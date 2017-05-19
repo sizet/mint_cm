@@ -1,0 +1,176 @@
+<!--
+Copyright © 2017, Che-Wei Hsu <cwxhsu@gmail.com>
+This file is part of the MintCM.
+Some rights reserved. See README.
+-->
+
+<html>
+
+<head>
+
+<meta http-equiv="cache-control" content="no-cache">
+<meta http-equiv="content-type" content="text/html; charset=utf-8">
+<script type="text/javascript" src="jquery_main.js"></script>
+<script type="text/javascript" src="json3.js"></script>
+<script type="text/javascript" src="md5.js"></script>
+<script type="text/javascript" src="mcm_jslib_api.js"></script>
+<script type="text/javascript" src="mcm_jslib_data_info_auto.js"></script>
+<script type="text/javascript" src="maam_jslib_api.js"></script>
+<link rel="stylesheet" href="web_app_1002_style.css">
+
+<script type="text/javascript">
+function select_init()
+{
+    var item_list, item_idx;
+
+
+    item_list = [];
+    item_list[item_list.length] =
+        [maam_limit_multiple_active.allow, "Allow"];
+    item_list[item_list.length] =
+        [maam_limit_multiple_active.deny_force_kick_inside, "Deny, Force Kick Inside"];
+    item_list[item_list.length] =
+        [maam_limit_multiple_active.deny_force_kick_outside, "Deny, Force Kick Outside"];
+    item_list[item_list.length] =
+        [maam_limit_multiple_active.deny_permission_kick_inside, "Deny, Permission Kick Inside"];
+    item_list[item_list.length] =
+        [maam_limit_multiple_active.deny_permission_kick_outside, "Deny, Permission Kick Outside"];
+
+    for(item_idx = 0; item_idx < item_list.length; item_idx++)
+    {
+        $("#multiple_user_active_rule_select").append($("<option></option>")
+            .attr("value", item_list[item_idx][0]).text(item_list[item_idx][1]));
+    }
+
+    for(item_idx = 0; item_idx < item_list.length; item_idx++)
+    {
+        $("#same_accout_multiple_active_rule_select").append($("<option></option>")
+            .attr("value", item_list[item_idx][0]).text(item_list[item_idx][1]));
+    }
+}
+
+function body_init()
+{
+    var self_jslib, req_cmd, rep_ret, mcm_dv, tmp_html;
+
+
+    select_init();
+
+    $("#show_box").html("");
+
+    // 指定要讀出的資料.
+    req_cmd = "&run.mcm_module_get_loading" +
+              "&get.device.system";
+
+    // 送出請求, 在查詢部分代入 "anyone" 關鍵字, 沒登入也可存取資料.
+    self_jslib = new mcm_jslib_lib_t();
+    self_jslib.socket_path = "@mintcm";
+    self_jslib.session_permission = mcm_session_permission.rw;
+    self_jslib.session_stack_size = 0;
+    self_jslib.request_command = req_cmd;
+    self_jslib.data_format = mcm_data_format.all_default;
+    self_jslib.other_query = "anyone";
+    rep_ret = mcm_jslib_obtain_config(self_jslib);
+    if(rep_ret.rep_code < mcm_return_code.pass)
+    {
+        alert("call mcm_jslib_obtain_config() fail" +
+              "[" + rep_ret.rep_code + "]");
+        mcm_jslib_run_script(rep_ret.rep_data);
+        return;
+    }
+    // 處理資料格式.
+    mcm_dv = JSON.parse(rep_ret.rep_data);
+
+    tmp_html = "loading: " + mcm_dv.device.system.loading;
+
+    $("#show_box").html(tmp_html);
+}
+
+function account_login()
+{
+    var self_maam_jslib, rep_ret, auth_data, tmp_html;
+
+
+    // 加密 name 和 password.
+    auth_data = "verify_name=" + md5($("#name_text").val()) + "&" +
+                "verify_password=" + md5($("#password_text").val()) + "&" +
+                "multiple_user_active_rule=" +
+                $("#multiple_user_active_rule_select").find(":selected").val() + "&" +
+                "same_accout_multiple_active_rule=" +
+                $("#same_accout_multiple_active_rule_select").find(":selected").val();
+
+    // 登入.
+    self_maam_jslib = new maam_jslib_lib_t();
+    self_maam_jslib.request_action = maaam_request_action.login;
+    self_maam_jslib.request_data = auth_data;
+    self_maam_jslib.other_query = "";
+    rep_ret = maam_jslib_account_auth(self_maam_jslib);
+    if(rep_ret.rep_code < maam_return_code.pass)
+    {
+        switch(rep_ret.rep_code)
+        {
+            case maam_return_code.invalid_account_name:
+                tmp_html = "login fail, invalid name";
+                break;
+            case maam_return_code.invalid_account_password:
+                tmp_html = "login fail, invalid password";
+                break;
+            case maam_return_code.other_user_has_login:
+                tmp_html = "login fail, other user has login";
+                break;
+            case maam_return_code.same_account_has_login:
+                tmp_html = "login fail, same account has login";
+                break;
+            default:
+                tmp_html = "call maam_jslib_account_auth() fail" +
+                           "[" + rep_ret.rep_code + "]";
+        }
+        alert(tmp_html);
+        return;
+    }
+    // 登入成功, 導向.
+    maam_jslib_run_script(rep_ret.rep_data);
+}
+</script>
+
+</head>
+
+<body onload="body_init()">
+
+  <table class="css_table1">
+    <tr>
+      <td class="css_td1">Name</td>
+      <td class="css_td1">
+        <input id="name_text" type="text" size="16">
+      </td>
+    </tr>
+    <tr>
+      <td class="css_td1">Password</td>
+      <td class="css_td1">
+        <input id="password_text" type="text" size="16">
+      </td>
+    </tr>
+    <tr>
+      <td class="css_td1">Multiple User Active Rule</td>
+      <td class="css_td1">
+        <select id="multiple_user_active_rule_select">
+        </select>
+      </td>
+    </tr>
+    <tr>
+      <td class="css_td1">Same Account Multiple Active Rule</td>
+      <td class="css_td1">
+        <select id="same_accout_multiple_active_rule_select">
+        </select>
+      </td>
+    </tr>
+    <tr>
+      <td id="show_box" class="css_td1" colspan="2"></td>
+    </tr>
+  </table>
+
+  <button type="button" onclick="account_login()">login</button>
+
+</body>
+
+</html>

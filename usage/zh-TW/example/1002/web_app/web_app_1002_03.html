@@ -1,0 +1,70 @@
+<!--
+Copyright © 2017, Che-Wei Hsu <cwxhsu@gmail.com>
+This file is part of the MintCM.
+Some rights reserved. See README.
+-->
+
+<html>
+
+<head>
+
+<meta http-equiv="cache-control" content="no-cache">
+<meta http-equiv="content-type" content="text/html; charset=utf-8">
+<script type="text/javascript" src="jquery_main.js"></script>
+<script type="text/javascript" src="maam_jslib_api.js"></script>
+<link rel="stylesheet" href="web_app_1002_style.css">
+
+<script type="text/javascript">
+function body_init()
+{
+    $("#show_box").html("");
+}
+
+function account_check()
+{
+    var self_maam_jslib, rep_ret, tmp_html;
+
+
+    // 檢查 session 是否有效.
+    self_maam_jslib = new maam_jslib_lib_t();
+    self_maam_jslib.request_action = maaam_request_action.check;
+    self_maam_jslib.request_data = "";
+    self_maam_jslib.other_query = "";
+    rep_ret = maam_jslib_account_auth(self_maam_jslib);
+    if(rep_ret.rep_code < maam_return_code.pass)
+    {
+        switch(rep_ret.rep_code)
+        {
+            case maam_return_code.miss_session_key:
+            case maam_return_code.invalid_session_key:
+                tmp_html = "invalid access, please login";
+                break;
+            case maam_return_code.idle_timeout:
+                tmp_html = "idle timeout, please re-login";
+                break;
+            default:
+                tmp_html = "call maam_jslib_account_auth() fail" +
+                           "[" + rep_ret.rep_code + "]";
+        }
+        alert(tmp_html);
+        maam_jslib_run_script(rep_ret.rep_data);
+    }
+
+    $("#show_box").html("session available");
+}
+</script>
+
+</head>
+
+<body onload="body_init()">
+
+  <div>[check]</div>
+
+  <button type="button" onclick="account_check()">check</button>
+  <br><br>
+
+  <div id="show_box"></div>
+
+</body>
+
+</html>

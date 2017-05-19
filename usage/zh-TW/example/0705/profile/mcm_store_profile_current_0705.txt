@@ -1,0 +1,37 @@
+; Copyright © 2017, Che-Wei Hsu <cwxhsu@gmail.com>
+; This file is part of the MintCM.
+; Some rights reserved. See README.
+
+$version 1.5
+
+; device
+device descript:Wireless%20Device serial_number:0022E5A1CC9F help:aabbcc
+
+; device.system
+device.system ip_addr:192.168.10.254   uptime:0.1  
+
+; device.vap.*
+device.vap.#15 ssid:radius-2 channel:44 channel:50
+device.vap.#23 ssid:wap2-3   channel:0
+
+; device.vap.*.extra
+device.vap.#8.extra hidden:10000 tx_power:9
+device.vap.#23.extra hidden:0 tx_power:3 hidden:1
+
+; device.vap.*.station.*
+device.vap.#8.station.#20 mac_addr:00:11:22:33:44:55 rule:3 rate:100
+device.vap.#15.station.#30 mac_addr:00:aa:bb:cc:dd:ee rule:5  
+device.vap.#15.station.#33 mac_addr:00:aa:bb:cc:dd:ff $f@#??   rule:6
+
+; device.limit.*
+device.limit.#3 name:normal priority:10
+device.limit.#5 name:hei
+device.limit.#6 priority:15 name:low priority:5
+
+; device.client.*
+
+device.vap.#23.extra hidden:1 tx_power:10
+
+device.vap.#15.station.#30 mac_addr:00:aa:bb:cc:dd:00 rule:10 
+
+device.limit.#3 name:normal priority:19

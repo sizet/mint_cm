@@ -1,0 +1,96 @@
+<!--
+Copyright © 2017, Che-Wei Hsu <cwxhsu@gmail.com>
+This file is part of the MintCM.
+Some rights reserved. See README.
+-->
+
+<html>
+
+<head>
+
+<meta http-equiv="cache-control" content="no-cache">
+<meta http-equiv="content-type" content="text/html; charset=utf-8">
+<script type="text/javascript" src="jquery_main.js"></script>
+<script type="text/javascript" src="json3.js"></script>
+<script type="text/javascript" src="mcm_jslib_api.js"></script>
+<script type="text/javascript" src="mcm_jslib_data_info_auto.js"></script>
+<script type="text/javascript" src="web_app_0406_script.js"></script>
+<link rel="stylesheet" href="web_app_0406_style.css">
+
+<script type="text/javascript">
+function body_init()
+{
+    $("#limit_table").find("tbody").empty();
+}
+
+// 讀取 device.limit.*
+function module_run()
+{
+    var self_jslib, req_cmd = "", rep_ret, mcm_dv, data_array, tmp_html, i;
+
+
+    $("#limit_table").find("tbody").empty();
+
+    // 執行模組, 模組修改資料, 在讀出 device.limit.*
+    req_cmd += "&run.mcm_module_del_usablekey_add_entry";
+    req_cmd += "&get.device.limit.*";
+
+    // 送出讀出資料請求.
+    self_jslib = new mcm_jslib_lib_t();
+    self_jslib.socket_path = "@mintcm";
+    self_jslib.session_permission = mcm_session_permission.rw;
+    self_jslib.session_stack_size = 0;
+    self_jslib.request_command = req_cmd;
+    self_jslib.data_format = mcm_data_format.all_default;
+    self_jslib.other_query = "";
+    rep_ret = mcm_jslib_obtain_config(self_jslib);
+    if(rep_ret.rep_code < mcm_return_code.pass)
+    {
+        alert("call mcm_jslib_obtain_config() fail" +
+              "[" + rep_ret.rep_code + "]");
+        mcm_jslib_run_script(rep_ret.rep_data);
+        return;
+    }
+    // 處理資料格式.
+    mcm_dv = JSON.parse(rep_ret.rep_data);
+
+    // 顯示 device.limit.{i}
+    for(i = 0; i < mcm_dv.device.limit.length; i++)
+    {
+        data_array = new Array(4);
+        data_array[0] = "device.limit.@" + (i + 1);
+        data_array[1] = mcm_dv.device.limit[i].ekey;
+        data_array[2] = mcm_dv.device.limit[i].name;
+        data_array[3] = mcm_dv.device.limit[i].priority;
+        tmp_html = jsapi_make_trtd("css_td1", data_array);
+        $("#limit_table").find("tbody").append(tmp_html);
+    }
+}
+</script>
+
+</head>
+
+<body onload="body_init()">
+
+  <div>[del-entry]</div>
+  <div>[usable-key]</div>
+  <div>[add-entry]</div>
+
+  <table id="limit_table" class="css_table1">
+    <thead>
+      <tr>
+        <td class="css_td1"></td>
+        <td class="css_td1">ekey</td>
+        <td class="css_td1">name</td>
+        <td class="css_td1">priority</td>
+      </tr>
+    </thead>
+    <tbody>
+    </tbody>
+  </table>
+
+  <button type="button" onclick="module_run()">run</button>
+
+</body>
+
+</html>

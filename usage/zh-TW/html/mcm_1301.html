@@ -1,0 +1,274 @@
+<!--
+Copyright © 2017, Che-Wei Hsu <cwxhsu@gmail.com>
+This file is part of the MintCM.
+Some rights reserved. See README.
+-->
+
+<html>
+
+<head>
+<meta http-equiv="content-type" content="text/html; charset=utf-8">
+<link rel="stylesheet" href="../css/mcm_style.css">
+</head>
+
+<body class="css_body">
+
+<div class="css_div_box_frame_full">
+  <div class="css_div_box_title">chapter 13-01</div>
+  <div class="css_div_box_content">
+  </div>
+</div>
+<br>
+
+<div class="css_div_box_frame_full">
+  <div class="css_div_box_title">內部模組函式表</div>
+  <div class="css_div_box_content">
+    <br>
+
+    <font class="css_font_p1">資料狀態的取得 (基本模式)</font><br>
+    <table class="css_table_list2">
+      <tr>
+        <td class="css_td_list2_l1">
+          <a href="mcm_0402.html#hook_0402_mcm_config_get_alone_status_by_path_01">mcm_config_get_alone_status_by_path</a><br>
+          讀出 member 的狀態
+        </td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l1">
+          <a href="mcm_0402.html#hook_0402_mcm_config_get_entry_self_status_by_path_01">mcm_config_get_entry_self_status_by_path</a><br>
+          讀出 entry 的狀態
+        </td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l1">
+          <a href="mcm_0402.html#hook_0402_mcm_config_get_entry_all_status_by_path_01">mcm_config_get_entry_all_status_by_path</a><br>
+          讀出 entry 中所有 member 的狀態
+        </td>
+      </tr>
+    </table>
+    <br>
+
+    <font class="css_font_p1">資料數值的存取 (基本模式)</font><br>
+    <table class="css_table_list2">
+      <tr>
+        <td class="css_td_list2_l1">
+          <a href="mcm_0403.html#hook_0403_mcm_config_get_max_count_by_path_01">mcm_config_get_max_count_by_path</a><br>
+          取得 group 的資料筆數上限, 也就是資料模型中的 $(max) 值
+        </td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l1">
+          <a href="mcm_0403.html#hook_0403_mcm_config_get_count_by_path_01">mcm_config_get_count_by_path</a><br>
+          取得 group 內目前的 entry 數目
+        </td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l1">
+          <a href="mcm_0403.html#hook_0403_mcm_config_get_alone_by_path_01">mcm_config_get_alone_by_path</a><br>
+          讀出 member 的資料
+        </td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l1">
+          <a href="mcm_0403.html#hook_0403_mcm_config_set_alone_by_path_01">mcm_config_set_alone_by_path</a><br>
+          將資料寫入 member
+        </td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l1">
+          <a href="mcm_0403.html#hook_0403_mcm_config_get_entry_by_path_01">mcm_config_get_entry_by_path</a><br>
+          讀出 entry 的資料
+        </td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l1">
+          <a href="mcm_0403.html#hook_0403_mcm_config_set_entry_by_path_01">mcm_config_set_entry_by_path</a><br>
+          將寫入資料 entry
+        </td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l1">
+          <a href="mcm_0403.html#hook_0403_mcm_config_add_entry_by_path_01">mcm_config_add_entry_by_path</a><br>
+          增加一筆 entry
+        </td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l1">
+          <a href="mcm_0403.html#hook_0403_mcm_config_del_entry_by_path_01">mcm_config_del_entry_by_path</a><br>
+          刪除一筆 entry
+        </td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l1">
+          <a href="mcm_0403.html#hook_0403_mcm_config_del_all_entry_by_path_01">mcm_config_del_all_entry_by_path</a><br>
+          刪除 group 內所有的 entry
+        </td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l1">
+          <a href="mcm_0403.html#hook_0403_mcm_config_get_usable_key_by_path_01">mcm_config_get_usable_key_by_path</a><br>
+          取得 group 內可用的 key
+        </td>
+      </tr>
+    </table>
+    <br>
+
+    <font class="css_font_p1">路徑處理</font><br>
+    <table class="css_table_list2">
+      <tr>
+        <td class="css_td_list2_l1">
+          <a href="mcm_0404.html#hook_0404_mcm_config_find_group_by_mask_01">mcm_config_find_group_by_mask</a><br>
+          處理 mask_path 類型的路徑, 找到目標的 group_info
+        </td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l1">
+          <a href="mcm_0404.html#hook_0404_mcm_config_find_entry_by_mix_01">mcm_config_find_entry_by_mix</a><br>
+          處理 mix_path 類型的路徑, 找到目標的 group_info, store_info
+        </td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l1">
+          <a href="mcm_0404.html#hook_0404_mcm_config_find_alone_by_full_01">mcm_config_find_alone_by_full</a><br>
+          處理 full_path (member) 類型的路徑, 找到目標的 group_info, member_info, store_info
+        </td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l1">
+          <a href="mcm_0404.html#hook_0404_mcm_config_find_entry_by_full_01">mcm_config_find_entry_by_full</a><br>
+          處理 full_path (entry) 類型的路徑, 找到目標的 group_info, store_info
+        </td>
+      </tr>
+    </table>
+    <br>
+
+    <font class="css_font_p1">資料狀態的取得 (進階模式)</font><br>
+    <table class="css_table_list2">
+      <tr>
+        <td class="css_td_list2_l1">
+          <a href="mcm_0405.html#hook_0405_mcm_config_get_alone_status_by_info_01">mcm_config_get_alone_status_by_info</a><br>
+          讀出 member 的狀態
+        </td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l1">
+          <a href="mcm_0405.html#hook_0405_mcm_config_get_entry_self_status_by_info_01">mcm_config_get_entry_self_status_by_info</a><br>
+          讀出 entry 的狀態
+        </td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l1">
+          <a href="mcm_0405.html#hook_0405_mcm_config_get_entry_all_status_by_info_01">mcm_config_get_entry_all_status_by_info</a><br>
+          讀出 entry 中所有 member 的狀態
+        </td>
+      </tr>
+    </table>
+    <br>
+
+    <font class="css_font_p1">資料數值的存取 (進階模式)</font><br>
+    <table class="css_table_list2">
+      <tr>
+        <td class="css_td_list2_l1">
+          <a href="mcm_0406.html#hook_0406_mcm_config_get_max_count_by_info_01">mcm_config_get_max_count_by_info</a><br>
+          取得 group 的資料筆數上限, 也就是資料模型中的 $(max) 值
+        </td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l1">
+          <a href="mcm_0406.html#hook_0406_mcm_config_get_count_by_info_01">mcm_config_get_count_by_info</a><br>
+          取得 group 內目前的 entry 數目
+        </td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l1">
+          <a href="mcm_0406.html#hook_0406_mcm_config_get_alone_by_info_01">mcm_config_get_alone_by_info</a><br>
+          讀出 member 的資料
+        </td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l1">
+          <a href="mcm_0406.html#hook_0406_mcm_config_set_alone_by_info_01">mcm_config_set_alone_by_info</a><br>
+          將資料寫入 member
+        </td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l1">
+          <a href="mcm_0406.html#hook_0406_mcm_config_get_entry_by_info_01">mcm_config_get_entry_by_info</a><br>
+          讀出 entry 的資料
+        </td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l1">
+          <a href="mcm_0406.html#hook_0406_mcm_config_set_entry_by_info_01">mcm_config_set_entry_by_info</a><br>
+          將寫入資料 entry
+        </td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l1">
+          <a href="mcm_0406.html#hook_0406_mcm_config_add_entry_by_info_01">mcm_config_add_entry_by_info</a><br>
+          增加一筆 entry
+        </td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l1">
+          <a href="mcm_0406.html#hook_0406_mcm_config_del_entry_by_info_01">mcm_config_del_entry_by_info</a><br>
+          刪除一筆 entry
+        </td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l1">
+          <a href="mcm_0406.html#hook_0406_mcm_config_del_all_entry_by_info_01">mcm_config_del_all_entry_by_info</a><br>
+          刪除 group 內所有的 entry
+        </td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l1">
+          <a href="mcm_0406.html#hook_0406_mcm_config_get_usable_key_by_info_01">mcm_config_get_usable_key_by_info</a><br>
+          取得 group 內可用的 key
+        </td>
+      </tr>
+    </table>
+    <br>
+
+    <font class="css_font_p1">其他</font><br>
+    <table class="css_table_list2">
+      <tr>
+        <td class="css_td_list2_l1">
+          <a href="mcm_0407.html#hook_0407_mcm_config_save_01">mcm_config_save</a><br>
+          要求 mcm_daemon 儲存資料到資料現在值檔案
+        </td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l1">
+          <a href="mcm_0407.html#hook_0407_mcm_config_shutdown_01">mcm_config_shutdown</a><br>
+          關閉 mcm_daemon, 當系統需要關機或重開機時先讓 mcm_daemon 正常關閉
+        </td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l1">
+          <a href="mcm_0407.html#hook_0407_mcm_config_remove_store_current_profile_01">mcm_config_remove_store_current_profile</a><br>
+          移除移除資料現在值檔案
+        </td>
+      </tr>
+
+    </table>
+    <br>
+
+    <font class="css_font_p1">回傳資訊</font><br>
+    <table class="css_table_list2">
+      <tr>
+        <td class="css_td_list2_l1">
+          <a href="mcm_0501.html#hook_0501_mcm_service_response_init_01">mcm_service_response_init</a><br>
+          分配回傳的字串的緩衝空間
+        </td>
+      </tr>
+    </table>
+    <br>
+
+  </div>
+</div>
+<br>
+
+</body>
+
+</html>

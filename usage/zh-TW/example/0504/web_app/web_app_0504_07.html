@@ -1,0 +1,56 @@
+<!--
+Copyright © 2017, Che-Wei Hsu <cwxhsu@gmail.com>
+This file is part of the MintCM.
+Some rights reserved. See README.
+-->
+
+<html>
+
+<head>
+
+<meta http-equiv="cache-control" content="no-cache">
+<meta http-equiv="content-type" content="text/html; charset=utf-8">
+<script type="text/javascript" src="jquery_main.js"></script>
+<script type="text/javascript" src="json3.js"></script>
+<script type="text/javascript" src="mcm_jslib_api.js"></script>
+<script type="text/javascript" src="mcm_jslib_data_info_auto.js"></script>
+<link rel="stylesheet" href="web_app_0504_style.css">
+
+<script type="text/javascript">
+function do_test()
+{
+    var self_jslib, req_cmd, rep_ret, mcm_dv;
+
+
+    req_cmd = "&set.iull.device.system.uptime=123456789";
+
+    self_jslib = new mcm_jslib_lib_t();
+    self_jslib.socket_path = "@mintcm";
+    self_jslib.session_permission = mcm_session_permission.rw;
+    self_jslib.session_stack_size = 0;
+    self_jslib.request_command = req_cmd;
+    self_jslib.after_complete = mcm_after_complete.reload;
+    self_jslib.other_query = "";
+    rep_ret = mcm_jslib_submit_config(self_jslib);
+    if(rep_ret.rep_code < mcm_return_code.pass)
+    {
+        alert("call mcm_jslib_submit_config() fail" +
+              "[" + rep_ret.rep_code + "]");
+        mcm_jslib_run_script(rep_ret.rep_data);
+        return;
+    }
+    mcm_jslib_run_script(rep_ret.rep_data);
+}
+</script>
+
+</head>
+
+<body>
+
+  <div>[submit_config]<br>[success]</div>
+
+  <button type="button" onclick="do_test()">test</button>
+
+</body>
+
+</html>

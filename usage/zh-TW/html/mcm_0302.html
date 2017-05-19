@@ -1,0 +1,3680 @@
+<!--
+Copyright © 2017, Che-Wei Hsu <cwxhsu@gmail.com>
+This file is part of the MintCM.
+Some rights reserved. See README.
+-->
+
+<html>
+
+<head>
+<meta http-equiv="content-type" content="text/html; charset=utf-8">
+<link rel="stylesheet" href="../css/mcm_style.css">
+</head>
+
+<body class="css_body">
+
+<div class="css_div_box_frame_full">
+  <div class="css_div_box_title">chapter 03-02</div>
+  <div class="css_div_box_content">
+  </div>
+</div>
+<br>
+
+<div class="css_div_box_frame_full">
+  <div class="css_div_box_title">資料的存取 (用戶端程式)</div>
+  <div class="css_div_box_content">
+    <br>
+
+    此章節說明用戶端程式如何透過提供的介面存取資料.
+    <br><br><br>
+
+    Makefile 的編譯參數 :<br>
+    <div class="css_div_block">
+    # 路徑設定.<br>
+    <font class="css_font_p1">
+    MCM_PATH&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; = mint_cm<br>
+    MCM_LIB_PATH&nbsp;&nbsp; = $(MCM_PATH)/mcm_lib<br>
+    MCM_LULIB_PATH = $(MCM_LIB_PATH)/mcm_lulib
+    </font>
+    <br><br>
+    # 標頭檔路徑.<br>
+    <font class="css_font_p1">INCLUDE_PATH = -I$(MCM_LIB_PATH)</font><br>
+    # 函式庫路徑.<br>
+    <font class="css_font_p1">LIBRARY_PATH = -L$(MCM_LULIB_PATH)</font>
+    <br><br>
+    # 使用靜態鏈結或動態鏈結的鏈結參數.<br>
+    <font class="css_font_p1">
+    USE_STATIC_MCM_LIB = YES<br>
+    ifeq (${USE_STATIC_MCM_LIB}, YES)<br>
+    LIBRARY_FILE = $(MCM_LULIB_PATH)/mcm_lulib_api.a<br>
+    else<br>
+    LIBRARY_FILE = -lmcm_lulib_api<br>
+    endif<br>
+    </font>
+    </div>
+    MintCM 的用戶端函式庫在 <font class="css_font_b1">mint_cm/mcm_lib/mcm_lulib</font>.<br>
+    使用動態鏈結必須將 <font class="css_font_b1">libmcm_lulib_api.so</font> 複製到系統的 lib 目錄.
+    <br><br>
+
+    需要的標頭檔 :<br>
+    <font class="css_font_p1">#include "mcm_lheader/mcm_type.h"</font><br>
+    <font class="css_font_p1">#include "mcm_lheader/mcm_size.h"</font><br>
+    <font class="css_font_p1">#include "mcm_lheader/mcm_connect.h"</font><br>
+    <font class="css_font_p1">#include "mcm_lheader/mcm_return.h"</font><br>
+    <font class="css_font_p1">#include "mcm_lheader/mcm_data_exinfo_auto.h"</font><br>
+    <font class="css_font_p1">#include "mcm_lulib/mcm_lulib_api.h"</font>
+    <br><br>
+
+  </div>
+</div>
+<br>
+
+<div class="css_div_box_frame_full">
+  <div class="css_div_box_title">變數格式的說明</div>
+  <div class="css_div_box_content">
+    <br>
+
+    這邊先說明使用 mcm_lulib_api.so 提供的函式的變數的用途和格式.
+    <br><br><br>
+
+    使用的資料模型範例, 參考 <a href="mcm_0202.html#hook_0202_data_profile_01">#02-02#</a>.
+    <br><br><br>
+
+    <div class="css_div_hook" id="hook_0302_lulib_01"></div>
+    <font class="css_font_b1">[struct mcm_lulib_lib_t *this_lulib]</font><br>
+    用來儲存 libmcm_lulib_api.so 使用時需要的資訊.<br>
+    會用到的結構成員 :<br>
+    <table class="css_table_list2">
+      <tr>
+        <td class="css_td_list2_l1">
+          <div class="css_div_hook" id="hook_0302_socket_path_01"></div>
+          <font class="css_font_b1">[char *socket_path]</font><br>
+          伺服器的位址路徑. <a href="mcm_0203.html#hook_0203_server_socket_path_01">[詳細]</a>
+        </td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l1">
+          <div class="css_div_hook" id="hook_0302_call_from_01"></div>
+          <font class="css_font_b1">[MCM_DTYPE_LIST_TD call_from]</font><br>
+          表示是誰要求資料存取.<br>
+          <table class="css_table_list2">
+            <tr>
+              <td class="css_td_list2_t3" colspan="2">
+                <font class="css_font_g1">MCM_CALL_FROM</font><br>
+                <font class="css_font_b1">(mint_cm/mcm_lib/mcm_lheader/mcm_connect.h)</font>
+              </td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l2">MCM_CFROM_BOOT</td>
+              <td class="css_td_list2_r1">表示是開機的第一次呼叫</td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l2">MCM_CFROM_USER</td>
+              <td class="css_td_list2_r1">表示是用戶端程式在請求</td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l2">MCM_CFROM_KERNEL</td>
+              <td class="css_td_list2_r1">表示是核心端程式在請求</td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l2">MCM_CFROM_WEB</td>
+              <td class="css_td_list2_r1">表示是用網頁端程式在請求</td>
+            </tr>
+          </table>
+          用戶端程式使用 MCM_CFROM_USER.
+        </td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l1">
+          <div class="css_div_hook" id="hook_0302_session_permission_01"></div>
+          <font class="css_font_b1">[MCM_DTYPE_LIST_TD session_permission]</font><br>
+          表示資料存取的模式.<br>
+          <table class="css_table_list2">
+            <tr>
+              <td class="css_td_list2_t3" colspan="2">
+                <font class="css_font_g1">MCM_SESSION_PERMISSION</font><br>
+                <font class="css_font_b1">(mint_cm/mcm_lib/mcm_lheader/mcm_connect.h)</font>
+              </td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l2">MCM_SPERMISSION_RO</td>
+              <td class="css_td_list2_r1">唯讀</td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l2">MCM_SPERMISSION_RW</td>
+              <td class="css_td_list2_r1">讀寫</td>
+            </tr>
+          </table>
+          如果只要讀取資料, 使用 MCM_SPERMISSION_RO,
+          如果要修改 (設定/增加/刪除) 資料, 使用 MCM_SPERMISSION_RW.
+        </td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l1">
+          <div class="css_div_hook" id="hook_0302_session_stack_size_01"></div>
+          <font class="css_font_b1">[MCM_DTYPE_USIZE_TD session_stack_size]</font><br>
+          伺服器端負責此連線的執行緒的堆疊大小.<br>
+          <table class="css_table_list2">
+            <tr>
+              <td class="css_td_list2_l2">0</td>
+              <td class="css_td_list2_r1">
+                系統預設值<br>
+                可以使用系統指令 <font class="css_font_p1">ulimit -s</font> 查看 (單位是 KB)<br>
+                或是使用系統函式 <font class="css_font_b1">getrlimit() + RLIMIT_STACK</font> 查看
+              </td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l2">1 ~ N</td>
+              <td class="css_td_list2_r1">
+                指定的值<br>
+                小於系統最小限制 <font class="css_font_g1">PTHREAD_STACK_MIN</font> 的話會改用最小值
+              </td>
+            </tr>
+          </table>
+          一般 Linux 的執行緒預設的堆疊大小是 8MB, 如果沒有需要執行內部模組的話不需要這麼多堆疊空間,
+          可以降低堆疊大小減少記憶體的使用. 而如果需要執行內部模組的話, 因為內部模組函式的內容是客制化的,
+          所以需要的堆疊空間不固定 (區域變數的多寡和函式呼叫的層數都會影響需要的堆疊空間),
+          就有可能需要更大的堆疊空間.
+        </td>
+      </tr>
+    </table>
+    <br><br>
+
+    <div class="css_div_hook" id="hook_0302_mask_path_01"></div>
+    <font class="css_font_b1">[char *mask_path]</font><br>
+    取得 group 的資訊的路徑.<br>
+    格式 :<br>
+    <div class="css_div_block">
+      <font class="css_font_g1">$(group-info-1).$(group-info-2). - - - .$(group-info-N)</font>
+    </div>
+    <font class="css_font_b1">$(entry-info)</font><br>
+    由 group 名稱和 mask 資訊所組成的一小段路徑.<br>
+    格式 :<br>
+    <div class="css_div_block">
+      <font class="css_font_p1">gs 類型 :</font>
+      <font class="css_font_g1">$(group-name)</font><br>
+      <font class="css_font_p1">gd 類型 :</font>
+      <font class="css_font_g1">$(group-name).*</font>
+    </div>
+    <br>
+    <table class="css_table_list2">
+      <tr>
+        <td class="css_td_list2_l2">$(group-name)</td>
+        <td class="css_td_list2_r1">group 的名稱</td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l2">*</td>
+        <td class="css_td_list2_r1">表示 gd 類型的 group 的 mask 符號</td>
+      </tr>
+    </table>
+    <br>
+    範例 :<br>
+    <div class="css_div_block">
+      device<br>
+      表示 device<br><br>
+      device.system<br>
+      表示 system<br><br>
+      device.vap.*<br>
+      表示 vap<br><br>
+      device.vap.*.extra<br>
+      表示 extra<br><br>
+      device.vap.*.station.*<br>
+      表示 station<br><br>
+      device.limit.*<br>
+      表示 limit<br><br>
+      device.client.*<br>
+      表示 client
+    </div>
+    <br><br>
+
+    <div class="css_div_hook" id="hook_0302_mix_path_01"></div>
+    <font class="css_font_b1">[char *mix_path]</font><br>
+    存取多個 entry 的路徑.<br><br>
+    格式 :<br>
+    <div class="css_div_block">
+      <font class="css_font_g1">$(group-info-NonLast). - - - .($(group-info-LastGD) or $(group-info-LastGS))</font>
+    </div>
+    <font class="css_font_b1">$(entry-info-NonLast)</font><br>
+    由 group 名稱和 index / key 資訊所組成的一小段路徑 (非最後一段路徑).<br>
+    格式 :<br>
+    <div class="css_div_block">
+      <font class="css_font_p1">gs 類型 :</font><br>
+      <font class="css_font_g1">$(group-name)</font><br><br>
+      <font class="css_font_p1">gd 類型 :</font><br>
+      <font class="css_font_r1">index 模式 :</font>
+      <font class="css_font_g1">$(group-name).@$(entry-index)</font><br>
+      <font class="css_font_r1">&nbsp;&nbsp;key 模式 :</font>
+      <font class="css_font_g1">$(group-name).#$(entry-key)</font>
+    </div>
+    <font class="css_font_b1">[$(entry-info-LastGD)]</font><br>
+    由 gd 類型的 group 名稱和 mask 資訊所組成的一小段路徑 (最後一段路徑).<br>
+    格式 :<br>
+    <div class="css_div_block">
+      <font class="css_font_g1">$(group-name).*</font>
+    </div>
+    <font class="css_font_b1">[$(entry-info-LastGS)]</font><br>
+    由 gs 類型的 group 名稱所組成的一小段路徑 (最後一段路徑).<br>
+    格式 :<br>
+    <div class="css_div_block">
+      <font class="css_font_g1">$(group-name)</font>
+    </div>
+    <br>
+    index / key 模式的差異主要是針對 entry 的搜尋方式.<br>
+    <table class="css_table_list2">
+      <tr>
+        <td class="css_td_list2_l2">index</td>
+        <td class="css_td_list2_r1">尋找 group 內的第幾筆 entry (1, 2, 3, ...)</td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l2">key</td>
+        <td class="css_td_list2_r1">尋找 group 內 key 值相符的 entry (35, 10, 21, ...)</td>
+      </tr>
+    </table>
+    實際使用上有分成 :<br>
+    <table class="css_table_list2">
+      <tr>
+        <td class="css_td_list2_l2">index / key 模式</td>
+        <td class="css_td_list2_r1">路徑上的 $(entry-index/key) 部分可以 index / key 混用</td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l2">key 模式</td>
+        <td class="css_td_list2_r1">路徑上的 $(entry-index/key) 部分只允許使用 key</td>
+      </tr>
+    </table>
+    <br>
+    <table class="css_table_list2">
+      <tr>
+        <td class="css_td_list2_l2">$(group-name)</td>
+        <td class="css_td_list2_r1">
+          group 的名稱
+        </td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l2">@</td>
+        <td class="css_td_list2_r1">
+          entry index 的前綴符號
+        </td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l2">$(entry-index)</td>
+        <td class="css_td_list2_r1">
+          entry 的 index 值, <font class="css_font_p1">1 ~ 4294967295</font>
+          <font class="css_font_c1">(MCM_DTYPE_EK_TD)</font>
+        </td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l2">#</td>
+        <td class="css_td_list2_r1">
+          entry key 的前綴符號
+        </td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l2">$(entry-key)</td>
+        <td class="css_td_list2_r1">
+          entry 的 key 值, <font class="css_font_p1">1 ~ 4294967295</font>
+          <font class="css_font_c1">(MCM_DTYPE_EK_TD)</font>
+        </td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l2">*</td>
+        <td class="css_td_list2_r1">
+          表示 gd 類型的 group 的 mask 符號
+        </td>
+      </tr>
+    </table>
+    <br>
+    範例 :<br>
+    <div class="css_div_block">
+      device<br>
+      表示 device<br><br>
+      device.system<br>
+      表示 system<br><br>
+      device.vap.*<br>
+      表示 vap<br><br>
+      device.vap.@1.extra<br>
+      表示 vap 的第 1 筆 entry 的 extra<br><br>
+      device.vap.@3.station.*<br>
+      表示 vap 的第 3 筆 entry 的 station<br><br>
+      device.vap.#71.station.*<br>
+      表示 vap 內 key 為 71 的 entry 的 station<br><br>
+      device.limit.*<br>
+      表示 limit<br><br>
+      device.client.*<br>
+      表示 client
+    </div>
+    <br><br>
+
+    <div class="css_div_hook" id="hook_0302_full_path_01"></div>
+    <font class="css_font_b1">[char *full_path]</font><br>
+    存取的目標 entry 或 member 的路徑.<br><br>
+    entry 格式 :<br>
+    <div class="css_div_block">
+      <font class="css_font_g1">$(group-info-1).$(group-info-2). - - - .$(group-info-N)</font>
+    </div>
+    <font class="css_font_b1">$(entry-info)</font><br>
+    由 group 名稱和 index / key 資訊所組成的一小段路徑.<br>
+    格式 :<br>
+    <div class="css_div_block">
+      <font class="css_font_p1">gs 類型 :</font><br>
+      <font class="css_font_g1">$(group-name)</font><br><br>
+      <font class="css_font_p1">gd 類型 :</font><br>
+      <font class="css_font_r1">index 模式 :</font>
+      <font class="css_font_g1">$(group-name).@$(entry-index)</font><br>
+      <font class="css_font_r1">&nbsp;&nbsp;key 模式 :</font>
+      <font class="css_font_g1">$(group-name).#$(entry-key)</font>
+    </div>
+    <br>
+    member 格式 :<br>
+    <div class="css_div_block">
+      <font class="css_font_g1">$(group-info-1).$(group-info-2). - - - .$(group-info-N).$(member-name)</font>
+    </div>
+    <br>
+    index / key 模式的差異主要是針對 entry 的搜尋方式.<br>
+    <table class="css_table_list2">
+      <tr>
+        <td class="css_td_list2_l2">index</td>
+        <td class="css_td_list2_r1">尋找 group 內的第幾筆 entry (1, 2, 3, ...)</td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l2">key</td>
+        <td class="css_td_list2_r1">尋找 group 內 key 值相符的 entry (35, 10, 21, ...)</td>
+      </tr>
+    </table>
+    實際使用上有分成 :<br>
+    <table class="css_table_list2">
+      <tr>
+        <td class="css_td_list2_l2">index / key 模式</td>
+        <td class="css_td_list2_r1">路徑上的 $(entry-index/key) 部分可以 index / key 混用</td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l2">key 模式</td>
+        <td class="css_td_list2_r1">路徑上的 $(entry-index/key) 部分只允許使用 key</td>
+      </tr>
+    </table>
+    <br>
+    <table class="css_table_list2">
+      <tr>
+        <td class="css_td_list2_l2">$(group-name)</td>
+        <td class="css_td_list2_r1">
+          group 的名稱
+        </td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l2">@</td>
+        <td class="css_td_list2_r1">
+          entry index 的前綴符號
+        </td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l2">$(entry-index)</td>
+        <td class="css_td_list2_r1">
+          entry 的 index 值, <font class="css_font_p1">1 ~ 4294967295</font>
+          <font class="css_font_c1">(MCM_DTYPE_EK_TD)</font>
+        </td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l2">#</td>
+        <td class="css_td_list2_r1">
+          entry key 的前綴符號
+        </td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l2">$(entry-key)</td>
+        <td class="css_td_list2_r1">
+          entry 的 key 值, <font class="css_font_p1">1 ~ 4294967295</font>
+          <font class="css_font_c1">(MCM_DTYPE_EK_TD)</font>
+        </td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l2">$(member-name)</td>
+        <td class="css_td_list2_r1">
+          member 的名稱
+        </td>
+      </tr>
+    </table>
+    <br>
+    範例 (entry) :<br>
+    <div class="css_div_block">
+      device<br>
+      表示 device 的全部<br><br>
+      device.system<br>
+      表示 system 的全部<br><br>
+      device.vap.#71<br>
+      表示 vap 內 key 為 71 的 entry<br><br>
+      device.vap.@29.extra<br>
+      表示 vap 的第 29 筆 entry 的 extra<br><br>
+      device.vap.#15.station.@6<br>
+      表示 vap 內 key 為 45 的 entry 的 station 的第 6 筆 entry<br><br>
+      device.limit.#1<br>
+      表示 limit 內 key 為 1 的 entry<br><br>
+      device.client.@1<br>
+      表示 client 的第 1 筆 entry
+    </div>
+    <br>
+    範例 (member) :<br>
+    <div class="css_div_block">
+      device.product<br>
+      表示 device 的 product<br><br>
+      device.system.uptime<br>
+      表示 system 的 uptime<br><br>
+      device.vap.@3.ekey<br>
+      表示 vap 的第 3 筆 entry 的 ekey<br><br>
+      device.vap.#12.extra.hidden<br>
+      表示 vap 內 key 為 12 的 entry 的 extra 的 hidden<br><br>
+      device.vap.@7.station.#26.mac_addr<br>
+      表示 vap 的第 7 筆 entry 的 station 內 key 為 26 的 entry 的 mac_addr<br><br>
+      device.limit.@23.priority<br>
+      表示 limit 內第 23 筆 entry 的 priority<br><br>
+      device.client.#6.location_x<br>
+      表示 client 內 key 為 6 的 location_x
+    </div>
+    <br><br>
+
+    <div class="css_div_hook" id="hook_0302_typedef_01"></div>
+    <font class="css_font_b1">存取 member 資料的變數的型態</font><br>
+    根據在資料模型中指定的資料類型 <a href="mcm_0201.html#hook_0201_type_format_02">[詳細]</a>,
+    需要使用對應的型態的變數來紀錄.<br>
+    <table class="css_table_list2">
+      <tr>
+        <td class="css_td_list2_t1">$(type)</td>
+        <td class="css_td_list2_t1">對應型態</td>
+        <td class="css_td_list2_t1">printf 格式</td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l2">ek</td>
+        <td class="css_td_list2_r1">MCM_DTYPE_EK_TD</td>
+        <td class="css_td_list2_r1">MCM_DTYPE_EK_PF</td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l2">rk</td>
+        <td class="css_td_list2_r1">MCM_DTYPE_RK_TD</td>
+        <td class="css_td_list2_r1">MCM_DTYPE_RK_PF</td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l2">isc</td>
+        <td class="css_td_list2_r1">MCM_DTYPE_ISC_TD</td>
+        <td class="css_td_list2_r1">MCM_DTYPE_ISC_PF</td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l2">iuc</td>
+        <td class="css_td_list2_r1">MCM_DTYPE_IUC_TD</td>
+        <td class="css_td_list2_r1">MCM_DTYPE_IUC_PF</td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l2">iss</td>
+        <td class="css_td_list2_r1">MCM_DTYPE_ISS_TD</td>
+        <td class="css_td_list2_r1">MCM_DTYPE_ISS_PF</td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l2">ius</td>
+        <td class="css_td_list2_r1">MCM_DTYPE_IUS_TD</td>
+        <td class="css_td_list2_r1">MCM_DTYPE_IUS_PF</td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l2">isi</td>
+        <td class="css_td_list2_r1">MCM_DTYPE_ISI_TD</td>
+        <td class="css_td_list2_r1">MCM_DTYPE_ISI_PF</td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l2">iui</td>
+        <td class="css_td_list2_r1">MCM_DTYPE_IUI_TD</td>
+        <td class="css_td_list2_r1">MCM_DTYPE_IUI_PF</td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l2">isll</td>
+        <td class="css_td_list2_r1">MCM_DTYPE_ISLL_TD</td>
+        <td class="css_td_list2_r1">MCM_DTYPE_ISLL_PF</td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l2">iull</td>
+        <td class="css_td_list2_r1">MCM_DTYPE_IULL_TD</td>
+        <td class="css_td_list2_r1">MCM_DTYPE_IULL_PF</td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l2">ff</td>
+        <td class="css_td_list2_r1">MCM_DTYPE_FF_TD</td>
+        <td class="css_td_list2_r1">MCM_DTYPE_FF_PF</td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l2">fd</td>
+        <td class="css_td_list2_r1">MCM_DTYPE_FD_TD</td>
+        <td class="css_td_list2_r1">MCM_DTYPE_FD_PF</td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l2">fld</td>
+        <td class="css_td_list2_r1">MCM_DTYPE_FLD_TD</td>
+        <td class="css_td_list2_r1">MCM_DTYPE_FLD_PF</td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l2">s:$(size)</td>
+        <td class="css_td_list2_r1">MCM_DTYPE_S_TD (buffer array)</td>
+        <td class="css_td_list2_r1">MCM_DTYPE_S_PF</td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l2">b:$(size)</td>
+        <td class="css_td_list2_r1">MCM_DTYPE_B_TD (buffer array)</td>
+        <td class="css_td_list2_r1">MCM_DTYPE_B_PF</td>
+      </tr>
+    </table>
+    <br><br>
+
+    <div class="css_div_hook" id="hook_0302_typedef_02"></div>
+    <font class="css_font_b1">存取 entry 資料的變數的型態</font><br>
+    可以當作 struct 來存取, member 是成員變數.<br>
+    必須先寫好資料模型檔並編譯完成,
+    <font class="css_font_b1">mint_cm/mcm_lib/mcm_lheader/mcm_data_exinfo_auto.h</font>
+    會產生對應的結構資料.<br>
+    例如 :<br>
+    <div class="css_div_block">
+    vap 會被編譯出 :<br><br>
+    // device.vap.*<br>
+    <font class="css_font_p1">struct</font>
+    <font class="css_font_g1">mcm_dv_device_vap_t</font><br>
+    {<br>
+    <font class="css_font_r1">
+    &nbsp;&nbsp;&nbsp;&nbsp;MCM_DTYPE_EK_TD ekey;<br>
+    &nbsp;&nbsp;&nbsp;&nbsp;MCM_DTYPE_S_TD ssid[MCM_BSIZE_DEVICE_VAP_SSID];<br>
+    &nbsp;&nbsp;&nbsp;&nbsp;MCM_DTYPE_IUS_TD channel;<br>
+    </font>
+    } <font class="css_font_p1">/*__attribute__((packed))*/</font>;
+    </div>
+    <br>
+    如果需要修改結構的對齊方式,
+    修改 <font class="css_font_b1">mint_cm/mcm_build/mcm_build.c</font> 並重新編譯全部.<br>
+    <div class="css_div_block">
+    <font class="css_font_p1">#define</font>
+    <font class="css_font_g1">MCM_DATA_EXINFO_DATA_VALUE_ATTRIBUTE</font>
+    <font class="css_font_r1">"/*__attribute__((packed))*/"</font>
+    </div>
+    <br>
+
+  </div>
+</div>
+<br>
+
+<div class="css_div_box_frame_full">
+  <div class="css_div_box_title">可用的函式</div>
+  <div class="css_div_box_content">
+    <br>
+
+    <div class="css_div_hook" id="hook_0302_mcm_lulib_init_01"></div>
+    <table class="css_table_box">
+      <tr>
+        <td class="css_td_box">
+          <font class="css_font_b2">mcm_lulib_init</font><br>
+          初始化, 發出資料存取請求.<br>
+          <table class="css_table_list2">
+            <tr>
+              <td class="css_td_list2_t1">參數</td>
+              <td class="css_td_list2_t1">說明</td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l1">
+                <font class="css_font_r1">struct mcm_lulib_lib_t *</font><br>
+                <font class="css_font_g1">this_lulib</font>
+              </td>
+              <td class="css_td_list2_r1">
+                紀錄 mcm_lulib_api 所需要的資料<br>
+                需要先設定好會用到的結構成員 :<br>
+                <font class="css_font_p1">socket_path</font>
+                <a href="#hook_0302_socket_path_01">[詳細]</a><br>
+                <font class="css_font_p1">call_from</font>
+                <a href="#hook_0302_call_from_01">[詳細]</a><br>
+                <font class="css_font_p1">session_permission</font>
+                <a href="#hook_0302_session_permission_01">[詳細]</a><br>
+                <font class="css_font_p1">session_stack_size</font>
+                <a href="#hook_0302_session_stack_size_01">[詳細]</a><br>
+              </td>
+            </tr>
+          </table>
+          <table class="css_table_list2">
+            <tr>
+              <td class="css_td_list2_t1">回傳</td>
+              <td class="css_td_list2_t1">說明</td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l2">&gt;= MCM_RCODE_PASS</td>
+              <td class="css_td_list2_r1">成功</td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l2">&nbsp;&lt; MCM_RCODE_PASS</td>
+              <td class="css_td_list2_r1">錯誤</td>
+            </tr>
+          </table>
+          <br>
+          範例 :<br>
+<pre class="css_pre_code">
+#include &lt;time.h&gt;
+#include &lt;errno.h&gt;
+#include &lt;stdio.h&gt;
+#include &lt;string.h&gt;
+#include &lt;stdlib.h&gt;
+#include "mcm_lheader/mcm_type.h"
+#include "mcm_lheader/mcm_size.h"
+#include "mcm_lheader/mcm_connect.h"
+#include "mcm_lheader/mcm_return.h"
+#include "mcm_lheader/mcm_data_exinfo_auto.h"
+#include "mcm_lulib/mcm_lulib_api.h"
+
+#define DMSG(msg_fmt, msgs...) printf("%s(%04u): " msg_fmt "\n", __FILE__, __LINE__, ##msgs)
+
+int main(int argc, char **argv)
+{
+    struct mcm_lulib_lib_t self_lulib;
+
+    memset(&self_lulib, 0, sizeof(struct mcm_lulib_lib_t));
+    self_lulib.socket_path = "@mintcm";
+    self_lulib.call_from = MCM_CFROM_USER;
+    self_lulib.session_permission = MCM_SPERMISSION_RW;
+    self_lulib.session_stack_size = 0;
+    if(mcm_lulib_init(&self_lulib) < MCM_RCODE_PASS)
+    {
+        DMSG("call mcm_lulib_init() fail");
+        goto FREE_01;
+    }
+
+    // 資料存取.
+    // ...
+
+FREE_01:
+    return 0;
+}
+</pre>
+        </td>
+      </tr>
+    </table>
+    <br>
+
+    <div class="css_div_hook" id="hook_0302_mcm_lulib_exit_01"></div>
+    <table class="css_table_box">
+      <tr>
+        <td class="css_td_box">
+          <font class="css_font_b2">mcm_lulib_exit</font><br>
+          使用完畢, 釋放使用權.<br>
+          <table class="css_table_list2">
+            <tr>
+              <td class="css_td_list2_t1">參數</td>
+              <td class="css_td_list2_t1">說明</td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l1">
+                <font class="css_font_r1">struct mcm_lulib_lib_t *</font><br>
+                <font class="css_font_g1">this_lulib</font>
+              </td>
+              <td class="css_td_list2_r1">
+                紀錄 mcm_lulib_api 的資料
+              </td>
+            </tr>
+          </table>
+          <table class="css_table_list2">
+            <tr>
+              <td class="css_td_list2_t1">回傳</td>
+              <td class="css_td_list2_t1">說明</td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l2">&gt;= MCM_RCODE_PASS</td>
+              <td class="css_td_list2_r1">成功</td>
+            </tr>
+          </table>
+          <br>
+          範例 :<br>
+<pre class="css_pre_code">
+#include &lt;time.h&gt;
+#include &lt;errno.h&gt;
+#include &lt;stdio.h&gt;
+#include &lt;string.h&gt;
+#include &lt;stdlib.h&gt;
+#include "mcm_lheader/mcm_type.h"
+#include "mcm_lheader/mcm_size.h"
+#include "mcm_lheader/mcm_connect.h"
+#include "mcm_lheader/mcm_return.h"
+#include "mcm_lheader/mcm_data_exinfo_auto.h"
+#include "mcm_lulib/mcm_lulib_api.h"
+
+#define DMSG(msg_fmt, msgs...) printf("%s(%04u): " msg_fmt "\n", __FILE__, __LINE__, ##msgs)
+
+int main(int argc, char **argv)
+{
+    struct mcm_lulib_lib_t self_lulib;
+
+    memset(&self_lulib, 0, sizeof(struct mcm_lulib_lib_t));
+    self_lulib.socket_path = "@mintcm";
+    self_lulib.call_from = MCM_CFROM_USER;
+    self_lulib.session_permission = MCM_SPERMISSION_RW;
+    self_lulib.session_stack_size = 0;
+    if(mcm_lulib_init(&self_lulib) < MCM_RCODE_PASS)
+    {
+        DMSG("call mcm_lulib_init() fail");
+        goto FREE_01;
+    }
+
+    // 資料存取.
+    // ...
+
+    mcm_lulib_exit(&self_lulib);
+FREE_01:
+    return 0;
+}
+</pre>
+        </td>
+      </tr>
+    </table>
+    <br>
+
+    <div class="css_div_hook" id="hook_0302_mcm_lulib_get_max_count_01"></div>
+    <table class="css_table_box">
+      <tr>
+        <td class="css_td_box">
+          <font class="css_font_b2">mcm_lulib_get_max_count</font><br>
+          取得 group 的資料筆數上限, 也就是資料模型中的 $(max) 值.<br>
+          <table class="css_table_list2">
+            <tr>
+              <td class="css_td_list2_t1">參數</td>
+              <td class="css_td_list2_t1">說明</td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l1">
+                <font class="css_font_r1">struct mcm_lulib_lib_t *</font><br>
+                <font class="css_font_g1">this_lulib</font>
+              </td>
+              <td class="css_td_list2_r1">
+                紀錄 mcm_lulib_api 所需要的資料
+              </td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l1">
+                <font class="css_font_r1">char *</font><br>
+                <font class="css_font_g1">mask_path</font><br>
+              </td>
+              <td class="css_td_list2_r1">
+                目標的路徑 <a href="#hook_0302_mask_path_01">[詳細]</a>
+              </td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l1">
+                <font class="css_font_r1">MCM_DTYPE_EK_TD *</font><br>
+                <font class="css_font_g1">count_buf</font>
+              </td>
+              <td class="css_td_list2_r1">
+                紀錄資料筆數的緩衝
+              </td>
+            </tr>
+          </table>
+          <table class="css_table_list2">
+            <tr>
+              <td class="css_td_list2_t1">回傳</td>
+              <td class="css_td_list2_t1">說明</td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l2">&gt;= MCM_RCODE_PASS</td>
+              <td class="css_td_list2_r1">成功</td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l2">&nbsp;&lt; MCM_RCODE_PASS</td>
+              <td class="css_td_list2_r1">錯誤</td>
+            </tr>
+          </table>
+          <br>
+          注意事項 :<br>
+          <table class="css_table_list1">
+            <tr>
+              <td class="css_td_list1_l">01.&nbsp;</td>
+              <td class="css_td_list1_r">
+                資料存取模式可以是 MCM_SPERMISSION_RO 或 MCM_SPERMISSION_RW.
+              </td>
+            </tr>
+          </table>
+          <br>
+          範例 :<br>
+<pre class="css_pre_code">
+#include &lt;time.h&gt;
+#include &lt;errno.h&gt;
+#include &lt;stdio.h&gt;
+#include &lt;string.h&gt;
+#include &lt;stdlib.h&gt;
+#include "mcm_lheader/mcm_type.h"
+#include "mcm_lheader/mcm_size.h"
+#include "mcm_lheader/mcm_connect.h"
+#include "mcm_lheader/mcm_return.h"
+#include "mcm_lheader/mcm_data_exinfo_auto.h"
+#include "mcm_lulib/mcm_lulib_api.h"
+
+#define DMSG(msg_fmt, msgs...) printf("%s(%04u): " msg_fmt "\n", __FILE__, __LINE__, ##msgs)
+
+int main(int argc, char **argv)
+{
+    char *path1;
+    struct mcm_lulib_lib_t self_lulib;
+    MCM_DTYPE_EK_TD max_count;
+
+    memset(&self_lulib, 0, sizeof(struct mcm_lulib_lib_t));
+    self_lulib.socket_path = "@mintcm";
+    self_lulib.call_from = MCM_CFROM_USER;
+    self_lulib.session_permission = MCM_SPERMISSION_RO;
+    self_lulib.session_stack_size = 0;
+    if(mcm_lulib_init(&self_lulib) < MCM_RCODE_PASS)
+    {
+        DMSG("call mcm_lulib_init() fail");
+        goto FREE_01;
+    }
+
+    // 範例 : 取得 device.system 的資料筆數上限.
+    // 路徑 : "device.system"
+    path1 = "device.system";
+    if(mcm_lulib_get_max_count(&self_lulib, path1, &max_count) < MCM_RCODE_PASS)
+    {
+        DMSG("call mcm_lulib_get_max_count(%s) fail", path1);
+        goto FREE_02;
+    }
+    DMSG("[max-count] %s = " MCM_DTYPE_EK_PF, path1, max_count);
+
+    // 範例 : 取得 device.vap.* 的資料筆數上限.
+    // 路徑 : "device.vap.*"
+    path1 = "device.vap.*";
+    if(mcm_lulib_get_max_count(&self_lulib, path1, &max_count) < MCM_RCODE_PASS)
+    {
+        DMSG("call mcm_lulib_get_max_count(%s) fail", path1);
+        goto FREE_02;
+    }
+    DMSG("[max-count] %s = " MCM_DTYPE_EK_PF, path1, max_count);
+
+    // 範例 : 取得 device.vap.*.station.* 的資料筆數上限.
+    // 路徑 : "device.vap.*.station.*"
+    path1 = "device.vap.*.station.*";
+    if(mcm_lulib_get_max_count(&self_lulib, path1, &max_count) < MCM_RCODE_PASS)
+    {
+        DMSG("call mcm_lulib_get_max_count(%s) fail", path1);
+        goto FREE_02;
+    }
+    DMSG("[max-count] %s = " MCM_DTYPE_EK_PF, path1, max_count);
+
+FREE_02:
+    mcm_lulib_exit(&self_lulib);
+FREE_01:
+    return 0;
+}
+</pre>
+<br><br>
+          <div class="css_div_hook" id="hook_0302_max_count_01"></div>
+          除了上述方式外, 可以使用另一種方式取得 group 的資料筆數上限.<br>
+          必須先寫好資料模型檔並編譯完成, <font class="css_font_b1">mint_cm/mcm_lib/mcm_lheader/mcm_data_exinfo_auto.h</font>
+          會產生對應的資料定義.
+          <br><br>
+          以 <a href="mcm_0202.html#hook_0202_data_profile_01">#02-02#</a> 的資料模型為例, 會產生 :<br>
+          <div class="css_div_block">
+            // device<br>
+            <font class="css_font_r1">#define MCM_MCOUNT_DEVICE_MAX_COUNT 1U</font><br><br>
+            // device.system<br>
+            <font class="css_font_r1">#define MCM_MCOUNT_DEVICE_SYSTEM_MAX_COUNT 1U</font><br><br>
+            // device.vap.*<br>
+            <font class="css_font_r1">#define MCM_MCOUNT_DEVICE_VAP_MAX_COUNT 16U</font><br><br>
+            // device.vap.*.extra<br>
+            <font class="css_font_r1">#define MCM_MCOUNT_DEVICE_VAP_EXTRA_MAX_COUNT 1U</font><br><br>
+            // device.vap.*.station.*<br>
+            <font class="css_font_r1">#define MCM_MCOUNT_DEVICE_VAP_STATION_MAX_COUNT 32U</font><br><br>
+            // device.limit.*<br>
+            <font class="css_font_r1">#define MCM_MCOUNT_DEVICE_LIMIT_MAX_COUNT 64U</font><br><br>
+            // device.client.*<br>
+            <font class="css_font_r1">#define MCM_MCOUNT_DEVICE_CLIENT_MAX_COUNT 128U</font><br>
+          </div>
+          定義內的值就是實際的 $(max) 值.
+          <br><br>
+          範例 :<br>
+<pre class="css_pre_code">
+#include &lt;time.h&gt;
+#include &lt;errno.h&gt;
+#include &lt;stdio.h&gt;
+#include &lt;string.h&gt;
+#include &lt;stdlib.h&gt;
+#include "mcm_lheader/mcm_type.h"
+#include "mcm_lheader/mcm_size.h"
+#include "mcm_lheader/mcm_connect.h"
+#include "mcm_lheader/mcm_return.h"
+#include "mcm_lheader/mcm_data_exinfo_auto.h"
+#include "mcm_lulib/mcm_lulib_api.h"
+
+#define DMSG(msg_fmt, msgs...) printf("%s(%04u): " msg_fmt "\n", __FILE__, __LINE__, ##msgs)
+
+int main(int argc, char **argv)
+{
+    char *path1;
+
+    // 範例 : 取得 device.system 的資料筆數上限.
+    // 路徑 : "device.system"
+    path1 = "device.system";
+    DMSG("[max-count] %s = " MCM_DTYPE_EK_PF, path1, MCM_MCOUNT_DEVICE_SYSTEM_MAX_COUNT);
+
+    // 範例 : 取得 device.vap.* 的資料筆數上限.
+    // 路徑 : "device.vap.*"
+    path1 = "device.vap.*";
+    DMSG("[max-count] %s = " MCM_DTYPE_EK_PF, path1, MCM_MCOUNT_DEVICE_VAP_MAX_COUNT);
+
+    // 範例 : 取得 device.vap.*.station.* 的資料筆數上限.
+    // 路徑 : "device.vap.*.station.*"
+    path1 = "device.vap.*.station.*";
+    DMSG("[max-count] %s = " MCM_DTYPE_EK_PF, path1, MCM_MCOUNT_DEVICE_VAP_STATION_MAX_COUNT);
+
+    return 0;
+}
+</pre>
+        </td>
+      </tr>
+    </table>
+    <br>
+
+    <div class="css_div_hook" id="hook_0302_mcm_lulib_get_count_01"></div>
+    <table class="css_table_box">
+      <tr>
+        <td class="css_td_box">
+          <font class="css_font_b2">mcm_lulib_get_count</font><br>
+          取得 group 內目前的 entry 數目.<br>
+          <table class="css_table_list2">
+            <tr>
+              <td class="css_td_list2_t1">參數</td>
+              <td class="css_td_list2_t1">說明</td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l1">
+                <font class="css_font_r1">struct mcm_lulib_lib_t *</font><br>
+                <font class="css_font_g1">this_lulib</font>
+              </td>
+              <td class="css_td_list2_r1">
+                紀錄 mcm_lulib_api 所需要的資料
+              </td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l1">
+                <font class="css_font_r1">char *</font><br>
+                <font class="css_font_g1">mix_path</font><br>
+              </td>
+              <td class="css_td_list2_r1">
+                目標的路徑 <a href="#hook_0302_mix_path_01">[詳細]</a><br>
+                <font class="css_font_p1">[index / key 模式]</font>
+              </td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l1">
+                <font class="css_font_r1">MCM_DTYPE_EK_TD *</font><br>
+                <font class="css_font_g1">count_buf</font>
+              </td>
+              <td class="css_td_list2_r1">
+                紀錄資料筆數的緩衝
+              </td>
+            </tr>
+          </table>
+          <table class="css_table_list2">
+            <tr>
+              <td class="css_td_list2_t1">回傳</td>
+              <td class="css_td_list2_t1">說明</td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l2">&gt;= MCM_RCODE_PASS</td>
+              <td class="css_td_list2_r1">成功</td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l2">&nbsp;&lt; MCM_RCODE_PASS</td>
+              <td class="css_td_list2_r1">錯誤</td>
+            </tr>
+          </table>
+          <br>
+          注意事項 :<br>
+          <table class="css_table_list1">
+            <tr>
+              <td class="css_td_list1_l">01.&nbsp;</td>
+              <td class="css_td_list1_r">
+                資料存取模式可以是 MCM_SPERMISSION_RO 或 MCM_SPERMISSION_RW.
+              </td>
+            </tr>
+          </table>
+          <br>
+          範例 :<br>
+<pre class="css_pre_code">
+#include &lt;time.h&gt;
+#include &lt;errno.h&gt;
+#include &lt;stdio.h&gt;
+#include &lt;string.h&gt;
+#include &lt;stdlib.h&gt;
+#include "mcm_lheader/mcm_type.h"
+#include "mcm_lheader/mcm_size.h"
+#include "mcm_lheader/mcm_connect.h"
+#include "mcm_lheader/mcm_return.h"
+#include "mcm_lheader/mcm_data_exinfo_auto.h"
+#include "mcm_lulib/mcm_lulib_api.h"
+
+#define DMSG(msg_fmt, msgs...) printf("%s(%04u): " msg_fmt "\n", __FILE__, __LINE__, ##msgs)
+
+int main(int argc, char **argv)
+{
+    char *path1;
+    struct mcm_lulib_lib_t self_lulib;
+    MCM_DTYPE_EK_TD count;
+
+    memset(&self_lulib, 0, sizeof(struct mcm_lulib_lib_t));
+    self_lulib.socket_path = "@mintcm";
+    self_lulib.call_from = MCM_CFROM_USER;
+    self_lulib.session_permission = MCM_SPERMISSION_RO;
+    self_lulib.session_stack_size = 0;
+    if(mcm_lulib_init(&self_lulib) < MCM_RCODE_PASS)
+    {
+        DMSG("call mcm_lulib_init() fail");
+        goto FREE_01;
+    }
+
+    // 指定目標路徑, 再使用函式取得.
+    // 對於多層的目標, 可以使用 index + key 模式取值.
+
+    // 範例 : 取得 device.system 的資料筆數. (對於 gs 類型 group, 總是 1)
+    // 路徑 : "device.system"
+    path1 = "device.system";
+    if(mcm_lulib_get_count(&self_lulib, path1, &count) < MCM_RCODE_PASS)
+    {
+        DMSG("call mcm_lulib_get_count(%s) fail", path1);
+        goto FREE_02;
+    }
+    DMSG("[count] %s = " MCM_DTYPE_EK_PF, path1, count);
+
+    // 範例 : 取得 device.vap.* 的資料筆數.
+    // 路徑 : "device.vap.*"
+    path1 = "device.vap.*";
+    if(mcm_lulib_get_count(&self_lulib, path1, &count) < MCM_RCODE_PASS)
+    {
+        DMSG("call mcm_lulib_get_count(%s) fail", path1);
+        goto FREE_02;
+    }
+    DMSG("[count] %s = " MCM_DTYPE_EK_PF, path1, count);
+
+    // 範例 : 取得 device.vap.@2.station.* 的資料筆數.
+    // 路徑 : "device.vap.@2.station.*"
+    path1 = "device.vap.@2.station.*";
+    if(mcm_lulib_get_count(&self_lulib, path1, &count) < MCM_RCODE_PASS)
+    {
+        DMSG("call mcm_lulib_get_count(%s) fail", path1);
+        goto FREE_02;
+    }
+    DMSG("[count] %s = " MCM_DTYPE_EK_PF, path1, count);
+
+    // 範例 : 取得 device.vap.#23.station.* 的資料筆數.
+    // 路徑 : "device.vap.#23.tation.*"
+    path1 = "device.vap.#23.station.*";
+    if(mcm_lulib_get_count(&self_lulib, path1, &count) < MCM_RCODE_PASS)
+    {
+        DMSG("call mcm_lulib_get_count(%s) fail", path1);
+        goto FREE_02;
+    }
+    DMSG("[count] %s = " MCM_DTYPE_EK_PF, path1, count);
+
+FREE_02:
+    mcm_lulib_exit(&self_lulib);
+FREE_01:
+    return 0;
+}
+</pre>
+        </td>
+      </tr>
+    </table>
+    <br>
+
+    <div class="css_div_hook" id="hook_0302_mcm_lulib_get_alone_01"></div>
+    <table class="css_table_box">
+      <tr>
+        <td class="css_td_box">
+          <font class="css_font_b2">mcm_lulib_get_alone</font><br>
+          讀出 member 的資料.<br>
+          <table class="css_table_list2">
+            <tr>
+              <td class="css_td_list2_t1">參數</td>
+              <td class="css_td_list2_t1">說明</td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l1">
+                <font class="css_font_r1">struct mcm_lulib_lib_t *</font><br>
+                <font class="css_font_g1">this_lulib</font><br>
+              </td>
+              <td class="css_td_list2_r1">
+                紀錄 mcm_lulib_api 所需要的資料
+              </td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l1">
+                <font class="css_font_r1">char *</font><br>
+                <font class="css_font_g1">full_path</font><br>
+              </td>
+              <td class="css_td_list2_r1">
+                目標的路徑 <a href="#hook_0302_full_path_01">[詳細]</a><br>
+                <font class="css_font_p1">[member 格式][index / key 模式]</font>
+              </td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l1">
+                <font class="css_font_r1">void *</font><br>
+                <font class="css_font_g1">data_buf</font><br>
+              </td>
+              <td class="css_td_list2_r1">
+                紀錄資料的變數的緩衝 (變數的資料型態 <a href="#hook_0302_typedef_01">[詳細]</a>)
+              </td>
+            </tr>
+          </table>
+          <table class="css_table_list2">
+            <tr>
+              <td class="css_td_list2_t1">回傳</td>
+              <td class="css_td_list2_t1">說明</td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l2">&gt;= MCM_RCODE_PASS</td>
+              <td class="css_td_list2_r1">成功</td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l2">&nbsp;&lt; MCM_RCODE_PASS</td>
+              <td class="css_td_list2_r1">錯誤</td>
+            </tr>
+          </table>
+          <br>
+          注意事項 :<br>
+          <table class="css_table_list1">
+            <tr>
+              <td class="css_td_list1_l">01.&nbsp;</td>
+              <td class="css_td_list1_r">
+                資料存取模式可以是 MCM_SPERMISSION_RO 或 MCM_SPERMISSION_RW.
+              </td>
+            </tr>
+          </table>
+          <br>
+          範例 :<br>
+<pre class="css_pre_code">
+#include &lt;time.h&gt;
+#include &lt;errno.h&gt;
+#include &lt;stdio.h&gt;
+#include &lt;string.h&gt;
+#include &lt;stdlib.h&gt;
+#include "mcm_lheader/mcm_type.h"
+#include "mcm_lheader/mcm_size.h"
+#include "mcm_lheader/mcm_connect.h"
+#include "mcm_lheader/mcm_return.h"
+#include "mcm_lheader/mcm_data_exinfo_auto.h"
+#include "mcm_lulib/mcm_lulib_api.h"
+
+#define DMSG(msg_fmt, msgs...) printf("%s(%04u): " msg_fmt "\n", __FILE__, __LINE__, ##msgs)
+
+int main(int argc, char **argv)
+{
+    char *path1;
+    struct mcm_lulib_lib_t self_lulib;
+    MCM_DTYPE_B_TD serial_number[MCM_BSIZE_DEVICE_SERIAL_NUMBER];
+    MCM_DTYPE_FD_TD loading;
+    MCM_DTYPE_EK_TD ekey;
+    MCM_DTYPE_ISS_TD tx_power;
+    MCM_DTYPE_S_TD mac_addr[MCM_BSIZE_DEVICE_VAP_STATION_MAC_ADDR];
+    MCM_DTYPE_RK_TD rule;
+
+    memset(&self_lulib, 0, sizeof(struct mcm_lulib_lib_t));
+    self_lulib.socket_path = "@mintcm";
+    self_lulib.call_from = MCM_CFROM_USER;
+    self_lulib.session_permission = MCM_SPERMISSION_RO;
+    self_lulib.session_stack_size = 0;
+    if(mcm_lulib_init(&self_lulib) < MCM_RCODE_PASS)
+    {
+        DMSG("call mcm_lulib_init() fail");
+        goto FREE_01;
+    }
+
+    // 指定目標路徑, 指定目標的資料類型, 指定儲存的變數.
+    // 對於 gd 類型的 group, 可以使用 index + key 模式.
+
+    // 範例 : 讀出 device.serial_number
+    // 路徑 : "device.serial_number"
+    // 型態 : b -> MCM_DTYPE_B_TD
+    // 變數 : serial_number
+    path1 = "device.serial_number";
+    if(mcm_lulib_get_alone(&self_lulib, path1, serial_number) < MCM_RCODE_PASS)
+    {
+        DMSG("call mcm_lulib_get_alone(%s) fail", path1);
+        goto FREE_02;
+    }
+    DMSG("[get-alone] %s = "
+         MCM_DTYPE_B_PF MCM_DTYPE_B_PF MCM_DTYPE_B_PF MCM_DTYPE_B_PF MCM_DTYPE_B_PF
+         MCM_DTYPE_B_PF MCM_DTYPE_B_PF MCM_DTYPE_B_PF MCM_DTYPE_B_PF MCM_DTYPE_B_PF,
+         path1,
+         serial_number[0], serial_number[1], serial_number[2], serial_number[3],
+         serial_number[4], serial_number[5], serial_number[6], serial_number[7],
+         serial_number[8], serial_number[9]);
+
+    // 範例 : 讀出 device.system.loading
+    // 路徑 : "device.system.loading"
+    // 型態 : fd -> MCM_DTYPE_FD_TD
+    // 變數 : loading
+    path1 = "device.system.loading";
+    if(mcm_lulib_get_alone(&self_lulib, path1, &loading) < MCM_RCODE_PASS)
+    {
+        DMSG("call mcm_lulib_get_alone(%s) fail", path1);
+        goto FREE_02;
+    }
+    DMSG("[get-alone] %s = " MCM_DTYPE_FD_PF, path1, loading);
+
+    // 範例 : 讀出 device.vap.@3.ekey
+    // 路徑 : "device.vap.@3.ekey"
+    // 型態 : ek -> MCM_DTYPE_EK_TD
+    // 變數 : vap_ekey
+    path1 = "device.vap.@3.ekey";
+    if(mcm_lulib_get_alone(&self_lulib, path1, &ekey) < MCM_RCODE_PASS)
+    {
+        DMSG("call mcm_lulib_get_alone(%s) fail", path1);
+        goto FREE_02;
+    }
+    DMSG("[get-alone] %s = " MCM_DTYPE_EK_PF, path1, ekey);
+
+    // 範例 : 讀出 device.vap.#8.extra.tx_power
+    // 路徑 : "device.vap.#8.extra.tx_power"
+    // 型態 : iss -> MCM_DTYPE_ISS_TD
+    // 變數 : tx_power
+    path1 = "device.vap.#8.extra.tx_power";
+    if(mcm_lulib_get_alone(&self_lulib, path1, &tx_power) < MCM_RCODE_PASS)
+    {
+        DMSG("call mcm_lulib_get_alone(%s) fail", path1);
+        goto FREE_02;
+    }
+    DMSG("[get-alone] %s = " MCM_DTYPE_ISS_PF, path1, tx_power);
+
+    // 範例 : 讀出 device.vap.@2.station.#30.mac_addr
+    // 路徑 : "device.vap.@2.station.#30.mac_addr"
+    // 型態 : s -> MCM_DTYPE_S_TD
+    // 變數 : mac_addr
+    path1 = "device.vap.@2.station.#30.mac_addr";
+    if(mcm_lulib_get_alone(&self_lulib, path1, mac_addr) < MCM_RCODE_PASS)
+    {
+        DMSG("call mcm_lulib_get_alone(%s) fail", path1);
+        goto FREE_02;
+    }
+    DMSG("[get-alone] %s = " MCM_DTYPE_S_PF, path1, mac_addr);
+
+    // 範例 : 讀出 device.vap.#15.station.@2.rule
+    // 路徑 : "device.vap.#15.station.@2.rule"
+    // 型態 : rk -> MCM_DTYPE_RK_TD
+    // 變數 : mac_addr
+    path1 = "device.vap.#15.station.@2.rule";
+    if(mcm_lulib_get_alone(&self_lulib, path1, &rule) < MCM_RCODE_PASS)
+    {
+        DMSG("call mcm_lulib_get_alone(%s) fail", path1);
+        goto FREE_02;
+    }
+    DMSG("[get-alone] %s = " MCM_DTYPE_RK_PF, path1, rule);
+
+FREE_02:
+    mcm_lulib_exit(&self_lulib);
+FREE_01:
+    return 0;
+}
+</pre>
+        </td>
+      </tr>
+    </table>
+    <br>
+
+    <div class="css_div_hook" id="hook_0302_mcm_lulib_set_alone_01"></div>
+    <table class="css_table_box">
+      <tr>
+        <td class="css_td_box">
+          <font class="css_font_b2">mcm_lulib_set_alone</font><br>
+          將資料寫入 member.<br>
+          <table class="css_table_list2">
+            <tr>
+              <td class="css_td_list2_t1">參數</td>
+              <td class="css_td_list2_t1">說明</td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l1">
+                <font class="css_font_r1">struct mcm_lulib_lib_t *</font><br>
+                <font class="css_font_g1">this_lulib</font><br>
+              </td>
+              <td class="css_td_list2_r1">
+                紀錄 mcm_lulib_api 所需要的資料
+              </td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l1">
+                <font class="css_font_r1">char *</font><br>
+                <font class="css_font_g1">full_path</font><br>
+              </td>
+              <td class="css_td_list2_r1">
+                目標的路徑 <a href="#hook_0302_full_path_01">[詳細]</a><br>
+                <font class="css_font_p1">[member 格式][index / key 模式]</font>
+              </td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l1">
+                <font class="css_font_r1">void *</font><br>
+                <font class="css_font_g1">data_con</font><br>
+              </td>
+              <td class="css_td_list2_r1">
+                寫入的資料 (變數的資料型態 <a href="#hook_0302_typedef_01">[詳細]</a>)
+              </td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l1">
+                <font class="css_font_r1">MCM_DTYPE_USIZE_TD</font><br>
+                <font class="css_font_g1">data_len</font><br>
+              </td>
+              <td class="css_td_list2_r1">
+                寫入的資料的長度<br>
+                <font class="css_font_p1">字串類型填入字串長度, 其他類型填入變數大小</font>
+              </td>
+            </tr>
+          </table>
+          <table class="css_table_list2">
+            <tr>
+              <td class="css_td_list2_t1">回傳</td>
+              <td class="css_td_list2_t1">說明</td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l2">&gt;= MCM_RCODE_PASS</td>
+              <td class="css_td_list2_r1">成功</td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l2">&nbsp;&lt; MCM_RCODE_PASS</td>
+              <td class="css_td_list2_r1">錯誤</td>
+            </tr>
+          </table>
+          <br>
+          注意事項 :<br>
+          <table class="css_table_list1">
+            <tr>
+              <td class="css_td_list1_l">01.&nbsp;</td>
+              <td class="css_td_list1_r">
+                資料存取模式必須是 MCM_SPERMISSION_RW.
+              </td>
+            </tr>
+            <tr>
+              <td class="css_td_list1_l">02.&nbsp;</td>
+              <td class="css_td_list1_r">
+                對於 ek 類型的 member 是唯讀的, 不可寫入.
+              </td>
+            </tr>
+          </table>
+          <br>
+          範例 :<br>
+<pre class="css_pre_code">
+#include &lt;time.h&gt;
+#include &lt;errno.h&gt;
+#include &lt;stdio.h&gt;
+#include &lt;string.h&gt;
+#include &lt;stdlib.h&gt;
+#include "mcm_lheader/mcm_type.h"
+#include "mcm_lheader/mcm_size.h"
+#include "mcm_lheader/mcm_connect.h"
+#include "mcm_lheader/mcm_return.h"
+#include "mcm_lheader/mcm_data_exinfo_auto.h"
+#include "mcm_lulib/mcm_lulib_api.h"
+
+#define DMSG(msg_fmt, msgs...) printf("%s(%04u): " msg_fmt "\n", __FILE__, __LINE__, ##msgs)
+
+int main(int argc, char **argv)
+{
+    char *path1;
+    struct mcm_lulib_lib_t self_lulib;
+    MCM_DTYPE_S_TD descript[MCM_BSIZE_DEVICE_DESCRIPT];
+    MCM_DTYPE_B_TD serial_number[MCM_BSIZE_DEVICE_SERIAL_NUMBER];
+    MCM_DTYPE_FD_TD loading;
+    MCM_DTYPE_IUI_TD channel;
+    MCM_DTYPE_ISC_TD hidden;
+    MCM_DTYPE_RK_TD rule;
+    MCM_DTYPE_USIZE_TD i;
+
+    srand(time(NULL));
+
+    memset(&self_lulib, 0, sizeof(struct mcm_lulib_lib_t));
+    self_lulib.socket_path = "@mintcm";
+    self_lulib.call_from = MCM_CFROM_USER;
+    self_lulib.session_permission = MCM_SPERMISSION_RW;
+    self_lulib.session_stack_size = 0;
+    if(mcm_lulib_init(&self_lulib) < MCM_RCODE_PASS)
+    {
+        DMSG("call mcm_lulib_init() fail");
+        goto FREE_01;
+    }
+
+    // 修改資料後可以開啟 mint_cm/run/mcm_store_profile_current.txt 確認數值.
+
+    // 範例 : 設定 device.descript
+    // 路徑 : "device.descript"
+    // 型態 : s -> MCM_DTYPE_S_TD
+    // 變數 : descript / strlen(descript)
+    path1 = "device.descript";
+    snprintf(descript, sizeof(descript), "network-device-%02u", rand() % 100);
+    DMSG("[set-alone] %s = " MCM_DTYPE_S_PF, path1, descript);
+    if(mcm_lulib_set_alone(&self_lulib, path1, descript, strlen(descript)) < MCM_RCODE_PASS)
+    {
+        DMSG("call mcm_lulib_set_alone(%s) fail", path1);
+        goto FREE_02;
+    }
+
+    // 範例 : 設定 device.serial_number
+    // 路徑 : "device.serial_number"
+    // 型態 : b -> MCM_DTYPE_B_TD
+    // 變數 : serial_number / sizeof(serial_number)
+    path1 = "device.serial_number";
+    for(i = 0; i < sizeof(serial_number); i++)
+        serial_number[i] = rand() % 256;
+    DMSG("[set-alone] %s = "
+         MCM_DTYPE_B_PF MCM_DTYPE_B_PF MCM_DTYPE_B_PF MCM_DTYPE_B_PF MCM_DTYPE_B_PF
+         MCM_DTYPE_B_PF MCM_DTYPE_B_PF MCM_DTYPE_B_PF MCM_DTYPE_B_PF MCM_DTYPE_B_PF,
+         path1,
+         serial_number[0], serial_number[1], serial_number[2], serial_number[3],
+         serial_number[4], serial_number[5], serial_number[6], serial_number[7],
+         serial_number[8], serial_number[9]);
+    if(mcm_lulib_set_alone(&self_lulib, path1, serial_number, sizeof(serial_number))
+                           < MCM_RCODE_PASS)
+    {
+        DMSG("call mcm_lulib_set_alone(%s) fail", path1);
+        goto FREE_02;
+    }
+
+    // 範例 : 設定 device.system.loading
+    // 路徑 : "device.system.loading"
+    // 型態 : fd -> MCM_DTYPE_FD_TD
+    // 變數 : loading / sizeof(loading)
+    path1 = "device.system.loading";
+    loading = ((MCM_DTYPE_FD_TD) 20000) / ((rand() % 100) + 1);
+    DMSG("[set-alone] %s = " MCM_DTYPE_FD_PF, path1, loading);
+    if(mcm_lulib_set_alone(&self_lulib, path1, &loading, sizeof(loading)) < MCM_RCODE_PASS)
+    {
+        DMSG("call mcm_lulib_set_alone(%s) fail", path1);
+        goto FREE_02;
+    }
+
+    // 範例 : 設定 device.vap.@1.channel
+    // 路徑 : "device.vap.@1.channel"
+    // 型態 : iui -> MCM_DTYPE_IUI_TD
+    // 變數 : channel / sizeof(channel)
+    path1 = "device.vap.@1.channel";
+    channel = rand() % 200;
+    DMSG("[set-alone] %s = " MCM_DTYPE_IUI_PF, path1, channel);
+    if(mcm_lulib_set_alone(&self_lulib, path1, &channel, sizeof(channel)) < MCM_RCODE_PASS)
+    {
+        DMSG("call mcm_lulib_set_alone(%s) fail", path1);
+        goto FREE_02;
+    }
+
+    // 範例 : 設定 device.vap.#8.extra.hidden
+    // 路徑 : "device.vap.#8.extra.hidden"
+    // 型態 : isc -> MCM_DTYPE_ISC_TD
+    // 變數 : hidden / sizeof(hidden)
+    path1 = "device.vap.#8.extra.hidden";
+    hidden = rand() % 2;
+    DMSG("[set-alone] %s = " MCM_DTYPE_ISC_PF, path1, hidden);
+    if(mcm_lulib_set_alone(&self_lulib, path1, &hidden, sizeof(hidden)) < MCM_RCODE_PASS)
+    {
+        DMSG("call mcm_lulib_set_alone(%s) fail", path1);
+        goto FREE_02;
+    }
+
+    // 範例 : 設定 device.vap.@2.station.#33.rule
+    // 路徑 : "device.vap.@2.station.#33.rule"
+    // 型態 : rk -> MCM_DTYPE_RK_TD
+    // 變數 : rule / sizeof(rule)
+    path1 = "device.vap.@2.station.#33.rule";
+    rule = rand() % 50;
+    DMSG("[set-alone] %s = " MCM_DTYPE_RK_PF, path1, rule);
+    if(mcm_lulib_set_alone(&self_lulib, path1, &rule, sizeof(rule)) < MCM_RCODE_PASS)
+    {
+        DMSG("call mcm_lulib_set_alone(%s) fail", path1);
+        goto FREE_02;
+    }
+
+FREE_02:
+    mcm_lulib_exit(&self_lulib);
+FREE_01:
+    return 0;
+}
+</pre>
+        </td>
+      </tr>
+    </table>
+    <br>
+
+    <div class="css_div_hook" id="hook_0302_mcm_lulib_get_entry_01"></div>
+    <table class="css_table_box">
+      <tr>
+        <td class="css_td_box">
+          <font class="css_font_b2">mcm_lulib_get_entry</font><br>
+          讀取 entry 的資料.<br>
+          <table class="css_table_list2">
+            <tr>
+              <td class="css_td_list2_t1">參數</td>
+              <td class="css_td_list2_t1">說明</td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l1">
+                <font class="css_font_r1">struct mcm_lulib_lib_t *</font><br>
+                <font class="css_font_g1">this_lulib</font><br>
+              </td>
+              <td class="css_td_list2_r1">
+                紀錄 mcm_lulib_api 所需要的資料
+              </td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l1">
+                <font class="css_font_r1">char *</font><br>
+                <font class="css_font_g1">full_path</font><br>
+              </td>
+              <td class="css_td_list2_r1">
+                目標的路徑 <a href="#hook_0302_full_path_01">[詳細]</a><br>
+                <font class="css_font_p1">[entry 格式][index / key 模式]</font>
+              </td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l1">
+                <font class="css_font_r1">void *</font><br>
+                <font class="css_font_g1">data_buf</font><br>
+              </td>
+              <td class="css_td_list2_r1">
+                紀錄資料的變數的緩衝 (變數的資料型態 <a href="#hook_0302_typedef_02">[詳細]</a>)
+              </td>
+            </tr>
+          </table>
+          <table class="css_table_list2">
+            <tr>
+              <td class="css_td_list2_t1">回傳</td>
+              <td class="css_td_list2_t1">說明</td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l2">&gt;= MCM_RCODE_PASS</td>
+              <td class="css_td_list2_r1">成功</td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l2">&nbsp;&lt; MCM_RCODE_PASS</td>
+              <td class="css_td_list2_r1">錯誤</td>
+            </tr>
+          </table>
+          <br>
+          注意事項 :<br>
+          <table class="css_table_list1">
+            <tr>
+              <td class="css_td_list1_l">01.&nbsp;</td>
+              <td class="css_td_list1_r">
+                資料存取模式可以是 MCM_SPERMISSION_RO 或 MCM_SPERMISSION_RW.
+              </td>
+            </tr>
+          </table>
+          <br>
+          範例 :<br>
+<pre class="css_pre_code">
+#include &lt;time.h&gt;
+#include &lt;errno.h&gt;
+#include &lt;stdio.h&gt;
+#include &lt;string.h&gt;
+#include &lt;stdlib.h&gt;
+#include "mcm_lheader/mcm_type.h"
+#include "mcm_lheader/mcm_size.h"
+#include "mcm_lheader/mcm_connect.h"
+#include "mcm_lheader/mcm_return.h"
+#include "mcm_lheader/mcm_data_exinfo_auto.h"
+#include "mcm_lulib/mcm_lulib_api.h"
+
+#define DMSG(msg_fmt, msgs...) printf("%s(%04u): " msg_fmt "\n", __FILE__, __LINE__, ##msgs)
+
+int main(int argc, char **argv)
+{
+    char *path1;
+    struct mcm_lulib_lib_t self_lulib;
+    struct mcm_dv_device_t device_v;
+    struct mcm_dv_device_vap_t vap_v;
+    struct mcm_dv_device_vap_extra_t extra_v;
+    struct mcm_dv_device_vap_station_t station_v;
+    struct mcm_dv_device_limit_t limit_v;
+
+    memset(&self_lulib, 0, sizeof(struct mcm_lulib_lib_t));
+    self_lulib.socket_path = "@mintcm";
+    self_lulib.call_from = MCM_CFROM_USER;
+    self_lulib.session_permission = MCM_SPERMISSION_RO;
+    self_lulib.session_stack_size = 0;
+    if(mcm_lulib_init(&self_lulib) < MCM_RCODE_PASS)
+    {
+        DMSG("call mcm_lulib_init() fail");
+        goto FREE_01;
+    }
+
+    // 對於 gd 類型的 group, 可以使用 index + key 模式.
+
+    // 範例 : 讀出 device
+    // 路徑 : "device"
+    // 型態 : struct mcm_dv_device_t
+    // 變數 : device_v
+    path1 = "device";
+    if(mcm_lulib_get_entry(&self_lulib, path1, &device_v) < MCM_RCODE_PASS)
+    {
+        DMSG("call mcm_lulib_get_entry(%s) fail", path1);
+        goto FREE_02;
+    }
+    DMSG("[get-entry] %s.descript = " MCM_DTYPE_S_PF,
+         path1, device_v.descript);
+    DMSG("[get-entry] %s.serial_number = "
+         MCM_DTYPE_B_PF MCM_DTYPE_B_PF MCM_DTYPE_B_PF MCM_DTYPE_B_PF MCM_DTYPE_B_PF
+         MCM_DTYPE_B_PF MCM_DTYPE_B_PF MCM_DTYPE_B_PF MCM_DTYPE_B_PF MCM_DTYPE_B_PF,
+         path1,
+         device_v.serial_number[0], device_v.serial_number[1], device_v.serial_number[2],
+         device_v.serial_number[3], device_v.serial_number[4], device_v.serial_number[5],
+         device_v.serial_number[6], device_v.serial_number[7], device_v.serial_number[8],
+         device_v.serial_number[9]);
+
+    // 範例 : 讀出 device.vap.@1
+    // 路徑 : "device.vap.@1"
+    // 類型 : struct mcm_dv_device_vap_t
+    // 變數 : vap_v
+    path1 = "device.vap.@1";
+    if(mcm_lulib_get_entry(&self_lulib, path1, &vap_v) < MCM_RCODE_PASS)
+    {
+        DMSG("call mcm_lulib_get_entry(%s) fail", path1);
+        goto FREE_02;
+    }
+    DMSG("[get-entry] %s.ekey = " MCM_DTYPE_EK_PF, path1, vap_v.ekey);
+    DMSG("[get-entry] %s.ssid = " MCM_DTYPE_S_PF, path1, vap_v.ssid);
+    DMSG("[get-entry] %s.channel = " MCM_DTYPE_IUI_PF, path1, vap_v.channel);
+
+    // 範例 : 讀出 device.vap.#23.extra
+    // 路徑 : "device.vap.#23.extra"
+    // 類型 : struct mcm_dv_device_vap_extra_t
+    // 變數 : extra_v
+    path1 = "device.vap.#23.extra";
+    if(mcm_lulib_get_entry(&self_lulib, path1, &extra_v) < MCM_RCODE_PASS)
+    {
+        DMSG("call mcm_lulib_get_entry(%s) fail", path1);
+        goto FREE_02;
+    }
+    DMSG("[get-entry] %s.hidden = " MCM_DTYPE_ISC_PF, path1, extra_v.hidden);
+    DMSG("[get-entry] %s.tx_power = " MCM_DTYPE_ISS_PF,
+         path1, extra_v.tx_power);
+
+    // 範例 : 讀出 device.vap.@2.station.#30
+    // 路徑 : "device.vap.@2.station.#30"
+    // 類型 : struct mcm_dv_device_vap_station_t
+    // 變數 : station_v
+    path1 = "device.vap.@2.station.#30";
+    if(mcm_lulib_get_entry(&self_lulib, path1, &station_v) < MCM_RCODE_PASS)
+    {
+        DMSG("call mcm_lulib_get_entry(%s) fail", path1);
+        goto FREE_02;
+    }
+    DMSG("[get-entry] %s.ekey = " MCM_DTYPE_EK_PF, path1, station_v.ekey);
+    DMSG("[get-entry] %s.mac_addr = " MCM_DTYPE_S_PF, path1, station_v.mac_addr);
+    DMSG("[get-entry] %s.rule = " MCM_DTYPE_RK_PF, path1, station_v.rule);
+
+    // 範例 : 讀出 device.limit.#6
+    // 路徑 : "device.limit.#6"
+    // 類型 : struct mcm_dv_device_limit_t
+    // 變數 : limit_v
+    path1 = "device.limit.#6";
+    if(mcm_lulib_get_entry(&self_lulib, path1, &limit_v) < MCM_RCODE_PASS)
+    {
+        DMSG("call mcm_lulib_get_entry(%s) fail", path1);
+        goto FREE_02;
+    }
+    DMSG("[get-entry] %s.ekey = " MCM_DTYPE_EK_PF, path1, limit_v.ekey);
+    DMSG("[get-entry] %s.name = " MCM_DTYPE_S_PF, path1, limit_v.name);
+    DMSG("[get-entry] %s.priority = " MCM_DTYPE_ISI_PF, path1, limit_v.priority);
+
+FREE_02:
+    mcm_lulib_exit(&self_lulib);
+FREE_01:
+    return 0;
+}
+</pre>
+        </td>
+      </tr>
+    </table>
+    <br>
+
+    <div class="css_div_hook" id="hook_0302_mcm_lulib_set_entry_01"></div>
+    <table class="css_table_box">
+      <tr>
+        <td class="css_td_box">
+          <font class="css_font_b2">mcm_lulib_set_entry</font><br>
+          將資料寫入 entry.<br>
+          <table class="css_table_list2">
+            <tr>
+              <td class="css_td_list2_t1">參數</td>
+              <td class="css_td_list2_t1">說明</td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l1">
+                <font class="css_font_r1">struct mcm_lulib_lib_t *</font><br>
+                <font class="css_font_g1">this_lulib</font><br>
+              </td>
+              <td class="css_td_list2_r1">
+                紀錄 mcm_lulib_api 所需要的資料
+              </td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l1">
+                <font class="css_font_r1">char *</font><br>
+                <font class="css_font_g1">full_path</font><br>
+              </td>
+              <td class="css_td_list2_r1">
+                目標的路徑 <a href="#hook_0302_full_path_01">[詳細]</a><br>
+                <font class="css_font_p1">[entry 格式][index / key 模式]</font>
+              </td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l1">
+                <font class="css_font_r1">void *</font><br>
+                <font class="css_font_g1">data_con</font><br>
+              </td>
+              <td class="css_td_list2_r1">
+                寫入的資料 (變數的資料型態 <a href="#hook_0302_typedef_02">[詳細]</a>)
+              </td>
+            </tr>
+          </table>
+          <table class="css_table_list2">
+            <tr>
+              <td class="css_td_list2_t1">回傳</td>
+              <td class="css_td_list2_t1">說明</td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l2">&gt;= MCM_RCODE_PASS</td>
+              <td class="css_td_list2_r1">成功</td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l2">&nbsp;&lt; MCM_RCODE_PASS</td>
+              <td class="css_td_list2_r1">錯誤</td>
+            </tr>
+          </table>
+          <br>
+          注意事項 :<br>
+          <table class="css_table_list1">
+            <tr>
+              <td class="css_td_list1_l">01.&nbsp;</td>
+              <td class="css_td_list1_r">
+                資料存取模式必須是 MCM_SPERMISSION_RW.
+              </td>
+            </tr>
+            <tr>
+              <td class="css_td_list1_l">02.&nbsp;</td>
+              <td class="css_td_list1_r">
+                因為 ek 類型的 member 是唯讀的, 所以資料庫內 ek 的數值不會被寫入的資料覆蓋.
+              </td>
+            </tr>
+          </table>
+          <br>
+          範例 :<br>
+<pre class="css_pre_code">
+#include &lt;time.h&gt;
+#include &lt;errno.h&gt;
+#include &lt;stdio.h&gt;
+#include &lt;string.h&gt;
+#include &lt;stdlib.h&gt;
+#include "mcm_lheader/mcm_type.h"
+#include "mcm_lheader/mcm_size.h"
+#include "mcm_lheader/mcm_connect.h"
+#include "mcm_lheader/mcm_return.h"
+#include "mcm_lheader/mcm_data_exinfo_auto.h"
+#include "mcm_lulib/mcm_lulib_api.h"
+
+#define DMSG(msg_fmt, msgs...) printf("%s(%04u): " msg_fmt "\n", __FILE__, __LINE__, ##msgs)
+
+int main(int argc, char **argv)
+{
+    char *path1;
+    struct mcm_lulib_lib_t self_lulib;
+    struct mcm_dv_device_t device_v;
+    struct mcm_dv_device_system_t system_v;
+    struct mcm_dv_device_vap_t vap_v;
+    struct mcm_dv_device_vap_extra_t extra_v;
+    struct mcm_dv_device_vap_station_t station_v;
+    MCM_DTYPE_USIZE_TD i;
+
+    srand(time(NULL));
+
+    memset(&self_lulib, 0, sizeof(struct mcm_lulib_lib_t));
+    self_lulib.socket_path = "@mintcm";
+    self_lulib.call_from = MCM_CFROM_USER;
+    self_lulib.session_permission = MCM_SPERMISSION_RW;
+    self_lulib.session_stack_size = 0;
+    if(mcm_lulib_init(&self_lulib) < MCM_RCODE_PASS)
+    {
+        DMSG("call mcm_lulib_init() fail");
+        goto FREE_01;
+    }
+
+    // 修改資料後可以開啟 mint_cm/run/mcm_store_profile_current.txt 確認數值.
+
+    // 範例 : 設定 device
+    // 路徑 : "device"
+    // 型態 : struct mcm_dv_device_t
+    // 變數 : device_v
+    path1 = "device";
+    memset(&device_v, 0, sizeof(device_v));
+    snprintf(device_v.descript, sizeof(device_v.descript), "network-device-%02u", rand() % 100);
+    for(i = 0; i < sizeof(device_v.serial_number); i++)
+        device_v.serial_number[i] = rand() % 256;
+    DMSG("[set-entry] %s.descript = " MCM_DTYPE_S_PF, path1, device_v.descript);
+    DMSG("[set-entry] %s.serial_number = "
+         MCM_DTYPE_B_PF MCM_DTYPE_B_PF MCM_DTYPE_B_PF MCM_DTYPE_B_PF MCM_DTYPE_B_PF
+         MCM_DTYPE_B_PF MCM_DTYPE_B_PF MCM_DTYPE_B_PF MCM_DTYPE_B_PF MCM_DTYPE_B_PF,
+         path1,
+         device_v.serial_number[0], device_v.serial_number[1], device_v.serial_number[2],
+         device_v.serial_number[3], device_v.serial_number[4], device_v.serial_number[5],
+         device_v.serial_number[6], device_v.serial_number[7], device_v.serial_number[8],
+         device_v.serial_number[9]);
+    if(mcm_lulib_set_entry(&self_lulib, path1, &device_v, sizeof(device_v)) < MCM_RCODE_PASS)
+    {
+        DMSG("call mcm_lulib_set_entry(%s) fail", path1);
+        goto FREE_02;
+    }
+
+    // 範例 : 設定 device.system
+    // 路徑 : "device.system"
+    // 型態 : struct mcm_dv_device_system_t
+    // 變數 : system_v
+    path1 = "device.system";
+    memset(&system_v, 0, sizeof(system_v));
+    snprintf(system_v.date, sizeof(system_v.date), "2016/05/%u", rand() % 30);
+    snprintf(system_v.ip_addr, sizeof(system_v.ip_addr), "192.168.1.%u", rand() % 250);
+    system_v.uptime = rand();
+    system_v.loading = ((MCM_DTYPE_FD_TD) 25000) / ((rand() % 100) + 1);
+    DMSG("[set-entry] %s.date = " MCM_DTYPE_S_PF, path1, system_v.date);
+    DMSG("[set-entry] %s.ip_addr = " MCM_DTYPE_S_PF, path1, system_v.ip_addr);
+    DMSG("[set-entry] %s.uptime = " MCM_DTYPE_IULL_PF, path1, system_v.uptime);
+    DMSG("[set-entry] %s.loading = " MCM_DTYPE_FD_PF, path1, system_v.loading);
+    if(mcm_lulib_set_entry(&self_lulib, path1, &system_v, sizeof(system_v)) < MCM_RCODE_PASS)
+    {
+        DMSG("call mcm_lulib_set_entry(%s) fail", path1);
+        goto FREE_02;
+    }
+
+    // 範例 : 設定 device.vap.@1
+    // 路徑 : "device.vap.@1"
+    // 型態 : struct mcm_dv_device_vap_t
+    // 變數 : vap_v
+    path1 = "device.vap.@1";
+    memset(&vap_v, 0, sizeof(vap_v));
+    snprintf(vap_v.ssid, sizeof(vap_v.ssid), "access-%u", rand() % 100);
+    vap_v.channel = rand() % 200;
+    DMSG("[set-entry] %s.ssid = " MCM_DTYPE_S_PF, path1, vap_v.ssid);
+    DMSG("[set-entry] %s.channel = " MCM_DTYPE_IUI_PF, path1, vap_v.channel);
+    if(mcm_lulib_set_entry(&self_lulib, path1, &vap_v, sizeof(vap_v)) < MCM_RCODE_PASS)
+    {
+        DMSG("call mcm_lulib_set_entry(%s) fail", path1);
+        goto FREE_02;
+    }
+
+    // 範例 : 設定 device.vap.#23.extra
+    // 路徑 : "device.vap.#23.extra"
+    // 型態 : struct mcm_dv_device_vap_extra_t
+    // 變數 : extra_v
+    path1 = "device.vap.#23.extra";
+    memset(&extra_v, 0, sizeof(extra_v));
+    extra_v.hidden = rand() % 2;
+    extra_v.tx_power = (rand() % 20) - 10;
+    DMSG("[set-entry] %s.hidden = " MCM_DTYPE_ISC_PF, path1, extra_v.hidden);
+    DMSG("[set-entry] %s.tx_power = " MCM_DTYPE_ISS_PF, path1, extra_v.tx_power);
+    if(mcm_lulib_set_entry(&self_lulib, path1, &extra_v, sizeof(extra_v)) < MCM_RCODE_PASS)
+    {
+        DMSG("call mcm_lulib_set_entry(%s) fail", path1);
+        goto FREE_02;
+    }
+
+    // 範例 : 設定 device.vap.@2.station.#30
+    // 路徑 : "device.vap.@2.station.#30"
+    // 型態 : struct mcm_dv_device_vap_station_t
+    // 變數 : station_v
+    path1 = "device.vap.@2.station.#30";
+    memset(&station_v, 0, sizeof(station_v));
+    snprintf(station_v.mac_addr, sizeof(station_v.mac_addr), "00:11:22:AA:BB:%02X", rand() % 255);
+    station_v.rule = rand() % 50;
+    DMSG("[set-entry] %s.mac_addr = " MCM_DTYPE_S_PF, path1, station_v.mac_addr);
+    DMSG("[set-entry] %s.rule = " MCM_DTYPE_RK_PF, path1, station_v.rule);
+    if(mcm_lulib_set_entry(&self_lulib, path1, &station_v, sizeof(station_v)) < MCM_RCODE_PASS)
+    {
+        DMSG("call mcm_lulib_set_entry(%s) fail", path1);
+        goto FREE_02;
+    }
+
+FREE_02:
+    mcm_lulib_exit(&self_lulib);
+FREE_01:
+    return 0;
+}
+</pre>
+        </td>
+      </tr>
+    </table>
+    <br>
+
+    <div class="css_div_hook" id="hook_0302_mcm_lulib_add_entry_01"></div>
+    <table class="css_table_box">
+      <tr>
+        <td class="css_td_box">
+          <font class="css_font_b2">mcm_lulib_add_entry</font><br>
+          增加一筆 entry.<br>
+          <table class="css_table_list2">
+            <tr>
+              <td class="css_td_list2_t1">參數</td>
+              <td class="css_td_list2_t1">說明</td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l1">
+                <font class="css_font_r1">struct mcm_lulib_lib_t *</font><br>
+                <font class="css_font_g1">this_lulib</font><br>
+              </td>
+              <td class="css_td_list2_r1">
+                紀錄 mcm_lulib_api 所需要的資料
+              </td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l1">
+                <font class="css_font_r1">char *</font><br>
+                <font class="css_font_g1">full_path</font><br>
+              </td>
+              <td class="css_td_list2_r1">
+                目標的路徑 <a href="#hook_0302_full_path_01">[詳細]</a><br>
+                <font class="css_font_p1">[entry 格式][index / key 模式]</font><br>
+                <font class="css_font_r1">加入的目標必須是 [key 模式]</font>
+              </td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l1">
+                <font class="css_font_r1">void *</font><br>
+                <font class="css_font_g1">data_con</font><br>
+              </td>
+              <td class="css_td_list2_r1">
+                寫入的資料 (變數的資料型態 <a href="#hook_0302_typedef_02">[詳細]</a>)<br>
+                <font class="css_font_p1">可為 NULL, 表示使用初始值 (資料模型中設的 $(default))</font>
+                <a href="mcm_0201.html#hook_0201_default_format_01">[詳細]</a>
+              </td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l1">
+                <font class="css_font_r1">MCM_DTYPE_USIZE_TD</font><br>
+                <font class="css_font_g1">data_len</font><br>
+              </td>
+              <td class="css_td_list2_r1">
+                寫入的資料的長度<br>
+                <font class="css_font_p1">若 data_con 是 NULL, 則為 0</font>
+              </td>
+            </tr>
+          </table>
+          <table class="css_table_list2">
+            <tr>
+              <td class="css_td_list2_t1">回傳</td>
+              <td class="css_td_list2_t1">說明</td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l2">&gt;= MCM_RCODE_PASS</td>
+              <td class="css_td_list2_r1">成功</td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l2">&nbsp;&lt; MCM_RCODE_PASS</td>
+              <td class="css_td_list2_r1">錯誤</td>
+            </tr>
+          </table>
+          <br>
+          注意事項 :<br>
+          <table class="css_table_list1">
+            <tr>
+              <td class="css_td_list1_l">01.&nbsp;</td>
+              <td class="css_td_list1_r">
+                資料存取模式必須是 MCM_SPERMISSION_RW.
+              </td>
+            </tr>
+            <tr>
+              <td class="css_td_list1_l">02.&nbsp;</td>
+              <td class="css_td_list1_r">
+                路徑可以是 [indxe / key 模式], 但是最後一段要加入的目標必須是 [key 模式].
+              </td>
+            </tr>
+            <tr>
+              <td class="css_td_list1_l">03.&nbsp;</td>
+              <td class="css_td_list1_r">
+                增加 entry 需要指定新的 key (不可和存在的 entry 的 key 相同).
+              </td>
+            </tr>
+            <tr>
+              <td class="css_td_list1_l">04.&nbsp;</td>
+              <td class="css_td_list1_r">
+                key 值會使用 full_path 的值, data_con 內的 key 值會被忽略.
+              </td>
+            </tr>
+            <tr>
+              <td class="css_td_list1_l">05.&nbsp;</td>
+              <td class="css_td_list1_r">
+                增加多層資料時, 要逐層增加.
+              </td>
+            </tr>
+          </table>
+          <br>
+          範例 :<br>
+<pre class="css_pre_code">
+#include &lt;time.h&gt;
+#include &lt;errno.h&gt;
+#include &lt;stdio.h&gt;
+#include &lt;string.h&gt;
+#include &lt;stdlib.h&gt;
+#include "mcm_lheader/mcm_type.h"
+#include "mcm_lheader/mcm_size.h"
+#include "mcm_lheader/mcm_connect.h"
+#include "mcm_lheader/mcm_return.h"
+#include "mcm_lheader/mcm_data_exinfo_auto.h"
+#include "mcm_lulib/mcm_lulib_api.h"
+
+#define DMSG(msg_fmt, msgs...) printf("%s(%04u): " msg_fmt "\n", __FILE__, __LINE__, ##msgs)
+
+int main(int argc, char **argv)
+{
+    char *path1;
+    struct mcm_lulib_lib_t self_lulib;
+    struct mcm_dv_device_vap_t vap_v;
+    struct mcm_dv_device_vap_station_t station_v;
+
+    srand(time(NULL));
+
+    memset(&self_lulib, 0, sizeof(struct mcm_lulib_lib_t));
+    self_lulib.socket_path = "@mintcm";
+    self_lulib.call_from = MCM_CFROM_USER;
+    self_lulib.session_permission = MCM_SPERMISSION_RW;
+    self_lulib.session_stack_size = 0;
+    if(mcm_lulib_init(&self_lulib) < MCM_RCODE_PASS)
+    {
+        DMSG("call mcm_lulib_init() fail");
+        goto FREE_01;
+    }
+
+    // 路徑可以是 [indxe / key 模式], 但是最後一段要加入的目標必須是 [key 模式].
+    // 增加 entry 需要指定新的 key (不可和存在的 entry 的 key 相同).
+    // key 值會使用 full_path 的值, data_con 內的 key 值會被忽略.
+    // 增加多層資料時, 要逐層增加.
+    // 修改資料後可以開啟 mint_cm/run/mcm_store_profile_current.txt 確認數值.
+
+    // 範例 : 增加 device.vap.#123
+    // 路徑 : "device.vap.#123"
+    // 類型 : struct mcm_dv_device_vap_t
+    // 變數 : vap_v / sizeof(vap_v)
+    // 加入的目標 (vap) 必須是 key 模式.
+    path1 = "device.vap.#123";
+    memset(&vap_v, 0, sizeof(vap_v));
+    snprintf(vap_v.ssid, sizeof(vap_v.ssid), "vap-%u", rand() % 100);
+    vap_v.channel = rand() % 200;
+    DMSG("[add-entry] %s.ssid = " MCM_DTYPE_S_PF, path1, vap_v.ssid);
+    DMSG("[add-entry] %s.channel = " MCM_DTYPE_IUI_PF, path1, vap_v.channel);
+    if(mcm_lulib_add_entry(&self_lulib, path1, &vap_v, sizeof(vap_v)) < MCM_RCODE_PASS)
+    {
+        DMSG("call mcm_lulib_add_entry(%s) fail", path1);
+        goto FREE_02;
+    }
+    // 如果 parent-group 是 gd 類型的 gs 類型 group, 當 parent-group 增加
+    // entry 時, 也會一併被增加.
+    // 以 device.vap.*.extra 為例, 當 device.vap.* 增加 entry,
+    // 對應的 extra 也會被增加, 被增加的 extra 內容為資料模型中設定的初始值.
+
+    // 範例 : 增加 device.vap.@3.station.#111
+    // 路徑 : "device.vap.@3.station.#111"
+    // 類型 : struct mcm_dv_device_vap_station_t
+    // 變數 : station_v / sizeof(station_v)
+    // 加入的目標 (station) 必須是 key 模式.
+    path1 = "device.vap.@3.station.#111";
+    memset(&station_v, 0, sizeof(station_v));
+    snprintf(station_v.mac_addr, sizeof(station_v.mac_addr), "00:1a:2b:3c:4d:%02x", rand() % 255);
+    station_v.rule = rand() % 50;
+    DMSG("[add-entry] %s.mac_addr = " MCM_DTYPE_S_PF, path1, station_v.mac_addr);
+    DMSG("[add-entry] %s.rule = " MCM_DTYPE_RK_PF, path1, station_v.rule);
+    if(mcm_lulib_add_entry(&self_lulib, path1, &station_v, sizeof(station_v)) < MCM_RCODE_PASS)
+    {
+        DMSG("call mcm_lulib_add_entry(%s) fail", path1);
+        goto FREE_02;
+    }
+
+    // 範例 : 增加 device.vap.#234.station.#1
+    // 路徑 : "device.vap.#234.station.#1"
+    // 類型 : struct mcm_dv_device_vap_t
+    // 變數 : vap_v / sizeof(vap_v)
+    // 增加多層資料時, 要逐層增加.
+    // device.vap.#234 並不存在, 先增加.
+    path1 = "device.vap.#234";
+    memset(&vap_v, 0, sizeof(vap_v));
+    snprintf(vap_v.ssid, sizeof(vap_v.ssid), "vap-%u", rand() % 100);
+    vap_v.channel = rand() % 200;
+    DMSG("[add-entry] %s.ssid = " MCM_DTYPE_S_PF, path1, vap_v.ssid);
+    DMSG("[add-entry] %s.channel = " MCM_DTYPE_IUI_PF, path1, vap_v.channel);
+    if(mcm_lulib_add_entry(&self_lulib, path1, &vap_v, sizeof(vap_v)) < MCM_RCODE_PASS)
+    {
+        DMSG("call mcm_lulib_add_entry(%s) fail", path1);
+        goto FREE_02;
+    }
+    // 接著增加 device.vap.#234.station.#1
+    path1 = "device.vap.#234.station.#1";
+    memset(&station_v, 0, sizeof(station_v));
+    snprintf(station_v.mac_addr, sizeof(station_v.mac_addr), "00:aa:bb:cc:dd:%02x", rand() % 255);
+    station_v.rule = rand() % 50;
+    DMSG("[add-entry] %s.mac_addr = " MCM_DTYPE_S_PF, path1, station_v.mac_addr);
+    DMSG("[add-entry] %s.rule = " MCM_DTYPE_RK_PF, path1, station_v.rule);
+    if(mcm_lulib_add_entry(&self_lulib, path1, &station_v, sizeof(station_v)) < MCM_RCODE_PASS)
+    {
+        DMSG("call mcm_lulib_add_entry(%s) fail", path1);
+        goto FREE_02;
+    }
+
+    // 範例 : 增加 device.limit.#51
+    // 路徑 : "device.limit.#51"
+    // 使用初始值.
+    path1 = "device.limit.#51";
+    DMSG("[add-entry] %s", path1);
+    if(mcm_lulib_add_entry(&self_lulib, path1, NULL, 0) < MCM_RCODE_PASS)
+    {
+        DMSG("call mcm_lulib_add_entry(%s) fail", path1);
+        goto FREE_02;
+    }
+
+FREE_02:
+    mcm_lulib_exit(&self_lulib);
+FREE_01:
+    return 0;
+}
+</pre>
+        </td>
+      </tr>
+    </table>
+    <br>
+
+    <div class="css_div_hook" id="hook_0302_mcm_lulib_del_entry_01"></div>
+    <table class="css_table_box">
+      <tr>
+        <td class="css_td_box">
+          <font class="css_font_b2">mcm_lulib_del_entry</font><br>
+          刪除一筆 entry.<br>
+          <table class="css_table_list2">
+            <tr>
+              <td class="css_td_list2_t1">參數</td>
+              <td class="css_td_list2_t1">說明</td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l1">
+                <font class="css_font_r1">struct mcm_lulib_lib_t *</font><br>
+                <font class="css_font_g1">this_lulib</font><br>
+              </td>
+              <td class="css_td_list2_r1">
+                紀錄 mcm_lulib_api 所需要的資料
+              </td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l1">
+                <font class="css_font_r1">char *</font><br>
+                <font class="css_font_g1">full_path</font><br>
+              </td>
+              <td class="css_td_list2_r1">
+                目標的路徑 <a href="#hook_0302_full_path_01">[詳細]</a><br>
+                <font class="css_font_p1">[entry 格式][index / key 模式]</font>
+              </td>
+            </tr>
+          </table>
+          <table class="css_table_list2">
+            <tr>
+              <td class="css_td_list2_t1">回傳</td>
+              <td class="css_td_list2_t1">說明</td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l2">&gt;= MCM_RCODE_PASS</td>
+              <td class="css_td_list2_r1">成功</td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l2">&nbsp;&lt; MCM_RCODE_PASS</td>
+              <td class="css_td_list2_r1">錯誤</td>
+            </tr>
+          </table>
+          <br>
+          注意事項 :<br>
+          <table class="css_table_list1">
+            <tr>
+              <td class="css_td_list1_l">01.&nbsp;</td>
+              <td class="css_td_list1_r">
+                資料存取模式必須是 MCM_SPERMISSION_RW.
+              </td>
+            </tr>
+          </table>
+          <br>
+          範例 :<br>
+<pre class="css_pre_code">
+#include &lt;time.h&gt;
+#include &lt;errno.h&gt;
+#include &lt;stdio.h&gt;
+#include &lt;string.h&gt;
+#include &lt;stdlib.h&gt;
+#include "mcm_lheader/mcm_type.h"
+#include "mcm_lheader/mcm_size.h"
+#include "mcm_lheader/mcm_connect.h"
+#include "mcm_lheader/mcm_return.h"
+#include "mcm_lheader/mcm_data_exinfo_auto.h"
+#include "mcm_lulib/mcm_lulib_api.h"
+
+#define DMSG(msg_fmt, msgs...) printf("%s(%04u): " msg_fmt "\n", __FILE__, __LINE__, ##msgs)
+
+int main(int argc, char **argv)
+{
+    char *path1;
+    struct mcm_lulib_lib_t self_lulib;
+
+    memset(&self_lulib, 0, sizeof(struct mcm_lulib_lib_t));
+    self_lulib.socket_path = "@mintcm";
+    self_lulib.call_from = MCM_CFROM_USER;
+    self_lulib.session_permission = MCM_SPERMISSION_RW;
+    self_lulib.session_stack_size = 0;
+    if(mcm_lulib_init(&self_lulib) < MCM_RCODE_PASS)
+    {
+        DMSG("call mcm_lulib_init() fail");
+        goto FREE_01;
+    }
+
+    // 修改資料後可以開啟 mint_cm/run/mcm_store_profile_current.txt 確認數值.
+
+    // 範例 : 刪除 device.vap.@1
+    // 路徑 : "device.vap.@1"
+    path1 = "device.vap.@1";
+    DMSG("[del-entry] %s", path1);
+    if(mcm_lulib_del_entry(&self_lulib, path1) < MCM_RCODE_PASS)
+    {
+        DMSG("call mcm_lulib_del_entry(%s) fail", path1);
+        goto FREE_02;
+    }
+
+    // 範例 : 刪除 device.vap.#15.station.@2
+    // 路徑 : "device.vap.#15.station.@2"
+    path1 = "device.vap.#15.station.@2";
+    DMSG("[del-entry] %s", path1);
+    if(mcm_lulib_del_entry(&self_lulib, path1) < MCM_RCODE_PASS)
+    {
+        DMSG("call mcm_lulib_del_entry(%s) fail", path1);
+        goto FREE_02;
+    }
+
+FREE_02:
+    mcm_lulib_exit(&self_lulib);
+FREE_01:
+    return 0;
+}
+</pre>
+        </td>
+      </tr>
+    </table>
+    <br>
+
+    <div class="css_div_hook" id="hook_0302_mcm_lulib_get_all_entry_01"></div>
+    <table class="css_table_box">
+      <tr>
+        <td class="css_td_box">
+          <font class="css_font_b2">mcm_lulib_get_all_entry</font><br>
+          讀取 group 內所有 entry 的資料.<br>
+          <table class="css_table_list2">
+            <tr>
+              <td class="css_td_list2_t1">參數</td>
+              <td class="css_td_list2_t1">說明</td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l1">
+                <font class="css_font_r1">struct mcm_lulib_lib_t *</font><br>
+                <font class="css_font_g1">this_lulib</font><br>
+              </td>
+              <td class="css_td_list2_r1">
+                紀錄 mcm_lulib_api 所需要的資料
+              </td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l1">
+                <font class="css_font_r1">char *</font><br>
+                <font class="css_font_g1">mix_path</font><br>
+              </td>
+              <td class="css_td_list2_r1">
+                目標的路徑 <a href="#hook_0302_mix_path_01">[詳細]</a><br>
+                <font class="css_font_p1">[index / key 模式]</font><br>
+              </td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l1">
+                <font class="css_font_r1">MCM_DTYPE_EK_TD *</font><br>
+                <font class="css_font_g1">count_buf</font>
+              </td>
+              <td class="css_td_list2_r1">
+                紀錄資料筆數的緩衝
+              </td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l1">
+                <font class="css_font_r1">void **</font><br>
+                <font class="css_font_g1">data_buf</font><br>
+              </td>
+              <td class="css_td_list2_r1">
+                紀錄資料的變數的緩衝 (變數的資料型態 <a href="#hook_0302_typedef_01">[詳細]</a>)<br>
+                <font class="css_font_r1">內部函式會配置記憶體空間並放入資料, 使用完需要釋放, 傳入參數需要做強制轉型 (void **)</font><br>
+              </td>
+            </tr>
+          </table>
+          <table class="css_table_list2">
+            <tr>
+              <td class="css_td_list2_t1">回傳</td>
+              <td class="css_td_list2_t1">說明</td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l2">&gt;= MCM_RCODE_PASS</td>
+              <td class="css_td_list2_r1">成功</td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l2">&nbsp;&lt; MCM_RCODE_PASS</td>
+              <td class="css_td_list2_r1">錯誤</td>
+            </tr>
+          </table>
+          <br>
+          注意事項 :<br>
+          <table class="css_table_list1">
+            <tr>
+              <td class="css_td_list1_l">01.&nbsp;</td>
+              <td class="css_td_list1_r">
+                資料存取模式可以是 MCM_SPERMISSION_RO 或 MCM_SPERMISSION_RW.
+              </td>
+            </tr>
+          </table>
+          <br>
+          範例 :<br>
+<pre class="css_pre_code">
+#include &lt;time.h&gt;
+#include &lt;errno.h&gt;
+#include &lt;stdio.h&gt;
+#include &lt;string.h&gt;
+#include &lt;stdlib.h&gt;
+#include "mcm_lheader/mcm_type.h"
+#include "mcm_lheader/mcm_size.h"
+#include "mcm_lheader/mcm_connect.h"
+#include "mcm_lheader/mcm_return.h"
+#include "mcm_lheader/mcm_data_exinfo_auto.h"
+#include "mcm_lulib/mcm_lulib_api.h"
+
+#define DMSG(msg_fmt, msgs...) printf("%s(%04u): " msg_fmt "\n", __FILE__, __LINE__, ##msgs)
+
+int main(int argc, char **argv)
+{
+    char *path1, path2[MCM_PATH_MAX_LENGTH];
+    struct mcm_lulib_lib_t self_lulib;
+    struct mcm_dv_device_t *device_v;
+    struct mcm_dv_device_vap_t *vap_v;
+    struct mcm_dv_device_vap_extra_t *extra_v;
+    struct mcm_dv_device_vap_station_t *station_v;
+    MCM_DTYPE_EK_TD i, count;
+
+    memset(&self_lulib, 0, sizeof(struct mcm_lulib_lib_t));
+    self_lulib.socket_path = "@mintcm";
+    self_lulib.call_from = MCM_CFROM_USER;
+    self_lulib.session_permission = MCM_SPERMISSION_RO;
+    self_lulib.session_stack_size = 0;
+    if(mcm_lulib_init(&self_lulib) < MCM_RCODE_PASS)
+    {
+        DMSG("call mcm_lulib_init() fail");
+        goto FREE_01;
+    }
+
+    // 對於 gd 類型的 group, 可以使用 index + key 模式.
+
+    // 範例 : 讀出 device
+    // 路徑 : "device"
+    path1 = "device";
+    if(mcm_lulib_get_all_entry(&self_lulib, path1, &count, (void **) &device_v) < MCM_RCODE_PASS)
+    {
+        DMSG("call mcm_lulib_get_all_entry(%s) fail", path1);
+        goto FREE_02;
+    }
+    DMSG("[get-all-entry] %s = " MCM_DTYPE_EK_PF, path1, count);
+    DMSG("[get-all-entry] %s.descript = " MCM_DTYPE_S_PF, path1, device_v[0].descript);
+    DMSG("[get-all-entry] %s.serial_number = "
+         MCM_DTYPE_B_PF MCM_DTYPE_B_PF MCM_DTYPE_B_PF MCM_DTYPE_B_PF MCM_DTYPE_B_PF
+         MCM_DTYPE_B_PF MCM_DTYPE_B_PF MCM_DTYPE_B_PF MCM_DTYPE_B_PF MCM_DTYPE_B_PF,
+         path1,
+         device_v[0].serial_number[0], device_v[0].serial_number[1],
+         device_v[0].serial_number[2], device_v[0].serial_number[3],
+         device_v[0].serial_number[4], device_v[0].serial_number[5],
+         device_v[0].serial_number[6], device_v[0].serial_number[7],
+         device_v[0].serial_number[8], device_v[0].serial_number[9]);
+    free(device_v);
+
+    // 範例 : 讀出 device.vap.*
+    // 路徑 : "device.vap.*"
+    path1 = "device.vap.*";
+    if(mcm_lulib_get_all_entry(&self_lulib, path1, &count, (void **) &vap_v) < MCM_RCODE_PASS)
+    {
+        DMSG("call mcm_lulib_get_all_entry(%s) fail", path1);
+        goto FREE_02;
+    }
+    DMSG("[get-all-entry] %s = " MCM_DTYPE_EK_PF, path1, count);
+    for(i = 0; i < count; i++)
+    {
+        snprintf(path2, sizeof(path2), "device.vap.@%u", i + 1);
+        DMSG("[get-all-entry] %s.ekey = " MCM_DTYPE_EK_PF, path2, vap_v[i].ekey);
+        DMSG("[get-all-entry] %s.ssid = " MCM_DTYPE_S_PF, path2, vap_v[i].ssid);
+        DMSG("[get-all-entry] %s.channel = " MCM_DTYPE_IUI_PF, path2, vap_v[i].channel);
+    }
+    free(vap_v);
+
+    // 範例 : 讀出 device.vap.@2.extra
+    // 路徑 : "device.vap.@2.extra"
+    path1 = "device.vap.@2.extra";
+    if(mcm_lulib_get_all_entry(&self_lulib, path1, &count, (void **) &extra_v) < MCM_RCODE_PASS)
+    {
+        DMSG("call mcm_lulib_get_all_entry(%s) fail", path1);
+        goto FREE_02;
+    }
+    DMSG("[get-all-entry] %s = " MCM_DTYPE_EK_PF, path1, count);
+    DMSG("[get-all-entry] %s.hidden = " MCM_DTYPE_ISC_PF, path1, extra_v[0].hidden);
+    DMSG("[get-all-entry] %s.tx_power = " MCM_DTYPE_ISS_PF, path1, extra_v[0].tx_power);
+    free(extra_v);
+
+    // 範例 : 讀出 device.vap.#15.station.*
+    // 路徑 : "device.vap.#15.station.*"
+    path1 = "device.vap.#15.station.*";
+    if(mcm_lulib_get_all_entry(&self_lulib, path1, &count, (void **) &station_v) < MCM_RCODE_PASS)
+    {
+        DMSG("call mcm_lulib_get_all_entry(%s) fail", path1);
+        goto FREE_02;
+    }
+    DMSG("[get-all-entry] %s = " MCM_DTYPE_EK_PF, path1, count);
+    for(i = 0; i < count; i++)
+    {
+        snprintf(path2, sizeof(path2), "device.vap.#15.station.@%u", i + 1);
+        DMSG("[get-all-entry] %s.ekey = " MCM_DTYPE_EK_PF, path2, station_v[i].ekey);
+        DMSG("[get-all-entry] %s.mac_addr = " MCM_DTYPE_S_PF, path2, station_v[i].mac_addr);
+        DMSG("[get-all-entry] %s.rule = " MCM_DTYPE_RK_PF, path2, station_v[i].rule);
+    }
+    free(station_v);
+
+FREE_02:
+    mcm_lulib_exit(&self_lulib);
+FREE_01:
+    return 0;
+}
+</pre>
+        </td>
+      </tr>
+    </table>
+    <br>
+
+    <div class="css_div_hook" id="hook_0302_mcm_lulib_del_all_entry_01"></div>
+    <table class="css_table_box">
+      <tr>
+        <td class="css_td_box">
+          <font class="css_font_b2">mcm_lulib_del_all_entry</font><br>
+          刪除 group 內所有的 entry.<br>
+          <table class="css_table_list2">
+            <tr>
+              <td class="css_td_list2_t1">參數</td>
+              <td class="css_td_list2_t1">說明</td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l1">
+                <font class="css_font_r1">struct mcm_lulib_lib_t *</font><br>
+                <font class="css_font_g1">this_lulib</font><br>
+              </td>
+              <td class="css_td_list2_r1">
+                紀錄 mcm_lulib_api 所需要的資料
+              </td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l1">
+                <font class="css_font_r1">char *</font><br>
+                <font class="css_font_g1">mix_path</font><br>
+              </td>
+              <td class="css_td_list2_r1">
+                目標的路徑 <a href="#hook_0302_mix_path_01">[詳細]</a><br>
+                <font class="css_font_p1">[index / key 模式]</font><br>
+              </td>
+            </tr>
+          </table>
+          <table class="css_table_list2">
+            <tr>
+              <td class="css_td_list2_t1">回傳</td>
+              <td class="css_td_list2_t1">說明</td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l2">&gt;= MCM_RCODE_PASS</td>
+              <td class="css_td_list2_r1">成功</td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l2">&nbsp;&lt; MCM_RCODE_PASS</td>
+              <td class="css_td_list2_r1">錯誤</td>
+            </tr>
+          </table>
+          <br>
+          注意事項 :<br>
+          <table class="css_table_list1">
+            <tr>
+              <td class="css_td_list1_l">01.&nbsp;</td>
+              <td class="css_td_list1_r">
+                資料存取模式必須是 MCM_SPERMISSION_RW.
+              </td>
+            </tr>
+          </table>
+          <br>
+          範例 :<br>
+<pre class="css_pre_code">
+#include &lt;time.h&gt;
+#include &lt;errno.h&gt;
+#include &lt;stdio.h&gt;
+#include &lt;string.h&gt;
+#include &lt;stdlib.h&gt;
+#include "mcm_lheader/mcm_type.h"
+#include "mcm_lheader/mcm_size.h"
+#include "mcm_lheader/mcm_connect.h"
+#include "mcm_lheader/mcm_return.h"
+#include "mcm_lheader/mcm_data_exinfo_auto.h"
+#include "mcm_lulib/mcm_lulib_api.h"
+
+#define DMSG(msg_fmt, msgs...) printf("%s(%04u): " msg_fmt "\n", __FILE__, __LINE__, ##msgs)
+
+int main(int argc, char **argv)
+{
+    char *path1;
+    struct mcm_lulib_lib_t self_lulib;
+
+    memset(&self_lulib, 0, sizeof(struct mcm_lulib_lib_t));
+    self_lulib.socket_path = "@mintcm";
+    self_lulib.call_from = MCM_CFROM_USER;
+    self_lulib.session_permission = MCM_SPERMISSION_RW;
+    self_lulib.session_stack_size = 0;
+    if(mcm_lulib_init(&self_lulib) < MCM_RCODE_PASS)
+    {
+        DMSG("call mcm_lulib_init() fail");
+        goto FREE_01;
+    }
+
+    // 修改資料後可以開啟 mint_cm/run/mcm_store_profile_current.txt 確認數值.
+
+    // 範例 : 刪除所有的 device.vap.@1.station.*
+    // 路徑 : "device.vap.@1.station.*"
+    path1 = "device.vap.@1.station.*";
+    DMSG("[del-all-entry] %s", path1);
+    if(mcm_lulib_del_all_entry(&self_lulib, path1) < MCM_RCODE_PASS)
+    {
+        DMSG("call mcm_lulib_del_all_entry(%s) fail", path1);
+        goto FREE_02;
+    }
+
+    // 範例 : 刪除所有的 device.vap.#15.station.*
+    // 路徑 : "device.vap.#15.station.*"
+    path1 = "device.vap.#15.station.*";
+    DMSG("[del-all-entry] %s", path1);
+    if(mcm_lulib_del_all_entry(&self_lulib, path1) < MCM_RCODE_PASS)
+    {
+        DMSG("call mcm_lulib_del_all_entry(%s) fail", path1);
+        goto FREE_02;
+    }
+
+    // 範例 : 刪除所有的 device.limit.*
+    // 路徑 : "device.limit.*"
+    path1 = "device.limit.*";
+    DMSG("[del-all-entry] %s", path1);
+    if(mcm_lulib_del_all_entry(&self_lulib, path1) < MCM_RCODE_PASS)
+    {
+        DMSG("call mcm_lulib_del_all_entry(%s) fail", path1);
+        goto FREE_02;
+    }
+
+FREE_02:
+    mcm_lulib_exit(&self_lulib);
+FREE_01:
+    return 0;
+}
+</pre>
+        </td>
+      </tr>
+    </table>
+    <br>
+
+    <div class="css_div_hook" id="hook_0302_mcm_lulib_get_usable_key_01"></div>
+    <table class="css_table_box">
+      <tr>
+        <td class="css_td_box">
+          <font class="css_font_b2">mcm_lulib_get_usable_key</font><br>
+          取得 group 內可用的 key.<br>
+          <table class="css_table_list2">
+            <tr>
+              <td class="css_td_list2_t1">參數</td>
+              <td class="css_td_list2_t1">說明</td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l1">
+                <font class="css_font_r1">struct mcm_lulib_lib_t *</font><br>
+                <font class="css_font_g1">this_lulib</font><br>
+              </td>
+              <td class="css_td_list2_r1">
+                紀錄 mcm_lulib_api 所需要的資料
+              </td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l1">
+                <font class="css_font_r1">char *</font><br>
+                <font class="css_font_g1">mix_path</font><br>
+              </td>
+              <td class="css_td_list2_r1">
+                目標的路徑 <a href="#hook_0302_mix_path_01">[詳細]</a><br>
+                <font class="css_font_p1">[index / key 模式]</font><br>
+              </td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l1">
+                <font class="css_font_r1">MCM_DTYPE_EK_TD *</font><br>
+                <font class="css_font_g1">key_buf</font>
+              </td>
+              <td class="css_td_list2_r1">
+                紀錄可用的 key 的緩衝
+              </td>
+            </tr>
+          </table>
+          <table class="css_table_list2">
+            <tr>
+              <td class="css_td_list2_t1">回傳</td>
+              <td class="css_td_list2_t1">說明</td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l2">&gt;= MCM_RCODE_PASS</td>
+              <td class="css_td_list2_r1">成功</td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l2">&nbsp;&lt; MCM_RCODE_PASS</td>
+              <td class="css_td_list2_r1">錯誤</td>
+            </tr>
+          </table>
+          <br>
+          注意事項 :<br>
+          <table class="css_table_list1">
+            <tr>
+              <td class="css_td_list1_l">01.&nbsp;</td>
+              <td class="css_td_list1_r">
+                資料存取模式可以是 MCM_SPERMISSION_RO 或 MCM_SPERMISSION_RW.
+              </td>
+            </tr>
+            <tr>
+              <td class="css_td_list1_l">02.&nbsp;</td>
+              <td class="css_td_list1_r">
+                key_buf 返回的值大於 0 才表示有可用的 key.
+              </td>
+            </tr>
+          </table>
+          <br>
+          範例 :<br>
+<pre class="css_pre_code">
+#include &lt;time.h&gt;
+#include &lt;errno.h&gt;
+#include &lt;stdio.h&gt;
+#include &lt;string.h&gt;
+#include &lt;stdlib.h&gt;
+#include "mcm_lheader/mcm_type.h"
+#include "mcm_lheader/mcm_size.h"
+#include "mcm_lheader/mcm_connect.h"
+#include "mcm_lheader/mcm_return.h"
+#include "mcm_lheader/mcm_data_exinfo_auto.h"
+#include "mcm_lulib/mcm_lulib_api.h"
+
+#define DMSG(msg_fmt, msgs...) printf("%s(%04u): " msg_fmt "\n", __FILE__, __LINE__, ##msgs)
+
+int main(int argc, char **argv)
+{
+    char *path1;
+    struct mcm_lulib_lib_t self_lulib;
+    MCM_DTYPE_EK_TD key;
+
+    memset(&self_lulib, 0, sizeof(struct mcm_lulib_lib_t));
+    self_lulib.socket_path = "@mintcm";
+    self_lulib.call_from = MCM_CFROM_USER;
+    self_lulib.session_permission = MCM_SPERMISSION_RO;
+    self_lulib.session_stack_size = 0;
+    if(mcm_lulib_init(&self_lulib) < MCM_RCODE_PASS)
+    {
+        DMSG("call mcm_lulib_init() fail");
+        goto FREE_01;
+    }
+
+    // 要增加 entry 時, 需要不能重複的 key,
+    // 如果不知道如何分配 key, 可用此函式取得可用的 key.
+
+    // 範例 : 取得 device.vap.* 內可用的 key.
+    // 路徑 : "device.vap.*"
+    path1 = "device.vap.*";
+    if(mcm_lulib_get_usable_key(&self_lulib, path1, &key) < MCM_RCODE_PASS)
+    {
+        DMSG("call mcm_lulib_get_usable_key(%s) fail", path1);
+        goto FREE_02;
+    }
+    if(key == 0)
+    {
+        DMSG("[usable-key] %s = entry is full", path1);
+    }
+    else
+    {
+        DMSG("[usable-key] %s = " MCM_DTYPE_EK_PF, path1, key);
+    }
+
+FREE_02:
+    mcm_lulib_exit(&self_lulib);
+FREE_01:
+    return 0;
+}
+</pre>
+        </td>
+      </tr>
+    </table>
+    <br>
+
+    <div class="css_div_hook" id="hook_0302_mcm_lulib_run_01"></div>
+    <table class="css_table_box">
+      <tr>
+        <td class="css_td_box">
+          <font class="css_font_b2">mcm_lulib_run</font><br>
+          執行 <font class="css_font_p1">mint_cm/mcm_daemon/mcm_module</font> 內的模組函式.<br>
+          <table class="css_table_list2">
+            <tr>
+              <td class="css_td_list2_t1">參數</td>
+              <td class="css_td_list2_t1">說明</td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l1">
+                <font class="css_font_r1">struct mcm_lulib_lib_t *</font><br>
+                <font class="css_font_g1">this_lulib</font><br>
+              </td>
+              <td class="css_td_list2_r1">
+                紀錄 mcm_lulib_api 所需要的資料
+              </td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l1">
+                <font class="css_font_r1">char *</font><br>
+                <font class="css_font_g1">module_function</font><br>
+              </td>
+              <td class="css_td_list2_r1">
+                目標的函式名稱
+              </td>
+            </tr>
+          </table>
+          <table class="css_table_list2">
+            <tr>
+              <td class="css_td_list2_t1">回傳</td>
+              <td class="css_td_list2_t1">說明</td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l2">&gt;= MCM_RCODE_PASS</td>
+              <td class="css_td_list2_r1">成功</td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l2">&nbsp;&lt; MCM_RCODE_PASS</td>
+              <td class="css_td_list2_r1">錯誤</td>
+            </tr>
+          </table>
+          <br>
+          注意事項 :<br>
+          <table class="css_table_list1">
+            <tr>
+              <td class="css_td_list1_l">01.&nbsp;</td>
+              <td class="css_td_list1_r">
+                如果內部模組函式只需要讀取資料, 資料存取模式可以是 MCM_SPERMISSION_RO 或 MCM_SPERMISSION_RW,
+                如果內部模組函式需要修改資料, 資料存取模必須是 MCM_SPERMISSION_RW.
+              </td>
+            </tr>
+            <tr>
+              <td class="css_td_list1_l">02.&nbsp;</td>
+              <td class="css_td_list1_r">
+                因為內部模組函式的內容是客制化的, 所以需要的堆疊空間不固定
+                (區域變數的多寡和函式呼叫的層數都會影響需要的堆疊空間),
+                透過 session_stack_size 調整伺服器端處理此連線的執行緒的堆疊空間.
+              </td>
+            </tr>
+          </table>
+          <br>
+          範例 :<br>
+<pre class="css_pre_code">
+#include &lt;time.h&gt;
+#include &lt;errno.h&gt;
+#include &lt;stdio.h&gt;
+#include &lt;string.h&gt;
+#include &lt;stdlib.h&gt;
+#include "mcm_lheader/mcm_type.h"
+#include "mcm_lheader/mcm_size.h"
+#include "mcm_lheader/mcm_connect.h"
+#include "mcm_lheader/mcm_return.h"
+#include "mcm_lheader/mcm_data_exinfo_auto.h"
+#include "mcm_lulib/mcm_lulib_api.h"
+
+#define DMSG(msg_fmt, msgs...) printf("%s(%04u): " msg_fmt "\n", __FILE__, __LINE__, ##msgs)
+
+int main(int argc, char **argv)
+{
+    char *path1;
+    struct mcm_lulib_lib_t self_lulib;
+
+    memset(&self_lulib, 0, sizeof(struct mcm_lulib_lib_t));
+    self_lulib.socket_path = "@mintcm";
+    self_lulib.call_from = MCM_CFROM_USER;
+    self_lulib.session_permission = MCM_SPERMISSION_RO;
+    self_lulib.session_stack_size = 1048576;
+    if(mcm_lulib_init(&self_lulib) < MCM_RCODE_PASS)
+    {
+        DMSG("call mcm_lulib_init() fail");
+        goto FREE_01;
+    }
+
+    // 範例 : 執行 mcm_module_user_test_01 此函式.
+    path1 = "mcm_module_user_test_01";
+    DMSG("[run] %s", path1);
+    if(mcm_lulib_run(&self_lulib, path1) < MCM_RCODE_PASS)
+    {
+        DMSG("call mcm_lulib_run(%s) fail", path1);
+        goto FREE_02;
+    }
+
+FREE_02:
+    mcm_lulib_exit(&self_lulib);
+FREE_01:
+    return 0;
+}
+</pre>
+<pre class="css_pre_code">
+模組部分 :
+這部分程式要放在 mint_cm/mcm_daemon/mcm_module 之下, 檔案名稱隨意 (*.c),
+之後在 mint_cm 使用 make all 重新編譯.
+
+#include &lt;time.h&gt;
+#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+#include "../../mcm_lib/mcm_lheader/mcm_type.h"
+#include "../../mcm_lib/mcm_lheader/mcm_size.h"
+#include "../../mcm_lib/mcm_lheader/mcm_control.h"
+#include "../../mcm_lib/mcm_lheader/mcm_connect.h"
+#include "../../mcm_lib/mcm_lheader/mcm_return.h"
+#include "../../mcm_lib/mcm_lheader/mcm_debug.h"
+#include "../../mcm_lib/mcm_lheader/mcm_data_exinfo_auto.h"
+#include "../mcm_service_handle_extern.h"
+#include "../mcm_config_handle_extern.h"
+
+#define DMSG(msg_fmt, msgs...) printf("%s(%04u): " msg_fmt "\n", __FILE__, __LINE__, ##msgs)
+
+int mcm_module_user_test_01(struct mcm_service_session_t *this_session)
+{
+    srand(time(NULL));
+
+    DMSG("module-%u", rand());
+
+    return MCM_RCODE_PASS;
+}
+</pre>
+        </td>
+      </tr>
+    </table>
+    <br>
+
+    <div class="css_div_hook" id="hook_0302_mcm_lulib_update_01"></div>
+    <table class="css_table_box">
+      <tr>
+        <td class="css_td_box">
+          <font class="css_font_b2">mcm_lulib_update</font><br>
+          要求 mcm_daemon 做資料更新.<br>
+          <table class="css_table_list2">
+            <tr>
+              <td class="css_td_list2_t1">參數</td>
+              <td class="css_td_list2_t1">說明</td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l1">
+                <font class="css_font_r1">struct mcm_lulib_lib_t *</font><br>
+                <font class="css_font_g1">this_lulib</font><br>
+              </td>
+              <td class="css_td_list2_r1">
+                紀錄 mcm_lulib_api 所需要的資料
+              </td>
+            </tr>
+          </table>
+          <table class="css_table_list2">
+            <tr>
+              <td class="css_td_list2_t1">回傳</td>
+              <td class="css_td_list2_t1">說明</td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l2">&gt;= MCM_RCODE_PASS</td>
+              <td class="css_td_list2_r1">成功</td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l2">&nbsp;&lt; MCM_RCODE_PASS</td>
+              <td class="css_td_list2_r1">錯誤</td>
+            </tr>
+          </table>
+          <br>
+          此功能只有在特殊情況才需要.
+          <br><br>
+          程式修改資料時, mcm_daemon 的大致處理步驟 :<br>
+          <table class="css_table_list1">
+            <tr>
+              <td class="css_td_list1_l">01.&nbsp;</td>
+              <td class="css_td_list1_r">
+                程式呼叫 mcm_lulib_init() 取得使用權.
+              </td>
+            </tr>
+            <tr>
+              <td class="css_td_list1_l">02.&nbsp;</td>
+              <td class="css_td_list1_r">
+                程式修改資料.
+              </td>
+            </tr>
+            <tr>
+              <td class="css_td_list1_l">03.&nbsp;</td>
+              <td class="css_td_list1_r">
+                mcm_daemon 會把修改的資料放到資料庫的新進資料區 (原始的資料是放在資料庫的系統資料區).
+              </td>
+            </tr>
+            <tr>
+              <td class="css_td_list1_l">04.&nbsp;</td>
+              <td class="css_td_list1_r">
+                程式呼叫內部模組處理修改的資料.
+              </td>
+            </tr>
+            <tr>
+              <td class="css_td_list1_l">05.&nbsp;</td>
+              <td class="css_td_list1_r">
+                程式使用完畢, 呼叫 mcm_lulib_exit() 釋放使用權.
+              </td>
+            </tr>
+            <tr>
+              <td class="css_td_list1_l">06.&nbsp;</td>
+              <td class="css_td_list1_r">
+                mcm_daemon 將資料庫內新進資料區的資料套用回系統資料區.
+              </td>
+            </tr>
+          </table>
+          <br>
+          如果在 [02] 時候做刪除資料, 接著在 [04] 之後讀取被刪除的資料, 照理說應該要讀不到資料,
+          但是因為資料在 [06] 才會套用回系統資料區, 所以實際上是能夠讀到資料的,
+          此函式就是要求 mcm_daemon 馬上做 [06] 的處理, 避免發生此問題.
+          <br><br>
+          注意事項 :<br>
+          <table class="css_table_list1">
+            <tr>
+              <td class="css_td_list1_l">01.&nbsp;</td>
+              <td class="css_td_list1_r">
+                資料存取模式必須是 MCM_SPERMISSION_RW.
+              </td>
+            </tr>
+          </table>
+          <br>
+          範例 :<br>
+<pre class="css_pre_code">
+#include &lt;time.h&gt;
+#include &lt;errno.h&gt;
+#include &lt;stdio.h&gt;
+#include &lt;string.h&gt;
+#include &lt;stdlib.h&gt;
+#include "mcm_lheader/mcm_type.h"
+#include "mcm_lheader/mcm_size.h"
+#include "mcm_lheader/mcm_connect.h"
+#include "mcm_lheader/mcm_return.h"
+#include "mcm_lheader/mcm_data_exinfo_auto.h"
+#include "mcm_lulib/mcm_lulib_api.h"
+
+#define DMSG(msg_fmt, msgs...) printf("%s(%04u): " msg_fmt "\n", __FILE__, __LINE__, ##msgs)
+
+int main(int argc, char **argv)
+{
+    char *path1;
+    struct mcm_lulib_lib_t self_lulib;
+    MCM_DTYPE_EK_TD count;
+
+    memset(&self_lulib, 0, sizeof(struct mcm_lulib_lib_t));
+    self_lulib.socket_path = "@mintcm";
+    self_lulib.call_from = MCM_CFROM_USER;
+    self_lulib.session_permission = MCM_SPERMISSION_RW;
+    self_lulib.session_stack_size = 0;
+    if(mcm_lulib_init(&self_lulib) < MCM_RCODE_PASS)
+    {
+        DMSG("call mcm_lulib_init() fail");
+        goto FREE_01;
+    }
+
+    // 範例 :
+    // 1. 刪除 device.limit.* 所有資料.
+    // 2. 取得 device.limit.* 的資料筆數, 應該要是 0, 但是資料庫尚未更新,
+    //    這時還是讀的到資料.
+    // 3. 更新資料庫.
+    // 4. 取得 device.limit.* 的資料筆數, 這時就會是 0.
+
+    // 1. 刪除所有的 device.limit.*
+    path1 = "device.limit.*";
+    DMSG("[del-all-entry] %s", path1);
+    if(mcm_lulib_del_all_entry(&self_lulib, path1) < MCM_RCODE_PASS)
+    {
+        DMSG("call mcm_lulib_del_all_entry(%s) fail", path1);
+        goto FREE_02;
+    }
+
+    // 2. 取得 device.limit.* 的資料筆數, 應該要是 0, 但是資料庫尚未更新,
+    //    這時還是讀的到資料.
+    path1 = "device.limit.*";
+    if(mcm_lulib_get_count(&self_lulib, path1, &count) < MCM_RCODE_PASS)
+    {
+        DMSG("call mcm_lulib_get_count(%s) fail", path1);
+        goto FREE_02;
+    }
+    DMSG("[count (before)] %s = " MCM_DTYPE_EK_PF, path1, count);
+
+    // 3. 更新資料庫.
+    DMSG("[update]");
+    if(mcm_lulib_update(&self_lulib) < MCM_RCODE_PASS)
+    {
+        DMSG("call mcm_lulib_update() fail");
+        goto FREE_02;
+    }
+
+    // 4. 取得 device.limit.* 的資料筆數, 這時就會是是 0.
+    path1 = "device.limit.*";
+    if(mcm_lulib_get_count(&self_lulib, path1, &count) < MCM_RCODE_PASS)
+    {
+        DMSG("call mcm_lulib_get_count(%s) fail", path1);
+        goto FREE_02;
+    }
+    DMSG("[count (after)] %s = " MCM_DTYPE_EK_PF, path1, count);
+
+FREE_02:
+    mcm_lulib_exit(&self_lulib);
+FREE_01:
+    return 0;
+}
+</pre>
+        </td>
+      </tr>
+    </table>
+    <br>
+
+    <div class="css_div_hook" id="hook_0302_mcm_lulib_save_01"></div>
+    <table class="css_table_box">
+      <tr>
+        <td class="css_td_box">
+          <font class="css_font_b2">mcm_lulib_save</font><br>
+          要求 mcm_daemon 儲存資料到資料現在值檔案.<br>
+          <table class="css_table_list2">
+            <tr>
+              <td class="css_td_list2_t1">參數</td>
+              <td class="css_td_list2_t1">說明</td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l1">
+                <font class="css_font_r1">struct mcm_lulib_lib_t *</font><br>
+                <font class="css_font_g1">this_lulib</font><br>
+              </td>
+              <td class="css_td_list2_r1">
+                紀錄 mcm_lulib_api 所需要的資料
+              </td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l1">
+                <font class="css_font_r1">MCM_DTYPE_BOOL_TD</font><br>
+                <font class="css_font_g1">force_save</font>
+              </td>
+              <td class="css_td_list2_r1">
+                是否強制要求儲存資料<br>
+                <font class="css_font_p1">0 : 否, 有需要儲存的資料被修改才儲存</font><br>
+                <font class="css_font_p1">1 : 是, 不論有無修改都要儲存</font>
+              </td>
+            </tr>
+          </table>
+          <table class="css_table_list2">
+            <tr>
+              <td class="css_td_list2_t1">回傳</td>
+              <td class="css_td_list2_t1">說明</td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l2">&gt;= MCM_RCODE_PASS</td>
+              <td class="css_td_list2_r1">成功</td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l2">&nbsp;&lt; MCM_RCODE_PASS</td>
+              <td class="css_td_list2_r1">錯誤</td>
+            </tr>
+          </table>
+          <br>
+          注意事項 :<br>
+          <table class="css_table_list1">
+            <tr>
+              <td class="css_td_list1_l">01.&nbsp;</td>
+              <td class="css_td_list1_r">
+                資料存取模式必須是 MCM_SPERMISSION_RW.
+              </td>
+            </tr>
+          </table>
+          <br>
+          範例 :<br>
+<pre class="css_pre_code">
+#include &lt;time.h&gt;
+#include &lt;errno.h&gt;
+#include &lt;stdio.h&gt;
+#include &lt;string.h&gt;
+#include &lt;stdlib.h&gt;
+#include "mcm_lheader/mcm_type.h"
+#include "mcm_lheader/mcm_size.h"
+#include "mcm_lheader/mcm_connect.h"
+#include "mcm_lheader/mcm_return.h"
+#include "mcm_lheader/mcm_data_exinfo_auto.h"
+#include "mcm_lulib/mcm_lulib_api.h"
+
+#define DMSG(msg_fmt, msgs...) printf("%s(%04u): " msg_fmt "\n", __FILE__, __LINE__, ##msgs)
+
+int main(int argc, char **argv)
+{
+    struct mcm_lulib_lib_t self_lulib;
+    MCM_DTYPE_BOOL_TD force_save = 1;
+
+    memset(&self_lulib, 0, sizeof(struct mcm_lulib_lib_t));
+    self_lulib.socket_path = "@mintcm";
+    self_lulib.call_from = MCM_CFROM_USER;
+    self_lulib.session_permission = MCM_SPERMISSION_RW;
+    self_lulib.session_stack_size = 0;
+    if(mcm_lulib_init(&self_lulib) < MCM_RCODE_PASS)
+    {
+        DMSG("call mcm_lulib_init() fail");
+        goto FREE_01;
+    }
+
+    DMSG("[save] %s", force_save == 0 ? "check" : "force");
+    if(mcm_lulib_save(&self_lulib, force_save) < MCM_RCODE_PASS)
+    {
+        DMSG("call mcm_lulib_save() fail");
+        goto FREE_02;
+    }
+
+FREE_02:
+    mcm_lulib_exit(&self_lulib);
+FREE_01:
+    return 0;
+}
+</pre>
+        </td>
+      </tr>
+    </table>
+    <br>
+
+    <div class="css_div_hook" id="hook_0302_mcm_lulib_shutdown_01"></div>
+    <table class="css_table_box">
+      <tr>
+        <td class="css_td_box">
+          <font class="css_font_b2">mcm_lulib_shutdown</font><br>
+          關閉 mcm_daemon, 當系統需要關機或重開機時先讓 mcm_daemon 正常關閉.<br>
+          <table class="css_table_list2">
+            <tr>
+              <td class="css_td_list2_t1">參數</td>
+              <td class="css_td_list2_t1">說明</td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l1">
+                <font class="css_font_r1">struct mcm_lulib_lib_t *</font><br>
+                <font class="css_font_g1">this_lulib</font><br>
+              </td>
+              <td class="css_td_list2_r1">
+                紀錄 mcm_lulib_api 所需要的資料
+              </td>
+            </tr>
+          </table>
+          <table class="css_table_list2">
+            <tr>
+              <td class="css_td_list2_t1">回傳</td>
+              <td class="css_td_list2_t1">說明</td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l2">&gt;= MCM_RCODE_PASS</td>
+              <td class="css_td_list2_r1">成功</td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l2">&nbsp;&lt; MCM_RCODE_PASS</td>
+              <td class="css_td_list2_r1">錯誤</td>
+            </tr>
+          </table>
+          <br>
+          注意事項 :
+          <table class="css_table_list1">
+            <tr>
+              <td class="css_td_list1_l">01.&nbsp;</td>
+              <td class="css_td_list1_r">
+                資料存取模式必須是 MCM_SPERMISSION_RW.
+              </td>
+            </tr>
+            <tr>
+              <td class="css_td_list1_l">02.&nbsp;</td>
+              <td class="css_td_list1_r">
+                使用後並不會馬上關閉, 要等到 mcm_lulib_exit() 之後才會關閉.
+              </td>
+            </tr>
+          </table>
+          <br>
+          範例 :<br>
+<pre class="css_pre_code">
+#include &lt;time.h&gt;
+#include &lt;errno.h&gt;
+#include &lt;stdio.h&gt;
+#include &lt;string.h&gt;
+#include &lt;stdlib.h&gt;
+#include "mcm_lheader/mcm_type.h"
+#include "mcm_lheader/mcm_size.h"
+#include "mcm_lheader/mcm_connect.h"
+#include "mcm_lheader/mcm_return.h"
+#include "mcm_lheader/mcm_data_exinfo_auto.h"
+#include "mcm_lulib/mcm_lulib_api.h"
+
+#define DMSG(msg_fmt, msgs...) printf("%s(%04u): " msg_fmt "\n", __FILE__, __LINE__, ##msgs)
+
+int main(int argc, char **argv)
+{
+    struct mcm_lulib_lib_t self_lulib;
+
+    memset(&self_lulib, 0, sizeof(struct mcm_lulib_lib_t));
+    self_lulib.socket_path = "@mintcm";
+    self_lulib.call_from = MCM_CFROM_USER;
+    self_lulib.session_permission = MCM_SPERMISSION_RW;
+    self_lulib.session_stack_size = 0;
+    if(mcm_lulib_init(&self_lulib) < MCM_RCODE_PASS)
+    {
+        DMSG("call mcm_lulib_init() fail");
+        goto FREE_01;
+    }
+
+    DMSG("[shutdown]");
+    if(mcm_lulib_shutdown(&self_lulib) < MCM_RCODE_PASS)
+    {
+        DMSG("call mcm_lulib_shutdown() fail");
+        goto FREE_02;
+    }
+
+FREE_02:
+    mcm_lulib_exit(&self_lulib);
+FREE_01:
+    return 0;
+}
+</pre>
+        </td>
+      </tr>
+    </table>
+    <br>
+
+  </div>
+</div>
+<br>
+
+<div class="css_div_box_frame_full">
+  <div class="css_div_box_title">函式的混合使用</div>
+  <div class="css_div_box_content">
+    <br>
+
+    在實際情況下, 函式需要混合使用來完成工作, 這邊說明如何使用以及使用的時機.
+    <br><br>
+
+    方便說明, 左邊的函式使用右邊的簡稱 :<br>
+    <table class="css_table_list2">
+      <tr>
+        <td class="css_td_list2_l1">mcm_lulib_get_count</td>
+        <td class="css_td_list2_r1" rowspan="4">get</td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l1">mcm_lulib_get_alone</td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l1">mcm_lulib_get_entry</td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l1">mcm_lulib_get_all_entry</td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l1">mcm_lulib_set_alone</td>
+        <td class="css_td_list2_r1" rowspan="2">set</td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l1">mcm_lulib_set_entry</td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l1">mcm_lulib_add_entry</td>
+        <td class="css_td_list2_r1">add</td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l1">mcm_lulib_del_entry</td>
+        <td class="css_td_list2_r1" rowspan="2">del</td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l1">mcm_lulib_delall_entry_value</td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l1">mcm_lulib_run</td>
+        <td class="css_td_list2_r1">run</td>
+      </tr>
+    </table>
+    <br>
+
+    <table class="css_table_box">
+      <tr>
+        <td class="css_td_box">
+          <font class="css_font_b2">在取值的情況</font>
+          <br><br>
+          使用的時機 :<br>
+          要取得的資料必須先從系統中取出, 再放到資料庫中供讀取.
+          <a href="mcm_0301.html#hook_0301_case_obtain_01">[詳細]</a>
+          <br><br>
+          使用方式 :<br>
+          <table class="css_table_list1">
+            <tr>
+              <td class="css_td_list1_l">01.&nbsp;</td>
+              <td class="css_td_list1_r">
+                使用 [run] 執行內部模組, 並在模組函式中實作將資料從系統中取出放到資料庫的部分.
+              </td>
+            </tr>
+            <tr>
+              <td class="css_td_list1_l">02.&nbsp;</td>
+              <td class="css_td_list1_r">
+                使用 [get] 取出資料.
+              </td>
+            </tr>
+          </table>
+          <br>
+          範例 :<br>
+<pre class="css_pre_code">
+// 執行 module_get_loading(), 取得 device.system.loading
+path1 = "module_get_loading";
+mcm_lulib_run(&self_lulib, path1);
+path1 = "device.system.loading";
+mcm_lulib_get_alone(&self_lulib, path1, &loading);
+
+// 執行 mcm_module_get_client(), 取得 device.client.*
+path1 = "mcm_module_get_client";
+mcm_lulib_run(&self_lulib, path1);
+path1 = device.client.*;
+mcm_lulib_get_all_entry(&self_lulib, path1, &count, &client_v);
+
+...
+</pre>
+<br>
+          注意事項 :<br>
+          <table class="css_table_list1">
+            <tr>
+              <td class="css_td_list1_l">01.&nbsp;</td>
+              <td class="css_td_list1_r">
+                可以使用多個 [run] 分別處理不同種類的資料, 也可以只使用一個 [run] 處理全部的資料.
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+    <br>
+
+    <table class="css_table_box">
+      <tr>
+        <td class="css_td_box">
+          <font class="css_font_b2">在設值的情況</font>
+          <br><br>
+          使用的時機 :<br>
+          資料送入資料庫後, 需要用這些資料對系統做實際的設定.
+          <a href="mcm_0301.html#hook_0301_case_submit_01">[詳細]</a>
+          <br><br>
+          使用方式 :<br>
+          <table class="css_table_list1">
+            <tr>
+              <td class="css_td_list1_l">01.&nbsp;</td>
+              <td class="css_td_list1_r">
+                使用 [set] [add] [del] 修改資料.
+              </td>
+            </tr>
+            <tr>
+              <td class="css_td_list1_l">02.&nbsp;</td>
+              <td class="css_td_list1_r">
+                使用 [run] 執行內部模組, 並在模組函式中實作將修改的資料套用到系統的部分.
+              </td>
+            </tr>
+          </table>
+          <br>
+          範例程式 :<br>
+<pre class="css_pre_code">
+// 設定 device.system.ip_addr, 執行 module_config_sytem 實作.
+path1 = "device.system.ip_addr";
+mcm_lulib_set_alone(&self_lulib, path1, &ip_addr, sizeof(ip_addr));
+path1 = "module_config_sytem";
+mcm_lulib_run(&self_lulib, path1);
+
+// 設定 device.vap.@1, 執行 module_config_vap 實作.
+path1 = "device.vap.@1";
+mcm_lulib_set_entry(&self_lulib, path1, &vap_v, sizeof(vap_v));
+
+// 刪除 device.vap.#15, 執行 module_config_vap 實作.
+path1 = "device.vap.#15";
+mcm_lulib_del_entry(&self_lulib, path1);
+
+// 增加 device.vap.#55, 執行 module_config_vap 實作.
+path1 = "device.vap.#55";
+mcm_lulib_add_entry(&self_lulib, path1, &vap_v, sizeof(vap_v));
+
+path1 = "module_config_vap";
+mcm_lulib_run(&self_lulib, path1);
+
+...
+</pre>
+<br>
+          注意事項 :<br>
+          <table class="css_table_list1">
+            <tr>
+              <td class="css_td_list1_l">01.&nbsp;</td>
+              <td class="css_td_list1_r">
+                可以使用多個 [run] 分別處理不同種類的資料, 也可以只使用一個 [run] 處理全部的資料.
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+    <br>
+
+    後續的章節會說明在內部模組中如何存取資料.
+    <br><br>
+
+  </div>
+</div>
+<br>
+
+<div class="css_div_box_frame_full">
+  <div class="css_div_box_title">注意事項</div>
+  <div class="css_div_box_content">
+    <br>
+
+    如果要透過修改設定資料檔案來做讀取測試的話, 步驟 :<br>
+    先關閉 mcm_daemon (有在執行的話), 修改設定值檔案, 重新執行 mcm_daemon.<br>
+    修改設定值檔案有二個方法 :<br>
+    <table class="css_table_list2">
+      <tr>
+        <td class="css_td_list2_l2">初始值檔案<br>mcm_store_profile_default.txt</td>
+        <td class="css_td_list2_r1">
+          因為 mcm_daemon 會先讀取現在值檔案, 不存在才讀取初始值檔,
+          所以每次改好後執行 mcm_daemon 之前要先將現在值檔案刪除.<br>
+          檔案內容格式 <a href="mcm_0202.html">[詳細]</a>
+        </td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l2">現在值檔案<br>mcm_store_profile_current.txt</td>
+        <td class="css_td_list2_r1">
+          檔案內容格式和初始值檔案相同 <a href="mcm_0202.html">[詳細]</a>
+        </td>
+      </tr>
+    </table>
+    <br>
+
+    使用 [set] [add] [del] [delall] 操作後, 只要該 group 在資料模型中的 $(save) 為 1,
+    資料就會在 mcm_lulib_exit() 後寫回現在值的檔案, 所以除了使用列印的方式觀察之外也可以直接看檔案內容.
+    <br><br>
+
+  </div>
+</div>
+<br>
+
+<div class="css_div_box_frame_full">
+  <div class="css_div_box_title">範例程式的使用</div>
+  <div class="css_div_box_content">
+    <br>
+
+    <table class="css_table_list1">
+      <tr>
+        <td class="css_td_list1_l">01.&nbsp;</td>
+        <td class="css_td_list1_r">
+          範例程式目錄在 <font class="css_font_b1">mint_cm/usage/example/0302</font>.
+        </td>
+      </tr>
+    </table>
+    <br><br>
+
+    <table class="css_table_list1">
+      <tr>
+        <td class="css_td_list1_l">02.&nbsp;</td>
+        <td class="css_td_list1_r">
+          下面關於 <font class="css_font_p1">make</font> 的操作沒有特別註明的話都是在
+          <font class="css_font_b1">mint_cm</font> 目錄.
+        </td>
+      </tr>
+    </table>
+    <br><br>
+
+    <table class="css_table_list1">
+      <tr>
+        <td class="css_td_list1_l">03.&nbsp;</td>
+        <td class="css_td_list1_r">
+          第一次使用, 使用 <font class="css_font_p1">make example_add KEY=0302</font>
+          載入範例並編譯.
+        </td>
+      </tr>
+    </table>
+    <br><br>
+
+    <table class="css_table_list1">
+      <tr>
+        <td class="css_td_list1_l">04.&nbsp;</td>
+        <td class="css_td_list1_r">
+          <font class="css_font_b1">user_app/user_app_0302</font> 是範例程式,<br>
+          必須先在目錄內使用 <font class="css_font_p1">make all</font> 進行編譯.<br><br>
+          使用方式 :<br>
+          <table class="css_table_list2">
+            <tr>
+              <td class="css_td_list2_t2" colspan="2">
+                <font class="css_font_g1">user_app_0302 &lt;test_item&gt;</font>
+              </td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_t2" colspan="2">
+                &lt;test_item&gt; 列表 :
+              </td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l2">max-count</td>
+              <td class="css_td_list2_r1">mcm_lulib_get_max_count() 範例</font>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l2">count</td>
+              <td class="css_td_list2_r1">mcm_lulib_get_count() 範例</font>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l2">get-alone</td>
+              <td class="css_td_list2_r1">mcm_lulib_get_alone() 範例</font>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l2">set-alone</td>
+              <td class="css_td_list2_r1">mcm_lulib_set_alone() 範例</font>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l2">get-entry</td>
+              <td class="css_td_list2_r1">mcm_lulib_get_entry() 範例</font>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l2">set-entry</td>
+              <td class="css_td_list2_r1">mcm_lulib_set_entry() 範例</font>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l2">add-entry</td>
+              <td class="css_td_list2_r1">mcm_lulib_add_entry() 範例</font>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l2">del-entry</td>
+              <td class="css_td_list2_r1">mcm_lulib_del_entry() 範例</font>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l2">get-all-entry</td>
+              <td class="css_td_list2_r1">mcm_lulib_get_all_entry() 範例</font>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l2">del-all-entry</td>
+              <td class="css_td_list2_r1">mcm_lulib_del_all_entry() 範例</font>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l2">run</td>
+              <td class="css_td_list2_r1">mcm_lulib_run() 範例</font>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l2">update-store</td>
+              <td class="css_td_list2_r1">mcm_lulib_update() 範例</font>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l2">shutdown</td>
+              <td class="css_td_list2_r1">mcm_lulib_shutdown() 範例</font>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+    <br><br>
+
+    <table class="css_table_list1">
+      <tr>
+        <td class="css_td_list1_l">05.&nbsp;</td>
+        <td class="css_td_list1_r">
+          先執行 mcm_daemon, 才可以使用 user_app_0302 做測試.
+        </td>
+      </tr>
+    </table>
+    <br><br>
+
+    <table class="css_table_list1">
+      <tr>
+        <td class="css_td_list1_l">06.&nbsp;</td>
+        <td class="css_td_list1_r">
+          測試完畢不使用後, 使用 <font class="css_font_p1">make example_del KEY=0302</font>
+          將範例移除.
+        </td>
+      </tr>
+    </table>
+    <br><br>
+
+    <table class="css_table_list1">
+      <tr>
+        <td class="css_td_list1_l">07.&nbsp;</td>
+        <td class="css_td_list1_r">
+          範例程式目錄下的檔案在做完 <font class="css_font_p1">make example_add</font>
+          後會複製到真正使用的位置, 要修改做測試的話要改在複製後的.<br>
+          <table class="css_table_list2">
+            <tr>
+              <td class="css_td_list2_r1">
+                來源 <font class="css_font_b1">profile/mcm_data_profile_0302.xml</font><br>
+                目地 <font class="css_font_b1">mint_cm/mcm_build/mcm_data_profile.xml</font><br>
+                資料模型範例<br>
+                有修改要使用 <font class="css_font_p1">make all</font> 重新編譯
+              </td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_r1">
+                來源 <font class="css_font_b1">profile/mcm_store_profile_default_0302.txt</font><br>
+                目地 <font class="css_font_b1">mint_cm/mcm_build/mcm_store_profile_default.txt</font><br>
+                資料預設值範例<br>
+                使用 <font class="css_font_p1">make all</font> 後會再複製到 <font class="css_font_b1">mint_cm/run</font>
+              </td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_r1">
+                來源 <font class="css_font_b1">module/mcm_module_0302.c</font><br>
+                目地 <font class="css_font_b1">mint_cm/mcm_daemon/mcm_module</font><br>
+                搭配 mcm_lulib_run() 使用的內部模組範例<br>
+                有修改要使用 <font class="css_font_p1">make all</font> 重新編譯
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+    <br>
+
+  </div>
+</div>
+<br>
+
+</body>
+
+</html>

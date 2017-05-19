@@ -1,0 +1,97 @@
+<!--
+Copyright © 2017, Che-Wei Hsu <cwxhsu@gmail.com>
+This file is part of the MintCM.
+Some rights reserved. See README.
+-->
+
+<html>
+
+<head>
+<meta http-equiv="content-type" content="text/html; charset=utf-8">
+<link rel="stylesheet" href="../css/mcm_style.css">
+</head>
+
+<body class="css_body">
+
+<div class="css_div_box_frame_full">
+  <div class="css_div_box_title">chapter 03-01</div>
+  <div class="css_div_box_content">
+  </div>
+</div>
+<br>
+
+<div class="css_div_box_frame_full">
+  <div class="css_div_box_title">資料的存取 (外部程式)</div>
+  <div class="css_div_box_content">
+    <br>
+
+    資料存取分成二部分, 外部程式和內部模組, 外部程式是指 mcm_daemon 之外的程式,
+    內部模組是 mcm_daemon 內部處理資料的程式.
+    <br><br>
+
+    考慮如下需求 :<br><br>
+    <table class="css_table_list1">
+      <tr>
+        <td class="css_td_list1_l">01.&nbsp;<div class="css_div_hook" id="hook_0301_case_obtain_01"></div></td>
+        <td class="css_td_list1_r">
+          從系統中取出資料<br>
+          例如外部程式需要取得系統目前的負載情況, 因為系統負載是會變動的, 並不是固定不變的資料,
+          所以需要有程式處理抓取系統負載並放到資料庫的動作, 這部分就是由內部模組處理.<br>
+          實際的動作流程會是, 外部程式先要求執行特定的內部模組, 接著內部模組抓取系統負載並放到資料庫,
+          最後外部程式在去讀取資料庫內的資料.
+          <br><br>
+        </td>
+      </tr>
+      <tr>
+        <td class="css_td_list1_l">02.&nbsp;<div class="css_div_hook" id="hook_0301_case_submit_01"></td>
+        <td class="css_td_list1_r">
+          操控系統<br>
+          例如外部程式要修改系統的網路位址, 因為資料庫只負責存放資料, 所以需要有程式取出資料庫內的設定值,
+          並對系統的網路做設定, 這部分就是由內部模組處理.<br>
+          實際的動作流程會是, 外部程式先將要設定的資料放入資料庫, 接著外部程式要求執行特定的內部模組,
+          最後內部模組從資料庫讀出設定的資料並對系統做修改.
+        </td>
+      </tr>
+    </table>
+    <br>
+
+    此章節說明外部程式如何存取資料庫和執行內部模組.
+    <br><br><br>
+
+    MintCM 提供三種存取介面 :<br><br>
+    <table class="css_table_list1">
+      <tr>
+        <td class="css_td_list1_l">01.&nbsp;</td>
+        <td class="css_td_list1_r">
+          Linux User Space<br>
+          用戶端的 C 函式.
+          <br><br>
+        </td>
+      </tr>
+      <tr>
+        <td class="css_td_list1_l">02.&nbsp;</td>
+        <td class="css_td_list1_r">
+          Linux Kernel Space<br>
+          核心端的 C 函式.
+          <br><br>
+        </td>
+      </tr>
+      <tr>
+        <td class="css_td_list1_l">03.&nbsp;</td>
+        <td class="css_td_list1_r">
+          Web Space<br>
+          網頁端的 JavaScript 函式.
+        </td>
+      </tr>
+      <tr>
+      </tr>
+    </table>
+    <br>
+
+  </div>
+</div>
+<br>
+
+</body>
+
+</html>

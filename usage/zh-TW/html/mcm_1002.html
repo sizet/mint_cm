@@ -1,0 +1,1660 @@
+<!--
+Copyright © 2017, Che-Wei Hsu <cwxhsu@gmail.com>
+This file is part of the MintCM.
+Some rights reserved. See README.
+-->
+
+<html>
+
+<head>
+<meta http-equiv="content-type" content="text/html; charset=utf-8">
+<link rel="stylesheet" href="../css/mcm_style.css">
+</head>
+
+<body class="css_body">
+
+<div class="css_div_box_frame_full">
+  <div class="css_div_box_title">chapter 10-02</div>
+  <div class="css_div_box_content">
+  </div>
+</div>
+<br>
+
+<div class="css_div_box_frame_full">
+  <div class="css_div_box_title">使用方式</div>
+  <div class="css_div_box_content">
+    <br>
+
+    此章節說明如何使用網頁端的登入登出功能.
+    <br><br><br>
+
+    分成 [網頁端] 和 [系統端] 說明.
+    <br><br>
+
+  </div>
+</div>
+<br>
+
+<div class="css_div_box_frame_full">
+  <div class="css_div_box_title">網頁端</div>
+  <div class="css_div_box_content">
+    <br>
+
+    網頁的編碼格式必須是 UTF-8, 如下的宣告 :<br>
+    <font class="css_font_p1">&lt;meta http-equiv="content-type" content="text/html; charset=utf-8"&gt;</font>
+    <br><br>
+
+    需要的 JS 檔 :<br>
+    <font class="css_font_p1">
+    jquery_main.js<br>
+    md5.js<br>
+    maam_jslib_api.js
+    </font>
+    <br><br><br>
+
+    相關的變數 :
+    <br><br>
+    <div class="css_div_hook" id="hook_1002_this_maam_jslib_01"></div>
+    <font class="css_font_b1">[maam_jslib_lib_t this_maam_jslib]</font><br>
+    用來儲存相關的的資訊.<br>
+    會用到的結構成員 :<br>
+    <table class="css_table_list2">
+      <tr>
+        <td class="css_td_list2_l1">
+          <div class="css_div_hook" id="hook_1002_request_action_01"></div>
+          <font class="css_font_b1">[request_action]</font><br>
+          要執行的動作.<br>
+          <table class="css_table_list2">
+            <tr>
+              <td class="css_td_list2_t3" colspan="2">
+                <font class="css_font_g1">maaam_request_action</font><br>
+                <font class="css_font_b1">(mint_aam/maam_lib/maam_jslib/maam_jslib_api.js)</font>
+              </td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l2">maaam_request_action.login</td>
+              <td class="css_td_list2_r1">登入</td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l2">maaam_request_action.logout</td>
+              <td class="css_td_list2_r1">登出</td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l2">maaam_request_action.check</td>
+              <td class="css_td_list2_r1">檢查連線是否有效</td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l1">
+          <div class="css_div_hook" id="hook_1002_request_data_01"></div>
+          <font class="css_font_b1">[request_data]</font><br>
+          要求的認證資料.<br>
+          依據 <font class="css_font_g1">request_action</font> 的值 :<br>
+          <table class="css_table_list2">
+            <tr>
+              <td class="css_td_list2_l2">maaam_request_action.login</td>
+              <td class="css_td_list2_r1">填入認證資料</td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l2">maaam_request_action.logout</td>
+              <td class="css_td_list2_r1">無作用, 填入空字串</td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l2">maaam_request_action.check</td>
+              <td class="css_td_list2_r1">無作用, 填入空字串</td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l1">
+          <div class="css_div_hook" id="hook_1002_other_query_01"></div>
+          <font class="css_font_b1">[other_query]</font><br>
+          額外的查詢參數, 不需要使用的話填入空字串.
+        </td>
+      </tr>
+    </table>
+    <br>
+
+    <div class="css_div_hook" id="hook_1002_multiple_user_active_rule_01"></div>
+    <font class="css_font_b1">是否允許多個帳號同時登入系統的處裡方式</font><br>
+    <div class="css_div_hook" id="hook_1002_same_accout_multiple_active_rule_01"></div>
+    <font class="css_font_b1">是否允許同一個帳號被多個使用者同時登入的的處裡方式</font><br>
+    <div class="css_div_hook" id="hook_1002_maam_limit_multiple_active_01"></div>
+    <table class="css_table_list2">
+      <tr>
+        <td class="css_td_list2_t3" colspan="2">
+          <font class="css_font_g1">maam_limit_multiple_active</font><br>
+          <font class="css_font_b1">(mint_aam/maam_lib/maam_jslib/maam_jslib_api.js)</font>
+        </td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l2">maam_limit_multiple_active.allow</td>
+        <td class="css_td_list2_r1">允許</td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l2">maam_limit_multiple_active.deny_force_kick_inside</td>
+        <td class="css_td_list2_r1">禁止, 發生時踢掉已經登入的使用者</td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l2">maam_limit_multiple_active.deny_force_kick_outside</td>
+        <td class="css_td_list2_r1">禁止, 發生時踢掉正在登入的使用者</td>
+      </tr>
+
+      <tr>
+        <td class="css_td_list2_l2">maam_limit_multiple_active.deny_permission_kick_inside</td>
+        <td class="css_td_list2_r1" rowspan="2">
+          禁止, 發生時使用帳號的權限來決定, 高的保留低的踢掉<br>
+          二邊權限一樣時 :<br>
+          <font class="css_font_r1">deny_permission_kick_inside</font><br>
+          踢掉已經登入的使用者<br>
+          <font class="css_font_r1">deny_permission_kick_outside</font><br>
+          踢掉正在登入的使用者<br><br>
+          帳號的權限在後續系統端的帳號驗證時設定 <a href="#hook_1002_login_info_01">[詳細]</a>
+        </td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l2">maam_limit_multiple_active.deny_permission_kick_outside</td>
+      </tr>
+    </table>
+    <br><br>
+
+    相關的函式 :
+    <br><br>
+
+    <div class="css_div_hook" id="hook_1002_md5_01"></div>
+    <table class="css_table_box">
+      <tr>
+        <td class="css_td_box">
+          <font class="css_font_b2">md5</font><br>
+          將資料做 MD5 加密.<br>
+          <table class="css_table_list2">
+            <tr>
+              <td class="css_td_list2_t1">參數</td>
+              <td class="css_td_list2_t1">說明</td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l1"><font class="css_font_g1">data</font></td>
+              <td class="css_td_list2_r1">要加密的字串</td>
+            </tr>
+          </table>
+          <table class="css_table_list2">
+            <tr>
+              <td class="css_td_list2_t1">回傳</td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_r1">加密後的字串</td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+    <br>
+
+    <div class="css_div_hook" id="hook_1002_maam_jslib_run_script_01"></div>
+    <table class="css_table_box">
+      <tr>
+        <td class="css_td_box">
+          <font class="css_font_b2">maam_jslib_run_script</font><br>
+          回應的訊息可是 JavaScript 格式, 使用此函式執行.<br>
+          <table class="css_table_list2">
+            <tr>
+              <td class="css_td_list2_t1">參數</td>
+              <td class="css_td_list2_t1">說明</td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l1"><font class="css_font_g1">script_con</font></td>
+              <td class="css_td_list2_r1">要執行的 JavaScript 內容</td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+    <br>
+
+    <div class="css_div_hook" id="hook_1002_maam_jslib_account_auth_01"></div>
+    <table class="css_table_box">
+      <tr>
+        <td class="css_td_box">
+          <font class="css_font_b2">maam_jslib_account_auth</font><br>
+          執行登入, 登出, 檢查等動作.<br>
+          <table class="css_table_list2">
+            <tr>
+              <td class="css_td_list2_t1">參數</td>
+              <td class="css_td_list2_t1">說明</td>
+            </tr>
+
+            <tr>
+              <td class="css_td_list2_l1"><font class="css_font_g1">this_maam_jslib</font></td>
+              <td class="css_td_list2_r1">
+                用來儲存相關的的資訊<br>
+                需要先設定以下的結構成員 :<br>
+                <font class="css_font_p1">request_action</font>
+                <a href="#hook_1002_request_action_01">[詳細]</a><br>
+                <font class="css_font_p1">request_data</font>
+                <a href="#hook_1002_request_data_01">[詳細]</a><br>
+                <font class="css_font_p1">other_query</font>
+                <a href="#hook_1002_other_query_01">[詳細]</a><br>
+              </td>
+            </tr>
+          </table>
+          <table class="css_table_list2">
+            <tr>
+              <td class="css_td_list2_t1">回傳</td>
+              <td class="css_td_list2_t1">說明</td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l1">
+                <font class="css_font_g1">$.rep_code</font>
+              </td>
+              <td class="css_td_list2_l1" rowspan="2">
+                依據 <font class="css_font_g1">request_action</font> 的值 :
+                <br><br>
+                <font class="css_font_p1">maaam_request_action.login</font><br>
+
+                <table class="css_table_list2">
+                  <tr>
+                    <td class="css_td_list2_t1">$.rep_code</td>
+                    <td class="css_td_list2_t1">說明</td>
+                    <td class="css_td_list2_t1">$.rep_data</td>
+                  </tr>
+                  <tr>
+                    <td class="css_td_list2_l2">maam_return_code.pass</td>
+                    <td class="css_td_list2_r1">成功</td>
+                    <td class="css_td_list2_r1">
+                      網頁導向主要頁面的 JavaScript 程式, 使用
+                      <font class="css_font_b1">maam_jslib_run_script()</font> 執行
+                    </td>
+                  </tr>
+                  <tr>
+                    <td class="css_td_list2_l2">
+                      maam_return_code.internal_error<br>
+                      maam_return_code.jslib_internal_error<br>
+                    </td>
+                    <td class="css_td_list2_r1">失敗, 內部錯誤</td>
+                    <td class="css_td_list2_r1">
+                      空資料
+                    </td>
+                  </tr>
+                  <tr>
+                    <td class="css_td_list2_l2">maam_return_code.session_table_full</td>
+                    <td class="css_td_list2_r1">失敗, 系統 session 數以滿</td>
+                    <td class="css_td_list2_r1">
+                      空資料
+                    </td>
+                  </tr>
+                  <tr>
+                    <td class="css_td_list2_l2">maam_return_code.miss_verify_name</td>
+                    <td class="css_td_list2_r1">失敗, 認證資料缺少帳號名稱資料</td>
+                    <td class="css_td_list2_r1">
+                      空資料
+                    </td>
+                  </tr>
+                  <tr>
+                    <td class="css_td_list2_l2">maam_return_code.miss_verify_password</td>
+                    <td class="css_td_list2_r1">失敗, 認證資料缺少帳號密碼資料</td>
+                    <td class="css_td_list2_r1">
+                      空資料
+                    </td>
+                  </tr>
+                  <tr>
+                    <td class="css_td_list2_l2">maam_return_code.miss_multiple_user_active_rule</td>
+                    <td class="css_td_list2_r1">失敗, 認證資料缺少多個帳號同時登入系統的處裡方式的資料</td>
+                    <td class="css_td_list2_r1">
+                      空資料
+                    </td>
+                  </tr>
+                  <tr>
+                    <td class="css_td_list2_l2">maam_return_code.miss_same_accout_multiple_active_rule</td>
+                    <td class="css_td_list2_r1">失敗, 認證資料缺少同一個帳號被多個使用者同時登入的的處裡方式的資料</td>
+                    <td class="css_td_list2_r1">
+                      空資料
+                    </td>
+                  </tr>
+                  <tr>
+                    <td class="css_td_list2_l2">maam_return_code.invalid_account_name</td>
+                    <td class="css_td_list2_r1">失敗, 帳號名稱錯誤</td>
+                    <td class="css_td_list2_r1">
+                      空資料
+                    </td>
+                  </tr>
+                  <tr>
+                    <td class="css_td_list2_l2">maam_return_code.invalid_account_password</td>
+                    <td class="css_td_list2_r1">失敗, 帳號密碼錯誤</td>
+                    <td class="css_td_list2_r1">
+                      空資料
+                    </td>
+                  </tr>
+                  <tr>
+                    <td class="css_td_list2_l2">maam_return_code.other_user_has_login</td>
+                    <td class="css_td_list2_r1">失敗, 此帳號已經被其他使用者登入</td>
+                    <td class="css_td_list2_r1">
+                      空資料
+                    </td>
+                  </tr>
+                  <tr>
+                    <td class="css_td_list2_l2">maam_return_code.same_account_has_login</td>
+                    <td class="css_td_list2_r1">失敗, 此系統已經有其他帳號登入</td>
+                    <td class="css_td_list2_r1">
+                      空資料
+                    </td>
+                  </tr>
+                </table>
+                <br>
+                <font class="css_font_p1">maaam_request_action.logout</font><br>
+                <table class="css_table_list2">
+                  <tr>
+                    <td class="css_td_list2_t1">$.rep_code</td>
+                    <td class="css_td_list2_t1">說明</td>
+                    <td class="css_td_list2_t1">$.rep_data</td>
+                  </tr>
+                  <tr>
+                    <td class="css_td_list2_l2">maam_return_code.pass</td>
+                    <td class="css_td_list2_r1">成功</td>
+                    <td class="css_td_list2_r1">
+                      網頁導向登入頁面的 JavaScript 程式, 使用
+                      <font class="css_font_b1">maam_jslib_run_script()</font> 執行
+                    </td>
+                  </tr>
+                  <tr>
+                    <td class="css_td_list2_l2">
+                      maam_return_code.internal_error<br>
+                      maam_return_code.jslib_internal_error<br>
+                    </td>
+                    <td class="css_td_list2_r1">內部錯誤</td>
+                    <td class="css_td_list2_r1">
+                      空資料
+                    </td>
+                  </tr>
+                  <tr>
+                    <td class="css_td_list2_l2">maam_return_code.miss_session_key</td>
+                    <td class="css_td_list2_r1">cookie 內沒有 session 資訊</td>
+                    <td class="css_td_list2_r1">
+                      網頁導向登入頁面的 JavaScript 程式, 使用
+                      <font class="css_font_b1">maam_jslib_run_script()</font> 執行
+                    </td>
+                  </tr>
+                  <tr>
+                    <td class="css_td_list2_l2">maam_return_code.invalid_session_key</td>
+                    <td class="css_td_list2_r1">無效的 session 資訊</td>
+                    <td class="css_td_list2_r1">
+                      網頁導向登入頁面的 JavaScript 程式, 使用
+                      <font class="css_font_b1">maam_jslib_run_script()</font> 執行
+                    </td>
+                  </tr>
+                  <tr>
+                    <td class="css_td_list2_l2">maam_return_code.idle_timeout</td>
+                    <td class="css_td_list2_r1"> session 閒置超時</td>
+                    <td class="css_td_list2_r1">
+                      網頁導向登入頁面的 JavaScript 程式, 使用
+                      <font class="css_font_b1">maam_jslib_run_script()</font> 執行
+                    </td>
+                  </tr>
+                </table>
+                <br>
+                <font class="css_font_p1">maaam_request_action.check</font><br>
+                <table class="css_table_list2">
+                  <tr>
+                    <td class="css_td_list2_t1">$.rep_code</td>
+                    <td class="css_td_list2_t1">說明</td>
+                    <td class="css_td_list2_t1">$.rep_data</td>
+                  </tr>
+                  <tr>
+                    <td class="css_td_list2_l2">maam_return_code.pass</td>
+                    <td class="css_td_list2_r1"> session 有效</td>
+                    <td class="css_td_list2_r1">
+                      空資料
+                    </td>
+                  </tr>
+                  <tr>
+                    <td class="css_td_list2_l2">
+                      maam_return_code.internal_error<br>
+                      maam_return_code.jslib_internal_error<br>
+                    </td>
+                    <td class="css_td_list2_r1">內部錯誤</td>
+                    <td class="css_td_list2_r1">
+                      空資料
+                    </td>
+                  </tr>
+                  <tr>
+                    <td class="css_td_list2_l2">maam_return_code.miss_session_key</td>
+                    <td class="css_td_list2_r1">cookie 內沒有 session 資訊</td>
+                    <td class="css_td_list2_r1">
+                      網頁導向登入頁面的 JavaScript 程式, 使用
+                      <font class="css_font_b1">maam_jslib_run_script()</font> 執行
+                    </td>
+                  </tr>
+                  <tr>
+                    <td class="css_td_list2_l2">maam_return_code.invalid_session_key</td>
+                    <td class="css_td_list2_r1">無效的 session 資訊</td>
+                    <td class="css_td_list2_r1">
+                      網頁導向登入頁面的 JavaScript 程式, 使用
+                      <font class="css_font_b1">maam_jslib_run_script()</font> 執行
+                    </td>
+                  </tr>
+                  <tr>
+                    <td class="css_td_list2_l2">maam_return_code.idle_timeout</td>
+                    <td class="css_td_list2_r1"> session 閒置超時</td>
+                    <td class="css_td_list2_r1">
+                      網頁導向登入頁面的 JavaScript 程式, 使用
+                      <font class="css_font_b1">maam_jslib_run_script()</font> 執行
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l1">
+                <font class="css_font_g1">$.rep_data</font>
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+    <br><br>
+
+    登入的使用方式 :
+    <br><br>
+
+    步驟-01 : 填入驗證資料.<br>
+    格式 :<br>
+    <div class="css_div_block">
+      <font class="css_font_g1">
+      "verify_name=" + <font class="css_font_r1">$(account-name)</font> + "&" +<br>
+      "verify_password=" + <font class="css_font_r1">$(account-password)</font> + "&" +<br>
+      "multiple_user_active_rule=" + <font class="css_font_r1">$(multiple-user-active-rule)</font> + "&" +<br>
+      "same_accout_multiple_active_rule=" + <font class="css_font_r1">$(same-accout-multiple-active-rule)</font>
+      </font>
+    </div>
+    <br>
+
+    <font class="css_font_b1">$(account-name)</font><br>
+    帳號名稱.
+    <br><br>
+
+    <font class="css_font_b1">$(account-password)</font><br>
+    帳號密碼.
+    <br><br>
+
+    <font class="css_font_b1">$(multiple-user-active-rule)</font><br>
+    是否允許多個帳號同時登入系統的處裡方式.
+    <a href="#hook_1002_multiple_user_active_rule_01">[詳細]</a>
+    <br><br>
+
+    <font class="css_font_b1">$(same-accout-multiple-active-rule)</font><br>
+    是否允許同一個帳號被多個使用者同時登入的的處裡方式.
+    <a href="#hook_1002_same_accout_multiple_active_rule_01">[詳細]</a>
+    <br><br>
+
+    步驟-02 : 使用 maam_jslib_account_auth() 處理並判斷回傳值決定處理方式.
+    <br><br>
+
+    範例 :<br>
+<pre class="css_pre_code">
+&lt;html&gt;
+&lt;head&gt;
+&lt;meta http-equiv="cache-control" content="no-cache"&gt;
+&lt;meta http-equiv="content-type" content="text/html; charset=utf-8"&gt;
+&lt;script language="javascript" type="text/javascript" src="jquery_main.js"&gt;&lt;/script&gt;
+&lt;script language="javascript" type="text/javascript" src="md5.js"&gt;&lt;/script&gt;
+&lt;script language="javascript" type="text/javascript" src="maam_jslib_api.js"&gt;&lt;/script&gt;
+&lt;script type="text/javascript"&gt;
+function account_login()
+{
+    var self_maam_jslib, rep_ret, auth_data, error_msg;
+
+    // 安全性考量, 將帳號名稱和帳號密碼使用 MD5 加密.
+    auth_data = "verify_name=" + md5($("#name_text").val()) + "&" +
+                "verify_password=" + md5($("#password_text").val()) + "&" +
+                "multiple_user_active_rule=" +
+                maam_limit_multiple_active.allow + "&" +
+                "same_accout_multiple_active_rule=" +
+                maam_limit_multiple_active.deny_force_kick_inside;
+
+    self_maam_jslib = new maam_jslib_lib_t();
+    self_maam_jslib.request_action = maaam_request_action.login;
+    self_maam_jslib.request_data = auth_data;
+    self_maam_jslib.other_query = "";
+    rep_ret = maam_jslib_account_auth(self_maam_jslib);
+    if(rep_ret.rep_code < maam_return_code.pass)
+    {
+        switch(rep_ret.rep_code)
+        {
+            case maam_return_code.invalid_account_name:
+                error_msg = "login fail, invalid name";
+                break;
+            case maam_return_code.invalid_account_password:
+                error_msg = "login fail, invalid password";
+                break;
+            case maam_return_code.other_user_has_login:
+                error_msg = "login fail, other user has login";
+                break;
+            case maam_return_code.same_account_has_login:
+                error_msg = "login fail, same account has login";
+                break;
+            default:
+                error_msg = "call maam_jslib_account_auth() fail" +
+                            "[" + rep_ret.rep_code + "]";
+        }
+        alert(error_msg);
+        return;
+    }
+    maam_jslib_run_script(rep_ret.rep_data);
+}
+&lt;/script&gt;
+&lt;/head&gt;
+&lt;body&gt;
+  &lt;input id="name_text" type="text" size="16"&gt;&lt;br&gt;
+  &lt;input id="password_text" type="text" size="16"&gt;&lt;br&gt;
+  &lt;button type="button" onclick="account_login()"&gt;login&lt;/button&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+</pre>
+    <br><br>
+
+    登出的使用方式 :
+    <br><br>
+
+    步驟-01 : 使用 maam_jslib_account_auth() 處理並判斷回傳值決定處理方式.
+    <br><br>
+
+    範例 :<br>
+<pre class="css_pre_code">
+&lt;html&gt;
+&lt;head&gt;
+&lt;meta http-equiv="cache-control" content="no-cache"&gt;
+&lt;meta http-equiv="content-type" content="text/html; charset=utf-8"&gt;
+&lt;script language="javascript" type="text/javascript" src="jquery_main.js"&gt;&lt;/script&gt;
+&lt;script language="javascript" type="text/javascript" src="maam_jslib_api.js"&gt;&lt;/script&gt;
+&lt;script type="text/javascript"&gt;
+function account_logout()
+{
+    var self_maam_jslib, rep_ret, error_msg;
+
+    self_maam_jslib = new maam_jslib_lib_t();
+    self_maam_jslib.request_action = maaam_request_action.logout;
+    self_maam_jslib.request_data = "";
+    self_maam_jslib.other_query = "";
+    rep_ret = maam_jslib_account_auth(self_maam_jslib);
+    if(rep_ret.rep_code < maam_return_code.pass)
+    {
+        switch(rep_ret.rep_code)
+        {
+            case maam_return_code.miss_session_key:
+            case maam_return_code.invalid_session_key:
+                error_msg = "invalid access, please login";
+                break;
+            case maam_return_code.idle_timeout:
+                error_msg = "idle timeout, please re-login";
+                break;
+            default:
+                error_msg = "call maam_jslib_account_auth() fail" +
+                            "[" + rep_ret.rep_code + "]";
+        }
+        alert(error_msg);
+    }
+    maam_jslib_run_script(rep_ret.rep_data);
+}
+&lt;/script&gt;
+&lt;/head&gt;
+&lt;body&gt;
+  &lt;button type="button" onclick="account_logout()"&gt;logout&lt;/button&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+</pre>
+    <br><br>
+
+    檢查 session 是否有效的使用方式 :
+    <br><br>
+
+    帳號登入後, 會有幾種情況導致 session 無效 :<br>
+    <table class="css_table_list1">
+      <tr>
+        <td class="css_td_list1_l">01.&nbsp;</td>
+        <td class="css_td_list1_r">
+          超過一段時間沒操作 (GET, POST), 閒置超時.
+        </td>
+      </tr>
+      <tr>
+        <td class="css_td_list1_l">02.&nbsp;</td>
+        <td class="css_td_list1_r">
+          被系統踢掉 (人為踢掉, 多個帳號登入, 同帳號多重登入等等).
+        </td>
+      </tr>
+    </table>
+    <br>
+
+    可以使用檢查 session 的方式檢查是否有效, 檢查 session 會執行的動作.
+    <table class="css_table_list1">
+      <tr>
+        <td class="css_td_list1_l">01.&nbsp;</div></td>
+        <td class="css_td_list1_r">
+           session 有效的話, 更新系統 session 資料的最後存取時間.
+        </td>
+      </tr>
+      <tr>
+        <td class="css_td_list1_l">02.&nbsp;</td>
+        <td class="css_td_list1_r">
+           session 無效的話, 回傳頁導向到登入頁面的 JavaScript 程式.
+        </td>
+      </tr>
+    </table>
+    <br>
+
+    步驟-01 : 使用 maam_jslib_account_auth() 處理並判斷回傳值決定處理方式.
+    <br><br>
+
+    範例 :<br>
+<pre class="css_pre_code">
+&lt;html&gt;
+&lt;head&gt;
+&lt;meta http-equiv="cache-control" content="no-cache"&gt;
+&lt;meta http-equiv="content-type" content="text/html; charset=utf-8"&gt;
+&lt;script language="javascript" type="text/javascript" src="jquery_main.js"&gt;&lt;/script&gt;
+&lt;script language="javascript" type="text/javascript" src="maam_jslib_api.js"&gt;&lt;/script&gt;
+&lt;script type="text/javascript"&gt;
+function account_check()
+{
+    var self_maam_jslib, rep_ret, error_msg;
+
+    self_maam_jslib = new maam_jslib_lib_t();
+    self_maam_jslib.request_action = maaam_request_action.check;
+    self_maam_jslib.request_data = "";
+    self_maam_jslib.other_query = "";
+    rep_ret = maam_jslib_account_auth(self_maam_jslib);
+    if(rep_ret.rep_code < maam_return_code.pass)
+    {
+        switch(rep_ret.rep_code)
+        {
+            case maam_return_code.miss_session_key:
+            case maam_return_code.invalid_session_key:
+                error_msg = "invalid access, please login";
+                break;
+            case maam_return_code.idle_timeout:
+                error_msg = "idle timeout, please re-login";
+                break;
+            default:
+                error_msg = "call maam_jslib_account_auth() fail" +
+                            "[" + rep_ret.rep_code + "]";
+        }
+        alert(error_msg);
+        maam_jslib_run_script(rep_ret.rep_data);
+    }
+}
+&lt;/script&gt;
+&lt;/head&gt;
+&lt;body&gt;
+  &lt;button type="button" onclick="account_check()"&gt;check&lt;/button&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+</pre>
+    <br><br>
+
+    搭配 MintCM 使用的注意事項 :
+    <br><br>
+
+    MintCM 和 MintAAM 的回傳值 (錯誤部分) 的範圍 :<br>
+    <table class="css_table_list2">
+      <tr>
+        <td class="css_td_list2_l2">
+          mcm_return_code.daemon_internal_error<br>~<br>
+          mcm_return_code.boundary
+        </td>
+        <td class="css_td_list2_r1">
+          屬於 MintCM 程式的錯誤值範圍
+        </td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l2">
+          maam_return_code.internal_error<br>~<br>
+          maam_return_code.boundary
+        </td>
+        <td class="css_td_list2_r1">
+          屬於 MintAAM 的錯誤值範圍
+        </td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l2">
+          mcm_return_code.module_internal_error<br>~
+        </td>
+        <td class="css_td_list2_r1">
+          屬於 MintCM 內部模組的錯誤值範圍
+        </td>
+      </tr>
+    </table>
+    <br>
+
+    使用下列 MintCM 函式要注意, 如果回傳的錯誤值是屬於 MintAAM, 則要另外處理.<br>
+    mcm_jslib_obtain_max_count() [取得 group 的最大資料筆數限制]<br>
+    mcm_jslib_obtain_config() [取得資料]<br>
+    mcm_jslib_submit_config() [設定資料]<br>
+    mcm_jslib_upload() [上傳 form 資料]
+    <br><br>
+
+    例如 :<br>
+<pre class="css_pre_code">
+rep_ret = ...;
+if(rep_ret.rep_code < mcm_return_code.pass)
+{
+    // 屬於 MintAAM 的範圍.
+    if((maam_return_code.internal_error >= rep_ret.rep_code) &&
+       (rep_ret.rep_code >= maam_return_code.boundary))
+    {
+        switch(rep_ret.rep_code)
+        {
+            case maam_return_code.miss_session_key:
+            case maam_return_code.invalid_session_key:
+                error_msg = "invalid access, please login";
+                break;
+            case maam_return_code.idle_timeout:
+                error_msg = "idle timeout, please re-login";
+                break;
+            default:
+                error_msg = "call ...() fail [auth]" +
+                            "[" + rep_ret.rep_code + "]";
+        }
+    }
+    // 屬於 MintCM 的範圍.
+    else
+    {
+       error_msg = "call ...() fail" +
+                   "[" + rep_ret.rep_code + "]";
+    }
+    alert(error_msg);
+    mcm_jslib_run_script(rep_ret.rep_data);
+    return;
+}
+</pre>
+    <br>
+
+  </div>
+</div>
+<br>
+
+<div class="css_div_box_frame_full">
+  <div class="css_div_box_title">系統端</div>
+  <div class="css_div_box_content">
+    <br>
+
+    系統端部分程式需要客製修改.
+    <br><br><br>
+
+    設定-01 : 網頁檔使用的副檔名.<br>
+    <font class="css_font_b1">mint_aam/maam_build/maam_custom.c</font>
+    <div class="css_div_block">
+      // 分別是副檔名的名稱和長度, 如果不是則需要修改.<br>
+      <font class="css_font_g1">
+      #define MAAM_HTML_KEY ".html"<br>
+      #define MAAM_HTML_LEN 5
+      </font>
+    </div>
+    <br><br>
+
+    設定-02 : 登入頁面和登入後主要頁面的路徑.<br>
+    <font class="css_font_b1">mint_aam/maam_build/maam_custom.c</font>
+    <div class="css_div_block">
+      // 以 mini_httpd.conf 中 dir=... 的位置為基準.<br>
+      <font class="css_font_g1">
+      #define MAAM_PAGE_LOGIN "/login.html"<br>
+      #define MAAM_PAGE_INDEX "/index.html"
+      </font>
+    </div>
+    <br><br>
+
+    設定-03 : 在 GET 時, 哪些網頁不用登入也允許讀取 (例如登入頁面).<br>
+    列表 :<br>
+    <font class="css_font_b1">mint_aam/maam_build/maam_custom.c</font><br>
+    <div class="css_div_block">
+      <font class="css_font_g1">
+      struct maam_access_t maam_access_allow_get_html_list[] =<br>
+      {<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;{MAAM_PAGE_LOGIN, 0, MAAM_CACCESS_ALL, NULL, 0, 0},<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;{NULL, 0, 0, NULL, 0, 0}<br>
+      };
+      </font>
+    </div>
+    <br>
+
+    <div class="css_div_hook" id="hook_1002_maam_access_allow_get_html_list_01"></div>
+    <font class="css_font_b1">[struct maam_access_t maam_access_allow_get_html_list[]]</font><br>
+    結構成員<br>
+    <table class="css_table_list2">
+      <tr>
+        <td class="css_td_list2_l1">
+         <font class="css_font_r1">char *</font><br>
+          <font class="css_font_g1">cmp_path_con</font>
+        </td>
+        <td class="css_td_list2_r1">
+          要和路徑部分 (path) 比對的字串
+        </td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l1">
+         <font class="css_font_r1">size_t</font><br>
+          <font class="css_font_g1">cmp_path_len</font>
+        </td>
+        <td class="css_td_list2_r1">
+          <font class="css_font_g1">cmp_path_con</font> 的長度
+        </td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l1">
+         <font class="css_font_r1">size_t</font><br>
+          <font class="css_font_g1">cmp_path_method</font>
+        </td>
+        <td class="css_td_list2_r1">
+          要和路徑部分比對的方法<br>
+          <table class="css_table_list2">
+            <tr>
+              <td class="css_td_list2_t3" colspan="2">
+                <font class="css_font_g1">MAAM_COMPARE_ACCESS_METHOD</font><br>
+                <font class="css_font_b1">(mint_aam/mcm_lib/maam_buildin/maam_local.h)</font>
+              </td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l2">MAAM_CACCESS_NONE</td>
+              <td class="css_td_list2_r1">
+                不比對, 直接認定匹配.
+                (使用此方法 <font class="css_font_g1">cmp_path_con, cmp_path_len</font>) 無作用
+              </td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l2">MAAM_CACCESS_ALL</td>
+              <td class="css_td_list2_r1">
+                路徑部分和比對的字串需要完全相同
+                (使用此方法 <font class="css_font_g1">cmp_path_len</font>) 無作用
+              </td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l2">MAAM_CACCESS_PREFIX</td>
+              <td class="css_td_list2_r1">
+                路徑部分的頭部往後 <font class="css_font_g1">cmp_path_len</font>
+                個字元需要和比對的字串相同
+              </td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l2">MAAM_CACCESS_POSTFIX</td>
+              <td class="css_td_list2_r1">
+                路徑部分的尾部往前 <font class="css_font_g1">cmp_path_len</font>
+                個字元需要和比對的字串相同
+              </td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l2">MAAM_CACCESS_SUB</td>
+              <td class="css_td_list2_r1">
+                比對部分的字串是路徑部分的子字串
+                (使用此方法 <font class="css_font_g1">cmp_path_len</font>) 無作用
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l1">
+         <font class="css_font_r1">char *</font><br>
+          <font class="css_font_g1">cmp_query_con</font>
+        </td>
+        <td class="css_td_list2_r1">
+          要和查詢部分 (query) 比對的字串
+        </td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l1">
+         <font class="css_font_r1">size_t</font><br>
+          <font class="css_font_g1">cmp_query_len</font>
+        </td>
+        <td class="css_td_list2_r1">
+          <font class="css_font_g1">cmp_query_con</font> 的長度
+        </td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l1">
+         <font class="css_font_r1">size_t</font><br>
+          <font class="css_font_g1">cmp_query_method</font>
+        </td>
+        <td class="css_td_list2_r1">
+          要和 GET 的查詢部分比對的方法<br>
+          <table class="css_table_list2">
+            <tr>
+              <td class="css_td_list2_t3" colspan="2">
+                <font class="css_font_g1">MAAM_COMPARE_ACCESS_METHOD</font><br>
+                <font class="css_font_b1">(mint_aam/mcm_lib/maam_buildin/maam_local.h)</font>
+              </td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l2">MAAM_CACCESS_NONE</td>
+              <td class="css_td_list2_r1">
+                不比對, 直接認定匹配.
+                (使用此方法 <font class="css_font_g1">cmp_query_con, cmp_query_len</font>) 無作用
+              </td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l2">MAAM_CACCESS_ALL</td>
+              <td class="css_td_list2_r1">
+                查詢部分和比對的字串需要完全相同
+                (使用此方法 <font class="css_font_g1">cmp_query_len</font>) 無作用
+              </td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l2">MAAM_CACCESS_PREFIX</td>
+              <td class="css_td_list2_r1">
+                查詢部分的頭部往後 <font class="css_font_g1">cmp_query_len</font>
+                個字元需要和比對的字串相同
+              </td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l2">MAAM_CACCESS_POSTFIX</td>
+              <td class="css_td_list2_r1">
+                查詢部分的尾部往前 <font class="css_font_g1">cmp_query_len</font>
+                個字元需要和比對的字串相同
+              </td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l2">MAAM_CACCESS_SUB</td>
+              <td class="css_td_list2_r1">
+                比對的字串是查詢部分的子字串
+                (使用此方法 <font class="css_font_g1">cmp_query_len</font>) 無作用
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l1" colspan="2">
+          注意事項 :<br>
+          <table class="css_table_list1">
+            <tr>
+              <td class="css_td_list1_l">01.&nbsp;</div></td>
+              <td class="css_td_list1_r">
+                cmp_query_con 設 NULL 表示不比對查詢部分.
+              </td>
+            </tr>
+            <tr>
+              <td class="css_td_list1_l">02.&nbsp;</div></td>
+              <td class="css_td_list1_r">
+                會先處理先 cmp_path_con, 成立才會處理 cmp_query_con.
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+    <br>
+
+    注意事項 :<br>
+    <table class="css_table_list1">
+      <tr>
+        <td class="css_td_list1_l">01.&nbsp;</td>
+        <td class="css_td_list1_r">
+          至少要填登入網頁.
+        </td>
+      </tr>
+      <tr>
+        <td class="css_td_list1_l">02.&nbsp;</td>
+        <td class="css_td_list1_r">
+          最後一組必須是 {NULL, 0, 0, NULL, 0, 0}.
+        </td>
+      </tr>
+      <tr>
+        <td class="css_td_list1_l">03.&nbsp;</td>
+        <td class="css_td_list1_r">
+          未登入時讀取非允許的網頁檔會重導向到登入頁面.
+        </td>
+      </tr>
+    </table>
+    <br>
+
+    範例 :<br>
+<pre class="css_pre_code">
+struct maam_access_t maam_access_allow_get_html_list[] =
+{
+    // 網頁 "/login.html" 允許存取.
+    {MAAM_PAGE_LOGIN, 0, MAAM_CACCESS_ALL, NULL, 0, 0},
+
+    // 目錄 "/debug/" 以下的網頁允許存取.
+    {"/debug/", 7, MAAM_CACCESS_PREFIX, NULL, 0, 0},
+
+    // 檔名結尾是 "guest.html" 的網頁允許存取.
+    {"guest.html", 10, MAAM_CACCESS_POSTFIX, NULL, 0, 0},
+
+    // 不管存取的網頁為何, GET 的查詢字串中帶有 "open" 關鍵字就允許存取.
+    {"", 0, MAAM_CACCESS_NONE, "open", 0, MAAM_CACCESS_SUB},
+
+    {NULL, 0, 0, NULL, 0, 0}
+};
+</pre>
+    <br><br>
+
+    設定-04 : 瀏覽器在 GET 時, 哪些非網頁檔在未登入情況下禁止存取.<br>
+    預設情況下, 在還沒登入時 GET 非網頁檔是允許的 (如 CSS, JS, 圖片檔等等),
+    可以設定哪些檔案登入後才能存取.<br>
+    列表 :<br>
+    <font class="css_font_b1">mint_aam/maam_build/maam_custom.c</font><br>
+    <div class="css_div_block">
+      <font class="css_font_g1">
+      struct maam_access_t maam_access_deny_get_other_list[] =<br>
+      {<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;{NULL, 0, 0, NULL, 0, 0}<br>
+      };
+      </font>
+    </div>
+    <br>
+
+    設定方法和 maam_access_allow_get_html_list[] 一樣 <a href="#hook_1002_maam_access_allow_get_html_list_01">[詳細]</a>.
+    <br><br>
+
+    注意事項 :<br>
+    <table class="css_table_list1">
+      <tr>
+        <td class="css_td_list1_l">01.&nbsp;</td>
+        <td class="css_td_list1_r">
+          最後一組必須是 {NULL, 0, 0, NULL, 0, 0}.
+        </td>
+      </tr>
+      <tr>
+        <td class="css_td_list1_l">02.&nbsp;</td>
+        <td class="css_td_list1_r">
+          還沒登入就存取禁止的非網頁檔會回傳 HTTP 404.
+        </td>
+      </tr>
+    </table>
+    <br>
+
+    範例 :<br>
+<pre class="css_pre_code">
+struct maam_access_t maam_access_allow_get_html_list[] =
+{
+    // 系統的設定檔 "/system.cfg" 登入後才能下載.
+    {"/system.cfg", 11, MAAM_CACCESS_ALL, NULL, 0, 0},
+
+    {NULL, 0, 0, NULL, 0, 0}
+};
+</pre>
+    <br><br>
+
+    設定-05 : 在 POST 時, 哪些項目不用登入也允許使用.<br>
+    列表 :<br>
+    <font class="css_font_b1">mint_aam/maam_build/maam_custom.c</font><br>
+    <div class="css_div_block">
+      <font class="css_font_g1">
+      struct maam_access_t maam_access_allow_post_list[] =<br>
+      {<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;{NULL, 0, 0, NULL, 0, 0}<br>
+      };
+      </font>
+    </div>
+    <br>
+
+    設定方法和 maam_access_allow_get_html_list[] 一樣 <a href="#hook_1002_maam_access_allow_get_html_list_01">[詳細]</a>.
+    <br><br>
+
+    注意事項 :<br>
+    <table class="css_table_list1">
+      <tr>
+        <td class="css_td_list1_l">01.&nbsp;</td>
+        <td class="css_td_list1_r">
+          最後一組必須是 {NULL, 0, 0, NULL, 0, 0}.
+        </td>
+      </tr>
+      <tr>
+        <td class="css_td_list1_l">02.&nbsp;</td>
+        <td class="css_td_list1_r">
+          還沒登入就使用禁止的項目會回傳導向登入頁面的 JavaScript 程式.
+        </td>
+      </tr>
+    </table>
+    <br>
+
+    範例 :<br>
+<pre class="css_pre_code">
+struct maam_access_t maam_access_allow_post_list[] =
+{
+    // 使用 "/cgi/mcm_cgi_config.cgi" 存取設定時, 如果查詢字串的尾端有 "anyone" 關鍵字就允許使用. 
+    {"/cgi/mcm_cgi_config.cgi", 0, MAAM_CACCESS_ALL, "anyone", 6, MAAM_CACCESS_POSTFIX},
+
+    {NULL, 0, 0, NULL, 0, 0}
+};
+</pre>
+    <br><br>
+
+    <div class="css_div_hook" id="hook_1002_maam_verify_account_01"></div>
+    設定-06 : 實作帳號驗證部分.<br>
+    函式 :<br>
+    <font class="css_font_b1">mint_aam/maam_build/maam_custom.c</font>
+    <div class="css_div_block">
+      <font class="css_font_g1">
+      int maam_verify_account(<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;struct maam_login_t *login_info,<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;int *verify_result_buf)<br>
+      {<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;int fret = MAAM_RCODE_PASS, cret = MAAM_RCODE_INTERNAL_ERROR;<br><br>
+      &nbsp;&nbsp;&nbsp;&nbsp;...<br><br>
+      &nbsp;&nbsp;&nbsp;&nbsp;*verify_result_buf = cret;<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;return fret;<br>
+      }
+      </font>
+    </div>
+    <br>
+
+    參數的用途 :<br>
+    <table class="css_table_list2">
+      <tr>
+        <td class="css_td_list2_t1">參數</td>
+        <td class="css_td_list2_t1">說明</td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l1">
+          <font class="css_font_r1">struct maam_login_t *</font><br>
+          <font class="css_font_g1">login_info</font>
+        </td>
+        <td class="css_td_list2_r1">
+          登入的資料以及建立 session 需要的資料, 登入的資料部分用來做帳號驗證,
+           session 需要的資料需要在帳號驗證成功後給予
+        </td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l1">
+          <font class="css_font_r1">int *</font><br>
+          <font class="css_font_g1">verify_result_buf</font>
+        </td>
+        <td class="css_td_list2_r1">
+          紀錄帳號驗證是否成功的緩衝
+        </td>
+      </tr>
+    </table>
+    <br>
+
+    <div class="css_div_hook" id="hook_1002_login_info_01"></div>
+    <font class="css_font_b1">[struct maam_login_t *login_info]</font><br>
+    結構成員<br>
+    <table class="css_table_list2">
+      <tr>
+        <td class="css_td_list2_l1">
+          <font class="css_font_r1">usockaddr *</font><br>
+          <font class="css_font_g1">client_addr</font>
+        </td>
+        <td class="css_td_list2_r1">
+          登入的資料, 客戶端的位址
+        </td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l1">
+          <font class="css_font_r1">char *</font><br>
+          <font class="css_font_g1">verify_name</font>
+        </td>
+        <td class="css_td_list2_r1">
+          登入的資料, 帳號名稱
+        </td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l1">
+          <font class="css_font_r1">char *</font><br>
+          <font class="css_font_g1">verify_password</font>
+        </td>
+        <td class="css_td_list2_r1">
+          登入的資料, 帳號密碼
+        </td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l1">
+          <div class="css_div_hook" id="hook_1002_account_name_01"></div>
+          <font class="css_font_r1">char</font><br>
+          <font class="css_font_g1">account_name[MAAM_BSIZE_ACCOUNT_NAME]</font>
+        </td>
+        <td class="css_td_list2_r1">
+           session 需要的資料, 帳號名稱
+        </td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l1">
+          <div class="css_div_hook" id="hook_1002_account_permission_01"></div>
+          <font class="css_font_r1">int</font><br>
+          <font class="css_font_g1">account_permission</font>
+        </td>
+        <td class="css_td_list2_r1">
+           session 需要的資料, 帳號的權限 (值越小代表越高)
+        </td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l1">
+          <font class="css_font_r1">long</font><br>
+          <font class="css_font_g1">account_idle_timeout</font>
+        </td>
+        <td class="css_td_list2_r1">
+           session 需要的資料, 帳號的閒置超時時間
+        </td>
+      </tr>
+    </table>
+    <br>
+
+    <font class="css_font_b1">[fret]</font><br>
+    用來表示處理帳號驗證時是否發生問題, 例如透過 MintCM 取得帳號資料時, 函數呼叫發生錯誤.<br>
+    可以設定的值 :<br>
+    <table class="css_table_list2">
+      <tr>
+        <td class="css_td_list2_l1">
+          <font class="css_font_r1">MAAM_RCODE_PASS</font>
+        </td>
+        <td class="css_td_list2_r1">
+          處理過程沒有發生錯誤
+        </td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l1">
+          <font class="css_font_r1">&lt; MAAM_RCODE_PASS</font>
+        </td>
+        <td class="css_td_list2_r1">
+          處理過程發生錯誤
+        </td>
+      </tr>
+    </table>
+    <br>
+
+    <font class="css_font_b1">[cret]</font><br>
+    用來表示帳號名稱和帳號密碼是否正確.<br>
+    可以設定的值 :<br>
+    <table class="css_table_list2">
+      <tr>
+        <td class="css_td_list2_l1">
+          <font class="css_font_r1">MAAM_RCODE_PASS</font>
+        </td>
+        <td class="css_td_list2_r1">
+          帳號正確
+        </td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l1">
+          <font class="css_font_r1">MAAM_RCODE_INVALID_ACCOUNT_NAME</font>
+        </td>
+        <td class="css_td_list2_r1">
+          帳號名稱錯誤
+        </td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l1">
+          <font class="css_font_r1">MAAM_RCODE_INVALID_ACCOUNT_PASSWORD</font>
+        </td>
+        <td class="css_td_list2_r1">
+          帳號密碼錯誤
+        </td>
+      </tr>
+    </table>
+    <br>
+
+    如果網頁端傳送的是加密後的資料, 在系統端也需要先將帳號資料加密後在比對.<br>
+    <div class="css_div_hook" id="hook_1002_maam_md5_hash_01"></div>
+    <table class="css_table_box">
+      <tr>
+        <td class="css_td_box">
+          <font class="css_font_b2">maam_md5_hash</font><br>
+          將資料做 MD5 加密.<br>
+          <table class="css_table_list2">
+            <tr>
+              <td class="css_td_list2_t1">參數</td>
+              <td class="css_td_list2_t1">說明</td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l1">
+                <font class="css_font_r1">void *</font><br>
+                <font class="css_font_g1">data_con</font>
+              </td>
+              <td class="css_td_list2_r1">要加密的資料</td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l1">
+                <font class="css_font_r1">size_t</font><br>
+                <font class="css_font_g1">data_len</font>
+              </td>
+              <td class="css_td_list2_r1">要加密的資料的長度</td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l1">
+                <font class="css_font_r1">char *</font><br>
+                <font class="css_font_g1">out_buf</font>
+              </td>
+              <td class="css_td_list2_r1">紀錄小寫字串格式的加密結果的緩衝</td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l1">
+                <font class="css_font_r1">size_t</font><br>
+                <font class="css_font_g1">out_size</font>
+              </td>
+              <td class="css_td_list2_r1"><font class="css_font_g1">out_buf</font> 的大小</td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+    <br>
+
+    範例 :
+<pre class="css_pre_code">
+int maam_verify_account(
+    struct maam_login_t *login_info,
+    int *verify_result_buf)
+{
+    int fret = MAAM_RCODE_PASS, cret = MAAM_RCODE_INTERNAL_ERROR;
+
+    // 紀錄 MD5 加密後的字串的緩衝.
+    char hash_code[MAAM_BSIZE_MD5_HASH];
+
+    // 存取 MintCM 需要的資料.
+    char *path1, path2[MCM_PATH_MAX_LENGTH];
+    struct mcm_lulib_lib_t self_lulib;
+    struct mcm_dv_device_web_account_t account_v;
+    MCM_DTYPE_EK_TD account_count, i;
+
+
+    // 使用 MintCM.
+    // device.web.account.* 紀錄帳號的資料.
+    memset(&self_lulib, 0, sizeof(struct mcm_lulib_lib_t));
+    self_lulib.socket_path = "@mintcm";
+    self_lulib.call_from = MCM_CFROM_USER;
+    self_lulib.session_permission = MCM_SPERMISSION_RO;
+    self_lulib.session_stack_size = 0;
+    if(mcm_lulib_init(&self_lulib) < MCM_RCODE_PASS)
+    {
+        MAAM_EMSG("call mcm_lulib_init() fail");
+        fret = MAAM_RCODE_INTERNAL_ERROR;
+        goto FREE_01;
+    }
+
+    // 讀出 device.web.account.* 的資料筆數.
+    path1 = "device.web.account.*";
+    if(mcm_lulib_get_count(&self_lulib, path1, &account_count) < MCM_RCODE_PASS)
+    {
+        MAAM_EMSG("call mcm_lulib_get_count(%s) fail", path1);
+        fret = MAAM_RCODE_INTERNAL_ERROR;
+        goto FREE_02;
+    }
+
+    // 網頁端傳送的帳號名稱和帳號密碼都經過 MD5 加密, 所以這邊也需要先對資料加密在比對.
+
+    for(i = 0; i < account_count; i++)
+    {
+        // 讀出帳號資料.
+        snprintf(path2, sizeof(path2), "device.web.account.@" MCM_DTYPE_EK_PF, i + 1);
+        if(mcm_lulib_get_entry(&self_lulib, path2, &account_v) < MCM_RCODE_PASS)
+        {
+            MAAM_EMSG("call mcm_lulib_get_entry(%s) fail", path2);
+            fret = MAAM_RCODE_INTERNAL_ERROR;
+            goto FREE_02;
+        }
+
+        // 使用 MD5 處理帳號名稱並比對.
+        maam_md5_hash(account_v.name, strlen(account_v.name),
+                      hash_code, sizeof(hash_code));
+        if(strcmp(login_info->verify_name, hash_code) == 0)
+        {
+            // 使用 MD5 處理帳號密碼並比對.
+            maam_md5_hash(account_v.password, strlen(account_v.password),
+                          hash_code, sizeof(hash_code));
+            if(strcmp(login_info->verify_password, hash_code) == 0)
+            {
+                // 帳號名稱和帳號密碼都正確.
+                MAAM_BDMSG("login pass [%s]", account_v.name);
+                break;
+            }
+            else
+            {
+                // 帳號密碼錯誤.
+                MAAM_BDMSG("login fail [%s], invalid password", account_v.name);
+                cret = MAAM_RCODE_INVALID_ACCOUNT_PASSWORD;
+                goto FREE_02;
+            }
+        }
+    }
+    if(i >= account_count)
+    {
+        // 帳號名稱錯誤.
+        MAAM_BDMSG("login fail, invalid name");
+        cret = MAAM_RCODE_INVALID_ACCOUNT_NAME;
+        goto FREE_02;
+    }
+
+    // 驗證成功, 填充 session 需要的資料.
+    snprintf(login_info->account_name, sizeof(login_info->account_name), "%s", account_v.name);
+    login_info->account_permission = account_v.permission;
+    login_info->account_idle_timeout = account_v.idle_timeout;
+
+    // 設定帳號驗證正確.
+    cret = MAAM_RCODE_PASS;
+FREE_02:
+    mcm_lulib_exit(&self_lulib);
+FREE_01:
+    *verify_result_buf = cret;
+    return fret;
+}
+</pre>
+    <br><br>
+
+    上述是基本的修改, 另外還有一些額外的部分視需要才要修改.
+    <br><br><br>
+
+    額外-01 : 共享記憶體的 key 值.<br>
+     session 的資料會放在共享記憶體內, key 值定義在 :<br>
+    <font class="css_font_b1">mint_aam/maam_build/maam_common.h</font><br>
+    <div class="css_div_block">
+      <font class="css_font_g1">
+      #define MAAM_SHARE_MEMORY_KEY 518276493
+      </font>
+    </div>
+    <br><br>
+
+    額外-02 : 共享記憶體的檔案互斥鎖的路徑 (此路徑必須可讀寫檔案).<br>
+    存取 session 的資料必須使用互斥鎖保護避免多程式同時存取, 這邊使用 flock() 做為互斥鎖 :<br>
+    <font class="css_font_b1">mint_aam/maam_build/maam_common.h</font><br>
+    <div class="css_div_block">
+      <font class="css_font_g1">
+      #define MAAM_MUTEX_PATH "/var/run/maam_mutex"
+      </font>
+    </div>
+    <br><br>
+
+    額外-03 : 最大的 session 數目.<br>
+    最大允許的已登入的使用者數目, 定義在 :<br>
+    <font class="css_font_b1">mint_aam/maam_build/maam_common.h</font><br>
+    <div class="css_div_block">
+      <font class="css_font_g1">
+      #define MAAM_MAX_SESSION 8
+      </font>
+    </div>
+    <br><br>
+
+    額外-04 : 權限的比對方式.<br>
+    在比對權限時 <a href="#hook_1002_maam_limit_multiple_active_01">[詳細]</a>, 數值越低權限越高,
+    可以修改比對方式, 定義在 :<br>
+    <font class="css_font_b1">mint_aam/maam_build/maam_handle.c</font><br>
+    <div class="css_div_block">
+      <font class="css_font_g1">
+      // A 的權限是否高於等於 B.<br>
+      #define MAAM_PERMISSION_HEIGHT_EQUAL(a, b) ((a) <= (b))<br>
+      // A 的權限是否等於 B.<br>
+      #define MAAM_PERMISSION_EQUAL(a, b) ((a) == (b))<br>
+      // A 的權限是否低於 B.<br>
+      #define MAAM_PERMISSION_LOW(a, b) ((a) > (b))
+      </font>
+    </div>
+    <br>
+
+  </div>
+</div>
+<br>
+
+<div class="css_div_box_frame_full">
+  <div class="css_div_box_title">範例程式的使用</div>
+  <div class="css_div_box_content">
+    <br>
+
+    <table class="css_table_list1">
+      <tr>
+        <td class="css_td_list1_l">01.&nbsp;</td>
+        <td class="css_td_list1_r">
+          範例程式目錄在 <font class="css_font_b1">mint_cm/usage/example/1002</font>.
+        </td>
+      </tr>
+    </table>
+    <br><br>
+
+    <table class="css_table_list1">
+      <tr>
+        <td class="css_td_list1_l">02.&nbsp;</td>
+        <td class="css_td_list1_r">
+          下面關於 <font class="css_font_p1">make</font> 的操作沒有特別註明的話都是在
+          <font class="css_font_b1">mint_cm</font> 目錄.
+        </td>
+      </tr>
+    </table>
+    <br><br>
+
+    <table class="css_table_list1">
+      <tr>
+        <td class="css_td_list1_l">03.&nbsp;</td>
+        <td class="css_td_list1_r">
+          第一次使用, 使用 <font class="css_font_p1">make example_add KEY=1002</font>
+          載入範例並編譯.
+        </td>
+      </tr>
+    </table>
+    <br><br>
+
+    <table class="css_table_list1">
+      <tr>
+        <td class="css_td_list1_l">04.&nbsp;</td>
+        <td class="css_td_list1_r">
+          <font class="css_font_b1">web_app</font> 是範例程式.<br><br>
+          範例項目 :<br>
+          <table class="css_table_list2">
+            <tr>
+              <td class="css_td_list2_l2">case-01</td>
+              <td class="css_td_list2_r1">測試一般存取</font>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l2">case-02</td>
+              <td class="css_td_list2_r1">測試上傳檔案</font>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l2">case-03</td>
+              <td class="css_td_list2_r1">測試 session 是否有效</font>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l2">case-04</td>
+              <td class="css_td_list2_r1">測試登出</font>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+    <br><br>
+
+    <table class="css_table_list1">
+      <tr>
+        <td class="css_td_list1_l">05.&nbsp;</td>
+        <td class="css_td_list1_r">
+          先執行 mcm_daemon 和 mini_httpd 才可測試.
+        </td>
+      </tr>
+    </table>
+    <br><br>
+
+    <table class="css_table_list1">
+      <tr>
+        <td class="css_td_list1_l">06.&nbsp;</td>
+        <td class="css_td_list1_r">
+          瀏覽器連至 <font class="css_font_b1">http://&lt;server-address&gt;</font>
+          會自動導到登入頁面.
+        </td>
+      </tr>
+    </table>
+    <br><br>
+
+    <table class="css_table_list1">
+      <tr>
+        <td class="css_td_list1_l">07.&nbsp;</td>
+        <td class="css_td_list1_r">
+          測試完畢不使用後, 使用 <font class="css_font_p1">make example_del KEY=1002</font>
+          將範例移除.
+        </td>
+      </tr>
+    </table>
+    <br><br>
+
+    <table class="css_table_list1">
+      <tr>
+        <td class="css_td_list1_l">08.&nbsp;</td>
+        <td class="css_td_list1_r">
+          範例程式目錄下的檔案在做完 <font class="css_font_p1">make example_add</font>
+          後會複製到真正使用的位置, 要修改做測試的話要改在複製後的.<br>
+          <table class="css_table_list2">
+            <tr>
+              <td class="css_td_list2_r1">
+                來源 <font class="css_font_b1">profile/mcm_data_profile_1002.xml</font><br>
+                目地 <font class="css_font_b1">mint_cm/mcm_build/mcm_data_profile.xml</font><br>
+                資料模型範例<br>
+                有修改要使用 <font class="css_font_p1">make all</font> 重新編譯
+              </td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_r1">
+                來源 <font class="css_font_b1">profile/mcm_store_profile_default_1002.txt</font><br>
+                目地 <font class="css_font_b1">mint_cm/mcm_build/mcm_store_profile_default.txt</font><br>
+                資料預設值範例<br>
+                使用 <font class="css_font_p1">make all</font> 後會再複製到 <font class="css_font_b1">mint_cm/run</font>
+              </td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_r1">
+                來源 <font class="css_font_b1">web_app</font><br>
+                目地 <font class="css_font_b1">mint_cm/run/web</font><br>
+                網頁程式範例
+              </td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_r1">
+                來源 <font class="css_font_b1">module/mcm_module_1002.c</font><br>
+                目地 <font class="css_font_b1">mint_cm/mcm_daemon/mcm_module</font><br>
+                內部模組範例<br>
+                有修改要使用 <font class="css_font_p1">make all</font> 重新編譯
+              </td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_r1">
+                來源 <font class="css_font_b1">cgi/mcm_cgi_upload_custom.c</font><br>
+                目地 <font class="css_font_b1">mint_cm/mcm_cgi</font><br>
+                CGI 端處理檔案上傳範例<br>
+                有修改要使用 <font class="css_font_p1">make all</font> 重新編譯
+              </td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_r1">
+                來源 <font class="css_font_b1">maam_buildin</font><br>
+                目地 <font class="css_font_b1">http_server/mini_httpd/last/mint_aam/maam_buildin</font><br>
+                MintAAM 端範例範例<br>
+                有修改要使用 <font class="css_font_p1">make all</font> 重新編譯
+              </td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_r1">
+                來源 <font class="css_font_b1">mini_httpd/Makefile</font><br>
+                目地 <font class="css_font_b1">http_server/mini_httpd/last</font><br>
+                mini_httpd 的 Makefile, 主要是加入使用 MintCM 函式庫的連結<br>
+                有修改要使用 <font class="css_font_p1">make all</font> 重新編譯
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+    <br>
+
+  </div>
+</div>
+<br>
+
+</body>
+
+
+</html>

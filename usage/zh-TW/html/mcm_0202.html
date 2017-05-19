@@ -1,0 +1,820 @@
+<!--
+Copyright © 2017, Che-Wei Hsu <cwxhsu@gmail.com>
+This file is part of the MintCM.
+Some rights reserved. See README.
+-->
+
+<html>
+
+<head>
+<meta http-equiv="content-type" content="text/html; charset=utf-8">
+<link rel="stylesheet" href="../css/mcm_style.css">
+</head>
+
+<body class="css_body">
+
+<div class="css_div_box_frame_full">
+  <div class="css_div_box_title">chapter 02-02</div>
+  <div class="css_div_box_content">
+  </div>
+</div>
+<br>
+
+<div class="css_div_box_frame_full">
+  <div class="css_div_box_title">資料預設值的建立</div>
+  <div class="css_div_box_content">
+    <br>
+
+    此章節說明如何建立資料的預設值.
+    <br><br><br>
+
+    為了讓程式啟動後就有預設的資料, 必須建立資料的預設值.
+    <br><br><br>
+
+    <div class="css_div_hook" id="hook_0202_data_profile_01"></div>
+    下面使用範例說明如何建立, 使用的資料種類參考
+    <a href="mcm_0201.html#hook_0201_model_01">#02-01#</a>,
+    資料模型如下 :<br>
+    <div class="css_div_block">
+      &lt;?xml version="1.0"?&gt;<br><br>
+      &lt;base version="1.0"&gt;<br>
+      &lt;device type="gs" max="1" save="1"&gt;<br>
+      &nbsp;&nbsp;&lt;ekey type="ek"&gt;0&lt;/ekey&gt;<br>
+      &nbsp;&nbsp;&lt;descript type="s:256"&gt;Network-Device&lt;/descript&gt;<br>
+      &nbsp;&nbsp;&lt;serial_number type="b:10"&gt;0022E5A1CC9F&lt;/serial_number&gt;<br><br>
+      &nbsp;&nbsp;&lt;system type="gs" max="1" save="1"&gt;<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&lt;ekey type="ek"&gt;0&lt;/ekey&gt;<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&lt;date type="s:12"&gt;2015/01/01&lt;/date&gt;<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&lt;ip_addr type="s:46"&gt;192.168.1.1&lt;/ip_addr&gt;<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&lt;uptime type="iull"&gt;0&lt;/uptime&gt;<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&lt;loading type="fd"&gt;0&lt;/loading&gt;<br>
+      &nbsp;&nbsp;&lt;/system&gt;<br><br>
+      &nbsp;&nbsp;&lt;vap type="gd" max="16" save="1"&gt;<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&lt;ekey type="ek"&gt;0&lt;/ekey&gt;<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&lt;ssid type="s:64"&gt;&lt;/ssid&gt;<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&lt;channel type="iui"&gt;0&lt;/channel&gt;<br><br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&lt;extra type="gs" max="1" save="1"&gt;<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;ekey type="ek"&gt;0&lt;/ekey&gt;<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;hidden type="isc"&gt;0&lt;/hidden&gt;<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;tx_power type="iss"&gt;0&lt;/tx_power&gt;<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&lt;/extra&gt;<br><br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&lt;station type="gd" max="32" save="1"&gt;<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;ekey type="ek"&gt;0&lt;/ekey&gt;<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;mac_addr type="s:18"&gt;00:00:00:00:00:00&lt;/mac_addr&gt;<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;rule type="rk"&gt;0&lt;/rule&gt;<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&lt;/station&gt;<br>
+      &nbsp;&nbsp;&lt;/vap&gt;<br><br>
+      &nbsp;&nbsp;&lt;limit type="gd" max="64" save="1"&gt;<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&lt;ekey type="ek"&gt;0&lt;/ekey&gt;<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&lt;name type="s:32"&gt;&lt;/name&gt;<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&lt;priority type="isi"&gt;-1&lt;/priority&gt;<br>
+      &nbsp;&nbsp;&lt;/limit&gt;<br><br>
+      &nbsp;&nbsp;&lt;client type="gd" max="128" save="0"&gt;<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&lt;ekey type="ek"&gt;0&lt;/ekey&gt;<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&lt;mac_addr type="s:18"&gt;&lt;/mac_addr&gt;<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&lt;location_x type="fld"&gt;0&lt;/location_x&gt;<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&lt;location_y type="fld"&gt;0&lt;/location_y&gt;<br>
+      &nbsp;&nbsp;&lt;/client&gt;<br>
+      &lt;/device&gt;<br>
+      &lt;/base&gt;
+    </div>
+    <br><br>
+
+    <div class="css_div_hook" id="hook_0202_version_01"></div>
+    步驟一 : 加入資料模型版本.<br>
+    格式 :<br>
+    <div class="css_div_block">
+      <font class="css_font_g1">$version $(version)</font>
+    </div>
+    實際 :<br>
+    <div class="css_div_block">
+      <font class="css_font_g1">$version 1.0</font>
+    </div>
+    <br>
+    這裡的 <font class="css_font_b1">$version</font> 就是資料模型中
+    <font class="css_font_b1">&lt;base&gt;&lt;/base&gt;</font> 內的設定.
+    <br><br><br>
+
+    <div class="css_div_hook" id="hook_0202_path_data_01"></div>
+    步驟二 : 加入資料設定.<br>
+    格式 :<br>
+    <div class="css_div_block">
+      <font class="css_font_g1">$(entry-path) $(member-list)</font>
+    </div>
+    <br>
+
+    <div class="css_div_hook" id="hook_0202_entry_path_01"></div>
+    <font class="css_font_b1">$(entry-path)</font><br>
+    由樹根到目標之間的 entry 資訊所組成的路徑.<br>
+    格式 :<br>
+    <div class="css_div_block">
+      <font class="css_font_g1">$(entry-info-1).$(entry-info-2). - - - .$(entry-info-N)</font>
+    </div>
+    <font class="css_font_b1">$(entry-info)</font><br>
+    由 group 名稱和 key 資訊所組成的一小段路徑.<br>
+    格式 :<br>
+    <div class="css_div_block">
+      <font class="css_font_p1">gs 類型 :</font>
+      <font class="css_font_g1">$(group-name)</font><br>
+      <font class="css_font_p1">gd 類型 :</font>
+      <font class="css_font_g1">$(group-name).#$(entry-key)</font><br>
+    </div>
+    <table class="css_table_list2">
+      <tr>
+        <td class="css_td_list2_l2">$(group-name)</td>
+        <td class="css_td_list2_r1">
+          group 的名稱
+        </td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l2">#</td>
+        <td class="css_td_list2_r1">
+          entry key 的前綴符號
+        </td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l2">$(entry-key)</td>
+        <td class="css_td_list2_r1">
+          entry 的 key 值, <font class="css_font_p1">1 ~ 4294967295</font>
+          <font class="css_font_c1">(MCM_DTYPE_EK_TD)</font>
+        </td>
+      </tr>
+    </table>
+    <br>
+    實際 :<br>
+    <div class="css_div_block">
+      <font class="css_font_g1">device</font><br><br>
+      <font class="css_font_g1">device.system</font><br><br>
+      <font class="css_font_g1">device.vap.#8</font><br>
+      表示 vap 中 key 為 8 的 entry<br>
+      <font class="css_font_g1">device.vap.#15</font><br>
+      表示 vap 中 key 為 15 的 entry<br><br>
+      <font class="css_font_g1">device.vap.#8.extra</font><br>
+      表示 vap 中 key 為 8 的 entry 的 extra<br>
+      <font class="css_font_g1">device.vap.#15.extra</font><br>
+      表示 vap 中 key 為 15 的 entry 的 extra<br><br>
+      <font class="css_font_g1">device.vap.#8.station.#20</font><br>
+      表示 vap 中 key 為 8 的 entry 的 key 為 20 的 station<br>
+      <font class="css_font_g1">device.vap.#15.station.#30</font><br>
+      表示 vap 中 key 為 15 的 entry 的 key 為 30 的 station<br>
+      <font class="css_font_g1">device.limit.#1</font><br>
+      表示 limit 中 key 為 1 的 entry<br>
+      <font class="css_font_g1">device.limit.#3</font><br>
+      表示 limit 中 key 為 3 的 entry<br><br>
+      <font class="css_font_g1">device.client.#109</font><br>
+      表示 client 中 key 為 109 的 entry<br>
+      <font class="css_font_g1">device.client.#120</font><br>
+      表示 client 中 key 為 120 的 entry
+    </div>
+    <br>
+
+    <div class="css_div_hook" id="hook_0202_member_list_01"></div>
+    <font class="css_font_b1">$(member-list)</font><br>
+    由 member (不包含 ek 類型) 所組成的段落.<br>
+    格式 :<br>
+    <div class="css_div_block">
+      <font class="css_font_g1">$(member-info-1) $(member-info-2) - - - $(member-info-N)</font>
+    </div>
+    <div class="css_div_hook" id="hook_0202_member_list_02"></div>
+    <font class="css_font_b1">$(member-info)</font><br>
+    由 member 的名稱和值所組成的資料區塊.<br>
+    格式 :<br>
+    <div class="css_div_block">
+      <font class="css_font_g1">$(name):$(value)</font>
+    </div>
+    <table class="css_table_list2">
+      <tr>
+        <td class="css_td_list2_l2">$(name)</td>
+        <td class="css_td_list2_r1">member 的名稱</td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l2">$(value)</td>
+        <td class="css_td_list2_r1">
+          member 的值, <a href="mcm_0201.html#hook_0201_default_format_01">[詳細]</a>
+        </td>
+      </tr>
+    </table>
+    <br>
+    實際 :<br>
+    <div class="css_div_block">
+      [device] :<br>
+      <font class="css_font_g1">descript:Wireless%20Device serial_number:0022E5A1CC9F</font><br><br>
+      [system] :<br>
+      <font class="css_font_g1">date:2015/06/07</font>
+      <font class="css_font_g1">ip_addr:192.168.10.254</font>
+      <font class="css_font_g1">uptime:0</font>
+      <font class="css_font_g1">loading:0</font><br><br>
+      [vap] :<br>
+      <font class="css_font_g1">ssid:open-1 channel:10</font><br><br>
+      [extra] :<br>
+      <font class="css_font_g1">hidden:1 tx_power:8</font><br><br>
+      [station] :<br>
+      <font class="css_font_g1">mac_addr:00:11:22:33:44:55 rule:3</font><br><br>
+      [limit] :<br>
+      <font class="css_font_g1">name:normal priorital:10</font><br><br>
+      [client] :<br>
+      <font class="css_font_g1">
+      mac_addr:mac_addr:00:11:22:33:44:55 location_x:123.987 location_y:-74.058
+      </font>
+    </div>
+    <br>
+
+    將 <font class="css_font_b1">$(entry-path), $(member-list)</font> 組合 :<br>
+    <div class="css_div_block">
+      <font class="css_font_g1">device descript:Wireless%20Device serial_number:0022E5A1CC9F</font><br><br>
+      <font class="css_font_g1">
+      device.system date:2015/06/07 ip_addr:192.168.10.254 uptime:0 loading:0
+      </font><br><br>
+      <font class="css_font_g1">device.vap.#8 ssid:open-1 channel:10</font><br>
+      <font class="css_font_g1">device.vap.#15 ssid:radius-2 channel:44</font><br><br>
+      <font class="css_font_g1">device.vap.#8.extra hidden:1 tx_power:8</font><br>
+      <font class="css_font_g1">device.vap.#15.extra hidden:0 tx_power:10</font><br><br>
+      <font class="css_font_g1">device.vap.#8.station.#20 mac_addr:00:11:22:33:44:55 rule:3</font><br>
+      <font class="css_font_g1">device.vap.#15.station.#30 mac_addr:00:aa:bb:cc:dd:ee rule:5</font><br><br>
+      <font class="css_font_g1">device.limit.#3 name:normal priority:10</font><br>
+      <font class="css_font_g1">device.limit.#5 name:height priority:15</font><br><br>
+      <font class="css_font_g1">
+      device.client.#109 mac_addr:00:11:22:33:44:55 location_x:123.7812 location_y:-74.058
+      </font><br>
+      <font class="css_font_g1">
+      device.client.#120 mac_addr:00:aa:bb:cc:dd:ee location_x:-0.9 location_y:0.25
+      </font>
+    </div>
+    <br><br>
+
+    最後輸出 :<br>
+    <div class="css_div_block">
+      $version 1.0<br><br>
+      device descript:Wireless%20Device serial_number:0022E5A1CC9F<br><br>
+      device.system date:2015/06/07 ip_addr:192.168.10.254 uptime:0 loading:0<br><br>
+      device.vap.#8 ssid:open-1 channel:10<br>
+      device.vap.#15 ssid:radius-2 channel:44<br><br>
+      device.vap.#8.extra hidden:1 tx_power:8<br>
+      device.vap.#15.extra hidden:0 tx_power:10<br><br>
+      device.vap.#8.station.#20 mac_addr:00:11:22:33:44:55 rule:3<br>
+      device.vap.#15.station.#30 mac_addr:00:aa:bb:cc:dd:ee rule:5<br><br>
+      device.limit.#3 name:normal priority:10<br>
+      device.limit.#5 name:height priority:15<br><br>
+      device.client.#109 mac_addr:00:11:22:33:44:55 location_x:123.7812 location_y:-74.058<br>
+      device.client.#120 mac_addr:00:aa:bb:cc:dd:ee location_x:-0.9 location_y:0.25
+    </div>
+    <br>
+
+  </div>
+</div>
+<br>
+
+<div class="css_div_box_frame_full">
+  <div class="css_div_box_title">註解的使用</div>
+  <div class="css_div_box_content">
+    <br>
+
+    在文字的最前面加上 <font class="css_font_b1">[;]</font> 表示此行是註解.<br>
+    範例 :<br>
+    <div class="css_div_block">
+      ; 這行是註解
+    </div>
+    <br>
+
+  </div>
+</div>
+<br>
+
+<div class="css_div_box_frame_full">
+  <div class="css_div_box_title">注意事項</div>
+  <div class="css_div_box_content">
+    <br>
+
+    <table class="css_table_list1">
+      <tr>
+        <td class="css_td_list1_l">01.&nbsp;</td>
+        <td class="css_td_list1_r">
+          編譯資料模型會自動產生 <font class="css_font_b1">mcm_store_profile.txt</font>,
+          裡面會有簡單的基本設定資料.
+        </td>
+      </tr>
+    </table>
+    <br><br>
+
+    <table class="css_table_list1">
+      <tr>
+        <td class="css_td_list1_l">02.&nbsp;</td>
+        <td class="css_td_list1_r">
+          編譯資料模型後如果 <font class="css_font_b1">mcm_build</font> 目錄不存在
+          <font class="css_font_b1">mcm_store_profile_default.txt</font>, 會自動從
+          <font class="css_font_b1">mcm_store_profile.txt</font> 複製一份過去, 要注意只有在
+          <font class="css_font_b1">mcm_store_profile_default.txt</font> 不存在時才會自動複製,
+          如果存在後有修改資料模型的話, 需要手動處理更動的部分.
+        </td>
+      </tr>
+    </table>
+    <br><br>
+
+    <div class="css_div_hook" id="hook_0202_entry_save_01"></div>
+    <table class="css_table_list1">
+      <tr>
+        <td class="css_td_list1_l">03.&nbsp;</td>
+        <td class="css_td_list1_r">
+          在資料模型中 $(save) 值為 0 的 group 不可以加上預設值 (上面的範例 [client] 只是示範, 實際使用不可加).
+        </td>
+      </tr>
+    </table>
+    <br><br>
+
+    <div class="css_div_hook" id="hook_0202_entry_max_01"></div>
+    <table class="css_table_list1">
+      <tr>
+        <td class="css_td_list1_l">04.&nbsp;</td>
+        <td class="css_td_list1_r">
+          entry 的數目不可超過資料模型中所設的 $(max) 值.
+        </td>
+      </tr>
+    </table>
+    <br><br>
+
+    <div class="css_div_hook" id="hook_0202_entry_no_member_01"></div>
+    <table class="css_table_list1">
+      <tr>
+        <td class="css_td_list1_l">05.&nbsp;</td>
+        <td class="css_td_list1_r">
+          沒有任何 member (排除 ek 類型) 的 group, 不可以加上預設值.
+        </td>
+      </tr>
+    </table>
+    <br><br>
+
+    <div class="css_div_hook" id="hook_0202_entry_lose_01"></div>
+    <table class="css_table_list1">
+      <tr>
+        <td class="css_td_list1_l">06.&nbsp;</td>
+        <td class="css_td_list1_r">
+          加上預設值後, 從樹根到目標 group 之間的 group 除非沒有 member, 否則都必須加上預設值.<br><br>
+          範例, 資料模型如下, 假設每個 group 內都有 member :<br>
+          <div class="css_div_block">
+            &lt;GroupA type="gs" max="1" save="1"&gt;<br>
+            &nbsp;&nbsp;&lt;GroupB type="gd" max="10" save="1"&gt;<br>
+            &nbsp;&nbsp;&nbsp;&nbsp;&lt;GroupC type="gd" max="10" save="1"&gt;<br>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;GroupD type="gd" max="10" save="1"&gt;<br>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;/GroupD&gt;<br>
+            &nbsp;&nbsp;&nbsp;&nbsp;&lt;/GroupC&gt;<br>
+            &nbsp;&nbsp;&lt;/GroupB&gt;<br>
+            &lt;/GroupA&gt;
+          </div>
+          設定 :<br>
+          <div class="css_div_block">
+            在 GroupD 加上預設值<br>
+            <font class="css_font_g1">GroupA.GroupB.#3.GroupC.#5.GroupD.#7</font><br><br>
+            則 GroupA, GroupB, GroupC 都要加上預設值<br>
+            <font class="css_font_g1">
+            GroupA<br>
+            GroupA.GroupB.#3<br>
+            GroupA.GroupB.#3.GroupC.#5
+            </font>
+          </div>
+        </td>
+      </tr>
+    </table>
+    <br><br>
+
+    <div class="css_div_hook" id="hook_0202_entry_lose_02"></div>
+    <table class="css_table_list1">
+      <tr>
+        <td class="css_td_list1_l">07.&nbsp;</td>
+        <td class="css_td_list1_r">
+          對於 gs 類型的 group, 除非沒有任何 member, 否則下列情況下必須加上預設值 :<br>
+          <table class="css_table_list2">
+            <tr>
+              <td class="css_td_list2_t1">parent-group 類型</td>
+              <td class="css_td_list2_t1">說明</td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l2">不存在</td>
+              <td class="css_td_list2_r1">樹根, 必須要加上預設值</td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l2">gs</td>
+              <td class="css_td_list2_r1">必須要加上預設值</td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l2">gd</td>
+              <td class="css_td_list2_r1">如果有 entry 存在, 則必須要加上預設值</td>
+            </tr>
+          </table>
+          <br>
+          範例, 資料模型如下 :<br>
+          <div class="css_div_block">
+            &lt;device type="gs" max="1" save="1"&gt;<br>
+            &nbsp;&nbsp;&lt;ekey type="ek"&gt;0&lt;/ekey&gt;<br><br>
+            &nbsp;&nbsp;&lt;system type="gs" max="1" save="1"&gt;<br>
+            &nbsp;&nbsp;&nbsp;&nbsp;&lt;ekey type="ek"&gt;0&lt;/ekey&gt;<br>
+            &nbsp;&nbsp;&nbsp;&nbsp;&lt;date type="s:12"&gt;&lt;/date&gt;<br>
+            &nbsp;&nbsp;&lt;/system&gt;<br><br>
+            &nbsp;&nbsp;&lt;vap type="gd" max="8" save="1"&gt;<br>
+            &nbsp;&nbsp;&nbsp;&nbsp;&lt;ekey type="ek"&gt;0&lt;/ekey&gt;<br>
+            &nbsp;&nbsp;&nbsp;&nbsp;&lt;ssid type="s:64"&gt;&lt;/ssid&gt;<br><br>
+            &nbsp;&nbsp;&nbsp;&nbsp;&lt;extra type="gs" max="1" save="1"&gt;<br>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;ekey type="ek"&gt;0&lt;/ekey&gt;<br>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;hidden type="s:8"&gt;&lt;/hidden&gt;<br>
+            &nbsp;&nbsp;&nbsp;&nbsp;&lt;/extra&gt;<br>
+            &nbsp;&nbsp;&lt;/vap&gt;<br>
+            &lt;/device&gt;<br>
+          </div>
+          設定 :<br>
+          <div class="css_div_block">
+            device :<br>
+            樹根, 但是沒有 member, 所以不需要加上預設值<br><br>
+            system :<br>
+            device 是 gs 類型, 所以需要加上預設值<br><br>
+            extra :<br>
+            vap 是 gd 類型,<br>
+            假設有一筆資料 device.vap.#4, 則必須加上預設值 device.vap.#4.extra
+          </div>
+        </td>
+      </tr>
+    </table>
+    <br>
+
+  </div>
+</div>
+<br>
+
+<div class="css_div_hook" id="hook_0202_error_message_01"></div>
+<div class="css_div_box_frame_full">
+  <div class="css_div_box_title">資料預設值設定的錯誤訊息</div>
+  <div class="css_div_box_content">
+    <br>
+
+    當程式讀取資料預設值檔案時, 會檢查是否有錯誤, 發現錯誤後會顯示錯誤訊息並停止執行.
+    <br><br>
+
+    錯誤訊息格式 :<br>
+    <div class="css_div_block">
+      <font class="css_font_r1">store profile error
+      [<font class="css_font_b1">$(error_file)</font>],
+      line <font class="css_font_b1">$(error_line)</font>,
+      code <font class="css_font_b1">$(error_code)</font> :<br>
+      <font class="css_font_b1">$(descript)</font>
+      </font>
+    </div>
+    範例 :<br>
+    <table class="css_table_console">
+      <tr>
+        <td class="css_td_console">
+          mcm_config_handle.c(3644):<br>
+          <font class="css_font_r1">
+          store profile error [default], line 4, code INVALID_MEMBER_03 :<br>
+          invalid member, unknown member [test]<br>
+          </font>
+          mcm_config_handle.c(4232): call mcm_load_store_anysis_member() fail<br>
+          mcm_config_handle.c(4320): call mcm_load_store_process() fail<br>
+          mcm_daemon.c(0328): call mcm_config_load_store() fail<br>
+		</td>
+      </tr>
+    </table>
+   <br>
+
+    <font class="css_font_b1">$(error_file)</font><br>
+    發生錯誤的檔案來源.<br>
+    <table class="css_table_list2">
+      <tr>
+        <td class="css_td_list2_l2">default</td>
+        <td class="css_td_list2_r1">紀錄預設值的檔案 (mcm_store_profile_default.txt)</td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l2">current</td>
+        <td class="css_td_list2_r1">紀錄現在值的檔案 (mcm_store_profile_current.txt)</td>
+      </tr>
+    </table>
+    <br>
+
+    <font class="css_font_b1">$(error_line)</font><br>
+    在第幾行發生錯誤.
+    <br><br>
+
+    <font class="css_font_b1">$(error_code)</font><br>
+    錯誤代號.
+    <br><br>
+
+    <font class="css_font_b1">$(descript)</font><br>
+    錯誤原因的簡單描述.
+    <br><br>
+
+    錯誤代號表 :<br>
+    <table class="css_table_list2">
+      <tr>
+        <td class="css_td_list2_t1" width="240px">代號</td>
+        <td class="css_td_list2_t1">說明</td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l2">INVALID_FORMAT_01</td>
+        <td class="css_td_list2_r1">
+          找不到分段符號 <font class="css_font_p1">[ ]</font>
+          <a href="#hook_0202_version_01">[詳細-A]</a>
+          <a href="#hook_0202_path_data_01">[詳細-B]</a>
+        </td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l2">INVALID_BASE_01</td>
+        <td class="css_td_list2_r1">
+          額外資料 <font class="css_font_p1">[$version]</font> 的設定有誤
+          <a href="#hook_0202_version_01">[詳細]</a>
+        </td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l2">INVALID_BASE_02</td>
+        <td class="css_td_list2_r1">
+          額外資料 <font class="css_font_p1">[$version]</font> 的設定發生重複
+        </td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l2">INVALID_BASE_03</td>
+        <td class="css_td_list2_r1">
+          找不到分段符號 <font class="css_font_p1">[ ]</font>
+          <a href="#hook_0202_version_01">[詳細-A]</a>
+          <a href="#hook_0202_path_data_01">[詳細-B]</a>
+        </td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l2">INVALID_BASE_04</td>
+        <td class="css_td_list2_r1">
+          未知的額外資料
+        </td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l2">INVALID_ENTRY-FORMAT_01</td>
+        <td class="css_td_list2_r1" rowspan="6">
+          <font class="css_font_p1">[$(entry-path)]</font> 的設定有誤
+          <a href="#hook_0202_entry_path_01">[詳細]</a>
+        </td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l2">INVALID_ENTRY-FORMAT_02</td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l2">INVALID_ENTRY-FORMAT_03</td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l2">INVALID_ENTRY-FORMAT_04</td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l2">INVALID_ENTRY-FORMAT_05</td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l2">INVALID_ENTRY-FORMAT_06</td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l2">INVALID_ENTRY-SAVE_01</td>
+        <td class="css_td_list2_r1">
+          此 group 的 <font class="css_font_p1">[$(save)]</font> 為 0, 不可加上預設值
+          <a href="#hook_0202_entry_save_01">[詳細]</a>
+        </td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l2">INVALID_ENTRY-MAX_01</td>
+        <td class="css_td_list2_r1">
+          entry 數目超過 group 的 <font class="css_font_p1">[$(max)]</font> 上限
+          <a href="#hook_0202_entry_max_01">[詳細]</a>
+        </td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l2">INVALID_ENTRY-MEMBER_01</td>
+        <td class="css_td_list2_r1">
+          此 group 沒有任何 member (不包含 <font class="css_font_p1">[es] [ek]</font> 類型), 不可加上預設值
+          <a href="#hook_0202_entry_no_member_01">[詳細]</a>
+        </td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l2">INVALID_ENTRY-DUPLIC_01</td>
+        <td class="css_td_list2_r1">
+          entry 設定發生重複
+        </td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l2">INVALID_ENTRY-LOSE_01</td>
+        <td class="css_td_list2_r1">
+          有 entry 沒設定到
+          <a href="#hook_0202_entry_lose_01">[詳細-A]</a>
+          <a href="#hook_0202_entry_lose_02">[詳細-B]</a>
+        </td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l2">INVALID_MEMBER_01</td>
+        <td class="css_td_list2_r1">
+          找不到任何 <font class="css_font_p1">[$(member-list)]</font> 設定
+          <a href="#hook_0202_member_list_01">[詳細]</a>
+        </td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l2">INVALID_MEMBER_02</td>
+        <td class="css_td_list2_r1">
+          找不到分段符號 <font class="css_font_p1">[:]</font>
+          <a href="#hook_0202_member_list_02">[詳細]</a>
+        </td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l2">INVALID_MEMBER_03</td>
+        <td class="css_td_list2_r1">
+          未知的 member
+        </td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l2">INVALID_MEMBER_04</td>
+        <td class="css_td_list2_r1">
+          member 設定發生重複
+        </td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l2">INVALID_MEMBER_05</td>
+        <td class="css_td_list2_r1">
+          有 member 沒設定到
+        </td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l2">INVALID_VALUE-INTEGER_01</td>
+        <td class="css_td_list2_r1" rowspan="2">
+          member 的值 (整數類型) 無效
+          <a href="mcm_0201.html#hook_0201_default_format_01">[詳細]</a>
+        </td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l2">INVALID_VALUE-INTEGER_02</td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l2">INVALID_VALUE-FLOAT_01</td>
+        <td class="css_td_list2_r1" rowspan="2">
+          member 的值 (浮點數類型) 無效
+          <a href="mcm_0201.html#hook_0201_default_format_01">[詳細]</a>
+        </td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l2">INVALID_VALUE-FLOAT_02</td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l2">INVALID_VALUE-STRING_01</td>
+        <td class="css_td_list2_r1" rowspan="6">
+          member 的值 (字串類型) 無效
+          <a href="mcm_0201.html#hook_0201_default_format_01">[詳細]</a>
+        </td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l2">INVALID_VALUE-STRING_02</td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l2">INVALID_VALUE-STRING_03</td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l2">INVALID_VALUE-STRING_04</td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l2">INVALID_VALUE-STRING_05</td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l2">INVALID_VALUE-STRING_06</td>
+      </tr>
+
+      <tr>
+        <td class="css_td_list2_l2">INVALID_VALUE-BYTES_01</td>
+        <td class="css_td_list2_r1" rowspan="3">
+          member 的值 (字節流類型) 無效
+          <a href="mcm_0201.html#hook_0201_default_format_01">[詳細]</a>
+        </td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l2">INVALID_VALUE-BYTES_02</td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l2">INVALID_VALUE-BYTES_03</td>
+      </tr>
+    </table>
+    <br>
+
+  </div>
+</div>
+<br>
+
+<div class="css_div_box_frame_full">
+  <div class="css_div_box_title">資料現在值檔案</div>
+  <div class="css_div_box_content">
+    <br>
+
+    在 mcm_daemon 中關於紀錄資料的檔案有二個, <font class="css_font_b1">資料預設值檔案</font> 和
+    <font class="css_font_b1">資料現在值檔案</font>.
+    <br><br>
+
+    mcm_daemon 會把目前的資料紀錄在 <font class="css_font_b1">資料現在值檔案</font> (Read-Write).
+    <br><br>
+
+    而 <font class="css_font_b1">資料預設值檔案</font> 則是紀錄初始化的資料的預設值 (Read-Only).
+    <br><br>
+
+    mcm_daemon 啟動後, 會優先讀取 <font class="css_font_b1">資料現在值檔案</font>, 不存在才讀取
+    <font class="css_font_b1">資料預設值檔案</font>.<br>
+    (所以要做還原預設值的動作只要刪除資料現在值檔案在重新執行 mcm_daemon 即可)
+    <br><br>
+
+  </div>
+</div>
+<br>
+
+<div class="css_div_box_frame_full">
+  <div class="css_div_box_title">範例程式的使用</div>
+  <div class="css_div_box_content">
+    <br>
+
+    <table class="css_table_list1">
+      <tr>
+        <td class="css_td_list1_l">01.&nbsp;</td>
+        <td class="css_td_list1_r">
+          範例程式目錄在 <font class="css_font_b1">mint_cm/usage/example/0202</font>.
+        </td>
+      </tr>
+    </table>
+    <br><br>
+
+    <table class="css_table_list1">
+      <tr>
+        <td class="css_td_list1_l">02.&nbsp;</td>
+        <td class="css_td_list1_r">
+          下面關於 <font class="css_font_p1">make</font> 的操作都是在
+          <font class="css_font_b1">mint_cm</font> 目錄.
+        </td>
+      </tr>
+    </table>
+    <br><br>
+
+    <table class="css_table_list1">
+      <tr>
+        <td class="css_td_list1_l">03.&nbsp;</td>
+        <td class="css_td_list1_r">
+          第一次使用, 使用 <font class="css_font_p1">make example_add KEY=0202</font>
+          載入範例並編譯.
+        </td>
+      </tr>
+    </table>
+    <br><br>
+
+    <div class="css_div_hook" id="hook_0202_mcm_daemon_01"></div>
+    <table class="css_table_list1">
+      <tr>
+        <td class="css_td_list1_l">04.&nbsp;</td>
+        <td class="css_td_list1_r">
+          mcm_daemon 執行方法, 進入 <font class="css_font_b1">mint_cm/run</font> 目錄, 指令 :<br>
+          <font class="css_font_p1">./mcm_daemon -t 0 -a @mintcm -l ./mcm_module.lib -m mcm_model_profile.txt -d mcm_store_profile_default.txt -c mcm_store_profile_current.txt -s 0 -e 0 -p /var/run/mcm_daemon.pid</font>
+          <br><br>
+          因為 mcm_daemon 會優先讀取預設值檔案, 不存在才讀取現在值檔案, 所以每次修改預設值檔案做測試時,
+          要先移除現在值檔案. 
+          預設值檔案錯誤的話, 會顯示錯誤訊息並停止執行. 
+          預設值檔案正確的話, 不會停止執行並且產生一個現在值檔案, 檔案內的設定值會和預設值檔案內容一致.<br>
+          使用 <font class="css_font_p1">[Ctrl + C]</font> 能夠中斷執行.
+        </td>
+      </tr>
+    </table>
+    <br><br>
+
+    <table class="css_table_list1">
+      <tr>
+        <td class="css_td_list1_l">05.&nbsp;</td>
+        <td class="css_td_list1_r">
+          測試完畢不使用後, 使用 <font class="css_font_p1">make example_del KEY=0202</font>
+          將範例移除.
+        </td>
+      </tr>
+    </table>
+    <br><br>
+
+    <table class="css_table_list1">
+      <tr>
+        <td class="css_td_list1_l">06.&nbsp;</td>
+        <td class="css_td_list1_r">
+          範例程式目錄下的檔案在做完 <font class="css_font_p1">make example_add</font>
+          後會複製到真正使用的位置, 要修改做測試的話要改在複製後的.<br>
+          <table class="css_table_list2">
+            <tr>
+              <td class="css_td_list2_r1">
+                來源 <font class="css_font_b1">profile/mcm_data_profile_0202.xml</font><br>
+                目地 <font class="css_font_b1">mint_cm/mcm_build/mcm_data_profile.xml</font><br>
+                資料模型範例<br>
+                有修改要使用 <font class="css_font_p1">make all</font> 重新編譯
+              </td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_r1">
+                來源 <font class="css_font_b1">profile/mcm_store_profile_default_0202.txt</font><br>
+                目地 <font class="css_font_b1">mint_cm/mcm_build/mcm_store_profile_default.txt</font><br>
+                資料預設值範例<br>
+                使用 <font class="css_font_p1">make all</font> 後會再複製到 <font class="css_font_b1">mint_cm/run</font>
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+    <br>
+
+  </div>
+</div>
+<br>
+
+</body>
+
+</html>

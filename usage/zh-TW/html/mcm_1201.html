@@ -1,0 +1,269 @@
+<!--
+Copyright © 2017, Che-Wei Hsu <cwxhsu@gmail.com>
+This file is part of the MintCM.
+Some rights reserved. See README.
+-->
+
+<html>
+
+<head>
+<meta http-equiv="content-type" content="text/html; charset=utf-8">
+<link rel="stylesheet" href="../css/mcm_style.css">
+</head>
+
+<body class="css_body">
+
+<div class="css_div_box_frame_full">
+  <div class="css_div_box_title">chapter 12-01</div>
+  <div class="css_div_box_content">
+  </div>
+</div>
+<br>
+
+<div class="css_div_box_frame_full">
+  <div class="css_div_box_title">需要的檔案</div>
+  <div class="css_div_box_content">
+    <br>
+
+    此系統可以編譯到使用 Linux 的不同硬體平台上執行, 這邊說明哪些檔案需要複製到目標平台.
+    <br><br><br>
+
+    必須在 PC 上執行的部分 :<br>
+    <table class="css_table_box">
+      <tr>
+        <td class="css_td_box">
+          <font class="css_font_b1">mint_cm/mcm_build</font><br>
+          編譯 <font class="css_font_r1">mcm_build</font><br>
+          此程負責分析資料模型並產生系統需要的程式定義檔和相關資料檔.
+        </td>
+      </tr>
+    </table>
+    <br><br>
+
+    在目標平台上執行的部分 :<br>
+    <table class="css_table_box">
+      <tr>
+        <td class="css_td_box">
+          <font class="css_font_b1">mint_cm/mcm_build</font><br>
+          產生 <font class="css_font_r1">mcm_model_profile.txt</font><br>
+          撰寫 <font class="css_font_r1">mcm_store_profile_default.txt</font><br>
+          程式分析完資料模型後會產生系統需要的資料模型檔, 以及撰寫系統需要的資料預設值檔,
+          必須複製到目標平台上.
+          <br><br>
+
+          <font class="css_font_b1">mint_cm/mcm_daemon</font><br>
+          編譯 <font class="css_font_r1">mcm_daemon</font><br>
+          主程式, 必須複製到目標平台上.
+          <br><br>
+
+          <font class="css_font_b1">mint_cm/mcm_daemon/mcm_module</font><br>
+          編譯 <font class="css_font_r1">mcm_module.lib</font><br>
+          自訂的資料處理函式庫, 必須複製到目標平台上.
+          <br><br>
+
+          <font class="css_font_b1">mint_cm/mcm_lib/mcm_lulib</font><br>
+          編譯 <font class="css_font_r1">libmcm_lulib_api.so</font><br>
+          提供介面給用戶端程式做資料的存取, 有用戶端程式或是網頁端程式需要就必須複製到目標平台上.
+          <br><br>
+
+          <font class="css_font_b1">mint_cm/mcm_lib/mcm_lklib</font><br>
+          編譯 <font class="css_font_r1">mcm_lklib_api.ko</font><br>
+          提供介面給核心端程式做資料的存取, 有核心端程式需要就必須複製到目標平台上.
+          <br><br>
+
+          <font class="css_font_b1">mint_cm/mcm_cgi</font><br>
+          編譯 <font class="css_font_r1">mcm_cgi_config.cgi</font><br>
+          編譯 <font class="css_font_r1">mcm_cgi_upload.cgi</font><br>
+          處理網頁端程式做資料的存取和檔案的上傳, 有網頁端程式需要就必須複製到目標平台上.
+          <br><br>
+
+          <font class="css_font_b1">mint_cm/mcm_lib/mcm_jslib</font><br>
+          放置 <font class="css_font_r1">jquery_main.js</font><br>
+          放置 <font class="css_font_r1">json3.js</font><br>
+          放置 <font class="css_font_r1">jquery_form.js</font><br>
+          放置 <font class="css_font_r1">mcm_jslib_api.js</font><br>
+          產生 <font class="css_font_r1">mcm_jslib_data_info_auto.js</font><br>
+          提供介面給網頁端程式做資料的存取和檔案的上傳,
+          有網頁端程式需要就必須複製到目標平台上.
+          <br><br>
+
+          <font class="css_font_b1">mint_cm/http_server/mini_httpd/last</font><br>
+          編譯 <font class="css_font_r1">mini_httpd</font><br>
+          撰寫 <font class="css_font_r1">mini_httpd.conf</font><br>
+          網頁伺服器和設定檔, 有網頁端程式需要就必須複製到目標平台上.
+          <br><br>
+
+          <font class="css_font_b1">mint_cm/http_server/mini_httpd/last/mint_aam/maam_lib/maam_jslib</font><br>
+          放置 <font class="css_font_r1">jquery_cookie.js</font><br>
+          放置 <font class="css_font_r1">md5.js</font><br>
+          放置 <font class="css_font_r1">maam_jslib_api.js</font><br>
+          提供介面給網頁端程式做登入登出, 有網頁端程式需要就必須複製到目標平台上.
+          <br><br>
+
+          <font class="css_font_b1">mint_cm/http_server/mini_httpd/last</font><br>
+          編譯 <font class="css_font_r1">libmaam_lulib_api.so</font><br>
+          提供介面給用戶端程式存取 session, 有用戶端程式需要就必須複製到目標平台上.
+          <br><br>
+
+          <font class="css_font_b1">mint_cm/Makefile</font><br>
+          變數 <font class="css_font_p1">CROSS</font> 可以指定要使用的交叉編譯器.
+        </td>
+      </tr>
+    </table>
+    <br>
+
+    為了測試方便, 預設所有使用到 mcm_lulib_api 和 maam_lulib_api 的程式都使用靜態連結,
+    在實際使用上可以改為動態連結.<br>
+    <div class="css_div_block">
+    在 Makefile 中使用到如下設定的都改為 <font class="css_font_r1">NO</font><br>
+    <font class="css_font_p1">USE_STATIC_MCM_LIB = YES</font><br>
+    <font class="css_font_p1">USE_STATIC_MAAM_LIB = YES</font><br>
+    </div>
+    <br>
+
+  </div>
+</div>
+<br>
+
+<div class="css_div_box_frame_full">
+  <div class="css_div_box_title">在不同硬體平台上使用</div>
+  <div class="css_div_box_content">
+    <br>
+
+    在 <font class="css_font_b1">mint_cm/mcm_build/mcm_build.c</font> 的一段程式 :<br>
+    <div class="css_div_block">
+    typedef MCM_DTYPE_EK_TD MCM_DTYPE_LEN_TD;<br>
+    MCM_DTYPE_LEN_TD ek_len;
+    </div>
+    <br>
+
+    變數 ek_len 用來計算路徑中 key 或 index 部分的最大長度, 之後計算整個路徑可能需要的最大緩衝空間.
+    因為是 mcm_build 在計算, 而計算後的緩衝空間會是 mcm_daemon 在使用,
+    所以必須注意 sizeof(MCM_DTYPE_LEN_TD) 在二邊平台的的大小.
+    <br><br>
+
+    <font class="css_font_r1">在 mcm_build 使用的平台上的大小必須大於或等於在 mcm_daemon 使用的平台上的大小.</font>
+    <br><br>
+
+    情況-01 :<br>
+    在 mcm_build 平台上的大小是 4, 在 mcm_daemon 平台上的大小是 2, 不用調整.
+    <br><br>
+
+    情況-02 :<br>
+    在 mcm_build 平台上的大小是 4, 在 mcm_daemon 平台上的大小是 4, 不用調整.
+    <br><br>
+
+    情況-03 :<br>
+    在 mcm_build 平台上的大小是 4, 在 mcm_daemon 平台上的大小是 8, 需要調整.<br>
+    MCM_DTYPE_LEN_TD 的最原始型態是 unsigned int, 加大變成 :<br>
+    <div class="css_div_block">
+    typedef unsigned long long int MCM_DTYPE_LEN_TD;<br>
+    </div>
+    <br>
+
+  </div>
+</div>
+<br>
+
+<div class="css_div_box_frame_full">
+  <div class="css_div_box_title">資料類型的調整</div>
+  <div class="css_div_box_content">
+    <br>
+
+    在資料模型的建立章節中列出的 <a href="mcm_0201.html#hook_0201_type_format_02">[member 的資料類型]</a>
+    可以將用不到的或是系統不支援的資料類型關閉.
+    <br>
+
+    <table class="css_table_list2">
+      <tr>
+        <td class="css_td_list2_t3" colspan="3">
+          <font class="css_font_g1">MCM_SUPPORT_DTYPE_*</font><br>
+          <font class="css_font_b1">(mint_cm/mcm_lib/mcm_lheader/mcm_type.h)</font><br>
+          <font class="css_font_p1">0 : 關閉, 1 : 開啟</font><br>
+        </td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_t1">定義</td>
+        <td class="css_td_list2_t1">資料類型</td>
+        <td class="css_td_list2_t1">使用的轉換函式</td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l2">MCM_SUPPORT_DTYPE_RK</td>
+        <td class="css_td_list2_r1">rk</td>
+        <td class="css_td_list2_r1"><font class="css_font_p1">strtoul</font></td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l2">MCM_SUPPORT_DTYPE_ISC</td>
+        <td class="css_td_list2_r1">isc</td>
+        <td class="css_td_list2_r1"><font class="css_font_p1">strtol</font></td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l2">MCM_SUPPORT_DTYPE_IUC</td>
+        <td class="css_td_list2_r1">iuc</td>
+        <td class="css_td_list2_r1"><font class="css_font_p1">strtoul</font></td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l2">MCM_SUPPORT_DTYPE_ISS</td>
+        <td class="css_td_list2_r1">iss</td>
+        <td class="css_td_list2_r1"><font class="css_font_p1">strtol</font></td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l2">MCM_SUPPORT_DTYPE_IUS</td>
+        <td class="css_td_list2_r1">ius</td>
+        <td class="css_td_list2_r1"><font class="css_font_p1">strtoul</font></td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l2">MCM_SUPPORT_DTYPE_ISI</td>
+        <td class="css_td_list2_r1">isi</td>
+        <td class="css_td_list2_r1"><font class="css_font_p1">strtol</font></td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l2">MCM_SUPPORT_DTYPE_IUI</td>
+        <td class="css_td_list2_r1">iui</td>
+        <td class="css_td_list2_r1"><font class="css_font_p1">strtoul</font></td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l2">MCM_SUPPORT_DTYPE_ISLL</td>
+        <td class="css_td_list2_r1">isll</td>
+        <td class="css_td_list2_r1"><font class="css_font_p1">strtoll</font></td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l2">MCM_SUPPORT_DTYPE_IULL</td>
+        <td class="css_td_list2_r1">iull</td>
+        <td class="css_td_list2_r1"><font class="css_font_p1">strtoull</font></td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l2">MCM_SUPPORT_DTYPE_FF</td>
+        <td class="css_td_list2_r1">ff</td>
+        <td class="css_td_list2_r1"><font class="css_font_p1">strtof</font></td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l2">MCM_SUPPORT_DTYPE_FD</td>
+        <td class="css_td_list2_r1">fd</td>
+        <td class="css_td_list2_r1"><font class="css_font_p1">strtod</font></td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l2">MCM_SUPPORT_DTYPE_FLD</td>
+        <td class="css_td_list2_r1">fld</td>
+        <td class="css_td_list2_r1"><font class="css_font_p1">strtold</font></td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l2">MCM_SUPPORT_DTYPE_S</td>
+        <td class="css_td_list2_r1">s:$(size)</td>
+        <td class="css_td_list2_r1"></td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l2">MCM_SUPPORT_DTYPE_B</td>
+        <td class="css_td_list2_r1">b:$(size)</td>
+        <td class="css_td_list2_r1"></td>
+      </tr>
+    </table>
+    <br>
+
+  </div>
+</div>
+<br>
+
+</body>
+
+</html>

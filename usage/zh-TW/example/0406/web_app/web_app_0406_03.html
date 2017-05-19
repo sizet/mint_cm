@@ -1,0 +1,158 @@
+<!--
+Copyright © 2017, Che-Wei Hsu <cwxhsu@gmail.com>
+This file is part of the MintCM.
+Some rights reserved. See README.
+-->
+
+<html>
+
+<head>
+
+<meta http-equiv="cache-control" content="no-cache">
+<meta http-equiv="content-type" content="text/html; charset=utf-8">
+<script type="text/javascript" src="jquery_main.js"></script>
+<script type="text/javascript" src="json3.js"></script>
+<script type="text/javascript" src="mcm_jslib_api.js"></script>
+<script type="text/javascript" src="mcm_jslib_data_info_auto.js"></script>
+<link rel="stylesheet" href="web_app_0406_style.css">
+
+<script type="text/javascript">
+function body_init()
+{
+    var self_jslib, req_cmd = "", rep_ret, mcm_dv;
+
+
+    $("#date_text").val();
+    $("#ip_addr_text").val();
+    $("#uptime_text").val();
+    $("#loading_text").val();
+    $("#date_check").prop("checked", false);
+    $("#ip_addr_check").prop("checked", false);
+    $("#uptime_check").prop("checked", false);
+    $("#loading_check").prop("checked", false);
+
+    // 指定要讀出的資料.
+    req_cmd = "&get.device.system";
+
+    // 送出讀出資料請求.
+    self_jslib = new mcm_jslib_lib_t();
+    self_jslib.socket_path = "@mintcm";
+    self_jslib.session_permission = mcm_session_permission.ro;
+    self_jslib.session_stack_size = 0;
+    self_jslib.request_command = req_cmd;
+    self_jslib.data_format = mcm_data_format.all_default;
+    self_jslib.other_query = "";
+    rep_ret = mcm_jslib_obtain_config(self_jslib);
+    if(rep_ret.rep_code < mcm_return_code.pass)
+    {
+        alert("call mcm_jslib_obtain_config() fail" +
+              "[" + rep_ret.rep_code + "]");
+        mcm_jslib_run_script(rep_ret.rep_data);
+        return;
+    }
+    // 處理資料格式.
+    mcm_dv = JSON.parse(rep_ret.rep_data);
+
+    // 顯示 device.system
+    $("#date_text").val(mcm_dv.device.system.date);
+    $("#ip_addr_text").val(mcm_dv.device.system.ip_addr);
+    $("#uptime_text").val(mcm_dv.device.system.uptime);
+    $("#loading_text").val(mcm_dv.device.system.loading);
+}
+
+// 設定資料.
+function module_run()
+{
+    var self_jslib, req_cmd = "", rep_ret;
+
+
+    if($("#date_check").prop("checked") == true)
+    {
+        // 設定 device.system.date
+        req_cmd += "&set.s.device.system.date=" +
+                   mcm_jslib_convert_submit_str($("#date_text").val());
+    }
+
+    if($("#ip_addr_check").prop("checked") == true)
+    {
+        // 設定 device.system.ip_addr
+        req_cmd += "&set.s.device.system.ip_addr=" +
+                   mcm_jslib_convert_submit_str($("#ip_addr_text").val());
+    }
+
+    if($("#uptime_check").prop("checked") == true)
+    {
+        // 設定 device.system.uptime
+        req_cmd += "&set.iull.device.system.uptime=" +
+                   $("#uptime_text").val();
+    }
+
+    if($("#loading_check").prop("checked") == true)
+    {
+        // 設定 device.system.loading
+        req_cmd += "&set.fd.device.system.loading=" +
+                   $("#loading_text").val();
+    }
+
+    // 執行內部模組.
+    req_cmd += "&run.mcm_module_get_alone";
+
+    // 送出修改資料請求.
+    self_jslib = new mcm_jslib_lib_t();
+    self_jslib.socket_path = "@mintcm";
+    self_jslib.session_permission = mcm_session_permission.rw;
+    self_jslib.session_stack_size = 0;
+    self_jslib.request_command = req_cmd;
+    self_jslib.after_complete = mcm_after_complete.reload;
+    self_jslib.other_query = "";
+    rep_ret = mcm_jslib_submit_config(self_jslib);
+    if(rep_ret.rep_code < mcm_return_code.pass)
+    {
+        alert("call mcm_jslib_submit_config() fail" +
+              "[" + rep_ret.rep_code + "]");
+        mcm_jslib_run_script(rep_ret.rep_data);
+        return;
+    }
+    mcm_jslib_run_script(rep_ret.rep_data);
+}
+</script>
+
+</head>
+
+<body onload="body_init()">
+
+  <div>[get-alone]</div>
+
+  <table class="css_table1">
+    <tr>
+      <td class="css_td1"></td>
+      <td class="css_td1">value</td>
+      <td class="css_td1">set</td>
+    </tr>
+    <tr>
+      <td class="css_td1">device.system.date</td>
+      <td class="css_td1"><input id="date_text" type="text" size="24"></td>
+      <td class="css_td1"><input id="date_check" type="checkbox"></td>
+    </tr>
+    <tr>
+      <td class="css_td1">device.system.ip_addr</td>
+      <td class="css_td1"><input id="ip_addr_text" type="text" size="24"></td>
+      <td class="css_td1"><input id="ip_addr_check" type="checkbox"></td>
+    </tr>
+    <tr>
+      <td class="css_td1">device.system.uptime</td>
+      <td class="css_td1"><input id="uptime_text" type="text" size="24"></td>
+      <td class="css_td1"><input id="uptime_check" type="checkbox"></td>
+    </tr>
+    <tr>
+      <td class="css_td1">device.system.loading</td>
+      <td class="css_td1"><input id="loading_text" type="text" size="24"></td>
+      <td class="css_td1"><input id="loading_check" type="checkbox"></td>
+    </tr>
+  </table>
+
+  <button type="button" onclick="module_run()">run</button>
+
+</body>
+
+</html>

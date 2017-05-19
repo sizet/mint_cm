@@ -1,0 +1,1635 @@
+<!--
+Copyright © 2017, Che-Wei Hsu <cwxhsu@gmail.com>
+This file is part of the MintCM.
+Some rights reserved. See README.
+-->
+
+<html>
+
+<head>
+<meta http-equiv="content-type" content="text/html; charset=utf-8">
+<link rel="stylesheet" href="../css/mcm_style.css">
+</head>
+
+<body class="css_body">
+
+<div class="css_div_box_frame_full">
+  <div class="css_div_box_title">chapter 02-01</div>
+  <div class="css_div_box_content">
+  </div>
+</div>
+<br>
+
+<div class="css_div_box_frame_full">
+  <div class="css_div_box_title">基本資料模型的建立</div>
+  <div class="css_div_box_content">
+    <br>
+
+    此章節說明如何建立資料模型.
+    <br><br><br>
+
+    資料模型檔案要放在 <font class="css_font_b1">mint_cm/mcm_build/mcm_data_profile.xml</font>.
+    <br><br><br>
+
+    資料模型是用來描述設備有提供哪些參數可使用, 資料模型的架構是樹狀結構, 格式為 XML 類型.<br>
+    使用類似 HTML 的 table 和 td 的組合模式將資料分成一個區塊一個區塊來描述.
+    <br><br><br>
+
+    <div class="css_div_hook" id="hook_0201_model_01"></div>
+    下面使用範例說明如何建立, 假設目前有個網路設備需要這些參數來操作這台網路設備的功能 :<br>
+    <table class="css_table_list2">
+      <tr>
+        <td class="css_td_list2_t1">資料區塊</td>
+        <td class="css_td_list2_t1">資料名稱</td>
+        <td class="css_td_list2_t1">說明</td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l1" rowspan="3">DATA-1</td>
+        <td class="css_td_list2_r1">(device)</td>
+        <td class="css_td_list2_r1">樹狀結構的根節點, 紀錄設備的基本資料, 靜態單筆資料</td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_r1">descript</td>
+        <td class="css_td_list2_r1">字串資料, 紀錄設備的相關描述</td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_r1">serial_number</td>
+        <td class="css_td_list2_r1">字節流資料, 紀錄設備的序號</td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l1" rowspan="5">DATA-2</td>
+        <td class="css_td_list2_r1">(system)</td>
+        <td class="css_td_list2_r1">紀錄基本設定, 靜態單筆資料類型</td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_r1">date</td>
+        <td class="css_td_list2_r1">字串資料, 紀錄日期</td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_r1">ip_addr</td>
+        <td class="css_td_list2_r1">字串資料, 紀錄設備的 IP 位址</td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_r1">uptime</td>
+        <td class="css_td_list2_r1">無號整數資料, 紀錄設備已開機多久</td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_r1">loadind</td>
+        <td class="css_td_list2_r1">浮點數資料, 紀錄設備的負載狀況</td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l1" rowspan="3">DATA-3</td>
+        <td class="css_td_list2_r1">(vap)</td>
+        <td class="css_td_list2_r1">紀錄無線網路存取點設定, 動態多筆資料</td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_r1">ssid</td>
+        <td class="css_td_list2_r1">字串資料, 紀錄無線介面的 SSID</td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_r1">channel</td>
+        <td class="css_td_list2_r1">有號整數資料, 紀錄無線介面使用的頻道</td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l1" rowspan="3">DATA-4</td>
+        <td class="css_td_list2_r1">(extra)</td>
+        <td class="css_td_list2_r1">紀錄每個無線網路存取點的額外設定, 靜態單筆資料</td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_r1">hidden</td>
+        <td class="css_td_list2_r1">有號整數資料, 紀錄是否隱藏無線介面</td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_r1">tx_power</td>
+        <td class="css_td_list2_r1">有號整數資料, 紀錄無線介面的發射功率</td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l1" rowspan="3">DATA-5</td>
+        <td class="css_td_list2_r1">(station)</td>
+        <td class="css_td_list2_r1">紀錄每個無線網路存取點的站台設定, 動態多筆資料</td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_r1">mac_addr</td>
+        <td class="css_td_list2_r1">字串資料, 紀錄站台的 MAC 位址</td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_r1">rule</td>
+        <td class="css_td_list2_r1">關聯資料, 紀錄站台要使用哪條限制規則 (limit)</td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l1" rowspan="3">DATA-6</td>
+        <td class="css_td_list2_r1">(limit)</td>
+        <td class="css_td_list2_r1">紀錄站台相關限制設定, 動態多筆資料</td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_r1">name</td>
+        <td class="css_td_list2_r1">字串資料, 紀錄規則的名稱</td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_r1">priority</td>
+        <td class="css_td_list2_r1">有號整數資料, 紀錄站台的優先權</td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l1" rowspan="4">DATA-7</td>
+        <td class="css_td_list2_r1">(client)</td>
+        <td class="css_td_list2_r1">紀錄連線上的站台資料, 動態多筆資料</td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_r1">mac_addr</td>
+        <td class="css_td_list2_r1">字串資料, 紀錄站台的 MAC 位址</td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_r1">location_x</td>
+        <td class="css_td_list2_r1">浮點數資料, 紀錄站台所在的 X 座標</td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_r1">location_y</td>
+        <td class="css_td_list2_r1">浮點數資料, 紀錄站台所在的 Y 座標</td>
+      </tr>
+    </table>
+    <br>
+    模型的架構會大致如下 :<br>
+    <div class="css_div_block">
+      <font class="css_font_r1">
+      &lt;device&gt;<br>
+      &nbsp;&nbsp;&lt;descript&gt;&lt;/descript&gt;<br>
+      &nbsp;&nbsp;&lt;serial_number&gt;&lt;/serial_number&gt;<br><br>
+      </font>
+      <font class="css_font_g1">
+      &nbsp;&nbsp;&lt;system&gt;<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&lt;date&gt;&lt;/date&gt;<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&lt;ip_addr&gt;&lt;/ip_addr&gt;<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&lt;uptime&gt;&lt;/uptime&gt;<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&lt;loading&gt;&lt;/loading&gt;<br>
+      &nbsp;&nbsp;&lt;/system&gt;<br>
+      </font><br>
+      <font class="css_font_b1">
+      &nbsp;&nbsp;&lt;vap&gt;<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&lt;ssid&gt;&lt;/ssid&gt;<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&lt;channel&gt;&lt;/channel&gt;<br>
+      </font><br>
+      <font class="css_font_c1">
+      &nbsp;&nbsp;&nbsp;&nbsp;&lt;extra&gt;<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;hidden&gt;&lt;/hidden&gt;<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;tx_power&gt;&lt;/tx_power&gt;<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&lt;/extra&gt;<br>
+      </font><br>
+      <font class="css_font_p1">
+      &nbsp;&nbsp;&nbsp;&nbsp;&lt;station&gt;<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;mac_addr&gt;&lt;/mac_addr&gt;<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;rule&gt;&lt;/rule&gt;<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&lt;/station&gt;<br>
+      </font>
+      <font class="css_font_b1">
+      &nbsp;&nbsp;&lt;/vap&gt;<br>
+      </font><br>
+      <font class="css_font_r1">
+      &nbsp;&nbsp;&lt;limit&gt;<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&lt;name&gt;&lt;/name&gt;<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&lt;priority&gt;&lt;/priority&gt;<br>
+      &nbsp;&nbsp;&lt;/limit&gt;<br>
+      </font><br>
+      <font class="css_font_g1">
+      &nbsp;&nbsp;&lt;client&gt;<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&lt;mac_addr&gt;&lt;/mac_addr&gt;<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&lt;locaion_x&gt;&lt;/locaion_x&gt;<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&lt;locaion_y&gt;&lt;/locaion_y&gt;<br>
+      &nbsp;&nbsp;&lt;/client&gt;<br>
+      </font>
+      <font class="css_font_r1">
+      &lt;/device&gt;
+      </font>
+    </div>
+    <br><br>
+
+    步驟一 : 加入 XML 開頭.<br>
+    <div class="css_div_block">
+      <font class="css_font_g1">&lt;?xml version="1.0"?&gt;</font><br><br>
+    </div>
+    <br><br>
+
+    <div class="css_div_hook" id="hook_0201_version_01"></div>
+    步驟二 : 加入 base 資訊 (用來描述額外的資訊).<br>
+    格式 :<br>
+    <div class="css_div_block">
+      <font class="css_font_g1">
+      &lt;base version="$(version)"&gt;<br>
+      &lt;/base&gt;
+      </font>
+    </div>
+    實際 :<br>
+    <div class="css_div_block">
+      &lt;?xml version="1.0"?&gt;<br><br>
+      <font class="css_font_g1">
+      &lt;base version="1.0"&gt;<br>
+      &lt;/base&gt;<br><br>
+      </font>
+    </div>
+    <br>
+
+    <font class="css_font_b1">version=$(version)</font><br>
+    表示此資料模型的版本, 格式可以隨意自訂, 如 [1] [1.2] [a.b] [2.1b] 都可.
+    <br><br><br>
+
+    步驟三 : 加入資料模型.<br>
+    <table class="css_table_list1">
+      <tr>
+        <td class="css_td_list1_l">*&nbsp;</td>
+        <td class="css_td_list1_r">
+          資料模型內容分成二大類, <font class="css_font_b1">群組(group)</font> 和
+          <font class="css_font_b1">成員(member)</font>, 類似 HTML 的 table 和 td.
+        </td>
+      </tr>
+      <tr>
+        <td class="css_td_list1_l">*&nbsp;</td>
+        <td class="css_td_list1_r">
+          以 [DATA-01] 來說, [device] 就是 group, [descript] 就是 member.
+        </td>
+      </tr>
+    </table>
+    <br>
+
+    先加入 group :<br>
+    格式 :<br>
+    <div class="css_div_block">
+      <font class="css_font_g1">
+      &lt;$(name) type="$(type)" max="$(max)" save="$(save)"&gt;<br>
+      &lt;/$(name)&gt;<br>
+      </font>
+    </div>
+    實際 :<br>
+    <div class="css_div_block">
+      &lt;?xml version="1.0"?&gt;<br><br>
+      &lt;base version="1.0"&gt;<br>
+      <font class="css_font_g1">
+      &lt;device type="gs" max="1" save="1"&gt;<br>
+      &lt;/device&gt;<br>
+      </font>
+      &lt;/base&gt;<br><br>
+    </div>
+    資料模型必須放在 <font class="css_font_b1">&lt;base&gt;...&lt;/base&gt;</font> 之內.
+    <br><br>
+
+    <div class="css_div_hook" id="hook_0201_name_format_01"></div>
+    <font class="css_font_b1">$(name)</font><br>
+    表示資料的名稱, 限制 :<br>
+    <table class="css_table_list2">
+      <tr>
+        <td class="css_td_list2_r1">
+          可使用的字元有 <font class="css_font_r1">a ~ z, A ~ Z, 0 ~ 9, _</font>
+        </td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_r1">
+          開頭字元必須是 <font class="css_font_r1">a ~ z, A ~ Z, _</font>
+        </td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_r1">
+          長度不可超過 <font class="css_font_r1">254</font>
+          <font class="css_font_c1">(MCM_DTYPE_SNLEN_TD - 1)</font>
+        </td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_r1">
+          同一層的 group 和 member 的名稱不可重複
+        </td>
+      </tr>
+    </table>
+    <br>
+
+    <div class="css_div_hook" id="hook_0201_type_format_01"></div>
+    <font class="css_font_b1">type="$(type)"</font><br>
+    表示 group 的類型 :<br>
+    <table class="css_table_list2">
+      <tr>
+        <td class="css_td_list2_t1">值</td>
+        <td class="css_td_list2_t1">說明</td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l2">gs</td>
+        <td class="css_td_list2_r1">
+          [group-static]<br>
+          表示此 group 只能容納靜態單筆資料, 能做 取得 / 設定 二種功能
+        </td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l2">gd</td>
+        <td class="css_td_list2_r1">
+          [group-dynamic]<br>
+          表示此 group 能夠容納動態多筆資料, 能做 取得 / 設定 / 增加 / 刪除 四種功能
+        </td>
+      </tr>
+    </table>
+    <br>
+
+    <div class="css_div_hook" id="hook_0201_max_format_01"></div>
+    <font class="css_font_b1">max="$(max)"</font><br>
+    表示 group 能夠容納的最大資料筆數 :<br>
+    <table class="css_table_list2">
+      <tr>
+        <td class="css_td_list2_t1">$(type)</td>
+        <td class="css_td_list2_t1">值 <font class="css_font_c1">(MCM_DTYPE_USIZE_TD)</font></td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l2">gs</td>
+        <td class="css_td_list2_r1">1</td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l2">gd</td>
+        <td class="css_td_list2_r1">1 ~ 4294967295</td>
+      </tr>
+    </table>
+    <br>
+
+    <div class="css_div_hook" id="hook_0201_save_format_01"></div>
+    <font class="css_font_b1">save="$(save)"</font><br>
+    表示 group 的資料是否要寫回檔案 :<br>
+    <table class="css_table_list2">
+      <tr>
+        <td class="css_td_list2_t1">值</td>
+        <td class="css_td_list2_t1">說明</td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l2">0</td>
+        <td class="css_td_list2_r1">資料不寫回檔案</td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l2">1</td>
+        <td class="css_td_list2_r1">資料要寫回檔案</td>
+      </tr>
+    </table>
+    <br>
+
+    接著加入 member :<br>
+    格式 :<br>
+    <div class="css_div_block">
+      <font class="css_font_g1">&lt;$(name) type="$(type)"&gt;$(default)&lt;/$(name)&gt;</font>
+    </div>
+    實際 :<br>
+    <div class="css_div_block">
+      &lt;?xml version="1.0"?&gt;<br><br>
+      &lt;base version="1.0"&gt;<br>
+      &lt;device type="gs" max="1" save="1"&gt;<br>
+      <font class="css_font_p1">
+      &nbsp;&nbsp;&lt;ekey type="ek"&gt;0&lt;/ekey&gt;<br>
+      </font>
+      <font class="css_font_g1">
+      &nbsp;&nbsp;&lt;descript type="s:256"&gt;Network-Device&lt;/descript&gt;<br>
+      &nbsp;&nbsp;&lt;serial_number type="b:10"&gt;0022E5A1CC9F&lt;/serial_number&gt;<br>
+      </font>
+      &lt;/device&gt;<br>
+      &lt;/base&gt;<br><br>
+    </div>
+    <br>
+
+    <font class="css_font_b1">$(name)</font><br>
+    表示資料的名稱, 限制 :<br>
+    <a href="#hook_0201_name_format_01">[參考]</a>
+    <br><br>
+
+    <div class="css_div_hook" id="hook_0201_type_format_02"></div>
+    <font class="css_font_b1">type="$(type)"</font><br>
+    表示 member 的資料類型 :<br>
+    <table class="css_table_list2">
+      <tr>
+        <td class="css_td_list2_t1">值</td>
+        <td class="css_td_list2_t1">說明</td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l2">ek</td>
+        <td class="css_td_list2_r1">
+          [entry-key] <font class="css_font_c1">(MCM_DTYPE_EK_TD)</font><br>
+          預留的資料, 紀錄此筆資料 key 值, 用來定位每筆資料<br>
+          <font class="css_font_p1">每個 group 都必須固定有一個此類型的 member</font>
+        </td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l2">rk</td>
+        <td class="css_td_list2_r1">
+          [related-key] <font class="css_font_c1">(MCM_DTYPE_RK_TD)</font><br>
+          需要關聯其他筆資料時, 需要記錄其 key 值, 但是 ek 類型只能有一個,
+          所以使用此種類型的資料來記錄<br>
+        </td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l2">isc</td>
+        <td class="css_td_list2_r1">
+          [integer-signed-char] <font class="css_font_c1">(MCM_DTYPE_ISC_TD)</font><br>
+          整數類型資料
+        </td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l2">iuc</td>
+        <td class="css_td_list2_r1">
+          [integer-unsigned-char] <font class="css_font_c1">(MCM_DTYPE_IUC_TD)</font><br>
+          整數類型資料
+        </td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l2">iss</td>
+        <td class="css_td_list2_r1">
+          [integer-signed-short] <font class="css_font_c1">(MCM_DTYPE_ISS_TD)</font><br>
+          整數類型資料
+        </td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l2">ius</td>
+        <td class="css_td_list2_r1">
+          [integer-unsigned-short] <font class="css_font_c1">(MCM_DTYPE_IUS_TD)</font><br>
+          整數類型資料
+        </td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l2">isi</td>
+        <td class="css_td_list2_r1">
+          [integer-signed-int] <font class="css_font_c1">(MCM_DTYPE_ISI_TD)</font><br>
+          整數類型資料
+        </td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l2">iui</td>
+        <td class="css_td_list2_r1">
+          [integer-unsigned-int] <font class="css_font_c1">(MCM_DTYPE_IUI_TD)</font><br>
+          整數類型資料
+        </td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l2">isll</td>
+        <td class="css_td_list2_r1">
+          [integer-signed-long-long] <font class="css_font_c1">(MCM_DTYPE_ISLL_TD)</font><br>
+          整數類型資料
+        </td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l2">iull</td>
+        <td class="css_td_list2_r1">
+          [integer-unsigned-long-long] <font class="css_font_c1">(MCM_DTYPE_IULL_TD)</font><br>
+          整數類型資料
+        </td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l2">ff</td>
+        <td class="css_td_list2_r1">
+          [float-float] <font class="css_font_c1">(MCM_DTYPE_FF_TD)</font><br>
+          浮點數類型資料
+        </td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l2">fd</td>
+        <td class="css_td_list2_r1">
+          [float-double] <font class="css_font_c1">(MCM_DTYPE_FD_TD)</font><br>
+          浮點數類型資料
+        </td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l2">fld</td>
+        <td class="css_td_list2_r1">
+          [float-long-doouble] <font class="css_font_c1">(MCM_DTYPE_FLD_TD)</font><br>
+          浮點數類型資料
+        </td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l2">s:$(size)</td>
+        <td class="css_td_list2_r1">
+          [string] <font class="css_font_c1">(MCM_DTYPE_S_TD)</font><br>
+          字串類型資料<br>
+          <font class="css_font_p1">size 表示字串緩衝的大小, 範圍 2 ~ 4294967295</font>
+          <font class="css_font_c1">(MCM_DTYPE_USIZE_TD)</font><br>
+        </td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l2">b:$(size)</td>
+        <td class="css_td_list2_r1">
+          [bytes] <font class="css_font_c1">(MCM_DTYPE_B_TD)</font><br>
+          字節流類型資料<br>
+          <font class="css_font_p1">size 表示字節緩衝的大小, 範圍 1 ~ 4294967295</font>
+          <font class="css_font_c1">(MCM_DTYPE_USIZE_TD)</font><br>
+        </td>
+      </tr>
+    </table>
+    <br>
+
+    <div class="css_div_hook" id="hook_0201_default_format_01"></div>
+    <font class="css_font_b1">$(default)</font><br>
+    用來紀錄 member 的初始值 :<br>
+    <table class="css_table_list2">
+      <tr>
+        <td class="css_td_list2_t1">$(type)</td>
+        <td class="css_td_list2_t1">值</td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l2">ek</td>
+        <td class="css_td_list2_r1">
+          不可為空, <font class="css_font_p1">0</font>
+        </td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l2">rk</td>
+        <td class="css_td_list2_r1">
+          不可為空, <font class="css_font_p1">0 ~ 4294967295</font>
+        </td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l2">isc</td>
+        <td class="css_td_list2_r1">
+          不可為空, <font class="css_font_p1">-128 ~ 127</font>
+        </td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l2">iuc</td>
+        <td class="css_td_list2_r1">
+          不可為空, <font class="css_font_p1">0 ~ 255</font>
+        </td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l2">iss</td>
+        <td class="css_td_list2_r1">
+          不可為空, <font class="css_font_p1">-32768 ~ 32767</font>
+        </td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l2">ius</td>
+        <td class="css_td_list2_r1">
+          不可為空, <font class="css_font_p1">0 ~ 65535</font>
+        </td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l2">isi</td>
+        <td class="css_td_list2_r1">
+          不可為空, <font class="css_font_p1">-2147483648 ~ 2147483648</font>
+        </td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l2">iui</td>
+        <td class="css_td_list2_r1">
+          不可為空, <font class="css_font_p1">0 ~ 4294967295</font>
+        </td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l2">isll</td>
+        <td class="css_td_list2_r1">
+          不可為空, <font class="css_font_p1">-9223372036854775808 ~ 9223372036854775807</font>
+        </td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l2">iull</td>
+        <td class="css_td_list2_r1">
+          不可為空, <font class="css_font_p1">0 ~ 18446744073709551615</font>
+        </td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l2">ff</td>
+        <td class="css_td_list2_r1">
+          不可為空
+        </td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l2">fd</td>
+        <td class="css_td_list2_r1">
+          不可為空
+        </td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l2">fld</td>
+        <td class="css_td_list2_r1">
+          不可為空
+        </td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l2">s:$(size)</td>
+        <td class="css_td_list2_r1">
+          可為空, 不為空須注意字串資料長度和緩衝大小<br><br>
+          可以使用 Unicode 字元, 特定字元 (含 Unicode), 必須以特定格式輸入 :<br>
+          <font class="css_font_p1">% + $(ASCII-Code (雙位數大寫 16 進制))</font><br><br>
+          可以列印的 ASCII 字元 <font class="css_font_b1">(0x20 ~ 0x7E)</font> 有二個字元列為特定字元 :<br>
+          <font class="css_font_p1">[ ](0x20) 改輸入 %20</font><br>
+          <font class="css_font_p1">[%](0x25) 改輸入 %25</font><br><br>
+          不可列印的 ASCII 字元都是特定字元 :<br>
+          <font class="css_font_p1">[\t](0x09) 改輸入 %09</font><br>
+          <font class="css_font_p1">[\r](0x0A) 改輸入 %0A</font><br>
+          <font class="css_font_p1">[\n](0x0D) 改輸入 %0D</font><br>
+          <font class="css_font_p1">...</font><br><br>
+          內部字串資料是以 UTF-8 格式儲存, 把 Unicode 轉 UTF-8
+          後用上述方式輸入, 例如 :<br>
+          <font class="css_font_p1">[資]</font> 的 UTF-8 編碼為
+          <font class="css_font_p1">E8 B3 87</font>, 輸入
+          <font class="css_font_p1">%E8%B3%87</font><br><br>
+          UTF-8 編碼長度為 1 ~ 6, 需注意緩衝大小, 例如要儲存 100 個 Unicode 字元,
+          緩衝大小至少要 : (100 * 6) + 1 = 601
+        </td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l2">b:$(size)</td>
+        <td class="css_td_list2_r1">
+          可為空, 不為空須注意字節資料長度和緩衝大小<br><br>
+          必須以特定格式輸入 :<br>
+          <font class="css_font_p1">$(Byte-Code (雙位數大寫 16 進制))</font><br><br>
+          例如 :<br>
+          0011A46DEE94
+      </tr>
+    </table>
+    <br>
+
+    加入 [DATA-02] :<br>
+    <div class="css_div_block">
+      &lt;?xml version="1.0"?&gt;<br><br>
+      &lt;base version="1.0"&gt;<br>
+      &lt;device type="gs" max="1" save="1"&gt;<br>
+      &nbsp;&nbsp;&lt;ekey type="ek"&gt;0&lt;/ekey&gt;<br>
+      &nbsp;&nbsp;&lt;descript type="s:256"&gt;Network-Device&lt;/descript&gt;<br>
+      &nbsp;&nbsp;&lt;serial_number type="b:10"&gt;0022E5A1CC9F&lt;/serial_number&gt;<br><br>
+      <font class="css_font_g1">
+      &nbsp;&nbsp;&lt;system type="gs" max="1" save="1"&gt;<br>
+      <font class="css_font_p1">
+      &nbsp;&nbsp;&nbsp;&nbsp;&lt;ekey type="ek"&gt;0&lt;/ekey&gt;<br>
+      </font>
+      &nbsp;&nbsp;&nbsp;&nbsp;&lt;date type="s:12"&gt;2015/01/01&lt;/date&gt;<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&lt;ip_addr type="s:46"&gt;192.168.1.1&lt;/ip_addr&gt;<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&lt;uptime type="iull"&gt;0&lt;/uptime&gt;<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&lt;loading type="fd"&gt;0&lt;/loading&gt;<br>
+      &nbsp;&nbsp;&lt;/system&gt;<br>
+      </font>
+      &lt;/device&gt;<br>
+      &lt;/base&gt;<br><br>
+    </div>
+    <br>
+
+    加入 [DATA-03] :<br>
+    <div class="css_div_block">
+      &lt;?xml version="1.0"?&gt;<br><br>
+      &lt;base version="1.0"&gt;<br>
+      &lt;device type="gs" max="1" save="1"&gt;<br>
+      &nbsp;&nbsp;&lt;ekey type="ek"&gt;0&lt;/ekey&gt;<br>
+      &nbsp;&nbsp;&lt;descript type="s:256"&gt;Network-Device&lt;/descript&gt;<br>
+      &nbsp;&nbsp;&lt;serial_number type="b:10"&gt;0022E5A1CC9F&lt;/serial_number&gt;<br><br>
+      &nbsp;&nbsp;&lt;system type="gs" max="1" save="1"&gt;<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&lt;ekey type="ek"&gt;0&lt;/ekey&gt;<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&lt;date type="s:12"&gt;2015/01/01&lt;/date&gt;<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&lt;ip_addr type="s:46"&gt;192.168.1.1&lt;/ip_addr&gt;<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&lt;uptime type="iull"&gt;0&lt;/uptime&gt;<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&lt;loading type="fd"&gt;0&lt;/loading&gt;<br>
+      &nbsp;&nbsp;&lt;/system&gt;<br><br>
+      <font class="css_font_g1">
+      &nbsp;&nbsp;&lt;vap type="gd" max="16" save="1"&gt;<br>
+      <font class="css_font_p1">
+      &nbsp;&nbsp;&nbsp;&nbsp;&lt;ekey type="ek"&gt;0&lt;/ekey&gt;<br>
+      </font>
+      &nbsp;&nbsp;&nbsp;&nbsp;&lt;ssid type="s:64"&gt;&lt;/ssid&gt;<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&lt;channel type="iui"&gt;0&lt;/channel&gt;<br>
+      &nbsp;&nbsp;&lt;/vap&gt;<br>
+      </font>
+      &lt;/device&gt;<br>
+      &lt;/base&gt;<br><br>
+    </div>
+    <br>
+
+    加入 [DATA-04] :<br>
+    <div class="css_div_block">
+      &lt;?xml version="1.0"?&gt;<br><br>
+      &lt;base version="1.0"&gt;<br>
+      &lt;device type="gs" max="1" save="1"&gt;<br>
+      &nbsp;&nbsp;&lt;ekey type="ek"&gt;0&lt;/ekey&gt;<br>
+      &nbsp;&nbsp;&lt;descript type="s:256"&gt;Network-Device&lt;/descript&gt;<br>
+      &nbsp;&nbsp;&lt;serial_number type="b:10"&gt;0022E5A1CC9F&lt;/serial_number&gt;<br><br>
+      &nbsp;&nbsp;&lt;system type="gs" max="1" save="1"&gt;<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&lt;ekey type="ek"&gt;0&lt;/ekey&gt;<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&lt;date type="s:12"&gt;2015/01/01&lt;/date&gt;<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&lt;ip_addr type="s:46"&gt;192.168.1.1&lt;/ip_addr&gt;<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&lt;uptime type="iull"&gt;0&lt;/uptime&gt;<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&lt;loading type="fd"&gt;0&lt;/loading&gt;<br>
+      &nbsp;&nbsp;&lt;/system&gt;<br><br>
+      &nbsp;&nbsp;&lt;vap type="gd" max="16" save="1"&gt;<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&lt;ekey type="ek"&gt;0&lt;/ekey&gt;<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&lt;ssid type="s:64"&gt;&lt;/ssid&gt;<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&lt;channel type="iui"&gt;0&lt;/channel&gt;<br><br>
+      <font class="css_font_g1">
+      &nbsp;&nbsp;&nbsp;&nbsp;&lt;extra type="gs" max="1" save="1"&gt;<br>
+      <font class="css_font_p1">
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;ekey type="ek"&gt;0&lt;/ekey&gt;<br>
+      </font>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;hidden type="isc"&gt;0&lt;/hidden&gt;<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;tx_power type="iss"&gt;0&lt;/tx_power&gt;<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&lt;/extra&gt;<br>
+      </font>
+      &nbsp;&nbsp;&lt;/vap&gt;<br>
+      &lt;/device&gt;<br>
+      &lt;/base&gt;<br><br>
+    </div>
+    <br>
+
+    加入 [DATA-05] :<br>
+    <div class="css_div_block">
+      &lt;?xml version="1.0"?&gt;<br><br>
+      &lt;base version="1.0"&gt;<br>
+      &lt;device type="gs" max="1" save="1"&gt;<br>
+      &nbsp;&nbsp;&lt;ekey type="ek"&gt;0&lt;/ekey&gt;<br>
+      &nbsp;&nbsp;&lt;descript type="s:256"&gt;Network-Device&lt;/descript&gt;<br>
+      &nbsp;&nbsp;&lt;serial_number type="b:10"&gt;0022E5A1CC9F&lt;/serial_number&gt;<br><br>
+      &nbsp;&nbsp;&lt;system type="gs" max="1" save="1"&gt;<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&lt;ekey type="ek"&gt;0&lt;/ekey&gt;<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&lt;date type="s:12"&gt;2015/01/01&lt;/date&gt;<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&lt;ip_addr type="s:46"&gt;192.168.1.1&lt;/ip_addr&gt;<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&lt;uptime type="iull"&gt;0&lt;/uptime&gt;<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&lt;loading type="fd"&gt;0&lt;/loading&gt;<br>
+      &nbsp;&nbsp;&lt;/system&gt;<br><br>
+      &nbsp;&nbsp;&lt;vap type="gd" max="16" save="1"&gt;<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&lt;ekey type="ek"&gt;0&lt;/ekey&gt;<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&lt;ssid type="s:64"&gt;&lt;/ssid&gt;<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&lt;channel type="iui"&gt;0&lt;/channel&gt;<br><br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&lt;extra type="gs" max="1" save="1"&gt;<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;ekey type="ek"&gt;0&lt;/ekey&gt;<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;hidden type="isc"&gt;0&lt;/hidden&gt;<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;tx_power type="iss"&gt;0&lt;/tx_power&gt;<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&lt;/extra&gt;<br><br>
+      <font class="css_font_g1">
+      &nbsp;&nbsp;&nbsp;&nbsp;&lt;station type="gd" max="32" save="1"&gt;<br>
+      <font class="css_font_p1">
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;ekey type="ek"&gt;0&lt;/ekey&gt;<br>
+      </font>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;mac_addr type="s:18"&gt;00:00:00:00:00:00&lt;/mac_addr&gt;<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;rule type="rk"&gt;0&lt;/rule&gt;<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&lt;/station&gt;<br>
+      </font>
+      &nbsp;&nbsp;&lt;/vap&gt;<br>
+      &lt;/device&gt;<br>
+      &lt;/base&gt;<br><br>
+    </div>
+    <br>
+
+    加入 [DATA-06] :<br>
+    <div class="css_div_block">
+      &lt;?xml version="1.0"?&gt;<br><br>
+      &lt;base version="1.0"&gt;<br>
+      &lt;device type="gs" max="1" save="1"&gt;<br>
+      &nbsp;&nbsp;&lt;ekey type="ek"&gt;0&lt;/ekey&gt;<br>
+      &nbsp;&nbsp;&lt;descript type="s:256"&gt;Network-Device&lt;/descript&gt;<br>
+      &nbsp;&nbsp;&lt;serial_number type="b:10"&gt;0022E5A1CC9F&lt;/serial_number&gt;<br><br>
+      &nbsp;&nbsp;&lt;system type="gs" max="1" save="1"&gt;<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&lt;ekey type="ek"&gt;0&lt;/ekey&gt;<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&lt;date type="s:12"&gt;2015/01/01&lt;/date&gt;<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&lt;ip_addr type="s:46"&gt;192.168.1.1&lt;/ip_addr&gt;<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&lt;uptime type="iull"&gt;0&lt;/uptime&gt;<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&lt;loading type="fd"&gt;0&lt;/loading&gt;<br>
+      &nbsp;&nbsp;&lt;/system&gt;<br><br>
+      &nbsp;&nbsp;&lt;vap type="gd" max="16" save="1"&gt;<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&lt;ekey type="ek"&gt;0&lt;/ekey&gt;<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&lt;ssid type="s:64"&gt;&lt;/ssid&gt;<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&lt;channel type="iui"&gt;0&lt;/channel&gt;<br><br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&lt;extra type="gs" max="1" save="1"&gt;<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;ekey type="ek"&gt;0&lt;/ekey&gt;<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;hidden type="isc"&gt;0&lt;/hidden&gt;<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;tx_power type="iss"&gt;0&lt;/tx_power&gt;<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&lt;/extra&gt;<br><br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&lt;station type="gd" max="32" save="1"&gt;<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;ekey type="ek"&gt;0&lt;/ekey&gt;<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;mac_addr type="s:18"&gt;00:00:00:00:00:00&lt;/mac_addr&gt;<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;rule type="rk"&gt;0&lt;/rule&gt;<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&lt;/station&gt;<br>
+      &nbsp;&nbsp;&lt;/vap&gt;<br><br>
+      <font class="css_font_g1">
+      &nbsp;&nbsp;&lt;limit type="gd" max="64" save="1"&gt;<br>
+      <font class="css_font_p1">
+      &nbsp;&nbsp;&nbsp;&nbsp;&lt;ekey type="ek"&gt;0&lt;/ekey&gt;<br>
+      </font>
+      &nbsp;&nbsp;&nbsp;&nbsp;&lt;name type="s:32"&gt;&lt;/name&gt;<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&lt;priority type="isi"&gt;-1&lt;/priority&gt;<br>
+      &nbsp;&nbsp;&lt;/limit&gt;<br>
+      </font>
+      &lt;/device&gt;<br>
+      &lt;/base&gt;<br><br>
+    </div>
+    <br>
+
+    加入 [DATA-07] :<br>
+    <div class="css_div_block">
+      &lt;?xml version="1.0"?&gt;<br><br>
+      &lt;base version="1.0"&gt;<br>
+      &lt;device type="gs" max="1" save="1"&gt;<br>
+      &nbsp;&nbsp;&lt;ekey type="ek"&gt;0&lt;/ekey&gt;<br>
+      &nbsp;&nbsp;&lt;descript type="s:256"&gt;Network-Device&lt;/descript&gt;<br>
+      &nbsp;&nbsp;&lt;serial_number type="b:10"&gt;0022E5A1CC9F&lt;/serial_number&gt;<br><br>
+      &nbsp;&nbsp;&lt;system type="gs" max="1" save="1"&gt;<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&lt;ekey type="ek"&gt;0&lt;/ekey&gt;<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&lt;date type="s:12"&gt;2015/01/01&lt;/date&gt;<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&lt;ip_addr type="s:46"&gt;192.168.1.1&lt;/ip_addr&gt;<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&lt;uptime type="iull"&gt;0&lt;/uptime&gt;<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&lt;loading type="fd"&gt;0&lt;/loading&gt;<br>
+      &nbsp;&nbsp;&lt;/system&gt;<br><br>
+      &nbsp;&nbsp;&lt;vap type="gd" max="16" save="1"&gt;<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&lt;ekey type="ek"&gt;0&lt;/ekey&gt;<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&lt;ssid type="s:64"&gt;&lt;/ssid&gt;<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&lt;channel type="iui"&gt;0&lt;/channel&gt;<br><br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&lt;extra type="gs" max="1" save="1"&gt;<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;ekey type="ek"&gt;0&lt;/ekey&gt;<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;hidden type="isc"&gt;0&lt;/hidden&gt;<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;tx_power type="iss"&gt;0&lt;/tx_power&gt;<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&lt;/extra&gt;<br><br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&lt;station type="gd" max="32" save="1"&gt;<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;ekey type="ek"&gt;0&lt;/ekey&gt;<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;mac_addr type="s:18"&gt;00:00:00:00:00:00&lt;/mac_addr&gt;<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;rule type="rk"&gt;0&lt;/rule&gt;<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&lt;/station&gt;<br>
+      &nbsp;&nbsp;&lt;/vap&gt;<br><br>
+      &nbsp;&nbsp;&lt;limit type="gd" max="64" save="1"&gt;<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&lt;ekey type="ek"&gt;0&lt;/ekey&gt;<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&lt;name type="s:32"&gt;&lt;/name&gt;<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&lt;priority type="isi"&gt;-1&lt;/priority&gt;<br>
+      &nbsp;&nbsp;&lt;/limit&gt;<br><br>
+      <font class="css_font_g1">
+      &nbsp;&nbsp;&lt;client type="gd" max="128" save="0"&gt;<br>
+      <font class="css_font_p1">
+      &nbsp;&nbsp;&nbsp;&nbsp;&lt;ekey type="ek"&gt;0&lt;/ekey&gt;<br>
+      </font>
+      &nbsp;&nbsp;&nbsp;&nbsp;&lt;mac_addr type="s:18"&gt;&lt;/mac_addr&gt;<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&lt;location_x type="fld"&gt;0&lt;/location_x&gt;<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&lt;location_y type="fld"&gt;0&lt;/location_y&gt;<br>
+      &nbsp;&nbsp;&lt;/client&gt;<br>
+      </font>
+      &lt;/device&gt;<br>
+      &lt;/base&gt;<br><br>
+    </div>
+    <br>
+
+    資料模型到此就建立完成.
+    <br><br>
+
+  </div>
+</div>
+<br>
+
+<div class="css_div_box_frame_full">
+  <div class="css_div_box_title">註解的使用</div>
+  <div class="css_div_box_content">
+    <br>
+
+    註解符號是 <font class="css_font_b1">&lt;!--</font> 和 <font class="css_font_b1">--&gt;</font>
+    <br><br>
+
+    可以使用 單行, 多行, 巢狀 模式的註解.
+    <br><br>
+
+    <font class="css_font_b1">&lt;!--</font> 必須在文字最前面,
+    <font class="css_font_b1">--&gt;</font> 必須在文字最後面.
+    <br><br>
+
+    範例 :<br>
+    <div class="css_div_block">
+      &lt;!-- text --&gt;<br><br>
+      &lt;!--<br>text<br>--&gt;<br><br>
+      &lt;!--<br>&lt;!-- text --&gt;<br>--&gt;<br><br>
+      &lt;!--<br>&lt;!--<br>text<br>--&gt;<br>--&gt;
+    </div>
+    <br>
+
+  </div>
+</div>
+<br>
+
+<div class="css_div_box_frame_full">
+  <div class="css_div_box_title">注意事項</div>
+  <div class="css_div_box_content">
+    <br>
+
+    <div class="css_div_hook" id="hook_0201_node_format_01"></div>
+    <table class="css_table_list1">
+      <tr>
+        <td class="css_td_list1_l">01.&nbsp;</td>
+        <td class="css_td_list1_r">
+          樹根的 group 必須是 gs 類型.
+        </td>
+      </tr>
+    </table>
+    <br><br>
+
+    <div class="css_div_hook" id="hook_0201_node_format_02"></div>
+    <table class="css_table_list1">
+      <tr>
+        <td class="css_td_list1_l">02.&nbsp;</td>
+        <td class="css_td_list1_r">
+          每個 group 都必須固定有一個 ek 類型的 member.
+        </td>
+      </tr>
+    </table>
+    <br><br>
+
+    <div class="css_div_hook" id="hook_0201_node_format_03"></div>
+    <table class="css_table_list1">
+      <tr>
+        <td class="css_td_list1_l">03.&nbsp;</td>
+        <td class="css_td_list1_r">
+          沒有 child-group 的 group 必須要有 member (不含 ek 類型).
+          <div class="css_div_block">
+            &lt;GroupA&gt;<br>
+            &nbsp;&nbsp;&lt;GroupB&gt;<br>
+            <font class="css_font_r1">
+            &nbsp;&nbsp;&nbsp;&nbsp;&lt;GroupC&gt;<br>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;...<br>
+            &nbsp;&nbsp;&nbsp;&nbsp;&lt;/GroupC&gt;<br>
+            </font>
+            &nbsp;&nbsp;&lt;/GroupB&gt;<br>
+            &lt;/GroupA&gt;
+          </div>
+        </td>
+      </tr>
+    </table>
+    <br><br>
+
+    <div class="css_div_hook" id="hook_0201_save_format_02"></div>
+    <table class="css_table_list1">
+      <tr>
+        <td class="css_td_list1_l">04.&nbsp;</td>
+        <td class="css_td_list1_r">
+          若 group 的 $(save) 設為 0, 則內部的 child-group 的 $(save) 都必須是 0.
+          <div class="css_div_block">
+            &lt;GroupA type="gs" max="1" save="1"&gt;<br>
+            &nbsp;&nbsp;&lt;GroupB1 type="gd" max="10" save="<font class="css_font_r1">0</font>"&gt;<br>
+            &nbsp;&nbsp;&nbsp;&nbsp;&lt;GroupC1 type="gd" max="15" save="<font class="css_font_p1">0</font>"&gt;<br>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;GroupD1 type="gd" max="20" save="<font class="css_font_p1">0</font>"&gt;<br>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;/GroupD1&gt;<br>
+            &nbsp;&nbsp;&nbsp;&nbsp;&lt;/GroupC1&gt;<br>
+            &nbsp;&nbsp;&lt;/GroupB1&gt;<br>
+            &nbsp;&nbsp;&lt;GroupB2 type="gs" max="1" save="1"&gt;<br>
+            &nbsp;&nbsp;&lt;/GroupB2&gt;<br>
+            &lt;/GroupA&gt;
+          </div>
+        </td>
+      </tr>
+    </table>
+    <br><br>
+
+    <div class="css_div_hook" id="hook_0201_arrange_format_01"></div>
+    <table class="css_table_list1">
+      <tr>
+        <td class="css_td_list1_l">05.&nbsp;</td>
+        <td class="css_td_list1_r">
+          group 類型的標籤必須是區塊模式 (頭尾標籤在不同行).<br>
+          member 類型的標籤必須是單行模式 (頭尾標籤在同一行).
+          <div class="css_div_block">
+            <font class="css_font_c1">group :</font><br>
+            &lt;Group&gt;<br>...<br>&lt;/Group&gt;<br><br>
+            <font class="css_font_c1">member :</font><br>
+            &lt;Member&gt;...&lt;/Member&gt;
+          </div>
+        </td>
+      </tr>
+    </table>
+    <br><br>
+
+    <table class="css_table_list1">
+      <tr>
+        <td class="css_td_list1_l">06.&nbsp;</td>
+        <td class="css_td_list1_r">
+          檔案的最後必須多加一行換行.
+          <div class="css_div_block">
+            &lt;?xml version="1.0"?&gt;<br>
+            &lt;base version="1.0"&gt;<br>
+            &nbsp;&nbsp;...<br>
+            &lt;/base&gt;<br>
+            <font class="css_font_p1">-- 多一行 --</font>
+          </div>
+        </td>
+      </tr>
+    </table>
+    <br>
+
+  </div>
+</div>
+<br>
+
+<div class="css_div_box_frame_full">
+  <div class="css_div_box_title">編譯資料模型</div>
+  <div class="css_div_box_content">
+    <br>
+
+    進入 <font class="css_font_b1">mint_cm</font>,
+    使用 <font class="css_font_p1">make binary_profile</font> 來編譯.
+    <br><br>
+
+    會自動使用 <font class="css_font_b1">mint_cm/mcm_build/mcm_build</font> 進行處理, 使用方法 :<br>
+    <table class="css_table_list2">
+      <tr>
+        <td class="css_td_list2_t2" colspan="3">
+          <font class="css_font_g1">mcm_build &lt;-d&gt; &lt;-m&gt; &lt;-s&gt;</font>
+        </td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_t1">參數</td>
+        <td class="css_td_list2_t1">讀寫</td>
+        <td class="css_td_list2_t1">說明</td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l2">&lt;-d data_profile_path&gt;</td>
+        <td class="css_td_list2_l3">讀</td>
+        <td class="css_td_list2_r1">mcm_data_profile.xml<br>資料模型檔案</td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l2">&lt;-d model_profile_path&gt;</td>
+        <td class="css_td_list2_l3">寫</td>
+        <td class="css_td_list2_r1">mcm_model_profile.txt<br>給程式讀取的資料模型檔案</td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l2">&lt;-d store_profile_path&gt;</td>
+        <td class="css_td_list2_l3">寫</td>
+        <td class="css_td_list2_r1">mcm_store_profile.txt<br>給程式讀取的資料模型設定值檔案</td>
+      </tr>
+    </table>
+    <br>
+
+    編譯無誤完成後, 會產生幾個檔案 :<br>
+    <table class="css_table_list2">
+      <tr>
+        <td class="css_td_list2_t2" colspan="2">
+          <font class="css_font_b1">mint_cm/mcm_build</font>
+        </td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l2">mcm_model_profile.txt</td>
+        <td class="css_td_list2_r1">給程式讀取的資料模型檔案</td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l2">mcm_store_profile.txt</td>
+        <td class="css_td_list2_r1">給程式讀取的資料設定的預設值檔案</td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l2">mcm_store_profile_default.txt</td>
+        <td class="css_td_list2_r1">給程式讀取的資料設定的預設值檔案 (實際使用的)</td>
+      </tr>
+    </table>
+    <table class="css_table_list2">
+      <tr>
+        <td class="css_td_list2_t2">
+          <font class="css_font_b1">mint_cm/mcm_daemon</font>
+        </td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l2">mcm_data_ininfo_auto.h</td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l2">mcm_data_info_auto.c</td>
+      </tr>
+    </table>
+    <table class="css_table_list2">
+      <tr>
+        <td class="css_td_list2_t2">
+          <font class="css_font_b1">mint_cm/mcm_lib/mcm_lheader</font>
+        </td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l2">mcm_data_exinfo_auto.h</td>
+      </tr>
+    </table>
+    <table class="css_table_list2">
+      <tr>
+        <td class="css_td_list2_t2">
+          <font class="css_font_b1">mint_cm/mcm_lib/mcm_jslib</font>
+        </td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l2">mcm_jslib_data_info_auto.js</td>
+      </tr>
+    </table>
+
+    <br>
+
+  </div>
+</div>
+<br>
+
+<div class="css_div_box_frame_full">
+  <div class="css_div_box_title">資料模型錯誤資訊</div>
+  <div class="css_div_box_content">
+    <br>
+
+    編譯資料模型時, 會檢查是否有錯誤, 發現錯誤後會顯示錯誤訊息並停止編譯.
+    <br><br>
+
+    錯誤訊息格式 :<br>
+    <div class="css_div_block">
+      <font class="css_font_r1">profile error,
+      line <font class="css_font_b1">$(error_line)</font>,
+      code <font class="css_font_b1">$(error_code)</font> :<br>
+      <font class="css_font_b1">$(descript)</font>
+      </font>
+    </div>
+    範例 :
+    <table class="css_table_console">
+      <tr>
+        <td class="css_td_console">
+          mcm_build.c(0641):<br>
+          <font class="css_font_r1">
+          profile error, line 13, code INVALID_NAME_05 :<br>
+          invalid tag [name], name can not be duplication [&lt;descript&gt;...&lt;/descript&gt;]<br>
+          </font>
+          mcm_build.c(2059): call check_name_format2() fail<br>
+          mcm_build.c(2285): call load_node_profile() fail<br>
+          mcm_build.c(0398): call load_xml_profile() fail
+		</td>
+      </tr>
+    </table>
+   <br>
+
+    <font class="css_font_b1">$(error_line)</font><br>
+    在第幾行發生錯誤.
+    <br><br>
+
+    <font class="css_font_b1">$(error_code)</font><br>
+    錯誤代號.
+    <br><br>
+
+    <font class="css_font_b1">$(descript)</font><br>
+    錯誤原因的簡單描述.
+    <br><br>
+
+    錯誤代號表 :<br>
+    <table class="css_table_list2">
+      <tr>
+        <td class="css_td_list2_t1" width="260px">代號</td>
+        <td class="css_td_list2_t1">說明</td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l2">INVALID_TAG_01</td>
+        <td class="css_td_list2_r1">
+          此行的文字長度太短
+        </td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l2">INVALID_TAG_02</td>
+        <td class="css_td_list2_r1">
+          標籤的頭尾名稱必須相同,
+          &lt;<font class="css_font_g1">uptime</font>&gt;...&lt;/<font class="css_font_r1">uptime</font>&gt;
+        </td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l2"><font class="css_font_r1">INVALID_TAG_SYMBOL_01</font></td>
+        <td class="css_td_list2_r1" rowspan="5">
+          標籤 &lt;...&gt;...&lt;/...&gt; 的
+          <font class="css_font_p1">[&lt;] [&gt;] [&lt;] [&gt;] [/]</font> 符號有缺少
+        </td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l2">INVALID_TAG_SYMBOL_02</td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l2">INVALID_TAG_SYMBOL_03</td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l2">INVALID_TAG_SYMBOL_04</td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l2">INVALID_TAG_SYMBOL_05</td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l2">INVALID_CLASS_01</td>
+        <td class="css_td_list2_r1">
+          最開始的標籤組必須是 <font class="css_font_g1">&lt;base&gt;...&lt;/base&gt;</font>
+        </td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l2">INVALID_NAME_01</td>
+        <td class="css_td_list2_r1">
+          標簽名稱不可為空
+        </td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l2">INVALID_NAME_02</td>
+        <td class="css_td_list2_r1">
+          標簽名稱長度太長 <a href="#hook_0201_name_format_01">[詳細]</a>
+        </td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l2">INVALID_NAME_03</td>
+        <td class="css_td_list2_r1" rowspan="2">
+          標簽名稱格式有錯誤 <a href="#hook_0201_name_format_01">[詳細]</a>
+        </td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l2">INVALID_NAME_04</td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l2">INVALID_NAME_05</td>
+        <td class="css_td_list2_r1">
+          標簽名稱發生重複 <a href="#hook_0201_name_format_01">[詳細]</a>
+        </td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l2">INVALID_ATTRIBUTE_01</td>
+        <td class="css_td_list2_r1">
+          標籤的屬性缺少 <font class="css_font_p1">[=]</font> 符號,
+          &lt;uptime type<font class="css_font_r1">=</font>"iui"&gt;...&lt;/uptime&gt;
+        </td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l2">INVALID_ATTRIBUTE_02</td>
+        <td class="css_td_list2_r1">
+          標籤的屬性無效<br>
+          &lt;base&gt;&lt;/base&gt; 類型可以使用的有 <font class="css_font_g1">[version]</font><br>
+          group 類型可以使用的有 <font class="css_font_g1">[type] [max] [save]</font><br>
+          member 類型可以使用的有 <font class="css_font_g1">[type]</font>
+        </td>
+      </tr>
+
+      <tr>
+        <td class="css_td_list2_l2">INVALID_ATTRIBUTE_03</td>
+        <td class="css_td_list2_r1" rowspan="2">
+          標籤的屬性缺少 <font class="css_font_p1">["]</font> 符號,
+          &lt;uptime type=<font class="css_font_r1">"</font>iui<font class="css_font_r1">"</font>&gt;...&lt;/uptime&gt;
+        </td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l2">INVALID_ATTRIBUTE_04</td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l2">INVALID_ATTRIBUTE_05</td>
+        <td class="css_td_list2_r1">
+          標籤的屬性有缺少,<br>
+          &lt;base&gt;&lt;/base&gt; 類型要有 <font class="css_font_g1">[version]</font><br>
+          group 類型要有 <font class="css_font_g1">[type] [max] [save]</font><br>
+          member 類型要有 <font class="css_font_g1">[type]</font>
+        </td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l2">INVALID_TYPE_01</td>
+        <td class="css_td_list2_r1">
+          此類型的標籤無法使用此屬性 <font class="css_font_p1">[type]</font>
+        </td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l2">INVALID_TYPE_02</td>
+        <td class="css_td_list2_r1" rowspan="2">
+          標籤屬性 <font class="css_font_p1">[type]</font> 的值無效
+          <a href="#hook_0201_type_format_01">[詳細-group]</a>
+          <a href="#hook_0201_type_format_02">[詳細-member]</a>
+        </td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l2">INVALID_TYPE_03</td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l2">INVALID_TYPE_04</td>
+        <td class="css_td_list2_r1">
+          標籤屬性 <font class="css_font_p1">[type]</font> 的值為
+          <font class="css_font_r1">[s:&lt;size&gt;]</font> 時, 其緩衝大小的設定有誤,
+          <a href="#hook_0201_type_format_02">[詳細]</a>
+        </td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l2">INVALID_MAX_01</td>
+        <td class="css_td_list2_r1">
+          此類型的標籤無法使用此屬性 <font class="css_font_p1">[max]</font>
+        </td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l2">INVALID_MAX_02</td>
+        <td class="css_td_list2_r1">
+          標籤屬性 <font class="css_font_g1">[type] [max] [save]</font> 必須照順序輸入
+        </td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l2">INVALID_MAX_03</td>
+        <td class="css_td_list2_r1">
+          此類型的標籤無法使用此屬性 <font class="css_font_p1">[max]</font>
+        </td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l2">INVALID_MAX_04</td>
+        <td class="css_td_list2_r1" rowspan="3">
+          標籤屬性 <font class="css_font_p1">[max]</font> 的值無效
+          <a href="#hook_0201_max_format_01">[詳細]</a>
+        </td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l2">INVALID_MAX_05</td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l2">INVALID_MAX_06</td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l2">INVALID_SAVE_01</td>
+        <td class="css_td_list2_r1">
+          此類型的標籤無法使用此屬性 <font class="css_font_p1">[save]</font>
+        </td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l2">INVALID_SAVE_02</td>
+        <td class="css_td_list2_r1">
+          標籤屬性 <font class="css_font_g1">[type] [max] [save]</font> 必須照順序輸入
+        </td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l2">INVALID_SAVE_03</td>
+        <td class="css_td_list2_r1">
+          此類型的標籤無法使用此屬性 <font class="css_font_p1">[save]</font>
+        </td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l2">INVALID_SAVE_04</td>
+        <td class="css_td_list2_r1" rowspan="2">
+          標籤屬性 <font class="css_font_p1">[save]</font> 的值無效
+          <a href="#hook_0201_save_format_01">[詳細]</a>
+        </td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l2">INVALID_SAVE_05</td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l2">INVALID_SAVE_06</td>
+        <td class="css_td_list2_r1">
+          若 parent-group 的 <font class="css_font_p1">[save]</font> 為 <font class="css_font_r1">0</font>,
+          則所有 child-group 的 $(save) 都必須是 0
+          <a href="#hook_0201_save_format_02">[詳細]</a>
+        </td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l2">INVALID_ARRANGE_01</td>
+        <td class="css_td_list2_r1" rowspan="2">
+          標籤的排列方式錯誤 <a href="#hook_0201_arrange_format_01">[詳細]</a>
+        </td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l2">INVALID_ARRANGE_02</td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l2">INVALID_DEFAULT_01</td>
+        <td class="css_td_list2_r1">
+          標籤的 <font class="css_font_p1">$(default)</font> 值無效
+          <a href="#hook_0201_default_format_01">[詳細]</a>
+        </td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l2">INVALID_DEFAULT-INTEGER_01</td>
+        <td class="css_td_list2_r1" rowspan="2">
+          標籤的 <font class="css_font_p1">$(default)</font> 值無效 (整數類型)
+          <a href="#hook_0201_default_format_01">[詳細]</a>
+        </td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l2">INVALID_DEFAULT-INTEGER_02</td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l2">INVALID_DEFAULT-FLOAT_01</td>
+        <td class="css_td_list2_r1" rowspan="2">
+          標籤的 <font class="css_font_p1">$(default)</font> 值無效 (浮點數類型)
+          <a href="#hook_0201_default_format_01">[詳細]</a>
+        </td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l2">INVALID_DEFAULT-FLOAT_02</td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l2">INVALID_DEFAULT-STRING_01</td>
+        <td class="css_td_list2_r1" rowspan="6">
+          標籤的 <font class="css_font_p1">$(default)</font> 值無效 (字串類型)
+          <a href="#hook_0201_default_format_01">[詳細]</a>
+        </td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l2">INVALID_DEFAULT-STRING_02</td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l2">INVALID_DEFAULT-STRING_03</td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l2">INVALID_DEFAULT-STRING_04</td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l2">INVALID_DEFAULT-STRING_05</td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l2">INVALID_DEFAULT-STRING_06</td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l2">INVALID_DEFAULT-BYTES_01</td>
+        <td class="css_td_list2_r1" rowspan="3">
+          標籤的 <font class="css_font_p1">$(default)</font> 值無效 (字節流類型)
+          <a href="#hook_0201_default_format_01">[詳細]</a>
+        </td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l2">INVALID_DEFAULT-BYTES_02</td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l2">INVALID_DEFAULT-BYTES_03</td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l2">INVALID_NODE_01</td>
+        <td class="css_td_list2_r1">
+          根結點的 group 必須是 <font class="css_font_p1">[gs]</font> 類型
+          <a href="#hook_0201_node_format_01">[詳細]</a>
+        </td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l2">INVALID_NODE_02</td>
+        <td class="css_td_list2_r1">
+          member 必須放在 group 內, 不可單獨出現
+        </td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l2">INVALID_NODE_03</td>
+        <td class="css_td_list2_r1">
+          標籤的頭尾名稱必須相同
+          &lt;<font class="css_font_g1">uptime</font>&gt;...&lt;/<font class="css_font_r1">uptime</font>&gt;
+        </td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l2">INVALID_NODE_04</td>
+        <td class="css_td_list2_r1">
+          每個 group 都必須固定有一個 <font class="css_font_p1">[ek]</font> 類型的 member
+          <a href="#hook_0201_node_format_02">[詳細]</a>
+        </td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l2">INVALID_NODE_05</td>
+        <td class="css_td_list2_r1">
+          沒有 child-group 的 group 必須要有 member
+          (不含 <font class="css_font_r1">[ek]</font> 類型)
+          <a href="#hook_0201_node_format_04">[詳細]</a>
+        </td>
+      </tr>
+    </table>
+    <br>
+
+  </div>
+</div>
+<br>
+
+<div class="css_div_box_frame_full">
+  <div class="css_div_box_title">編譯指令的使用</div>
+  <div class="css_div_box_content">
+    <br>
+
+    編譯的操作是在 <font class="css_font_b1">mint_cm</font> 目錄, 可用的指令 :<br>
+    <table class="css_table_list2">
+      <tr>
+        <td class="css_td_list2_t1" width="220px">指令</td>
+        <td class="css_td_list2_t1">說明</td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l2">binary_profile</td>
+        <td class="css_td_list2_r1">
+          處理資料模型
+        </td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l2">binary_library</td>
+        <td class="css_td_list2_r1">
+          編譯函式庫
+        </td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l2">binary_httpd</td>
+        <td class="css_td_list2_r1">
+          編譯網頁伺服器
+        </td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l2">binary_daemon</td>
+        <td class="css_td_list2_r1">
+          編譯執行檔
+        </td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l2">install_profile</td>
+        <td class="css_td_list2_r1">
+          複製資料模型和資料預設值檔到 <font class="css_font_b1">mint_cm\run</font>
+        </td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l2">install_library</td>
+        <td class="css_td_list2_r1">
+          複製相關的函式庫到 <font class="css_font_b1">mint_cm\run</font>
+        </td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l2">install_httpd</td>
+        <td class="css_td_list2_r1">
+          複製相關網頁伺服器設定檔和執行檔到 <font class="css_font_b1">mint_cm\run</font>
+        </td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l2">install_daemon</td>
+        <td class="css_td_list2_r1">
+          複製相關的執行檔到 <font class="css_font_b1">mint_cm\run</font>
+        </td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l2">all</td>
+        <td class="css_td_list2_r1">
+          依序編譯 <font class="css_font_p1">binary_profile binary_library binary_httpd binary_daemon install_library install_httpd install_profile install_daemon</font>
+        </td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l2">clean</td>
+        <td class="css_td_list2_r1">
+          清除編譯的結果
+        </td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l2">example_add KEY=$(key)</td>
+        <td class="css_td_list2_r1">
+          將指定的範例目錄內的檔案複製到對應的程式目錄,
+          之後做完整編譯 <font class="css_font_p1">all</font>
+        </td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l2">example_del KEY=$(key)</td>
+        <td class="css_td_list2_r1">
+          清除編譯結果 <font class="css_font_p1">clean</font>,
+          之後將 example_add 時複製過去的檔案刪除
+        </td>
+      </tr>
+    </table>
+    <br>
+
+  </div>
+</div>
+<br>
+
+<div class="css_div_box_frame_full">
+  <div class="css_div_box_title">範例程式的使用</div>
+  <div class="css_div_box_content">
+    <br>
+
+    <table class="css_table_list1">
+      <tr>
+        <td class="css_td_list1_l">01.&nbsp;</td>
+        <td class="css_td_list1_r">
+          範例程式目錄在 <font class="css_font_b1">mint_cm/usage/example/0201</font>.
+        </td>
+      </tr>
+    </table>
+    <br><br>
+
+    <table class="css_table_list1">
+      <tr>
+        <td class="css_td_list1_l">02.&nbsp;</td>
+        <td class="css_td_list1_r">
+          下面關於 <font class="css_font_p1">make</font> 的操作都是在
+          <font class="css_font_b1">mint_cm</font> 目錄.
+        </td>
+      </tr>
+    </table>
+    <br><br>
+
+    <table class="css_table_list1">
+      <tr>
+        <td class="css_td_list1_l">03.&nbsp;</td>
+        <td class="css_td_list1_r">
+          第一次使用, 使用 <font class="css_font_p1">make example_add KEY=0201</font>
+          載入範例並編譯.
+        </td>
+      </tr>
+    </table>
+    <br><br>
+
+    <table class="css_table_list1">
+      <tr>
+        <td class="css_td_list1_l">04.&nbsp;</td>
+        <td class="css_td_list1_r">
+          有修改的話, 使用 <font class="css_font_p1">make binary_profile</font> 重新編譯.<br>
+          資料模型錯誤的話, 會顯示錯誤訊息.<br>
+          資料模型正確的話, 會產生對應的檔案.
+        </td>
+      </tr>
+    </table>
+    <br><br>
+
+    <table class="css_table_list1">
+      <tr>
+        <td class="css_td_list1_l">05.&nbsp;</td>
+        <td class="css_td_list1_r">
+          測試完畢不使用後, 使用 <font class="css_font_p1">make example_del KEY=0201</font>
+          將範例移除.
+        </td>
+      </tr>
+    </table>
+    <br><br>
+
+    <table class="css_table_list1">
+      <tr>
+        <td class="css_td_list1_l">06.&nbsp;</td>
+        <td class="css_td_list1_r">
+          範例程式目錄下的檔案在做完 <font class="css_font_p1">make example_add</font>
+          後會複製到真正使用的位置, 要修改做測試的話要改在複製後的.<br>
+          <table class="css_table_list2">
+            <tr>
+              <td class="css_td_list2_r1">
+                來源 <font class="css_font_b1">profile/mcm_data_profile_0201.xml</font><br>
+                目地 <font class="css_font_b1">mint_cm/mcm_build/mcm_data_profile.xml</font><br>
+                資料模型範例<br>
+                有修改要使用 <font class="css_font_p1">make all</font> 重新編譯
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+    <br>
+
+  </div>
+</div>
+<br>
+
+</body>
+
+</html>

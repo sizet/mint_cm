@@ -1,0 +1,186 @@
+<!--
+Copyright © 2017, Che-Wei Hsu <cwxhsu@gmail.com>
+This file is part of the MintCM.
+Some rights reserved. See README.
+-->
+
+<html>
+
+<head>
+
+<meta http-equiv="cache-control" content="no-cache">
+<meta http-equiv="content-type" content="text/html; charset=utf-8">
+<script type="text/javascript" src="jquery_main.js"></script>
+<script type="text/javascript" src="json3.js"></script>
+<script type="text/javascript" src="mcm_jslib_api.js"></script>
+<script type="text/javascript" src="mcm_jslib_data_info_auto.js"></script>
+<script type="text/javascript" src="maam_jslib_api.js"></script>
+<script type="text/javascript" src="web_app_1004_script.js"></script>
+<link rel="stylesheet" href="web_app_1004_style.css">
+
+<script type="text/javascript">
+mcm_dv = null;
+
+function body_init()
+{
+    var self_jslib, req_cmd, rep_ret, data_array, i, tmp_html = "";
+
+
+    // 指定取出 session 資料.
+    req_cmd = "&run.mcm_module_get_session" +
+              "&get.device.web.session.*";
+
+    // 送出讀出資料請求.
+    self_jslib = new mcm_jslib_lib_t();
+    self_jslib.socket_path = "@mintcm";
+    self_jslib.session_permission = mcm_session_permission.rw;
+    self_jslib.session_stack_size = 0;
+    self_jslib.request_command = req_cmd;
+    self_jslib.data_format = mcm_data_format.all_default;
+    self_jslib.other_query = "";
+    rep_ret = mcm_jslib_obtain_config(self_jslib);
+    if(rep_ret.rep_code < mcm_return_code.pass)
+    {
+        if((maam_return_code.internal_error >= rep_ret.rep_code) &&
+           (rep_ret.rep_code >= maam_return_code.boundary))
+        {
+            switch(rep_ret.rep_code)
+            {
+                case maam_return_code.miss_session_key:
+                case maam_return_code.invalid_session_key:
+                    tmp_html = "invalid access, please login";
+                    break;
+                case maam_return_code.idle_timeout:
+                    tmp_html = "idle timeout, please re-login";
+                    break;
+                default:
+                    tmp_html = "call mcm_jslib_obtain_config() fail [auth]" +
+                               "[" + rep_ret.rep_code + "]";
+            }
+        }
+        else
+        {
+            tmp_html = "call mcm_jslib_obtain_config() fail [config]" +
+                       "[" + rep_ret.rep_code + "]";
+        }
+        alert(tmp_html);
+        mcm_jslib_run_script(rep_ret.rep_data);
+        return;
+    }
+    // 處理資料格式.
+    mcm_dv = JSON.parse(rep_ret.rep_data);
+
+    // 顯示 session 筆數.
+    data_array = new Array(2);
+    data_array[0] = new Array();
+    data_array[1] = new Array();
+    data_array[0].push("session count");
+    data_array[1].push(mcm_dv.device.web.session.length);
+    tmp_html += jsapi_make_table("css_table1", "css_td1", data_array);
+
+    // 顯示 session 資料.
+    data_array = new Array(8);
+    data_array[0] = new Array();
+    data_array[1] = new Array();
+    data_array[2] = new Array();
+    data_array[3] = new Array();
+    data_array[4] = new Array();
+    data_array[5] = new Array();
+    data_array[6] = new Array();
+    data_array[7] = new Array();
+    data_array[0].push("client<br>addr");
+    data_array[1].push("account<br>name");
+    data_array[2].push("account<br>permission");
+    data_array[3].push("session<br>key");
+    data_array[4].push("idle<br>timeout");
+    data_array[5].push("create<br>uptime");
+    data_array[6].push("last<br>access<br>uptime");
+    data_array[7].push("kick<br>session");
+    for(i = 0; i < mcm_dv.device.web.session.length; i++)
+    {
+        data_array[0].push(mcm_jslib_convert_html_str(mcm_dv.device.web.session[i].client_addr));
+        data_array[1].push(mcm_jslib_convert_html_str(mcm_dv.device.web.session[i].account_name));
+        data_array[2].push(mcm_dv.device.web.session[i].account_permission);
+        data_array[3].push(mcm_jslib_convert_html_str(mcm_dv.device.web.session[i].session_key));
+        data_array[4].push(mcm_dv.device.web.session[i].idle_timeout);
+        data_array[5].push(mcm_dv.device.web.session[i].create_uptime);
+        data_array[6].push(mcm_dv.device.web.session[i].last_access_uptime);
+        data_array[7].push(jsapi_make_checkbox("kick_checkbox_" + i, 0));
+    }
+    tmp_html += jsapi_make_table("css_table1", "css_td1", data_array);
+
+    $("#show_box").html(tmp_html);
+}
+
+// 踢掉 session.
+function kick_session()
+{
+    var self_jslib, req_cmd = "", rep_ret, tmp_path, i;
+
+
+    for(i = 0; i < mcm_dv.device.web.session.length; i++)
+        if($("#kick_checkbox_" + i).is(":checked"))
+        {
+            // 刪除 device.web.session.{i}
+            tmp_path = "device.web.session.#" + mcm_dv.device.web.session[i].ekey;
+
+            req_cmd += "&del." + tmp_path;
+        }
+
+    // 處理踢掉 session.
+    req_cmd += "&run.mcm_module_kick_session";
+
+    // 送出修改資料請求.
+    self_jslib = new mcm_jslib_lib_t();
+    self_jslib.socket_path = "@mintcm";
+    self_jslib.session_permission = mcm_session_permission.rw;
+    self_jslib.session_stack_size = 0;
+    self_jslib.request_command = req_cmd;
+    self_jslib.after_complete = mcm_after_complete.reload;
+    self_jslib.other_query = "";
+    rep_ret = mcm_jslib_submit_config(self_jslib);
+    if(rep_ret.rep_code < mcm_return_code.pass)
+    {
+        if((maam_return_code.internal_error >= rep_ret.rep_code) &&
+           (rep_ret.rep_code >= maam_return_code.boundary))
+        {
+            switch(rep_ret.rep_code)
+            {
+                case maam_return_code.miss_session_key:
+                case maam_return_code.invalid_session_key:
+                    tmp_html = "invalid access, please login";
+                    break;
+                case maam_return_code.idle_timeout:
+                    tmp_html = "idle timeout, please re-login";
+                    break;
+                default:
+                    tmp_html = "call mcm_jslib_submit_config() fail [auth]" +
+                               "[" + rep_ret.rep_code + "]";
+            }
+        }
+        else
+        {
+            tmp_html = "call mcm_jslib_submit_config() fail [config]" +
+                       "[" + rep_ret.rep_code + "]";
+        }
+        alert(tmp_html);
+        mcm_jslib_run_script(rep_ret.rep_data);
+        return;
+    }
+    mcm_jslib_run_script(rep_ret.rep_data);
+}
+</script>
+
+</head>
+
+<body onload="body_init()">
+
+  <div>[session]</div>
+
+  <div id="show_box"></div>
+
+  <button type="button" onclick="kick_session()">kick</button>
+
+</body>
+
+</html>

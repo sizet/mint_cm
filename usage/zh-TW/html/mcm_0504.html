@@ -1,0 +1,1408 @@
+<!--
+Copyright © 2017, Che-Wei Hsu <cwxhsu@gmail.com>
+This file is part of the MintCM.
+Some rights reserved. See README.
+-->
+
+<html>
+
+<head>
+<meta http-equiv="content-type" content="text/html; charset=utf-8">
+<link rel="stylesheet" href="../css/mcm_style.css">
+</head>
+
+<body class="css_body">
+
+<div class="css_div_box_frame_full">
+  <div class="css_div_box_title">chapter 05-04</div>
+  <div class="css_div_box_content">
+  </div>
+</div>
+<br>
+
+<div class="css_div_box_frame_full">
+  <div class="css_div_box_title">使用方式 (網頁端)</div>
+  <div class="css_div_box_content">
+    <br>
+
+    此章節說明如何在網頁端程式使用內部模組回傳資訊.
+    <br><br>
+
+  </div>
+</div>
+<br>
+
+<div class="css_div_box_frame_full">
+  <div class="css_div_box_title">變數格式的說明</div>
+  <div class="css_div_box_content">
+    <br>
+
+    <div class="css_div_hook" id="hook_0504_req_con_01"></div>
+    <font class="css_font_b1">[req_con]</font><br>
+    mcm_jslib_obtain_max_count(), mcm_jslib_obtain_config(),
+    mcm_jslib_submit_config() 回傳的資訊.<br>
+    會使用到的結構成員 :<br>
+    <table class="css_table_list2">
+      <tr>
+        <td class="css_td_list2_l1">
+          <font class="css_font_g1">rep_code</font>
+        </td>
+        <td class="css_td_list2_r1">
+          內部模組回傳的整數 <a href="mcm_0501.html#hook_0501_return_integer_01">[詳細]</a>
+        </td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l1">
+          <font class="css_font_g1">rep_data</font>
+        </td>
+        <td class="css_td_list2_r1">
+          內部模組回傳的字串內容 <a href="mcm_0501.html#hook_0501_return_string_01">[詳細]</a><br>
+        </td>
+      </tr>
+    </table>
+    <br>
+
+  </div>
+</div>
+<br>
+
+<div class="css_div_box_frame_full">
+  <div class="css_div_box_title">各種函式的行為限制</div>
+  <div class="css_div_box_content">
+    <br>
+
+    <table class="css_table_box">
+      <tr>
+        <td class="css_td_box">
+          <font class="css_font_b2">mcm_jslib_obtain_max_count</font><br><br>
+          <table class="css_table_list1">
+            <tr>
+              <td class="css_td_list1_l">01.&nbsp;</td>
+              <td class="css_td_list1_r">
+                rep_code 的值小於 MCM_RCODE_PASS 代表 rep_data 是錯誤訊息,
+                訊息內容是 CGI 部分填入, 固定是 JavaScript 格式.
+              </td>
+            </tr>
+          </table>
+          <br>
+          範例 : 指令內指定錯誤的路徑.<br>
+<pre class="css_pre_code">
+網頁程式部分
+
+&lt;html&gt;
+&lt;head&gt;
+&lt;meta http-equiv="cache-control" content="no-cache"&gt;
+&lt;meta http-equiv="content-type" content="text/html; charset=utf-8"&gt;
+&lt;script type="text/javascript" src="jquery_main.js"&gt;&lt;/script&gt;
+&lt;script type="text/javascript" src="json3.js"&gt;&lt;/script&gt;
+&lt;script type="text/javascript" src="mcm_jslib_api.js"&gt;&lt;/script&gt;
+&lt;script type="text/javascript" src="mcm_jslib_data_info_auto.js"&gt;&lt;/script&gt;
+&lt;script type="text/javascript"&gt;
+function do_test()
+{
+    var self_jslib, req_cmd, rep_ret, mcm_dv;
+
+    // 錯誤的路徑, 應該是 device.system
+    req_cmd = "&get.device.sys";
+
+    self_jslib = new mcm_jslib_lib_t();
+    self_jslib.socket_path = "@mintcm";
+    self_jslib.session_permission = mcm_session_permission.ro;
+    self_jslib.session_stack_size = 0;
+    self_jslib.request_command = req_cmd;
+    self_jslib.other_query = "";
+    rep_ret = mcm_jslib_obtain_max_count(self_jslib);
+    if(rep_ret.rep_code < mcm_return_code.pass)
+    {
+        alert("call mcm_jslib_obtain_max_count() fail" +
+              "[" + rep_ret.rep_code + "]");
+        mcm_jslib_run_script(rep_ret.rep_data);
+        return;
+    }
+    mcm_dv = JSON.parse(rep_ret.rep_data);
+}
+&lt;/script&gt;
+&lt;/head&gt;
+&lt;body&gt;
+  &lt;button type="button" onclick="do_test()"&gt;test&lt;/button&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+</pre>
+        </td>
+      </tr>
+    </table>
+    <br>
+
+    <table class="css_table_box">
+      <tr>
+        <td class="css_td_box">
+          <font class="css_font_b2">mcm_jslib_obtain_config</font><br><br>
+          <table class="css_table_list1">
+            <tr>
+              <td class="css_td_list1_l">01.&nbsp;</td>
+              <td class="css_td_list1_r">
+                rep_code 的值小於 MCM_RCODE_PASS 代表 rep_data 是錯誤訊息.
+              </td>
+            </tr>
+            <tr>
+              <td class="css_td_list1_l">02.&nbsp;</td>
+              <td class="css_td_list1_r">
+                如果處理指令發生錯誤, 而且錯誤的原因不是由內部模組設定的 (例如指令內指定錯誤的資訊),
+                訊息內容會由 CGI 部分填入, 固定是 JavaScript 格式.
+              </td>
+            </tr>
+            <tr>
+              <td class="css_td_list1_l">03.&nbsp;</td>
+              <td class="css_td_list1_r">
+                使用內部模組設定訊息時, 格式沒有限制.
+              </td>
+            </tr>
+            <tr>
+              <td class="css_td_list1_l">04.&nbsp;</td>
+              <td class="css_td_list1_r">
+                如果使用 run 執行多個內部模組, 只會得到最後一個被執行的內部模組的訊息.
+              </td>
+            </tr>
+          </table>
+          <br>
+          範例 : 指令內指定錯誤的路徑.<br>
+<pre class="css_pre_code">
+網頁程式部分
+
+&lt;html&gt;
+&lt;head&gt;
+&lt;meta http-equiv="cache-control" content="no-cache"&gt;
+&lt;meta http-equiv="content-type" content="text/html; charset=utf-8"&gt;
+&lt;script type="text/javascript" src="jquery_main.js"&gt;&lt;/script&gt;
+&lt;script type="text/javascript" src="json3.js"&gt;&lt;/script&gt;
+&lt;script type="text/javascript" src="mcm_jslib_api.js"&gt;&lt;/script&gt;
+&lt;script type="text/javascript" src="mcm_jslib_data_info_auto.js"&gt;&lt;/script&gt;
+&lt;script type="text/javascript"&gt;
+function do_test()
+{
+    var self_jslib, req_cmd, rep_ret, mcm_dv;
+
+    // 錯誤的路徑, 應該是 device.system
+    req_cmd = "&get.device.sys";
+
+    self_jslib = new mcm_jslib_lib_t();
+    self_jslib.socket_path = "@mintcm";
+    self_jslib.session_permission = mcm_session_permission.ro;
+    self_jslib.session_stack_size = 0;
+    self_jslib.request_command = req_cmd;
+    self_jslib.data_format = mcm_data_format.all_default;
+    self_jslib.other_query = "";
+    rep_ret = mcm_jslib_obtain_config(self_jslib);
+    if(rep_ret.rep_code < mcm_return_code.pass)
+    {
+        alert("call mcm_jslib_obtain_config() fail" +
+              "[" + rep_ret.rep_code + "]");
+        mcm_jslib_run_script(rep_ret.rep_data);
+        return;
+    }
+    mcm_dv = JSON.parse(rep_ret.rep_data);
+}
+&lt;/script&gt;
+&lt;/head&gt;
+&lt;body&gt;
+  &lt;button type="button" onclick="do_test()"&gt;test&lt;/button&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+</pre>
+          <br>
+          範例 : 由內部模組設定錯誤.<br>
+<pre class="css_pre_code">
+網頁程式部分
+
+&lt;html&gt;
+&lt;head&gt;
+&lt;meta http-equiv="cache-control" content="no-cache"&gt;
+&lt;meta http-equiv="content-type" content="text/html; charset=utf-8"&gt;
+&lt;script type="text/javascript" src="jquery_main.js"&gt;&lt;/script&gt;
+&lt;script type="text/javascript" src="json3.js"&gt;&lt;/script&gt;
+&lt;script type="text/javascript" src="mcm_jslib_api.js"&gt;&lt;/script&gt;
+&lt;script type="text/javascript" src="mcm_jslib_data_info_auto.js"&gt;&lt;/script&gt;
+&lt;script type="text/javascript"&gt;
+function do_test()
+{
+    var self_jslib, req_cmd, rep_ret, mcm_dv;
+
+    req_cmd = "&run.mcm_module_obtain_error_test" +
+              "&get.device.system";
+
+    self_jslib = new mcm_jslib_lib_t();
+    self_jslib.socket_path = "@mintcm";
+    self_jslib.session_permission = mcm_session_permission.ro;
+    self_jslib.session_stack_size = 0;
+    self_jslib.request_command = req_cmd;
+    self_jslib.data_format = mcm_data_format.all_default;
+    self_jslib.other_query = "";
+    rep_ret = mcm_jslib_obtain_config(self_jslib);
+    if(rep_ret.rep_code < mcm_return_code.pass)
+    {
+        alert("call mcm_jslib_obtain_config() fail" +
+              "[" + rep_ret.rep_code + "]");
+        mcm_jslib_run_script(rep_ret.rep_data);
+        return;
+    }
+    mcm_dv = JSON.parse(rep_ret.rep_data);
+}
+&lt;/script&gt;
+&lt;/head&gt;
+&lt;body&gt;
+  &lt;button type="button" onclick="do_test()"&gt;test&lt;/button&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+</pre>
+<pre class="css_pre_code">
+內部模組部分
+
+#include &lt;errno.h&gt;
+#include &lt;stdio.h&gt;
+#include &lt;string.h&gt;
+#include &lt;stdlib.h&gt;
+#include "../../mcm_lib/mcm_lheader/mcm_type.h"
+#include "../../mcm_lib/mcm_lheader/mcm_size.h"
+#include "../../mcm_lib/mcm_lheader/mcm_control.h"
+#include "../../mcm_lib/mcm_lheader/mcm_connect.h"
+#include "../../mcm_lib/mcm_lheader/mcm_return.h"
+#include "../../mcm_lib/mcm_lheader/mcm_debug.h"
+#include "../../mcm_lib/mcm_lheader/mcm_data_exinfo_auto.h"
+#include "../mcm_service_handle_extern.h"
+#include "../mcm_config_handle_extern.h"
+
+#define DMSG(msg_fmt, msgs...) printf("%s(%04u): " msg_fmt "\n", __FILE__, __LINE__, ##msgs)
+
+int mcm_module_obtain_error_test(
+    struct mcm_service_session_t *this_session)
+{
+    int fret = MCM_RCODE_MODULE_INTERNAL_ERROR;
+
+    DMSG("obtain error test :");
+
+    if(mcm_service_response_init(this_session, 1024) < MCM_RCODE_PASS)
+    {
+        DMSG("call mcm_service_response_init() fail");
+        goto FREE_01;
+    }
+    DMSG("buffer [%p][" MCM_DTYPE_USIZE_PF "]",
+         this_session->rep_msg_buf, this_session->rep_msg_size);
+
+    snprintf(this_session->rep_msg_buf, this_session->rep_msg_size,
+             "alert(\"custom error\");");
+
+FREE_01:
+    return fret;
+}
+</pre>
+          <br>
+          範例 : 執行多個內部模組.<br>
+<pre class="css_pre_code">
+網頁程式部分
+
+&lt;html&gt;
+&lt;head&gt;
+&lt;meta http-equiv="cache-control" content="no-cache"&gt;
+&lt;meta http-equiv="content-type" content="text/html; charset=utf-8"&gt;
+&lt;script type="text/javascript" src="jquery_main.js"&gt;&lt;/script&gt;
+&lt;script type="text/javascript" src="json3.js"&gt;&lt;/script&gt;
+&lt;script type="text/javascript" src="mcm_jslib_api.js"&gt;&lt;/script&gt;
+&lt;script type="text/javascript" src="mcm_jslib_data_info_auto.js"&gt;&lt;/script&gt;
+&lt;script type="text/javascript"&gt;
+function do_test()
+{
+    var self_jslib, req_cmd, rep_ret, mcm_dv;
+
+    // 執行多個內部模組, 只會得到最後一個被執行的內部模組的訊息,
+    // mcm_module_obtain_multiple_test_01() 設定錯誤會馬上返回不會繼續處理指令,
+    // 所以 mcm_module_obtain_multiple_test_02() 不會被執行到.
+    req_cmd = "&run.mcm_module_obtain_multiple_test_01" +
+              "&run.mcm_module_obtain_multiple_test_02" +
+              "&get.device.system";
+
+    self_jslib = new mcm_jslib_lib_t();
+    self_jslib.socket_path = "@mintcm";
+    self_jslib.session_permission = mcm_session_permission.ro;
+    self_jslib.session_stack_size = 0;
+    self_jslib.request_command = req_cmd;
+    self_jslib.data_format = mcm_data_format.all_default;
+    self_jslib.other_query = "";
+    rep_ret = mcm_jslib_obtain_config(self_jslib);
+    if(rep_ret.rep_code < mcm_return_code.pass)
+    {
+        alert("call mcm_jslib_obtain_config() fail" +
+              "[" + rep_ret.rep_code + "]");
+        mcm_jslib_run_script(rep_ret.rep_data);
+        return;
+    }
+    mcm_dv = JSON.parse(rep_ret.rep_data);
+}
+&lt;/script&gt;
+&lt;/head&gt;
+&lt;body&gt;
+  &lt;button type="button" onclick="do_test()"&gt;test&lt;/button&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+</pre>
+<pre class="css_pre_code">
+內部模組部分
+
+#include &lt;errno.h&gt;
+#include &lt;stdio.h&gt;
+#include &lt;string.h&gt;
+#include &lt;stdlib.h&gt;
+#include "../../mcm_lib/mcm_lheader/mcm_type.h"
+#include "../../mcm_lib/mcm_lheader/mcm_size.h"
+#include "../../mcm_lib/mcm_lheader/mcm_control.h"
+#include "../../mcm_lib/mcm_lheader/mcm_connect.h"
+#include "../../mcm_lib/mcm_lheader/mcm_return.h"
+#include "../../mcm_lib/mcm_lheader/mcm_debug.h"
+#include "../../mcm_lib/mcm_lheader/mcm_data_exinfo_auto.h"
+#include "../mcm_service_handle_extern.h"
+#include "../mcm_config_handle_extern.h"
+
+#define DMSG(msg_fmt, msgs...) printf("%s(%04u): " msg_fmt "\n", __FILE__, __LINE__, ##msgs)
+
+int mcm_module_obtain_multiple_test_01(
+    struct mcm_service_session_t *this_session)
+{
+    int fret = MCM_RCODE_MODULE_INTERNAL_ERROR;
+
+    DMSG("obtain multiple test 01 :");
+
+    if(mcm_service_response_init(this_session, 1024) < MCM_RCODE_PASS)
+    {
+        DMSG("call mcm_service_response_init() fail");
+        goto FREE_01;
+    }
+    DMSG("buffer [%p][" MCM_DTYPE_USIZE_PF "]",
+         this_session->rep_msg_buf, this_session->rep_msg_size);
+
+    snprintf(this_session->rep_msg_buf, this_session->rep_msg_size,
+             "alert(\"custom error 01\");");
+
+FREE_01:
+    return fret;
+}
+
+int mcm_module_obtain_multiple_test_02(
+    struct mcm_service_session_t *this_session)
+{
+    int fret = MCM_RCODE_MODULE_INTERNAL_ERROR;
+
+    DMSG("obtain multiple test 02 :");
+
+    if(mcm_service_response_init(this_session, 1024) < MCM_RCODE_PASS)
+    {
+        DMSG("call mcm_service_response_init() fail");
+        goto FREE_01;
+    }
+    DMSG("buffer [%p][" MCM_DTYPE_USIZE_PF "]",
+         this_session->rep_msg_buf, this_session->rep_msg_size);
+
+    snprintf(this_session->rep_msg_buf, this_session->rep_msg_size,
+             "alert(\"custom error 02\");");
+
+FREE_01:
+    return fret;
+}
+</pre>
+        </td>
+      </tr>
+    </table>
+    <br>
+
+    <table class="css_table_box">
+      <tr>
+        <td class="css_td_box">
+          <font class="css_font_b2">mcm_jslib_submit_config</font><br><br>
+          <table class="css_table_list1">
+            <tr>
+              <td class="css_td_list1_l">01.&nbsp;</td>
+              <td class="css_td_list1_r">
+                如果處理指令發生錯誤, 而且錯誤的原因不是由內部模組設定的 (例如指令內指定錯誤的資訊),
+                錯誤訊息內容會由 CGI 部分填入, 固定是 JavaScript 格式.
+              </td>
+            </tr>
+            <tr>
+              <td class="css_td_list1_l">02.&nbsp;</td>
+              <td class="css_td_list1_r">
+                如果處理指令沒有錯誤, 而且沒有指定執行內部模組並填入回傳訊息,
+                CGI 部分會依據 after_complete 來決定要填入哪種訊息.
+              </td>
+            </tr>
+            <tr>
+              <td class="css_td_list1_l">03.&nbsp;</td>
+              <td class="css_td_list1_r">
+                使用內部模組設定訊息時, 格式沒有限制.
+              </td>
+            </tr>
+            <tr>
+              <td class="css_td_list1_l">04.&nbsp;</td>
+              <td class="css_td_list1_r">
+                如果使用 run 執行多個內部模組, 只會得到最後一個被執行的內部模組的訊息.
+              </td>
+            </tr>
+          </table>
+          <br>
+          範例 : 錯誤的存取模式.<br>
+<pre class="css_pre_code">
+網頁程式部分
+
+&lt;html&gt;
+&lt;head&gt;
+&lt;meta http-equiv="cache-control" content="no-cache"&gt;
+&lt;meta http-equiv="content-type" content="text/html; charset=utf-8"&gt;
+&lt;script type="text/javascript" src="jquery_main.js"&gt;&lt;/script&gt;
+&lt;script type="text/javascript" src="json3.js"&gt;&lt;/script&gt;
+&lt;script type="text/javascript" src="mcm_jslib_api.js"&gt;&lt;/script&gt;
+&lt;script type="text/javascript" src="mcm_jslib_data_info_auto.js"&gt;&lt;/script&gt;
+&lt;script type="text/javascript"&gt;
+function do_test()
+{
+    var self_jslib, req_cmd, rep_ret, mcm_dv;
+
+    req_cmd = "&set.iull.device.system.uptime=123456789";
+
+    self_jslib = new mcm_jslib_lib_t();
+    self_jslib.socket_path = "@mintcm";
+    // 錯誤的存取模式, 應該是 mcm_session_permission.rw.
+    self_jslib.session_permission = mcm_session_permission.ro;
+    self_jslib.session_stack_size = 0;
+    self_jslib.request_command = req_cmd;
+    self_jslib.after_complete = mcm_after_complete.reload;
+    self_jslib.other_query = "";
+    rep_ret = mcm_jslib_submit_config(self_jslib);
+    if(rep_ret.rep_code < mcm_return_code.pass)
+    {
+        alert("call mcm_jslib_submit_config() fail" +
+              "[" + rep_ret.rep_code + "]");
+        mcm_jslib_run_script(rep_ret.rep_data);
+        return;
+    }
+    mcm_jslib_run_script(rep_ret.rep_data);
+}
+&lt;/script&gt;
+&lt;/head&gt;
+&lt;body&gt;
+  &lt;button type="button" onclick="do_test()"&gt;test&lt;/button&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+</pre>
+          <br>
+          範例 : 由內部模組設定錯誤.<br>
+<pre class="css_pre_code">
+網頁程式部分
+
+&lt;html&gt;
+&lt;head&gt;
+&lt;meta http-equiv="cache-control" content="no-cache"&gt;
+&lt;meta http-equiv="content-type" content="text/html; charset=utf-8"&gt;
+&lt;script type="text/javascript" src="jquery_main.js"&gt;&lt;/script&gt;
+&lt;script type="text/javascript" src="json3.js"&gt;&lt;/script&gt;
+&lt;script type="text/javascript" src="mcm_jslib_api.js"&gt;&lt;/script&gt;
+&lt;script type="text/javascript" src="mcm_jslib_data_info_auto.js"&gt;&lt;/script&gt;
+&lt;script type="text/javascript"&gt;
+function do_test()
+{
+    var self_jslib, req_cmd, rep_ret, mcm_dv;
+
+    req_cmd = "&set.iull.device.system.uptime=123456789" +
+              "&run.mcm_module_submit_error_test";
+
+    self_jslib = new mcm_jslib_lib_t();
+    self_jslib.socket_path = "@mintcm";
+    self_jslib.session_permission = mcm_session_permission.rw;
+    self_jslib.session_stack_size = 0;
+    self_jslib.request_command = req_cmd;
+    self_jslib.after_complete = mcm_after_complete.reload;
+    self_jslib.other_query = "";
+    rep_ret = mcm_jslib_submit_config(self_jslib);
+    if(rep_ret.rep_code < mcm_return_code.pass)
+    {
+        alert("call mcm_jslib_submit_config() fail" +
+              "[" + rep_ret.rep_code + "]");
+        mcm_jslib_run_script(rep_ret.rep_data);
+        return;
+    }
+    mcm_jslib_run_script(rep_ret.rep_data);
+}
+&lt;/script&gt;
+&lt;/head&gt;
+&lt;body&gt;
+  &lt;button type="button" onclick="do_test()"&gt;test&lt;/button&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+</pre>
+<pre class="css_pre_code">
+內部模組部分
+
+#include &lt;errno.h&gt;
+#include &lt;stdio.h&gt;
+#include &lt;string.h&gt;
+#include &lt;stdlib.h&gt;
+#include "../../mcm_lib/mcm_lheader/mcm_type.h"
+#include "../../mcm_lib/mcm_lheader/mcm_size.h"
+#include "../../mcm_lib/mcm_lheader/mcm_control.h"
+#include "../../mcm_lib/mcm_lheader/mcm_connect.h"
+#include "../../mcm_lib/mcm_lheader/mcm_return.h"
+#include "../../mcm_lib/mcm_lheader/mcm_debug.h"
+#include "../../mcm_lib/mcm_lheader/mcm_data_exinfo_auto.h"
+#include "../mcm_service_handle_extern.h"
+#include "../mcm_config_handle_extern.h"
+
+#define DMSG(msg_fmt, msgs...) printf("%s(%04u): " msg_fmt "\n", __FILE__, __LINE__, ##msgs)
+
+int mcm_module_submit_error_test(
+    struct mcm_service_session_t *this_session)
+{
+    int fret = MCM_RCODE_MODULE_INTERNAL_ERROR;
+
+    DMSG("submit error test :");
+
+    if(mcm_service_response_init(this_session, 1024) < MCM_RCODE_PASS)
+    {
+        DMSG("call mcm_service_response_init() fail");
+        goto FREE_01;
+    }
+    DMSG("buffer [%p][" MCM_DTYPE_USIZE_PF "]",
+         this_session->rep_msg_buf, this_session->rep_msg_size);
+
+    snprintf(this_session->rep_msg_buf, this_session->rep_msg_size,
+             "alert(\"custom error\");");
+
+FREE_01:
+    return fret;
+}
+</pre>
+          <br>
+          範例 : 處理指令沒有錯誤, 指定 CGI 部分填入重新整理頁面的訊息.<br>
+<pre class="css_pre_code">
+網頁程式部分
+
+&lt;html&gt;
+&lt;head&gt;
+&lt;meta http-equiv="cache-control" content="no-cache"&gt;
+&lt;meta http-equiv="content-type" content="text/html; charset=utf-8"&gt;
+&lt;script type="text/javascript" src="jquery_main.js"&gt;&lt;/script&gt;
+&lt;script type="text/javascript" src="json3.js"&gt;&lt;/script&gt;
+&lt;script type="text/javascript" src="mcm_jslib_api.js"&gt;&lt;/script&gt;
+&lt;script type="text/javascript" src="mcm_jslib_data_info_auto.js"&gt;&lt;/script&gt;
+&lt;script type="text/javascript"&gt;
+function do_test()
+{
+    var self_jslib, req_cmd, rep_ret, mcm_dv;
+
+    req_cmd = "&set.iull.device.system.uptime=123456789";
+
+    self_jslib = new mcm_jslib_lib_t();
+    self_jslib.socket_path = "@mintcm";
+    self_jslib.session_permission = mcm_session_permission.rw;
+    self_jslib.session_stack_size = 0;
+    self_jslib.request_command = req_cmd;
+    self_jslib.after_complete = mcm_after_complete.reload;
+    self_jslib.other_query = "";
+    rep_ret = mcm_jslib_submit_config(self_jslib);
+    if(rep_ret.rep_code < mcm_return_code.pass)
+    {
+        alert("call mcm_jslib_submit_config() fail" +
+              "[" + rep_ret.rep_code + "]");
+        mcm_jslib_run_script(rep_ret.rep_data);
+        return;
+    }
+    mcm_jslib_run_script(rep_ret.rep_data);
+}
+&lt;/script&gt;
+&lt;/head&gt;
+&lt;body&gt;
+  &lt;button type="button" onclick="do_test()"&gt;test&lt;/button&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+</pre>
+          <br>
+          範例 : 內部模組自訂訊息, 文字格式.<br>
+<pre class="css_pre_code">
+網頁程式部分
+
+&lt;html&gt;
+&lt;head&gt;
+&lt;meta http-equiv="cache-control" content="no-cache"&gt;
+&lt;meta http-equiv="content-type" content="text/html; charset=utf-8"&gt;
+&lt;script type="text/javascript" src="jquery_main.js"&gt;&lt;/script&gt;
+&lt;script type="text/javascript" src="json3.js"&gt;&lt;/script&gt;
+&lt;script type="text/javascript" src="mcm_jslib_api.js"&gt;&lt;/script&gt;
+&lt;script type="text/javascript" src="mcm_jslib_data_info_auto.js"&gt;&lt;/script&gt;
+&lt;script type="text/javascript"&gt;
+function do_test()
+{
+    var self_jslib, req_cmd = "", rep_ret;
+
+    req_cmd += "&set.s.device.descript=" +
+               mcm_jslib_convert_submit_str($("#descript_text").val());
+
+    req_cmd += "&run.mcm_module_submit_text_test";
+
+    self_jslib = new mcm_jslib_lib_t();
+    self_jslib.socket_path = "@mintcm";
+    self_jslib.session_permission = mcm_session_permission.rw;
+    self_jslib.session_stack_size = 0;
+    self_jslib.request_command = req_cmd;
+    self_jslib.after_complete = mcm_after_complete.reload;
+    self_jslib.other_query = "";
+    rep_ret = mcm_jslib_submit_config(self_jslib);
+    if(rep_ret.rep_code < mcm_return_code.pass)
+    {
+        alert("call mcm_jslib_submit_config() fail" +
+              "[" + rep_ret.rep_code + "]");
+        mcm_jslib_run_script(rep_ret.rep_data);
+        return;
+    }
+
+    // 顯示回傳的文字.
+    alert(rep_ret.rep_data);
+}
+&lt;/script&gt;
+&lt;/head&gt;
+&lt;body&gt;
+  &lt;table&gt;
+    &lt;tr&gt;
+      &lt;td&gt;input srting : &lt;/td&gt;
+      &lt;td&gt;
+        &lt;input id="descript_text" type="text" size="32"&gt;
+      &lt;/td&gt;
+      &lt;td&gt;
+        &lt;button type="button" onclick="do_test()"&gt;test&lt;/button&gt;
+      &lt;/td&gt;
+    &lt;/tr&gt;
+  &lt;/table&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+</pre>
+<pre class="css_pre_code">
+內部模組部分
+
+#include &lt;errno.h&gt;
+#include &lt;stdio.h&gt;
+#include &lt;string.h&gt;
+#include &lt;stdlib.h&gt;
+#include "../../mcm_lib/mcm_lheader/mcm_type.h"
+#include "../../mcm_lib/mcm_lheader/mcm_size.h"
+#include "../../mcm_lib/mcm_lheader/mcm_control.h"
+#include "../../mcm_lib/mcm_lheader/mcm_connect.h"
+#include "../../mcm_lib/mcm_lheader/mcm_return.h"
+#include "../../mcm_lib/mcm_lheader/mcm_debug.h"
+#include "../../mcm_lib/mcm_lheader/mcm_data_exinfo_auto.h"
+#include "../mcm_service_handle_extern.h"
+#include "../mcm_config_handle_extern.h"
+
+#define DMSG(msg_fmt, msgs...) printf("%s(%04u): " msg_fmt "\n", __FILE__, __LINE__, ##msgs)
+
+int mcm_module_submit_text_test(
+    struct mcm_service_session_t *this_session)
+{
+    int fret = MCM_RCODE_MODULE_INTERNAL_ERROR;
+    char *path1;
+    struct mcm_dv_device_t device_v;
+
+    DMSG("submit text test :");
+
+    if(mcm_service_response_init(this_session, 1024) < MCM_RCODE_PASS)
+    {
+        DMSG("call mcm_service_response_init() fail");
+        goto FREE_01;
+    }
+    DMSG("buffer [%p][" MCM_DTYPE_USIZE_PF "]",
+         this_session->rep_msg_buf, this_session->rep_msg_size);
+
+    path1 = "device";
+    if(mcm_config_get_entry_by_path(this_session, path1, MCM_DACCESS_AUTO, &device_v)
+                                    < MCM_RCODE_PASS)
+    {
+        DMSG("call mcm_config_get_entry_by_path(%s) fail", path1);
+        goto FREE_01;
+    }
+
+    snprintf(this_session->rep_msg_buf, this_session->rep_msg_size,
+             " %s",
+             device_v.descript);
+
+    fret = MCM_RCODE_PASS;
+FREE_01:
+    return fret;
+}
+</pre>
+          <br>
+          範例 : 內部模組自訂訊息, JSON 格式.<br>
+<pre class="css_pre_code">
+網頁程式部分
+
+&lt;html&gt;
+&lt;head&gt;
+&lt;meta http-equiv="cache-control" content="no-cache"&gt;
+&lt;meta http-equiv="content-type" content="text/html; charset=utf-8"&gt;
+&lt;script type="text/javascript" src="jquery_main.js"&gt;&lt;/script&gt;
+&lt;script type="text/javascript" src="json3.js"&gt;&lt;/script&gt;
+&lt;script type="text/javascript" src="mcm_jslib_api.js"&gt;&lt;/script&gt;
+&lt;script type="text/javascript" src="mcm_jslib_data_info_auto.js"&gt;&lt;/script&gt;
+&lt;script type="text/javascript"&gt;
+function do_test()
+{
+    var self_jslib, req_cmd = "", rep_ret, custom_data;
+
+    req_cmd += "&set.s.device.descript=" +
+               mcm_jslib_convert_submit_str($("#descript_text").val());
+
+    req_cmd += "&run.mcm_module_submit_json_test";
+
+    self_jslib = new mcm_jslib_lib_t();
+    self_jslib.socket_path = "@mintcm";
+    self_jslib.session_permission = mcm_session_permission.rw;
+    self_jslib.session_stack_size = 0;
+    self_jslib.request_command = req_cmd;
+    self_jslib.after_complete = mcm_after_complete.reload;
+    self_jslib.other_query = "";
+    rep_ret = mcm_jslib_submit_config(self_jslib);
+    if(rep_ret.rep_code < mcm_return_code.pass)
+    {
+        alert("call mcm_jslib_submit_config() fail" +
+              "[" + rep_ret.rep_code + "]");
+        mcm_jslib_run_script(rep_ret.rep_data);
+        return;
+    }
+
+    // 處理回傳的內容.
+    custom_data = JSON.parse(rep_ret.rep_data);
+    alert(custom_data.descript);
+}
+&lt;/script&gt;
+&lt;/head&gt;
+&lt;body&gt;
+  &lt;table&gt;
+    &lt;tr&gt;
+      &lt;td&gt;input srting : &lt;/td&gt;
+      &lt;td&gt;
+        &lt;input id="descript_text" type="text" size="32"&gt;
+      &lt;/td&gt;
+      &lt;td&gt;
+        &lt;button type="button" onclick="do_test()"&gt;test&lt;/button&gt;
+      &lt;/td&gt;
+    &lt;/tr&gt;
+  &lt;/table&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+</pre>
+<pre class="css_pre_code">
+內部模組部分
+
+#include &lt;errno.h&gt;
+#include &lt;stdio.h&gt;
+#include &lt;string.h&gt;
+#include &lt;stdlib.h&gt;
+#include "../../mcm_lib/mcm_lheader/mcm_type.h"
+#include "../../mcm_lib/mcm_lheader/mcm_size.h"
+#include "../../mcm_lib/mcm_lheader/mcm_control.h"
+#include "../../mcm_lib/mcm_lheader/mcm_connect.h"
+#include "../../mcm_lib/mcm_lheader/mcm_return.h"
+#include "../../mcm_lib/mcm_lheader/mcm_debug.h"
+#include "../../mcm_lib/mcm_lheader/mcm_data_exinfo_auto.h"
+#include "../mcm_service_handle_extern.h"
+#include "../mcm_config_handle_extern.h"
+
+#define DMSG(msg_fmt, msgs...) printf("%s(%04u): " msg_fmt "\n", __FILE__, __LINE__, ##msgs)
+
+int mcm_module_submit_json_test(
+    struct mcm_service_session_t *this_session)
+{
+    int fret = MCM_RCODE_MODULE_INTERNAL_ERROR;
+    char *path1;
+    struct mcm_dv_device_t device_v;
+
+    DMSG("submit json test :");
+
+    if(mcm_service_response_init(this_session, 1024) < MCM_RCODE_PASS)
+    {
+        DMSG("call mcm_service_response_init() fail");
+        goto FREE_01;
+    }
+    DMSG("buffer [%p][" MCM_DTYPE_USIZE_PF "]",
+         this_session->rep_msg_buf, this_session->rep_msg_size);
+
+    path1 = "device";
+    if(mcm_config_get_entry_by_path(this_session, path1, MCM_DACCESS_AUTO, &device_v)
+                                    < MCM_RCODE_PASS)
+    {
+        DMSG("call mcm_config_get_entry_by_path(%s) fail", path1);
+        goto FREE_01;
+    }
+
+    snprintf(this_session->rep_msg_buf, this_session->rep_msg_size,
+             "{\"descript\":\"%s\"}",
+             device_v.descript);
+
+    fret = MCM_RCODE_PASS;
+FREE_01:
+    return fret;
+}
+</pre>
+          <br>
+          範例 : 內部模組自訂訊息, JavaScript 格式, 控制網頁元素.<br>
+<pre class="css_pre_code">
+網頁程式部分
+
+&lt;html&gt;
+&lt;head&gt;
+&lt;meta http-equiv="cache-control" content="no-cache"&gt;
+&lt;meta http-equiv="content-type" content="text/html; charset=utf-8"&gt;
+&lt;script type="text/javascript" src="jquery_main.js"&gt;&lt;/script&gt;
+&lt;script type="text/javascript" src="json3.js"&gt;&lt;/script&gt;
+&lt;script type="text/javascript" src="mcm_jslib_api.js"&gt;&lt;/script&gt;
+&lt;script type="text/javascript" src="mcm_jslib_data_info_auto.js"&gt;&lt;/script&gt;
+&lt;script type="text/javascript"&gt;
+function do_test()
+{
+    var self_jslib, req_cmd = "", rep_ret;
+
+    req_cmd += "&set.iull.device.system.uptime=" +
+               $("#uptime_text").val();
+
+    req_cmd += "&run.mcm_module_javascript_control_element_test";
+
+    self_jslib = new mcm_jslib_lib_t();
+    self_jslib.socket_path = "@mintcm";
+    self_jslib.session_permission = mcm_session_permission.rw;
+    self_jslib.session_stack_size = 0;
+    self_jslib.request_command = req_cmd;
+    self_jslib.after_complete = mcm_after_complete.reload;
+    self_jslib.other_query = "";
+    rep_ret = mcm_jslib_submit_config(self_jslib);
+    if(rep_ret.rep_code < mcm_return_code.pass)
+    {
+        alert("call mcm_jslib_submit_config() fail" +
+              "[" + rep_ret.rep_code + "]");
+        mcm_jslib_run_script(rep_ret.rep_data);
+        return;
+    }
+
+    // 執行回傳的內容.
+    mcm_jslib_run_script(rep_ret.rep_data);
+}
+&lt;/script&gt;
+&lt;/head&gt;
+&lt;body&gt;
+  &lt;table&gt;
+    &lt;tr&gt;
+      &lt;td&gt;input number : &lt;/td&gt;
+      &lt;td&gt;
+        &lt;input id="uptime_text" type="text" size="8" value="0"&gt;
+      &lt;/td&gt;
+      &lt;td&gt;
+        &lt;button type="button" onclick="do_test()"&gt;submit&lt;/button&gt;
+      &lt;/td&gt;
+      &lt;td&gt;
+        &lt;div id="number_div"&gt;&lt;/div&gt;
+      &lt;/td&gt;
+    &lt;/tr&gt;
+  &lt;/table&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+</pre>
+<pre class="css_pre_code">
+內部模組部分
+
+#include &lt;errno.h&gt;
+#include &lt;stdio.h&gt;
+#include &lt;string.h&gt;
+#include &lt;stdlib.h&gt;
+#include "../../mcm_lib/mcm_lheader/mcm_type.h"
+#include "../../mcm_lib/mcm_lheader/mcm_size.h"
+#include "../../mcm_lib/mcm_lheader/mcm_control.h"
+#include "../../mcm_lib/mcm_lheader/mcm_connect.h"
+#include "../../mcm_lib/mcm_lheader/mcm_return.h"
+#include "../../mcm_lib/mcm_lheader/mcm_debug.h"
+#include "../../mcm_lib/mcm_lheader/mcm_data_exinfo_auto.h"
+#include "../mcm_service_handle_extern.h"
+#include "../mcm_config_handle_extern.h"
+
+#define DMSG(msg_fmt, msgs...) printf("%s(%04u): " msg_fmt "\n", __FILE__, __LINE__, ##msgs)
+
+int mcm_module_javascript_control_element_test(
+    struct mcm_service_session_t *this_session)
+{
+    int fret = MCM_RCODE_MODULE_INTERNAL_ERROR;
+    char *path1;
+    struct mcm_dv_device_system_t system_v;
+
+    DMSG("submit javascript control element test :");
+
+    if(mcm_service_response_init(this_session, 1024) < MCM_RCODE_PASS)
+    {
+        DMSG("call mcm_service_response_init() fail");
+        goto FREE_01;
+    }
+    DMSG("buffer [%p][" MCM_DTYPE_USIZE_PF "]",
+         this_session->rep_msg_buf, this_session->rep_msg_size);
+
+    path1 = "device.system";
+    if(mcm_config_get_entry_by_path(this_session, path1, MCM_DACCESS_AUTO, &system_v)
+                                    < MCM_RCODE_PASS)
+    {
+        DMSG("call mcm_config_get_entry_by_path(%s) fail", path1);
+        goto FREE_01;
+    }
+
+    snprintf(this_session->rep_msg_buf, this_session->rep_msg_size,
+             "$(\"#number_div\").html(\""
+             "&lt;font color=\\\"#%s\\\"&gt;%s number&lt;/font&gt;"
+             "\");",
+             system_v.uptime % 2 == 0 ? "FF0000" : "0000FF",
+             system_v.uptime % 2 == 0 ? "even" : "odd");
+
+    fret = MCM_RCODE_PASS;
+FREE_01:
+    return fret;
+}
+</pre>
+          <br>
+          範例 : 內部模組自訂訊息, JavaScript 格式, 頁面導向.<br>
+<pre class="css_pre_code">
+網頁程式部分
+
+&lt;html&gt;
+&lt;head&gt;
+&lt;meta http-equiv="cache-control" content="no-cache"&gt;
+&lt;meta http-equiv="content-type" content="text/html; charset=utf-8"&gt;
+&lt;script type="text/javascript" src="jquery_main.js"&gt;&lt;/script&gt;
+&lt;script type="text/javascript" src="json3.js"&gt;&lt;/script&gt;
+&lt;script type="text/javascript" src="mcm_jslib_api.js"&gt;&lt;/script&gt;
+&lt;script type="text/javascript" src="mcm_jslib_data_info_auto.js"&gt;&lt;/script&gt;
+&lt;script type="text/javascript"&gt;
+function do_test()
+{
+    var self_jslib, req_cmd = "", rep_ret;
+
+    req_cmd += "&set.s.device.descript=" +
+               mcm_jslib_convert_submit_str($("#descript_text").val());
+
+    req_cmd += "&run.mcm_module_submit_javascript_redirect_page_test";
+
+    self_jslib = new mcm_jslib_lib_t();
+    self_jslib.socket_path = "@mintcm";
+    self_jslib.session_permission = mcm_session_permission.rw;
+    self_jslib.session_stack_size = 0;
+    self_jslib.request_command = req_cmd;
+    self_jslib.after_complete = mcm_after_complete.reload;
+    self_jslib.other_query = "";
+    rep_ret = mcm_jslib_submit_config(self_jslib);
+    if(rep_ret.rep_code < mcm_return_code.pass)
+    {
+        alert("call mcm_jslib_submit_config() fail" +
+              "[" + rep_ret.rep_code + "]");
+        mcm_jslib_run_script(rep_ret.rep_data);
+        return;
+    }
+
+    // 執行回傳的內容.
+    mcm_jslib_run_script(rep_ret.rep_data);
+}
+&lt;/script&gt;
+&lt;/head&gt;
+&lt;body&gt;
+  &lt;table&gt;
+    &lt;tr&gt;
+      &lt;td&gt;input url : &lt;/td&gt;
+      &lt;td&gt;
+        &lt;input id="descript_text" type="text" size="32" value="http://www.pchome.com.tw"&gt;
+      &lt;/td&gt;
+      &lt;td&gt;
+        &lt;button type="button" onclick="do_test()"&gt;submit&lt;/button&gt;
+      &lt;/td&gt;
+    &lt;/tr&gt;
+  &lt;/table&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+</pre>
+<pre class="css_pre_code">
+內部模組部分
+
+#include &lt;errno.h&gt;
+#include &lt;stdio.h&gt;
+#include &lt;string.h&gt;
+#include &lt;stdlib.h&gt;
+#include "../../mcm_lib/mcm_lheader/mcm_type.h"
+#include "../../mcm_lib/mcm_lheader/mcm_size.h"
+#include "../../mcm_lib/mcm_lheader/mcm_control.h"
+#include "../../mcm_lib/mcm_lheader/mcm_connect.h"
+#include "../../mcm_lib/mcm_lheader/mcm_return.h"
+#include "../../mcm_lib/mcm_lheader/mcm_debug.h"
+#include "../../mcm_lib/mcm_lheader/mcm_data_exinfo_auto.h"
+#include "../mcm_service_handle_extern.h"
+#include "../mcm_config_handle_extern.h"
+
+#define DMSG(msg_fmt, msgs...) printf("%s(%04u): " msg_fmt "\n", __FILE__, __LINE__, ##msgs)
+
+int mcm_module_submit_javascript_redirect_page_test(
+    struct mcm_service_session_t *this_session)
+{
+    int fret = MCM_RCODE_MODULE_INTERNAL_ERROR;
+    char *path1;
+    struct mcm_dv_device_t device_v;
+
+    DMSG("submit javascript redirect page test :");
+
+    if(mcm_service_response_init(this_session, 1024) < MCM_RCODE_PASS)
+    {
+        DMSG("call mcm_service_response_init() fail");
+        goto FREE_01;
+    }
+    DMSG("buffer [%p][" MCM_DTYPE_USIZE_PF "]",
+         this_session->rep_msg_buf, this_session->rep_msg_size);
+
+    path1 = "device";
+    if(mcm_config_get_entry_by_path(this_session, path1, MCM_DACCESS_AUTO, &device_v)
+                                    < MCM_RCODE_PASS)
+    {
+        DMSG("call mcm_config_get_entry_by_path(%s) fail", path1);
+        goto FREE_01;
+    }
+
+    snprintf(this_session->rep_msg_buf, this_session->rep_msg_size,
+             "window.location.href = \"%s\";",
+             device_v.descript);
+
+    fret = MCM_RCODE_PASS;
+FREE_01:
+    return fret;
+}
+</pre>
+          <br>
+          範例 : 執行多個內部模組.<br>
+<pre class="css_pre_code">
+網頁程式部分
+
+&lt;html&gt;
+&lt;head&gt;
+&lt;meta http-equiv="cache-control" content="no-cache"&gt;
+&lt;meta http-equiv="content-type" content="text/html; charset=utf-8"&gt;
+&lt;script type="text/javascript" src="jquery_main.js"&gt;&lt;/script&gt;
+&lt;script type="text/javascript" src="json3.js"&gt;&lt;/script&gt;
+&lt;script type="text/javascript" src="mcm_jslib_api.js"&gt;&lt;/script&gt;
+&lt;script type="text/javascript" src="mcm_jslib_data_info_auto.js"&gt;&lt;/script&gt;
+&lt;script type="text/javascript"&gt;
+function do_test()
+{
+    var self_jslib, req_cmd, rep_ret, mcm_dv;
+
+    // 執行多個內部模組, 只會得到最後一個被執行的內部模組的訊息,
+    // mcm_module_submit_multiple_test_01() 輸出的訊息會被下一個內部模組覆蓋,
+    // 只會輸出 mcm_module_submit_multiple_test_02() 的訊息.
+    req_cmd = "&set.iull.device.system.uptime=123456789" +
+              "&run.mcm_module_submit_multiple_test_01" +
+              "&run.mcm_module_submit_multiple_test_02";
+
+    self_jslib = new mcm_jslib_lib_t();
+    self_jslib.socket_path = "@mintcm";
+    self_jslib.session_permission = mcm_session_permission.rw;
+    self_jslib.session_stack_size = 0;
+    self_jslib.request_command = req_cmd;
+    self_jslib.after_complete = mcm_after_complete.reload;
+    self_jslib.other_query = "";
+    rep_ret = mcm_jslib_submit_config(self_jslib);
+    if(rep_ret.rep_code < mcm_return_code.pass)
+    {
+        alert("call mcm_jslib_submit_config() fail" +
+              "[" + rep_ret.rep_code + "]");
+        mcm_jslib_run_script(rep_ret.rep_data);
+        return;
+    }
+
+    alert(rep_ret.rep_data);
+}
+&lt;/script&gt;
+&lt;/head&gt;
+&lt;body&gt;
+  &lt;button type="button" onclick="do_test()"&gt;test&lt;/button&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+</pre>
+<pre class="css_pre_code">
+內部模組部分
+
+#include &lt;errno.h&gt;
+#include &lt;stdio.h&gt;
+#include &lt;string.h&gt;
+#include &lt;stdlib.h&gt;
+#include "../../mcm_lib/mcm_lheader/mcm_type.h"
+#include "../../mcm_lib/mcm_lheader/mcm_size.h"
+#include "../../mcm_lib/mcm_lheader/mcm_control.h"
+#include "../../mcm_lib/mcm_lheader/mcm_connect.h"
+#include "../../mcm_lib/mcm_lheader/mcm_return.h"
+#include "../../mcm_lib/mcm_lheader/mcm_debug.h"
+#include "../../mcm_lib/mcm_lheader/mcm_data_exinfo_auto.h"
+#include "../mcm_service_handle_extern.h"
+#include "../mcm_config_handle_extern.h"
+
+#define DMSG(msg_fmt, msgs...) printf("%s(%04u): " msg_fmt "\n", __FILE__, __LINE__, ##msgs)
+
+int mcm_module_submit_multiple_test_01(
+    struct mcm_service_session_t *this_session)
+{
+    int fret = MCM_RCODE_MODULE_INTERNAL_ERROR;
+
+    DMSG("submit multiple test 01 :");
+
+    if(mcm_service_response_init(this_session, 1024) < MCM_RCODE_PASS)
+    {
+        DMSG("call mcm_service_response_init() fail");
+        goto FREE_01;
+    }
+    DMSG("buffer [%p][" MCM_DTYPE_USIZE_PF "]",
+         this_session->rep_msg_buf, this_session->rep_msg_size);
+
+    snprintf(this_session->rep_msg_buf, this_session->rep_msg_size,
+             "custom message 01");
+
+    fret = MCM_RCODE_PASS;
+FREE_01:
+    return fret;
+}
+
+int mcm_module_submit_multiple_test_02(
+    struct mcm_service_session_t *this_session)
+{
+    int fret = MCM_RCODE_MODULE_INTERNAL_ERROR;
+
+    DMSG("submit multiple test 02 :");
+
+    if(mcm_service_response_init(this_session, 1024) < MCM_RCODE_PASS)
+    {
+        DMSG("call mcm_service_response_init() fail");
+        goto FREE_01;
+    }
+    DMSG("buffer [%p][" MCM_DTYPE_USIZE_PF "]",
+         this_session->rep_msg_buf, this_session->rep_msg_size);
+
+    snprintf(this_session->rep_msg_buf, this_session->rep_msg_size,
+             "custom message 02");
+
+    fret = MCM_RCODE_PASS;
+FREE_01:
+    return fret;
+}
+</pre>
+        </td>
+      </tr>
+    </table>
+    <br>
+
+  </div>
+</div>
+<br>
+
+<div class="css_div_box_frame_full">
+  <div class="css_div_box_title">範例程式的使用</div>
+  <div class="css_div_box_content">
+    <br>
+
+    <table class="css_table_list1">
+      <tr>
+        <td class="css_td_list1_l">01.&nbsp;</td>
+        <td class="css_td_list1_r">
+          範例程式目錄在 <font class="css_font_b1">mint_cm/usage/example/0504</font>.
+        </td>
+      </tr>
+    </table>
+    <br><br>
+
+    <table class="css_table_list1">
+      <tr>
+        <td class="css_td_list1_l">02.&nbsp;</td>
+        <td class="css_td_list1_r">
+          下面關於 <font class="css_font_p1">make</font> 的操作沒有特別註明的話都是在
+          <font class="css_font_b1">mint_cm</font> 目錄.
+        </td>
+      </tr>
+    </table>
+    <br><br>
+
+    <table class="css_table_list1">
+      <tr>
+        <td class="css_td_list1_l">03.&nbsp;</td>
+        <td class="css_td_list1_r">
+          第一次使用, 使用 <font class="css_font_p1">make example_add KEY=0504</font>
+          載入範例並編譯.
+        </td>
+      </tr>
+    </table>
+    <br><br>
+
+    <table class="css_table_list1">
+      <tr>
+        <td class="css_td_list1_l">04.&nbsp;</td>
+        <td class="css_td_list1_r">
+          <font class="css_font_b1">web_app</font> 是範例程式.<br><br>
+          範例項目 :<br>
+          <table class="css_table_list2">
+            <tr>
+              <td class="css_td_list2_l2">case-01</td>
+              <td class="css_td_list2_r1">
+                mcm_jslib_obtain_max_count()<br>指令內指定錯誤的路徑
+              </td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l2">case-02</td>
+              <td class="css_td_list2_r1">
+                mcm_jslib_obtain_config()<br>指令內指定錯誤的路徑
+              </td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l2">case-03</td>
+              <td class="css_td_list2_r1">
+                mcm_jslib_obtain_config()<br>由內部模組設定錯誤
+              </td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l2">case-04</td>
+              <td class="css_td_list2_r1">
+                mcm_jslib_obtain_config()<br>執行多個內部模組
+              </td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l2">case-05</td>
+              <td class="css_td_list2_r1">
+                mcm_jslib_submit_config()<br>指令內指定錯誤的路徑
+              </td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l2">case-06</td>
+              <td class="css_td_list2_r1">
+                mcm_jslib_submit_config()<br>由內部模組設定錯誤
+              </td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l2">case-07</td>
+              <td class="css_td_list2_r1">
+                mcm_jslib_submit_config()<br>
+                處理指令沒有錯誤, CGI 部分填入重新整理頁面的 JavaScript 格式訊息
+              </td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l2">case-08</td>
+              <td class="css_td_list2_r1">
+                mcm_jslib_submit_config()<br>內部模組自訂訊息, 文字格式
+              </td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l2">case-09</td>
+              <td class="css_td_list2_r1">
+                mcm_jslib_submit_config()<br>內部模組自訂訊息, JSON 格式
+              </td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l2">case-10</td>
+              <td class="css_td_list2_r1">
+                mcm_jslib_submit_config()<br>
+                內部模組自訂訊息, JavaScript 格式, 控制網頁元素
+              </td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l2">case-11</td>
+              <td class="css_td_list2_r1">
+                mcm_jslib_submit_config()<br>
+                內部模組自訂訊息, JavaScript 格式, 頁面導向
+              </td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l2">case-12</td>
+              <td class="css_td_list2_r1">
+                mcm_jslib_submit_config()<br>執行多個內部模組
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+    <br><br>
+
+    <table class="css_table_list1">
+      <tr>
+        <td class="css_td_list1_l">05.&nbsp;</td>
+        <td class="css_td_list1_r">
+          先執行 mcm_daemon 和 mini_httpd 才可測試.
+        </td>
+      </tr>
+    </table>
+    <br><br>
+
+    <table class="css_table_list1">
+      <tr>
+        <td class="css_td_list1_l">06.&nbsp;</td>
+        <td class="css_td_list1_r">
+          瀏覽器連至 <font class="css_font_b1">http://&lt;server-address&gt;/web_app_0504_index.html</font>
+          就可以看到範例頁面.
+        </td>
+      </tr>
+    </table>
+    <br><br>
+
+    <table class="css_table_list1">
+      <tr>
+        <td class="css_td_list1_l">07.&nbsp;</td>
+        <td class="css_td_list1_r">
+          測試完畢不使用後, 使用 <font class="css_font_p1">make example_del KEY=0504</font>
+          將範例移除.
+        </td>
+      </tr>
+    </table>
+    <br><br>
+
+    <table class="css_table_list1">
+      <tr>
+        <td class="css_td_list1_l">08.&nbsp;</td>
+        <td class="css_td_list1_r">
+          範例程式目錄下的檔案在做完 <font class="css_font_p1">make example_add</font>
+          後會複製到真正使用的位置, 要修改做測試的話要改在複製後的.<br>
+          <table class="css_table_list2">
+            <tr>
+              <td class="css_td_list2_r1">
+                來源 <font class="css_font_b1">profile/mcm_data_profile_0504.xml</font><br>
+                目地 <font class="css_font_b1">mint_cm/mcm_build/mcm_data_profile.xml</font><br>
+                資料模型範例<br>
+                有修改要使用 <font class="css_font_p1">make all</font> 重新編譯
+              </td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_r1">
+                來源 <font class="css_font_b1">profile/mcm_store_profile_default_0504.txt</font><br>
+                目地 <font class="css_font_b1">mint_cm/mcm_build/mcm_store_profile_default.txt</font><br>
+                資料預設值範例<br>
+                使用 <font class="css_font_p1">make all</font> 後會再複製到 <font class="css_font_b1">mint_cm/run</font>
+              </td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_r1">
+                來源 <font class="css_font_b1">web_app</font><br>
+                目地 <font class="css_font_b1">mint_cm/run/web</font><br>
+                網頁程式範例
+              </td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_r1">
+                來源 <font class="css_font_b1">module/mcm_module_0504.c</font><br>
+                目地 <font class="css_font_b1">mint_cm/mcm_daemon/mcm_module</font><br>
+                內部模組範例<br>
+                有修改要使用 <font class="css_font_p1">make all</font> 重新編譯
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+    <br>
+
+  </div>
+</div>
+<br>
+
+</body>
+
+</html>

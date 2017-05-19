@@ -1,0 +1,490 @@
+<!--
+Copyright © 2017, Che-Wei Hsu <cwxhsu@gmail.com>
+This file is part of the MintCM.
+Some rights reserved. See README.
+-->
+
+<html>
+
+<head>
+<meta http-equiv="content-type" content="text/html; charset=utf-8">
+<link rel="stylesheet" href="../css/mcm_style.css">
+</head>
+
+<body class="css_body">
+
+<div class="css_div_box_frame_full">
+  <div class="css_div_box_title">chapter 11-01</div>
+  <div class="css_div_box_content">
+  </div>
+</div>
+<br>
+
+<div class="css_div_box_frame_full">
+  <div class="css_div_box_title">執行多套資料模型</div>
+  <div class="css_div_box_content">
+    <br>
+
+    此章節說明如何同時運作多個 mcm_daemon 並各自使用不同的資料模型.
+    <br><br><br>
+
+    例如程式一使用 主要設定 (main) 的資料模型, 程式二使用關於 紀錄 (log) 的資料模型.
+    <br><br>
+
+  </div>
+</div>
+<br>
+
+<div class="css_div_box_frame_full">
+  <div class="css_div_box_title">修改的部分</div>
+  <div class="css_div_box_content">
+    <br>
+
+    假設要使用二套資料模型.<br>
+    <table class="css_table_list1">
+      <tr>
+        <td class="css_td_list1_l">資料模型-01 :&nbsp;</td>
+        <td class="css_td_list1_l">內容是設備的基本設定, 簡稱 main</td>
+      </tr>
+      <tr>
+        <td class="css_td_list1_l">資料模型-02 :&nbsp;</td>
+        <td class="css_td_list1_l">內容是設備的系統紀錄, 簡稱 log</td>
+      </tr>
+    </table>
+    <br><br>
+
+    為了分辨不同的資料模型, 需要在原本的名稱加上後綴作區分, 在後續的說明中 :<br>
+    <font class="css_font_p1">$(suffix)</font> 表示小寫的後綴, 例如 main, log.<br>
+    <font class="css_font_p1">$(SUFFIX)</font> 表示大寫的後綴, 例如 MAIN, LOG.<br>
+    <br>
+
+    <table class="css_table_box">
+      <tr>
+        <td class="css_td_box">
+          <font class="css_font_b1">mcm_build</font><br>
+          每一個資料模型需要各自的 mcm_build 作處理.
+          <br><br>
+          <font class="css_font_g1">每一個資料模型複製一份 mcm_build</font>,
+          <font class="css_font_r1">並更名為 mcm_build_$(suffix)</font>
+          <br><br>
+          例如 :<br>
+          <div class="css_div_block">
+            複製二份 mcm_build,<br>
+            一個改名為 mcm_build_main<br>
+            一個改名為 mcm_build_log<br>
+          </div>
+        </td>
+      </tr>
+    </table>
+    <br>
+
+    <table class="css_table_box">
+      <tr>
+        <td class="css_td_box">
+          <font class="css_font_b1">mcm_daemon</font><br>
+          每一個資料模型需要各自的 mcm_daemon.
+          <br><br>
+          <font class="css_font_g1">每一個資料模型複製一份 mcm_daemon</font>,
+          <font class="css_font_r1">並更名為 mcm_daemon_$(suffix)</font>
+          <br><br>
+          例如 :<br>
+          <div class="css_div_block">
+            複製二份 mcm_daemon,<br>
+            一個改名為 mcm_daemon_main<br>
+            一個改名為 mcm_daemon_log<br>
+          </div>
+        </td>
+      </tr>
+    </table>
+    <br>
+
+    <table class="css_table_box">
+      <tr>
+        <td class="css_td_box">
+          <font class="css_font_b1">mcm_build_$(suffix)/mcm_data_profile.xml</font>
+          <br><br>
+          <font class="css_font_r1">資料模型檔的檔名必須是 mcm_data_profile_$(suffix).xml</font>
+          <br><br>
+          例如 :<br>
+          <div class="css_div_block">
+            mint_cm/mcm_build_main :<br>
+            撰寫的資料模型檔的檔名必須是 mcm_data_profile_main.xml<br>
+            mint_cm/mcm_build_log :<br>
+            撰寫的資料模型檔的檔名必須是 mcm_data_profile_log.xml
+          </div>
+        </td>
+      </tr>
+    </table>
+    <br>
+
+    <table class="css_table_box">
+      <tr>
+        <td class="css_td_box">
+          <font class="css_font_b1">mcm_build_$(suffix)/mcm_store_profile_default.txt</font>
+          <br><br>
+          <font class="css_font_r1">資料模型的預設值檔的檔名必須是 mcm_store_profile_default_$(suffix).txt</font>
+          <br><br>
+          例如 :<br>
+          <div class="css_div_block">
+            mint_cm/mcm_build_main :<br>
+            撰寫資料模型的預設值檔的檔名必須是 mcm_store_profile_default_main.txt<br>
+            mint_cm/mcm_build_log :<br>
+            撰寫資料模型的預設值檔的檔名必須是 mcm_store_profile_default_log.txt
+          </div>
+        </td>
+      </tr>
+    </table>
+    <br>
+
+    <table class="css_table_box">
+      <tr>
+        <td class="css_td_box">
+          <font class="css_font_b1">編譯的順序</font>
+          <br><br>
+          編譯需要加上指定模型的參數 :<br>
+          <font class="css_font_r1">MODEL_SUFFIX_LOWER=$(suffix) MODEL_SUFFIX_UPPER=$(SUFFIX)</font>
+          <br><br>
+
+          <table class="css_table_list1">
+            <tr>
+              <td class="css_td_list1_l">01.&nbsp;</td>
+              <td class="css_td_list1_r">
+                處理資料模型, <font class="css_font_p1">binary_profile</font>
+                <font class="css_font_r1">(需要加上指定模型的參數並使用多次處理每個模型)</font><br>
+                例如 :<br>
+                <div class="css_div_block">
+                make binary_profile MODEL_SUFFIX_LOWER=main MODEL_SUFFIX_UPPER=MAIN<br>
+                make binary_profile MODEL_SUFFIX_LOWER=log MODEL_SUFFIX_UPPER=LOG
+                </div>
+                <br>
+              </td>
+            </tr>
+            <tr>
+              <td class="css_td_list1_l">02.&nbsp;</td>
+              <td class="css_td_list1_r">
+                編譯函式庫, <font class="css_font_p1">binary_library</font> (只需要一次)<br>
+                例如 :<br>
+                <div class="css_div_block">
+                make binary_library
+                </div>
+                <br>
+              </td>
+            </tr>
+            <tr>
+              <td class="css_td_list1_l">03.&nbsp;</td>
+              <td class="css_td_list1_r">
+                編譯網頁伺服器, <font class="css_font_p1">binary_httpd</font> (只需要一次)<br>
+                例如 :<br>
+                <div class="css_div_block">
+                make binary_httpd
+                </div>
+                <br>
+              </td>
+            </tr>
+            <tr>
+              <td class="css_td_list1_l">04.&nbsp;</td>
+              <td class="css_td_list1_r">
+                編譯執行檔, <font class="css_font_p1">binary_daemon</font>
+                <font class="css_font_r1">(需要加上指定模型的參數並使用多次處理每個模型)</font><br>
+                例如 :<br>
+                <div class="css_div_block">
+                make binary_daemon MODEL_SUFFIX_LOWER=main MODEL_SUFFIX_UPPER=MAIN<br>
+                make binary_daemon MODEL_SUFFIX_LOWER=log MODEL_SUFFIX_UPPER=LOG
+                </div>
+                <br>
+              </td>
+            </tr>
+            <tr>
+              <td class="css_td_list1_l">05.&nbsp;</td>
+              <td class="css_td_list1_r">
+                複製複製資料模型和資料預設值檔到到執行目錄, <font class="css_font_p1">install_profile</font>
+                <font class="css_font_r1">(需要加上指定模型的參數並使用多次處理每個模型)</font><br>
+                例如 :<br>
+                <div class="css_div_block">
+                make install_profile MODEL_SUFFIX_LOWER=main MODEL_SUFFIX_UPPER=MAIN<br>
+                make install_profile MODEL_SUFFIX_LOWER=log MODEL_SUFFIX_UPPER=LOG
+                </div>
+                <br>
+              </td>
+            </tr>
+            <tr>
+              <td class="css_td_list1_l">06.&nbsp;</td>
+              <td class="css_td_list1_r">
+                複製函式庫到執行目錄, <font class="css_font_p1">install_library</font> (只需要一次)<br>
+                例如 :<br>
+                <div class="css_div_block">
+                make install_library
+                </div>
+                <br>
+              </td>
+            </tr>
+            <tr>
+              <td class="css_td_list1_l">07.&nbsp;</td>
+              <td class="css_td_list1_r">
+                複製網頁伺服器到執行目錄, <font class="css_font_p1">install_httpd</font> (只需要一次)<br>
+                例如 :<br>
+                <div class="css_div_block">
+                make install_httpd
+                </div>
+                <br>
+              </td>
+            </tr>
+            <tr>
+              <td class="css_td_list1_l">08.&nbsp;</td>
+              <td class="css_td_list1_r">
+                複製執行檔到執行目錄, <font class="css_font_p1">install_daemon</font>
+                <font class="css_font_r1">(需要加上指定模型的參數並使用多次處理每個模型)</font><br>
+                例如 :<br>
+                <div class="css_div_block">
+                make install_daemon MODEL_SUFFIX_LOWER=main MODEL_SUFFIX_UPPER=MAIN<br>
+                make install_daemon MODEL_SUFFIX_LOWER=log MODEL_SUFFIX_UPPER=LOG
+                </div>
+                <br>
+              </td>
+            </tr>
+            <tr>
+              <td class="css_td_list1_l">*.&nbsp;</td>
+              <td class="css_td_list1_r">
+                如果需要清除編譯, <font class="css_font_p1">clean</font>
+                <font class="css_font_r1">(需要加上指定模型的參數並使用多次處理每個模型)</font><br>
+                例如 :<br>
+                <div class="css_div_block">
+                make clean MODEL_SUFFIX_LOWER=main MODEL_SUFFIX_UPPER=MAIN<br>
+                make clean MODEL_SUFFIX_LOWER=log MODEL_SUFFIX_UPPER=LOG
+                </div>
+              </td>
+            </tr>
+          </table>
+
+        </td>
+      </tr>
+    </table>
+    <br>
+
+  </div>
+</div>
+<br>
+
+<div class="css_div_box_frame_full">
+  <div class="css_div_box_title">撰寫資料模型檔的注意事項</div>
+  <div class="css_div_box_content">
+    <br>
+
+    <font class="css_font_r1">所有的資料模型檔內, 不可以使用相同的根節點名稱.</font><br>
+    mcm_build_$(suffix) 會根據資料模型檔的內容, 在
+    <font class="css_font_b1">mint_cm/mcm_lib/mcm_lheader/mcm_data_exinfo_$(suffix)_auto.h</font>
+    產生對應的結構定義 (<font class="css_font_p1">struct mcm_dv_*_t {...}, struct mcm_ds_*_t {...}</font>),
+    相同的根節點名稱會導致重複定義.
+    <br><br>
+
+  </div>
+</div>
+<br>
+
+<div class="css_div_box_frame_full">
+  <div class="css_div_box_title">撰寫程式的注意事項</div>
+  <div class="css_div_box_content">
+    <br>
+
+    <table class="css_table_box">
+      <tr>
+        <td class="css_td_box">
+          <font class="css_font_b2">外部程式部分</font>
+          <br><br>
+          <table class="css_table_list2">
+            <tr>
+              <td class="css_td_list2_l1">
+                <font class="css_font_b1">include 部分</font>
+              </td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l1">
+                <font class="css_font_g1">原本 #include "mcm_lheader/mcm_data_exinfo_auto.h"</font><br>
+                <font class="css_font_r1">改為 #include "mcm_lheader/mcm_data_exinfo_$(suffix)_auto.h"</font><br>
+              </td>
+            </tr>
+          </table>
+          <br>
+          <table class="css_table_list2">
+            <tr>
+              <td class="css_td_list2_l1">
+                <font class="css_font_b1">define 部分</font>
+              </td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l1">
+                <font class="css_font_g1">
+                  原本這些定義<br>
+                  #define MCM_PROFILE_VERSION ...<br>
+                  #define MCM_PATH_MAX_LEVEL ...<br>
+                  #define MCM_PATH_MAX_LENGTH ...
+                </font><br>
+                <font class="css_font_r1">
+                  都會被改為<br>
+                  #define MCM_PROFILE_VERSION_$(SUFFIX) ...<br>
+                  #define MCM_PATH_MAX_LEVEL_$(SUFFIX) ...<br>
+                  #define MCM_PATH_MAX_LENGTH_$(SUFFIX) ...
+                </font><br>
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+    <br>
+
+    <table class="css_table_box">
+      <tr>
+        <td class="css_td_box">
+          <font class="css_font_b2">網頁程式部分</font>
+          <br><br>
+          <table class="css_table_list2">
+            <tr>
+              <td class="css_td_list2_l1">
+                <font class="css_font_b1">include Javascript 部分</font>
+              </td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l1">
+                <font class="css_font_g1">原本<br>&lt;script type="text/javascript" src="mcm_jslib_data_info_auto.js"&gt;&lt;/script&gt;</font><br>
+                <font class="css_font_r1">改為<br>&lt;script type="text/javascript" src="mcm_jslib_data_info_$(suffix)_auto.js"&gt;&lt;/script&gt;</font><br>
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+    <br>
+
+    <table class="css_table_box">
+      <tr>
+        <td class="css_td_box">
+          <font class="css_font_b2">內部模組程式部分</font>
+          <br><br>
+          <table class="css_table_list2">
+            <tr>
+              <td class="css_td_list2_l1">
+                <font class="css_font_b1">include 部分</font>
+              </td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l1">
+                <font class="css_font_g1">原本<br>#include "../../mcm_lib/mcm_lheader/mcm_data_exinfo_auto.h"</font><br>
+                <font class="css_font_r1">改為<br>#include "../../mcm_lib/mcm_lheader/mcm_data_exinfo_$(suffix)_auto.h"</font><br>
+              </td>
+            </tr>
+          </table>
+          <br>
+          <table class="css_table_list2">
+            <tr>
+              <td class="css_td_list2_l1">
+                <font class="css_font_b1">define 部分</font>
+              </td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l1">
+                <font class="css_font_g1">
+                  原本這些定義<br>
+                  #define MCM_PROFILE_VERSION ...<br>
+                  #define MCM_PATH_MAX_LEVEL ...<br>
+                  #define MCM_PATH_MAX_LENGTH ...
+                </font><br>
+                <font class="css_font_r1">
+                  都會被改為<br>
+                  #define MCM_PROFILE_VERSION_$(SUFFIX) ...<br>
+                  #define MCM_PATH_MAX_LEVEL_$(SUFFIX) ...<br>
+                  #define MCM_PATH_MAX_LENGTH_$(SUFFIX) ...
+                </font><br>
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+    <br>
+
+  </div>
+</div>
+<br>
+
+<div class="css_div_box_frame_full">
+  <div class="css_div_box_title">執行時的注意事項</div>
+  <div class="css_div_box_content">
+    <br>
+
+    <table class="css_table_box">
+      <tr>
+        <td class="css_td_box">
+          <font class="css_font_b2">執行參數</font>
+          <br><br>
+          <table class="css_table_list2">
+            <tr>
+              <td class="css_td_list2_l1">
+                <font class="css_font_b1">&lt;-a $(server_socket_path)&gt;</font><br>
+                開啟服務的位址路徑, 其他程式需要連線到此位址路徑作資料存取.<br>
+                需要指定不同的服務位址, 例如 :<br>
+                <div class="css_div_block">
+                  mcm_daemon_main 使用 @mcm-main<br>
+                  mcm_daemon_log 使用 @mcm-log
+                </div>
+              </td>
+            </tr>
+          </table>
+          <br>
+          <table class="css_table_list2">
+            <tr>
+              <td class="css_td_list2_l1">
+                <font class="css_font_b1">&lt;-l $(module_path)&gt;</font><br>
+                內部模組函式庫的路徑, 需要使用加上後綴的檔案名稱.
+              </td>
+            </tr>
+          </table>
+          <br>
+
+          <table class="css_table_list2">
+            <tr>
+              <td class="css_td_list2_l1">
+                <font class="css_font_b1">&lt;-m $(model_profile_path)&gt;</font><br>
+                資料模型檔案的路徑, 需要使用加上後綴的檔案名稱.
+              </td>
+            </tr>
+          </table>
+          <br>
+          <table class="css_table_list2">
+            <tr>
+              <td class="css_td_list2_l1">
+                <font class="css_font_b1">&lt;-d $(store_default_profile_path)&gt;</font><br>
+                資料預設值檔案的路徑, 需要使用加上後綴的檔案名稱.
+              </td>
+            </tr>
+          </table>
+          <br>
+          <table class="css_table_list2">
+            <tr>
+              <td class="css_td_list2_l1">
+                <font class="css_font_b1">&lt;-c $(store_current_profile_path)&gt;</font><br>
+                紀錄資料現在值檔案的路徑, 需要使用加上後綴的檔案名稱.
+              </td>
+            </tr>
+          </table>
+          <br>
+          <table class="css_table_list2">
+            <tr>
+              <td class="css_td_list2_l1">
+                <font class="css_font_b1">[-p $(pid_path)]</font><br>
+                紀錄 mcm_daemon 的 PID 的檔案的路徑, 需要使用加上後綴的檔案路徑.
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+    <br>
+
+  </div>
+</div>
+<br>
+
+</body>
+
+</html>

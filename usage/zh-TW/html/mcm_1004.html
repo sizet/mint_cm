@@ -1,0 +1,1141 @@
+<!--
+Copyright © 2017, Che-Wei Hsu <cwxhsu@gmail.com>
+This file is part of the MintCM.
+Some rights reserved. See README.
+-->
+
+<html>
+
+<head>
+<meta http-equiv="content-type" content="text/html; charset=utf-8">
+<link rel="stylesheet" href="../css/mcm_style.css">
+</head>
+
+<body class="css_body">
+
+<div class="css_div_box_frame_full">
+  <div class="css_div_box_title">chapter 10-04</div>
+  <div class="css_div_box_content">
+  </div>
+</div>
+<br>
+
+<div class="css_div_box_frame_full">
+  <div class="css_div_box_title">Session 的存取 (用戶端)</div>
+  <div class="css_div_box_content">
+    <br>
+
+    此章節說明用戶端程式如何存取 session 資料.
+    <br><br><br>
+
+    登入的使用者的 session 資料是放在共享記憶體, 其他用戶端程式可以存取這些資料.
+    <br><br>
+
+    Makefile 的編譯參數 :<br>
+    <div class="css_div_block">
+    # 路徑設定.<br>
+    <font class="css_font_p1">
+    MAAM_PATH&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; = mint_cm/http_server/mini_httpd/last<br>
+    MAAM_LIB_PATH&nbsp;&nbsp; = $(MAAM_PATH)/mcm_lib<br>
+    MAAM_LULIB_PATH = $(MAAM_PATH)
+    </font>
+    <br><br>
+    # 標頭檔路徑.<br>
+    <font class="css_font_p1">INCLUDE_PATH = -I$(MAAM_LIB_PATH)</font><br>
+    # 函式庫路徑.<br>
+    <font class="css_font_p1">LIBRARY_PATH = -L$(MAAM_LULIB_PATH)</font>
+    <br><br>
+    # 使用靜態鏈結或動態鏈結的鏈結參數.<br>
+    <font class="css_font_p1">
+    USE_STATIC_MAAM_LIB = YES<br>
+    ifeq (${USE_STATIC_MAAM_LIB}, YES)<br>
+    LIBRARY_FILE = $(MAAM_LULIB_PATH)/maam_lulib_api.a<br>
+    else<br>
+    LIBRARY_FILE = -lmaam_lulib_api<br>
+    endif<br>
+    </font>
+    </div>
+    MintAAM 的用戶端函式庫在 <font class="css_font_b1">mint_cm/http_server/mini_httpd/last</font>.<br>
+    使用動態鏈結必須將 <font class="css_font_b1">libmaam_lulib_api.so</font> 複製到系統的 lib 目錄.
+    <br><br>
+
+    需要的標頭檔 :<br>
+    <font class="css_font_p1">#include "maam_lulib/maam_lulib_api.h"</font>
+    <br><br>
+
+  </div>
+</div>
+<br>
+
+<div class="css_div_box_frame_full">
+  <div class="css_div_box_title">變數格式的說明</div>
+  <div class="css_div_box_content">
+    <br>
+
+    <div class="css_div_hook" id="hook_1004_maam_session_t_01"></div>
+    <font class="css_font_b1">[struct maam_session_t]</font><br>
+    紀錄每筆 session 的資料的結構, 結構成員<br>
+    <table class="css_table_list2">
+      <tr>
+        <td class="css_td_list2_l1">
+          <font class="css_font_r1">usockaddr</font><br>
+          <font class="css_font_g1">client_addr</font>
+        </td>
+        <td class="css_td_list2_r1">
+          客戶端的位址
+        </td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l1">
+          <font class="css_font_r1">char</font><br>
+          <font class="css_font_g1">account_name[MAAM_BSIZE_ACCOUNT_NAME]</font>
+        </td>
+        <td class="css_td_list2_r1">
+          帳號的名稱
+        </td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l1">
+          <font class="css_font_r1">int</font><br>
+          <font class="css_font_g1">account_permission</font>
+        </td>
+        <td class="css_td_list2_r1">
+          帳號的權限
+        </td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l1">
+          <font class="css_font_r1">char</font><br>
+          <font class="css_font_g1">session_key[MAAM_BSIZE_SESSION_KEY]</font>
+        </td>
+        <td class="css_td_list2_r1">
+           session 的 key 值
+        </td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l1">
+          <font class="css_font_r1">long</font><br>
+          <font class="css_font_g1">idle_timeout</font>
+        </td>
+        <td class="css_td_list2_r1">
+          閒置超時時間
+        </td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l1">
+          <font class="css_font_r1">long</font><br>
+          <font class="css_font_g1">create_uptime</font>
+        </td>
+        <td class="css_td_list2_r1">
+          登入的時間 (系統開機後的經過時間) [!]
+        </td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l1">
+          <font class="css_font_r1">long</font><br>
+          <font class="css_font_g1">last_access_uptime</font>
+        </td>
+        <td class="css_td_list2_r1">
+          最後活動的時間 (系統開機後的經過時間) [!]
+        </td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l1">
+          <font class="css_font_r1">int</font><br>
+          <font class="css_font_g1">session_index</font>
+        </td>
+        <td class="css_td_list2_r1">
+          內部鏈結串列使用, 紀錄此節點的編號 [!]
+        </td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l1">
+          <font class="css_font_r1">int</font><br>
+          <font class="css_font_g1">prev_session</font>
+        </td>
+        <td class="css_td_list2_r1">
+          內部鏈結串列使用, 紀錄串列上前一個節點的編號 [!]
+        </td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l1">
+          <font class="css_font_r1">int</font><br>
+          <font class="css_font_g1">next_session</font>
+        </td>
+        <td class="css_td_list2_r1">
+          內部鏈結串列使用, 紀錄串列上後一個節點的編號 [!]
+        </td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l1">
+          <font class="css_font_r1">int</font><br>
+          <font class="css_font_g1">empty_session</font>
+        </td>
+        <td class="css_td_list2_r1">
+          內部鏈結串列使用, 紀錄下一個沒被使用的節點的編號 [!]
+        </td>
+      </tr>
+    </table>
+    有 [!] 表示其他程式存取時不要修改這些資料, 會造成無法預期的錯誤.<br>
+    每筆 session 資料之間使用雙向鍊結串列排列.
+    <br><br><br>
+
+    <div class="css_div_hook" id="hook_1004_maam_auth_sys_t_01"></div>
+    <font class="css_font_b1">[struct maam_auth_sys_t]</font><br>
+     session 資料以及其他全部資料的結構, 結構成員<br>
+    <table class="css_table_list2">
+      <tr>
+        <td class="css_td_list2_l1">
+          <font class="css_font_r1">int</font><br>
+          <font class="css_font_g1">max_uptime</font>
+        </td>
+        <td class="css_td_list2_r1">
+          系統的 uptime 能記錄的最大值 [!]
+        </td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l1">
+          <font class="css_font_r1">int</font><br>
+          <font class="css_font_g1">session_count</font>
+        </td>
+        <td class="css_td_list2_r1">
+          目前的 session 數目 [!]
+        </td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l1">
+          <font class="css_font_r1">int</font><br>
+          <font class="css_font_g1">session_head</font>
+        </td>
+        <td class="css_td_list2_r1">
+          內部鏈結串列使用, 紀錄串列上第一個節點的編號 [!]
+        </td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l1">
+          <font class="css_font_r1">int</font><br>
+          <font class="css_font_g1">session_tail</font>
+        </td>
+        <td class="css_td_list2_r1">
+          內部鏈結串列使用, 紀錄串列上第一個沒被使用的節點的編號 [!]
+        </td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l1">
+          <font class="css_font_r1">struct maam_session_t</font><br>
+          <font class="css_font_g1">session_info[MAAM_MAX_SESSION]</font>
+        </td>
+        <td class="css_td_list2_r1">
+          每筆 session 的資料 <a href="#hook_1004_maam_session_t_01">[詳細]</a>
+        </td>
+      </tr>
+    </table>
+     有 [!] 表示其他程式存取時不要修改這些資料, 會造成無法預期的錯誤.
+    <br><br><br>
+
+    <div class="css_div_hook" id="hook_1004_maam_lulib_t_01"></div>
+    <font class="css_font_b1">[struct maam_lulib_t]</font><br>
+    用來儲存 libmaam_lulib_api.so 使用時需要的資訊.<br>
+    會用到的結構成員 :<br>
+    <table class="css_table_list2">
+      <tr>
+        <td class="css_td_list2_l1">
+          <div class="css_div_hook" id="hook_1004_sm_key_01"></div>
+          <font class="css_font_b1">[key_t sm_key]</font><br>
+          session 資料的共享記憶體的 key 值.<br>
+          <font class="css_font_p1">使用 MAAM_SHARE_MEMORY_KEY</font>
+        </td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l1">
+          <div class="css_div_hook" id="hook_1004_sm_mutex_path_01"></div>
+          <font class="css_font_b1">[char *sm_mutex_path]</font><br>
+          存取 session 資料的檔案互斥鎖的路徑.<br>
+          <font class="css_font_p1">使用 MAAM_MUTEX_PATH</font>
+        </td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l1">
+          <font class="css_font_b1">[int sm_id]</font><br>
+          紀錄使用 shmget() 開啟共享記憶體的 id.
+        </td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l1">
+          <font class="css_font_b1">[int sm_mutex_fd]</font><br>
+          紀錄使用 open() 開啟檔案互斥鎖的 fd.
+        </td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l1">
+          <font class="css_font_b1">[struct maam_auth_sys_t *auth_sys]</font><br>
+          紀錄 session 資料的記憶體位址.
+          <a href="#hook_1004_maam_auth_sys_t_01">[詳細]</a>
+        </td>
+      </tr>
+    </table>
+    <br>
+
+  </div>
+</div>
+<br>
+
+<div class="css_div_box_frame_full">
+  <div class="css_div_box_title">可用的函式</div>
+  <div class="css_div_box_content">
+    <br>
+
+    <div class="css_div_hook" id="hook_1004_maam_lulib_init_01"></div>
+    <table class="css_table_box">
+      <tr>
+        <td class="css_td_box">
+          <font class="css_font_b2">maam_lulib_init</font><br>
+          初始化, 開啟存取內部資料.<br>
+          <table class="css_table_list2">
+            <tr>
+              <td class="css_td_list2_t1">參數</td>
+              <td class="css_td_list2_t1">說明</td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l1">
+                <font class="css_font_r1">struct maam_lulib_t *</font><br>
+                <font class="css_font_g1">maam_lulib_info</font>
+              </td>
+              <td class="css_td_list2_r1">
+                紀錄 maam_lulib_api 所需要的資料
+                <a href="#hook_1004_maam_lulib_t_01">[詳細]</a><br>
+                需要先設定好會用到的結構成員 :<br>
+                <font class="css_font_p1">sm_key</font>
+                <a href="#hook_1004_sm_key_01">[詳細]</a><br>
+                <font class="css_font_p1">sm_mutex_path</font>
+                <a href="#hook_1004_sm_mutex_path_01">[詳細]</a><br>
+              </td>
+            </tr>
+          </table>
+          <table class="css_table_list2">
+            <tr>
+              <td class="css_td_list2_t1">回傳</td>
+              <td class="css_td_list2_t1">說明</td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l2">&gt;= MAAM_RCODE_PASS</td>
+              <td class="css_td_list2_r1">成功</td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l2">&nbsp;&lt; MAAM_RCODE_PASS</td>
+              <td class="css_td_list2_r1">錯誤</td>
+            </tr>
+          </table>
+          <br>
+          注意事項 :<br>
+          <table class="css_table_list1">
+            <tr>
+              <td class="css_td_list1_l">01.&nbsp;</td>
+              <td class="css_td_list1_r">
+                函式內會使用 flock(LOCK_EX) 鎖定佔有.
+              </td>
+            </tr>
+          </table>
+          <br>
+          範例 :<br>
+<pre class="css_pre_code">
+#include &lt;stdio.h&gt;
+#include &lt;string.h&gt;
+#include "maam_lulib/maam_lulib_api.h"
+
+#define DMSG(msg_fmt, msgs...) printf("%s(%04u): " msg_fmt "\n", __FILE__, __LINE__, ##msgs)
+
+int main(int argc, char **argv)
+{
+    struct maam_lulib_t self_maam_lulib;
+
+    memset(&self_maam_lulib, 0, sizeof(struct maam_lulib_t));
+    self_maam_lulib.sm_key = MAAM_SHARE_MEMORY_KEY;
+    self_maam_lulib.sm_mutex_path = MAAM_MUTEX_PATH;
+    if(maam_lulib_init(&self_maam_lulib) < MAAM_RCODE_PASS)
+    {
+        DMSG("call maam_lulib_init() fail");
+        goto FREE_01;
+    }
+
+    //  session 資料存取.
+    // ...
+
+FREE_01:
+    return 0;
+}
+</pre>
+        </td>
+      </tr>
+    </table>
+    <br>
+
+    <div class="css_div_hook" id="hook_1004_maam_lulib_exit_01"></div>
+    <table class="css_table_box">
+      <tr>
+        <td class="css_td_box">
+          <font class="css_font_b2">maam_lulib_exit</font><br>
+          使用完畢, 釋放使用權.<br>
+          <table class="css_table_list2">
+            <tr>
+              <td class="css_td_list2_t1">參數</td>
+              <td class="css_td_list2_t1">說明</td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l1">
+                <font class="css_font_r1">struct maam_lulib_t *</font><br>
+                <font class="css_font_g1">maam_lulib_info</font>
+              </td>
+              <td class="css_td_list2_r1">
+                紀錄 maam_lulib_api 所需要的資料
+                <a href="#hook_1004_maam_lulib_t_01">[詳細]</a>
+              </td>
+            </tr>
+          </table>
+          <table class="css_table_list2">
+            <tr>
+              <td class="css_td_list2_t1">回傳</td>
+              <td class="css_td_list2_t1">說明</td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l2">&gt;= MAAM_RCODE_PASS</td>
+              <td class="css_td_list2_r1">成功</td>
+            </tr>
+          </table>
+          <br>
+          注意事項 :<br>
+          <table class="css_table_list1">
+            <tr>
+              <td class="css_td_list1_l">01.&nbsp;</td>
+              <td class="css_td_list1_r">
+                函式會先使用 flock(LOCK_EX) 解除占有後才關閉相關資源.
+              </td>
+            </tr>
+          </table>
+          <br>
+          範例 :<br>
+<pre class="css_pre_code">
+#include &lt;stdio.h&gt;
+#include &lt;string.h&gt;
+#include "maam_lulib/maam_lulib_api.h"
+
+#define DMSG(msg_fmt, msgs...) printf("%s(%04u): " msg_fmt "\n", __FILE__, __LINE__, ##msgs)
+
+int main(int argc, char **argv)
+{
+    struct maam_lulib_t self_maam_lulib;
+
+    memset(&self_maam_lulib, 0, sizeof(struct maam_lulib_t));
+    self_maam_lulib.sm_key = MAAM_SHARE_MEMORY_KEY;
+    self_maam_lulib.sm_mutex_path = MAAM_MUTEX_PATH;
+    if(maam_lulib_init(&self_maam_lulib) < MAAM_RCODE_PASS)
+    {
+        DMSG("call maam_lulib_init() fail");
+        goto FREE_01;
+    }
+
+    //  session 資料存取.
+    // ...
+
+    maam_lulib_exit(&self_maam_lulib);
+FREE_01:
+    return 0;
+}
+</pre>
+        </td>
+      </tr>
+    </table>
+    <br>
+
+    <div class="css_div_hook" id="hook_1004_MAAM_LULIB_HEAD_SESSION_01"></div>
+    <table class="css_table_box">
+      <tr>
+        <td class="css_td_box">
+          <font class="css_font_b2">MAAM_LULIB_HEAD_SESSION</font><br>
+          巨集, 找到串列上開頭的那筆 session 資料.<br>
+          <table class="css_table_list2">
+            <tr>
+              <td class="css_td_list2_t1">參數</td>
+              <td class="css_td_list2_t1">說明</td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l1">
+                <font class="css_font_r1">struct maam_auth_sys_t *</font><br>
+                <font class="css_font_g1">auth_sys_info</font>
+              </td>
+              <td class="css_td_list2_r1">
+                 session 資料以及其他全部資料
+                <a href="#hook_1004_maam_auth_sys_t_01">[詳細]</a>
+              </td>
+            </tr>
+          </table>
+          <table class="css_table_list2">
+            <tr>
+              <td class="css_td_list2_t1">回傳</td>
+              <td class="css_td_list2_t1">說明</td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l2">!= NULL</td>
+              <td class="css_td_list2_r1">有該筆資料</td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l2">== NULL</td>
+              <td class="css_td_list2_r1">無該筆資料</td>
+            </tr>
+          </table>
+          <br>
+          範例 :<br>
+<pre class="css_pre_code">
+#include &lt;stdio.h&gt;
+#include &lt;string.h&gt;
+#include "maam_lulib/maam_lulib_api.h"
+
+#define DMSG(msg_fmt, msgs...) printf("%s(%04u): " msg_fmt "\n", __FILE__, __LINE__, ##msgs)
+
+int main(int argc, char **argv)
+{
+    struct maam_lulib_t self_maam_lulib;
+    struct maam_session_t *each_session;
+
+    memset(&self_maam_lulib, 0, sizeof(struct maam_lulib_t));
+    self_maam_lulib.sm_key = MAAM_SHARE_MEMORY_KEY;
+    self_maam_lulib.sm_mutex_path = MAAM_MUTEX_PATH;
+    if(maam_lulib_init(&self_maam_lulib) < MAAM_RCODE_PASS)
+    {
+        DMSG("call maam_lulib_init() fail");
+        goto FREE_01;
+    }
+
+    // 開頭的 session 資料.
+    each_session = MAAM_LULIB_HEAD_SESSION(self_maam_lulib.auth_sys);
+    if(each_session != NULL)
+    {
+        DMSG("head session [%s][%s]",
+             each_session->account_name, each_session->session_key);
+    }
+    else
+    {
+        DMSG("no any session");
+    }
+
+    maam_lulib_exit(&self_maam_lulib);
+FREE_01:
+    return 0;
+}
+</pre>
+        </td>
+      </tr>
+    </table>
+    <br>
+
+    <div class="css_div_hook" id="hook_1004_MAAM_LULIB_TAIL_SESSION_01"></div>
+    <table class="css_table_box">
+      <tr>
+        <td class="css_td_box">
+          <font class="css_font_b2">MAAM_LULIB_TAIL_SESSION</font><br>
+          巨集, 找到串列上結尾的那筆 session 資料.<br>
+          <table class="css_table_list2">
+            <tr>
+              <td class="css_td_list2_t1">參數</td>
+              <td class="css_td_list2_t1">說明</td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l1">
+                <font class="css_font_r1">struct maam_auth_sys_t *</font><br>
+                <font class="css_font_g1">auth_sys_info</font>
+              </td>
+              <td class="css_td_list2_r1">
+                 session 資料以及其他全部資料
+                <a href="#hook_1004_maam_auth_sys_t_01">[詳細]</a>
+              </td>
+            </tr>
+          </table>
+          <table class="css_table_list2">
+            <tr>
+              <td class="css_td_list2_t1">回傳</td>
+              <td class="css_td_list2_t1">說明</td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l2">!= NULL</td>
+              <td class="css_td_list2_r1">有該筆資料</td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l2">== NULL</td>
+              <td class="css_td_list2_r1">無該筆資料</td>
+            </tr>
+          </table>
+          <br>
+          範例 :<br>
+<pre class="css_pre_code">
+#include &lt;stdio.h&gt;
+#include &lt;string.h&gt;
+#include "maam_lulib/maam_lulib_api.h"
+
+#define DMSG(msg_fmt, msgs...) printf("%s(%04u): " msg_fmt "\n", __FILE__, __LINE__, ##msgs)
+
+int main(int argc, char **argv)
+{
+    struct maam_lulib_t self_maam_lulib;
+    struct maam_session_t *each_session;
+
+    memset(&self_maam_lulib, 0, sizeof(struct maam_lulib_t));
+    self_maam_lulib.sm_key = MAAM_SHARE_MEMORY_KEY;
+    self_maam_lulib.sm_mutex_path = MAAM_MUTEX_PATH;
+    if(maam_lulib_init(&self_maam_lulib) < MAAM_RCODE_PASS)
+    {
+        DMSG("call maam_lulib_init() fail");
+        goto FREE_01;
+    }
+
+    // 結尾的 session 資料.
+    each_session = MAAM_LULIB_TAIL_SESSION(self_maam_lulib.auth_sys);
+    if(each_session != NULL)
+    {
+        DMSG("tail session [%s][%s]",
+             each_session->account_name, each_session->session_key);
+    }
+    else
+    {
+        DMSG("no any session");
+    }
+
+    maam_lulib_exit(&self_maam_lulib);
+FREE_01:
+    return 0;
+}
+</pre>
+        </td>
+      </tr>
+    </table>
+    <br>
+
+    <div class="css_div_hook" id="hook_1004_MAAM_LULIB_NEXT_SESSION_01"></div>
+    <table class="css_table_box">
+      <tr>
+        <td class="css_td_box">
+          <font class="css_font_b2">MAAM_LULIB_NEXT_SESSION</font><br>
+          巨集, 找到串列上目前這筆 session 資料的後一筆.<br>
+          <table class="css_table_list2">
+            <tr>
+              <td class="css_td_list2_t1">參數</td>
+              <td class="css_td_list2_t1">說明</td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l1">
+                <font class="css_font_r1">struct maam_auth_sys_t *</font><br>
+                <font class="css_font_g1">auth_sys_info</font>
+              </td>
+              <td class="css_td_list2_r1">
+                 session 資料以及其他全部資料
+                <a href="#hook_1004_maam_auth_sys_t_01">[詳細]</a>
+              </td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l1">
+                <font class="css_font_r1">struct maam_session_t *</font><br>
+                <font class="css_font_g1">link_session</font>
+              </td>
+              <td class="css_td_list2_r1">
+                目前的 session 資料
+                <a href="#hook_1004_maam_session_t_01">[詳細]</a>
+              </td>
+            </tr>
+          </table>
+          <table class="css_table_list2">
+            <tr>
+              <td class="css_td_list2_t1">回傳</td>
+              <td class="css_td_list2_t1">說明</td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l2">!= NULL</td>
+              <td class="css_td_list2_r1">有該筆資料</td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l2">== NULL</td>
+              <td class="css_td_list2_r1">無該筆資料</td>
+            </tr>
+          </table>
+          <br>
+          範例 :<br>
+<pre class="css_pre_code">
+#include &lt;stdio.h&gt;
+#include &lt;string.h&gt;
+#include "maam_lulib/maam_lulib_api.h"
+
+#define DMSG(msg_fmt, msgs...) printf("%s(%04u): " msg_fmt "\n", __FILE__, __LINE__, ##msgs)
+
+int main(int argc, char **argv)
+{
+    struct maam_lulib_t self_maam_lulib;
+    struct maam_session_t *each_session;
+
+    memset(&self_maam_lulib, 0, sizeof(struct maam_lulib_t));
+    self_maam_lulib.sm_key = MAAM_SHARE_MEMORY_KEY;
+    self_maam_lulib.sm_mutex_path = MAAM_MUTEX_PATH;
+    if(maam_lulib_init(&self_maam_lulib) < MAAM_RCODE_PASS)
+    {
+        DMSG("call maam_lulib_init() fail");
+        goto FREE_01;
+    }
+
+    // 從開頭到結尾.
+    for(each_session = MAAM_LULIB_HEAD_SESSION(self_maam_lulib.auth_sys);
+        each_session != NULL;
+        each_session = MAAM_LULIB_NEXT_SESSION(self_maam_lulib.auth_sys, each_session))
+    {
+        DMSG("session [%s][%s]",
+             each_session->account_name, each_session->session_key);
+    }
+
+    maam_lulib_exit(&self_maam_lulib);
+FREE_01:
+    return 0;
+}
+</pre>
+        </td>
+      </tr>
+    </table>
+    <br>
+
+    <div class="css_div_hook" id="hook_1004_MAAM_LULIB_PREV_SESSION_01"></div>
+    <table class="css_table_box">
+      <tr>
+        <td class="css_td_box">
+          <font class="css_font_b2">MAAM_LULIB_PREV_SESSION</font><br>
+          巨集, 找到串列上目前這筆 session 資料的前一筆.<br>
+          <table class="css_table_list2">
+            <tr>
+              <td class="css_td_list2_t1">參數</td>
+              <td class="css_td_list2_t1">說明</td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l1">
+                <font class="css_font_r1">struct maam_auth_sys_t *</font><br>
+                <font class="css_font_g1">auth_sys_info</font>
+              </td>
+              <td class="css_td_list2_r1">
+                 session 資料以及其他全部資料
+                <a href="#hook_1004_maam_auth_sys_t_01">[詳細]</a>
+              </td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l1">
+                <font class="css_font_r1">struct maam_session_t *</font><br>
+                <font class="css_font_g1">link_session</font>
+              </td>
+              <td class="css_td_list2_r1">
+                目前的 session 資料
+                <a href="#hook_1004_maam_session_t_01">[詳細]</a>
+              </td>
+            </tr>
+          </table>
+          <table class="css_table_list2">
+            <tr>
+              <td class="css_td_list2_t1">回傳</td>
+              <td class="css_td_list2_t1">說明</td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l2">!= NULL</td>
+              <td class="css_td_list2_r1">有該筆資料</td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l2">== NULL</td>
+              <td class="css_td_list2_r1">無該筆資料</td>
+            </tr>
+          </table>
+          <br>
+          範例 :<br>
+<pre class="css_pre_code">
+#include &lt;stdio.h&gt;
+#include &lt;string.h&gt;
+#include "maam_lulib/maam_lulib_api.h"
+
+#define DMSG(msg_fmt, msgs...) printf("%s(%04u): " msg_fmt "\n", __FILE__, __LINE__, ##msgs)
+
+int main(int argc, char **argv)
+{
+    struct maam_lulib_t self_maam_lulib;
+    struct maam_session_t *each_session;
+
+    memset(&self_maam_lulib, 0, sizeof(struct maam_lulib_t));
+    self_maam_lulib.sm_key = MAAM_SHARE_MEMORY_KEY;
+    self_maam_lulib.sm_mutex_path = MAAM_MUTEX_PATH;
+    if(maam_lulib_init(&self_maam_lulib) < MAAM_RCODE_PASS)
+    {
+        DMSG("call maam_lulib_init() fail");
+        goto FREE_01;
+    }
+
+    // 從結尾到開頭.
+    for(each_session = MAAM_LULIB_TAIL_SESSION(self_maam_lulib.auth_sys);
+        each_session != NULL;
+        each_session = MAAM_LULIB_PREV_SESSION(self_maam_lulib.auth_sys, each_session))
+    {
+        DMSG("session [%s][%s]",
+             each_session->account_name, each_session->session_key);
+    }
+
+    maam_lulib_exit(&self_maam_lulib);
+FREE_01:
+    return 0;
+}
+</pre>
+        </td>
+      </tr>
+    </table>
+    <br>
+
+    <div class="css_div_hook" id="hook_1004_MAAM_LULIB_IP_NTOH_01"></div>
+    <table class="css_table_box">
+      <tr>
+        <td class="css_td_box">
+          <font class="css_font_b2">MAAM_LULIB_IP_NTOH</font><br>
+          巨集, 將網路格式的位址轉為字串格式.<br>
+          <table class="css_table_list2">
+            <tr>
+              <td class="css_td_list2_t1">參數</td>
+              <td class="css_td_list2_t1">說明</td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l1">
+                <font class="css_font_r1">usockaddr</font><br>
+                <font class="css_font_g1">usockaddr_info</font>
+              </td>
+              <td class="css_td_list2_r1">
+                網路格式的位址資料
+              </td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l1">
+                <font class="css_font_r1">char *</font><br>
+                <font class="css_font_g1">host_buf</font>
+              </td>
+              <td class="css_td_list2_r1">
+                紀錄字串格式位址的緩衝
+              </td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l1">
+                <font class="css_font_r1">size_t</font><br>
+                <font class="css_font_g1">host_size</font>
+              </td>
+              <td class="css_td_list2_r1">
+                紀錄字串格式位址的緩衝的大小
+              </td>
+            </tr>
+          </table>
+          <br>
+          注意事項 :<br>
+          <table class="css_table_list1">
+            <tr>
+              <td class="css_td_list1_l">01.&nbsp;</td>
+              <td class="css_td_list1_r">
+                需要引用 &lt;sys/types.h&gt; &lt;sys/socket.h&gt; &lt;arpa/inet.h&gt; 這幾個標頭檔.
+              </td>
+            </tr>
+          </table>
+          <br>
+          範例 :<br>
+<pre class="css_pre_code">
+#include &lt;stdio.h&gt;
+#include &lt;string.h&gt;
+#include &lt;sys/types.h&gt;
+#include &lt;sys/socket.h&gt;
+#include &lt;arpa/inet.h&gt;
+#include "maam_lulib/maam_lulib_api.h"
+
+#define DMSG(msg_fmt, msgs...) printf("%s(%04u): " msg_fmt "\n", __FILE__, __LINE__, ##msgs)
+
+int main(int argc, char **argv)
+{
+    struct maam_lulib_t self_maam_lulib;
+    struct maam_session_t *each_session;
+    char client_haddr[64];
+
+    memset(&self_maam_lulib, 0, sizeof(struct maam_lulib_t));
+    self_maam_lulib.sm_key = MAAM_SHARE_MEMORY_KEY;
+    self_maam_lulib.sm_mutex_path = MAAM_MUTEX_PATH;
+    if(maam_lulib_init(&self_maam_lulib) < MAAM_RCODE_PASS)
+    {
+        DMSG("call maam_lulib_init() fail");
+        goto FREE_01;
+    }
+
+    for(each_session = MAAM_LULIB_HEAD_SESSION(self_maam_lulib.auth_sys);
+        each_session != NULL;
+        each_session = MAAM_LULIB_NEXT_SESSION(self_maam_lulib.auth_sys, each_session))
+    {
+        // 轉換位址.
+        MAAM_LULIB_IP_NTOH(each_session->client_addr, client_haddr, sizeof(client_haddr));
+
+        DMSG("session [%s][%s][%s]",
+             each_session->account_name, each_session->session_key, client_haddr);
+    }
+
+    maam_lulib_exit(&self_maam_lulib);
+FREE_01:
+    return 0;
+}
+</pre>
+        </td>
+      </tr>
+    </table>
+    <br>
+
+    <div class="css_div_hook" id="hook_1004_maam_lulib_kick_session_01"></div>
+    <table class="css_table_box">
+      <tr>
+        <td class="css_td_box">
+          <font class="css_font_b2">maam_lulib_kick_session</font><br>
+          踢掉該使用者 (移除該筆 session 資料)<br>
+          <table class="css_table_list2">
+            <tr>
+              <td class="css_td_list2_t1">參數</td>
+              <td class="css_td_list2_t1">說明</td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l1">
+                <font class="css_font_r1">struct maam_auth_sys_t *</font><br>
+                <font class="css_font_g1">auth_sys_info</font>
+              </td>
+              <td class="css_td_list2_r1">
+                 session 資料以及其他全部資料
+                <a href="#hook_1004_maam_auth_sys_t_01">[詳細]</a>
+              </td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l1">
+                <font class="css_font_r1">struct maam_session_t *</font><br>
+                <font class="css_font_g1">session_info</font>
+              </td>
+              <td class="css_td_list2_r1">
+                要移除的 session 資料
+                <a href="#hook_1004_maam_session_t_01">[詳細]</a>
+              </td>
+            </tr>
+          </table>
+          <table class="css_table_list2">
+            <tr>
+              <td class="css_td_list2_t1">回傳</td>
+              <td class="css_td_list2_t1">說明</td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l2">&gt;= MAAM_RCODE_PASS</td>
+              <td class="css_td_list2_r1">成功</td>
+            </tr>
+          </table>
+          <br>
+          範例 :<br>
+<pre class="css_pre_code">
+#include &lt;stdio.h&gt;
+#include &lt;string.h&gt;
+#include "maam_lulib/maam_lulib_api.h"
+
+#define DMSG(msg_fmt, msgs...) printf("%s(%04u): " msg_fmt "\n", __FILE__, __LINE__, ##msgs)
+
+int main(int argc, char **argv)
+{
+    struct maam_lulib_t self_maam_lulib;
+    struct maam_session_t *each_session, *next_session;
+
+    memset(&self_maam_lulib, 0, sizeof(struct maam_lulib_t));
+    self_maam_lulib.sm_key = MAAM_SHARE_MEMORY_KEY;
+    self_maam_lulib.sm_mutex_path = MAAM_MUTEX_PATH;
+    if(maam_lulib_init(&self_maam_lulib) < MAAM_RCODE_PASS)
+    {
+        DMSG("call maam_lulib_init() fail");
+        goto FREE_01;
+    }
+
+    // 移除所有的 session 資料.
+    for(each_session = MAAM_LULIB_HEAD_SESSION(self_maam_lulib.auth_sys);
+        each_session != NULL;
+        each_session = next_session)
+    {
+        next_session = MAAM_LULIB_NEXT_SESSION(self_maam_lulib.auth_sys, each_session);
+
+        DMSG("kick session [%s][%s]",
+             each_session->account_name, each_session->session_key);
+
+        maam_lulib_kick_session(self_maam_lulib.auth_sys, each_session);
+    }
+
+    maam_lulib_exit(&self_maam_lulib);
+FREE_01:
+    return 0;
+}
+</pre>
+        </td>
+      </tr>
+    </table>
+    <br>
+
+  </div>
+</div>
+<br>
+
+<div class="css_div_box_frame_full">
+  <div class="css_div_box_title">範例程式的使用</div>
+  <div class="css_div_box_content">
+    <br>
+
+    <table class="css_table_list1">
+      <tr>
+        <td class="css_td_list1_l">01.&nbsp;</td>
+        <td class="css_td_list1_r">
+          範例程式目錄在 <font class="css_font_b1">mint_cm/usage/example/1004</font>.
+        </td>
+      </tr>
+    </table>
+    <br><br>
+
+    <table class="css_table_list1">
+      <tr>
+        <td class="css_td_list1_l">02.&nbsp;</td>
+        <td class="css_td_list1_r">
+          下面關於 <font class="css_font_p1">make</font> 的操作沒有特別註明的話都是在
+          <font class="css_font_b1">mint_cm</font> 目錄.
+        </td>
+      </tr>
+    </table>
+    <br><br>
+
+    <table class="css_table_list1">
+      <tr>
+        <td class="css_td_list1_l">03.&nbsp;</td>
+        <td class="css_td_list1_r">
+          第一次使用, 使用 <font class="css_font_p1">make example_add KEY=1004</font>
+          載入範例並編譯.
+        </td>
+      </tr>
+    </table>
+    <br><br>
+
+    <table class="css_table_list1">
+      <tr>
+        <td class="css_td_list1_l">04.&nbsp;</td>
+        <td class="css_td_list1_r">
+          <font class="css_font_b1">web_app</font> 是範例程式.<br><br>
+          範例項目 :<br>
+          <table class="css_table_list2">
+            <tr>
+              <td class="css_td_list2_l2">case-01</td>
+              <td class="css_td_list2_r1">測試帳號的增加/刪除/修改</font>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l2">case-02</td>
+              <td class="css_td_list2_r1">測試 session 的取得和踢除</font>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+    <br><br>
+
+    <table class="css_table_list1">
+      <tr>
+        <td class="css_td_list1_l">05.&nbsp;</td>
+        <td class="css_td_list1_r">
+          先執行 mcm_daemon 和 mini_httpd 才可測試.
+        </td>
+      </tr>
+    </table>
+    <br><br>
+
+    <table class="css_table_list1">
+      <tr>
+        <td class="css_td_list1_l">06.&nbsp;</td>
+        <td class="css_td_list1_r">
+          瀏覽器連至 <font class="css_font_b1">http://&lt;server-address&gt;</font>
+          會自動導到登入頁面.
+        </td>
+      </tr>
+    </table>
+    <br><br>
+
+    <table class="css_table_list1">
+      <tr>
+        <td class="css_td_list1_l">07.&nbsp;</td>
+        <td class="css_td_list1_r">
+          測試完畢不使用後, 使用 <font class="css_font_p1">make example_del KEY=1004</font>
+          將範例移除.
+        </td>
+      </tr>
+    </table>
+    <br><br>
+
+    <table class="css_table_list1">
+      <tr>
+        <td class="css_td_list1_l">08.&nbsp;</td>
+        <td class="css_td_list1_r">
+          範例程式目錄下的檔案在做完 <font class="css_font_p1">make example_add</font>
+          後會複製到真正使用的位置, 要修改做測試的話要改在複製後的.<br>
+          <table class="css_table_list2">
+            <tr>
+              <td class="css_td_list2_r1">
+                來源 <font class="css_font_b1">profile/mcm_data_profile_1004.xml</font><br>
+                目地 <font class="css_font_b1">mint_cm/mcm_build/mcm_data_profile.xml</font><br>
+                資料模型範例<br>
+                有修改要使用 <font class="css_font_p1">make all</font> 重新編譯
+              </td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_r1">
+                來源 <font class="css_font_b1">profile/mcm_store_profile_default_1004.txt</font><br>
+                目地 <font class="css_font_b1">mint_cm/mcm_build/mcm_store_profile_default.txt</font><br>
+                資料預設值範例<br>
+                使用 <font class="css_font_p1">make all</font> 後會再複製到 <font class="css_font_b1">mint_cm/run</font>
+              </td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_r1">
+                來源 <font class="css_font_b1">web_app</font><br>
+                目地 <font class="css_font_b1">mint_cm/run/web</font><br>
+                網頁程式範例
+              </td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_r1">
+                來源 <font class="css_font_b1">module/mcm_module_1004.c</font><br>
+                目地 <font class="css_font_b1">mint_cm/mcm_daemon/mcm_module</font><br>
+                內部模組範例<br>
+                有修改要使用 <font class="css_font_p1">make all</font> 重新編譯
+              </td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_r1">
+                來源 <font class="css_font_b1">module/Makefile</font><br>
+                目地 <font class="css_font_b1">mint_cm/mcm_daemon/mcm_module</font><br>
+                內部模組的 Makefile, 主要是加入使用 MintAAM 函式庫的連結<br>
+                有修改要使用 <font class="css_font_p1">make all</font> 重新編譯
+              </td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_r1">
+                來源 <font class="css_font_b1">maam_buildin</font><br>
+                目地 <font class="css_font_b1">http_server/mini_httpd/last/mint_aam/maam_buildin</font><br>
+                MintAAM 端範例範例<br>
+                有修改要使用 <font class="css_font_p1">make all</font> 重新編譯
+              </td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_r1">
+                來源 <font class="css_font_b1">mini_httpd/Makefile</font><br>
+                目地 <font class="css_font_b1">http_server/mini_httpd/last</font><br>
+                mini_httpd 的 Makefile, 主要是加入使用 MintCM 函式庫的連結<br>
+                有修改要使用 <font class="css_font_p1">make all</font> 重新編譯
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+    <br>
+
+  </div>
+</div>
+<br>
+
+</body>
+
+</html>

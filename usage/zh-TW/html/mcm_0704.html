@@ -1,0 +1,1930 @@
+<!--
+Copyright © 2017, Che-Wei Hsu <cwxhsu@gmail.com>
+This file is part of the MintCM.
+Some rights reserved. See README.
+-->
+
+<html>
+
+<head>
+<meta http-equiv="content-type" content="text/html; charset=utf-8">
+<link rel="stylesheet" href="../css/mcm_style.css">
+</head>
+
+<body class="css_body">
+
+<div class="css_div_box_frame_full">
+  <div class="css_div_box_title">chapter 07-04</div>
+  <div class="css_div_box_content">
+  </div>
+</div>
+<br>
+
+<div class="css_div_box_frame_full">
+  <div class="css_div_box_title">除錯 (還原預設值-內部)</div>
+  <div class="css_div_box_content">
+    <br>
+
+    此章節說明當資料現在值檔案損毀導致資料錯誤時, 如何使用 [除錯 (還原預設值-內部)] 模式做處理.
+    <br><br>
+
+  </div>
+</div>
+<br>
+
+<div class="css_div_box_frame_full">
+  <div class="css_div_box_title">使用方式</div>
+  <div class="css_div_box_content">
+    <br>
+
+    使用 [除錯 (還原預設值-內部)] 模式時系統的處理步驟 :<br>
+    <table class="css_table_list1">
+      <tr>
+        <td class="css_td_list1_l">01.&nbsp;</td>
+        <td class="css_td_list1_r">
+          載入資料現在值檔案, 檢查資料有無錯誤.
+          <table class="css_table_list1">
+            <tr>
+              <td class="css_td_list1_l">a.&nbsp;</td>
+              <td class="css_td_list1_r">
+                如果是 <font class="css_font_g1">能夠檢測到並且可以標記的錯誤</font>
+                <a href="mcm_0701.html#hook_0701_detect_and_mark_01">[詳細]</a>,
+                將該筆資料貼上對應的錯誤狀態.
+              </td>
+            </tr>
+            <tr>
+              <td class="css_td_list1_l">b.&nbsp;</td>
+              <td class="css_td_list1_r">
+                如果是 <font class="css_font_g1">能夠檢測到<font class="css_font_r1">但是無法標記</font>的錯誤</font>
+                <a href="mcm_0701.html#hook_0701_detect_not_mark_01">[詳細]</a>,
+                只會顯示有錯誤, 不會貼上對應的錯誤狀態.
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+      <tr>
+        <td class="css_td_list1_l">02.&nbsp;</td>
+        <td class="css_td_list1_r">
+          執行資料檢查的啟動表.
+        </td>
+      </tr>
+      <tr>
+        <td class="css_td_list1_l">03.&nbsp;</td>
+        <td class="css_td_list1_r">
+          在啟動表內的模組修正錯誤的資料.
+        </td>
+      </tr>
+      <tr>
+        <td class="css_td_list1_l">04.&nbsp;</td>
+        <td class="css_td_list1_r">
+          如果資料損毀嚴重需要做還原預設值處理,
+          使用 [還原預設值 (內部)] (<a href="mcm_0702.html">#07-02#</a>) 處理.
+        </td>
+      </tr>
+    </table>
+    <br>
+
+    執行完資料檢查的啟動表後, 資料的狀態會被清除無法再取得資料的錯誤狀態,
+    所以錯誤處理一定要在資料檢查的啟動表內進行.
+    <br><br>
+
+  </div>
+</div>
+<br>
+
+<div class="css_div_box_frame_full">
+  <div class="css_div_box_title">資料檢查的啟動表</div>
+  <div class="css_div_box_content">
+    <br>
+
+    啟動表要放在 <font class="css_font_b1">mint_cm/mcm_daemon/module</font> 內, 新增一個 C 檔案, 內容為 :<br>
+    <div class="css_div_block">
+    #include "../../mcm_lib/mcm_lheader/mcm_type.h"<br>
+    #include "../../mcm_lib/mcm_lheader/mcm_return.h"<br>
+    #include "../../mcm_lib/mcm_lheader/mcm_debug.h"<br>
+    #include "../mcm_action_handle_define.h"<br><br>
+    <font class="css_font_g1">
+    struct mcm_action_module_t MCM_ACTION_CUSTOM_MODULE_BOOT_PROFILE_LIST_NAME[] =<br>
+    {<br>
+    &nbsp;&nbsp;&nbsp;&nbsp;{""}<br>
+    };</font><br><br>
+    struct mcm_action_module_t MCM_ACTION_CUSTOM_MODULE_BOOT_OTHER_LIST_NAME[] =<br>
+    {<br>
+    &nbsp;&nbsp;&nbsp;&nbsp;{""}<br>
+    };<br><br>
+    int MCM_ACTION_CUSTOM_RESET_DEFAULT_NAME(<br>
+    &nbsp;&nbsp;&nbsp;&nbsp;void)<br>
+    {<br>
+    &nbsp;&nbsp;&nbsp;&nbsp;return MCM_RCODE_PASS;<br>
+    }
+    </div>
+    <br>
+
+    此章節只需要用到 <font class="css_font_g1">MCM_ACTION_CUSTOM_MODULE_BOOT_PROFILE_LIST_NAME[]</font>
+    <br><br>
+
+    在列表中填入要執行的模組函式名稱, 會依序執行, 最後一組必須要是 {""}.<br>
+    例如 :<br>
+<pre class="css_pre_code">
+struct mcm_action_module_t MCM_ACTION_CUSTOM_MODULE_BOOT_PROFILE_LIST_NAME[] =
+{
+    {"mcm_module_boot_check_01"},
+    {"mcm_module_boot_check_02"},
+    {"mcm_module_boot_check_03"},
+    {""}
+}
+</pre>
+<br>
+
+    資料檢查的啟動表內的內部模組的回傳值會影響後續的處理 :<br>
+    <table class="css_table_list2">
+      <tr>
+        <td class="css_td_list2_l2">MCM_RCODE_PASS</td>
+        <td class="css_td_list2_r1">資料錯誤已修正</td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l2">MCM_RCODE_MODULE_INTERNAL_ERROR</td>
+        <td class="css_td_list2_r1">資料錯誤嚴重, 需要還原預設值</td>
+      </tr>
+    </table>
+    還原預設值的動作會在每執行完一個內部模組後就檢查, 不會等到啟動表都執行完才處理.
+    <br><br>
+
+  </div>
+</div>
+<br>
+
+<div class="css_div_box_frame_full">
+  <div class="css_div_box_title">資料的錯誤狀態</div>
+  <div class="css_div_box_content">
+    <br>
+
+    使用的資料模型範例, 參考 <a href="mcm_0202.html#hook_0202_data_profile_01">#02-02#</a>.
+    <br><br><br>
+
+    內部模組取得資料的狀態和數值參考 <a href="mcm_0401.html">#04-01#</a>.
+    <br><br><br>
+
+    取出的狀態值需要和 <font class="css_font_r1">MCM_DSERROR_MASK</font> 做
+    <font class="css_font_b1">AND</font> 運算才是真正的值.
+    <br><br><br>
+
+    每筆資料可能會有多種錯誤, 將狀態值和該錯誤代碼做 <font class="css_font_b1">AND</font>
+    運算, 成立表示發生此種錯誤.
+    <br><br><br>
+
+    每種錯誤的狀態值都會加到 entry
+    (資料模型中 $(type) 為 ek 的 member), 有關於 member 的錯誤才會加到 member.
+    <br><br><br>
+
+    以下是各種錯誤狀況 :
+    <br><br>
+
+    <table class="css_table_box">
+      <tr>
+        <td class="css_td_box">
+          <font class="css_font_b2">MCM_DSERROR_LOSE_PARENT</font><br>
+          遺失 parent-entry.
+          <br><br>
+          <table class="css_table_list2">
+            <tr>
+              <td class="css_td_list2_l1">
+                狀況-01 :<br>
+                entry 存在, 但是 parent-entry 不存在, 發生錯誤.<br>
+                entry 貼上 MCM_DSERROR_LOSE_PARENT 狀態.
+              </td>
+            </tr>
+          </table>
+          <br>
+          被加上錯誤狀態的對象 :<br>
+          <table class="css_table_list2">
+            <tr>
+              <td class="css_td_list2_l1">entry</td>
+              <td class="css_td_list2_r1">是</td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l1">member</td>
+              <td class="css_td_list2_r1">否</td>
+            </tr>
+          </table>
+          <br>
+          注意事項 :<br>
+          <table class="css_table_list1">
+            <tr>
+              <td class="css_td_list1_l">01.&nbsp;</td>
+              <td class="css_td_list1_r">
+                遺失的 parent-entry 會自動被建立, 資料數值會是初始值 (資料模型中設的 $(default)).
+              </td>
+            </tr>
+          </table>
+          <br>
+          示範 (狀況-01) :<br>
+<pre class="css_pre_code">
+$version 1.0
+
+; device
+device descript:Wireless%20Device serial_number:0022E5A1CC9F
+
+; device.system
+device.system date:2015/06/07 ip_addr:192.168.10.254 uptime:0 loading:45.678
+
+; device.vap.*
+
+; device.vap.*.extra
+device.vap.#8.extra hidden:1 tx_power:9
+
+; device.vap.*.station.*
+device.vap.#8.station.#20 mac_addr:00:11:22:33:44:55 rule:3
+
+; device.limit.*
+
+; device.client.*
+</pre>
+<pre class="css_pre_code">
+錯誤項目 :
+device.vap.#8.extra 和 device.vap.#8.station.#20 存在, 但是 device.vap.#8 卻不存在, 發生錯誤.
+系統處理 :
+device.vap.#8.extra 貼上 MCM_DSATUS_ERROR_LOSE_PARENT.
+device.vap.#8.station.#20 貼上 MCM_DSERROR_LOSE_PARENT.
+</pre>
+          <br>
+          範例程式 :<br>
+<pre class="css_pre_code">
+現在值檔案部分
+
+$version 1.0
+
+; device
+device descript:Wireless%20Device serial_number:0022E5A1CC9F
+
+; device.system
+device.system date:2015/06/07 ip_addr:192.168.10.254 uptime:0 loading:45.678
+
+; device.vap.*
+
+; device.vap.*.extra
+device.vap.#8.extra hidden:1 tx_power:9
+
+; device.vap.*.station.*
+device.vap.#8.station.#20 mac_addr:00:11:22:33:44:55 rule:3
+
+; device.limit.*
+
+; device.client.*
+</pre>
+<pre class="css_pre_code">
+模組程式部分
+
+#include &lt;stdio.h&gt;
+#include &lt;string.h&gt;
+#include &lt;stdlib.h&gt;
+#include "../../mcm_lib/mcm_lheader/mcm_type.h"
+#include "../../mcm_lib/mcm_lheader/mcm_size.h"
+#include "../../mcm_lib/mcm_lheader/mcm_control.h"
+#include "../../mcm_lib/mcm_lheader/mcm_connect.h"
+#include "../../mcm_lib/mcm_lheader/mcm_return.h"
+#include "../../mcm_lib/mcm_lheader/mcm_debug.h"
+#include "../../mcm_lib/mcm_lheader/mcm_data_exinfo_auto.h"
+#include "../mcm_service_handle_extern.h"
+#include "../mcm_config_handle_extern.h"
+
+#define DMSG(msg_fmt, msgs...) printf("%s(%04u): " msg_fmt "\n", __FILE__, __LINE__, ##msgs)
+
+int mcm_module_check_test(
+    struct mcm_service_session_t *this_session)
+{
+    int fret = MCM_RCODE_MODULE_INTERNAL_ERROR;
+    char *path1;
+    struct mcm_ds_device_vap_extra_t extra_s;
+    struct mcm_ds_device_vap_station_t station_s;
+
+    // 範例 (狀況-01) :
+    //   device.vap.#8.extra 存在但是 device.vap.#8 不存在, 發生錯誤.
+    //   device.vap.#8.extra 被貼上 MCM_DSERROR_LOSE_PARENT.
+    // 取得 device.vap.#8.extra 狀態.
+    path1 = "device.vap.#8.extra";
+    if(mcm_config_get_entry_all_status_by_path(this_session, path1, &extra_s) < MCM_RCODE_PASS)
+    {
+        DMSG("call mcm_config_get_entry_all_status_by_path(%s) fail", path1);
+        goto FREE_01;
+    }
+    extra_s.ekey &= MCM_DSERROR_MASK;
+    extra_s.hidden &= MCM_DSERROR_MASK;
+    extra_s.tx_power &= MCM_DSERROR_MASK;
+    // 檢查是否有 MCM_DSERROR_LOSE_PARENT.
+    if((station_s.ekey & MCM_DSERROR_LOSE_PARENT) != 0)
+    {
+        DMSG("%s = MCM_DSERROR_LOSE_PARENT", path1);
+    }
+
+    // 範例 (狀況-01) :
+    //   device.vap.#8.station.#20 存在但是 device.vap.#8 不存在, 發生錯誤.
+    //   device.vap.#8.station.#20 被貼上 MCM_DSERROR_LOSE_PARENT.
+    // 取得 device.vap.#8.station.#20 狀態.
+    path1 = "device.vap.#8.station.#20";
+    if(mcm_config_get_entry_all_status_by_path(this_session, path1, &station_s) < MCM_RCODE_PASS)
+    {
+        DMSG("call mcm_config_get_entry_all_status_by_path(%s) fail", path1);
+        goto FREE_01;
+    }
+    station_s.ekey &= MCM_DSERROR_MASK;
+    station_s.mac_addr &= MCM_DSERROR_MASK;
+    station_s.rule &= MCM_DSERROR_MASK;
+    // 檢查是否有 MCM_DSERROR_LOSE_PARENT.
+    if((station_s.ekey & MCM_DSERROR_LOSE_PARENT) != 0)
+    {
+        DMSG("%s = MCM_DSERROR_LOSE_PARENT", path1);
+    }
+
+    fret = MCM_RCODE_PASS;
+FREE_01:
+    return fret;
+}
+</pre>
+<pre class="css_pre_code">
+資料檢查啟動表部分
+
+struct mcm_action_module_t MCM_ACTION_CUSTOM_MODULE_BOOT_PROFILE_LIST_NAME[] =
+{
+    {"mcm_module_check_test"},
+    {""}
+};
+</pre>
+        </td>
+      </tr>
+    </table>
+    <br>
+
+    <table class="css_table_box">
+      <tr>
+        <td class="css_td_box">
+          <font class="css_font_b2">MCM_DSERROR_LOSE_ENTRY</font><br>
+          遺失 entry.
+          <br><br>
+          <table class="css_table_list2">
+            <tr>
+              <td class="css_td_list2_l1">
+                狀況-01 :<br>
+                entry 是根結點, 但是不存在, 發生錯誤.<br>
+                entry 貼上 MCM_DSERROR_LOSE_ENTRY 狀態.
+              </td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l1">
+                狀況-02 :<br>
+                parent-entry 存在, 而 entry 是 gs 類型但是不存在, 發生錯誤.<br>
+                entry 貼上 MCM_DSERROR_LOSE_ENTRY 狀態.
+              </td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l1">
+                狀況-03 :<br>
+                entry 存在, 但是 parent-entry 不存在, 發生錯誤.<br>
+                parent-entry 貼上 MCM_DSERROR_LOSE_ENTRY 狀態.
+              </td>
+            </tr>
+          </table>
+          <br>
+          被加上錯誤狀態的對象 :<br>
+          <table class="css_table_list2">
+            <tr>
+              <td class="css_td_list2_l1">entry</td>
+              <td class="css_td_list2_r1">是</td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l1">member</td>
+              <td class="css_td_list2_r1">否</td>
+            </tr>
+          </table>
+          <br>
+          注意事項 :<br>
+          <table class="css_table_list1">
+            <tr>
+              <td class="css_td_list1_l">01.&nbsp;</td>
+              <td class="css_td_list1_r">
+                遺失的 entry 會自動被建立, 資料數值會是初始值 (資料模型中設的 $(default)).
+              </td>
+            </tr>
+          </table>
+          <br>
+          示範 (狀況-01) :<br>
+<pre class="css_pre_code">
+$version 1.0
+
+; device
+
+; device.system
+device.system date:2015/06/07 ip_addr:192.168.10.254 uptime:0 loading:45.678
+
+; device.vap.*
+device.vap.#8 ssid:open-1 channel:10
+
+; device.vap.*.extra
+device.vap.#8.extra hidden:1 tx_power:9
+
+; device.vap.*.station.*
+device.vap.#8.station.#20 mac_addr:00:11:22:33:44:55 rule:3
+
+; device.limit.*
+
+; device.client.*
+</pre>
+<pre class="css_pre_code">
+錯誤項目 :
+device 是根結點但是不存在, 發生錯誤.
+系統處理 :
+device 被建立並貼上 MCM_DSERROR_LOSE_ENTRY.
+</pre>
+          示範 (狀況-02) :<br>
+<pre class="css_pre_code">
+$version 1.0
+
+; device
+device descript:Wireless%20Device serial_number:0022E5A1CC9F
+
+; device.system
+
+; device.vap.*
+device.vap.#8 ssid:open-1 channel:10
+
+; device.vap.*.extra
+device.vap.#8.extra hidden:1 tx_power:9
+
+; device.vap.*.station.*
+device.vap.#8.station.#20 mac_addr:00:11:22:33:44:55 rule:3
+
+; device.limit.*
+
+; device.client.*
+</pre>
+<pre class="css_pre_code">
+錯誤項目 :
+device 存在, device.system 是 gs 類型但是不存在, 發生錯誤.
+系統處理 :
+device.system 被建立並貼上 MCM_DSERROR_LOSE_ENTRY.
+</pre>
+          示範 (狀況-02) :<br>
+<pre class="css_pre_code">
+$version 1.0
+
+; device
+device descript:Wireless%20Device serial_number:0022E5A1CC9F
+
+; device.system
+device.system date:2015/06/07 ip_addr:192.168.10.254 uptime:0 loading:45.678
+
+; device.vap.*
+device.vap.#8 ssid:open-1 channel:10
+
+; device.vap.*.extra
+
+; device.vap.*.station.*
+device.vap.#8.station.#20 mac_addr:00:11:22:33:44:55 rule:3
+
+; device.limit.*
+
+; device.client.*
+</pre>
+<pre class="css_pre_code">
+錯誤項目 :
+device.vap.#8 存在, device.vap.*.extra 是 gs 類型但是 device.vap.#8.extra 不存在, 發生錯誤.
+系統處理 :
+device.vap.#8.extra 被建立並貼上 MCM_DSERROR_LOSE_ENTRY.
+</pre>
+          示範 (狀況-03) :<br>
+<pre class="css_pre_code">
+$version 1.0
+
+; device
+device descript:Wireless%20Device serial_number:0022E5A1CC9F
+
+; device.system
+device.system date:2015/06/07 ip_addr:192.168.10.254 uptime:0 loading:45.678
+
+; device.vap.*
+
+; device.vap.*.extra
+device.vap.#8.extra hidden:1 tx_power:9
+
+; device.vap.*.station.*
+device.vap.#8.station.#20 mac_addr:00:11:22:33:44:55 rule:3
+
+; device.limit.*
+
+; device.client.*
+</pre>
+<pre class="css_pre_code">
+錯誤項目 :
+device.vap.#8.extra 和 device.vap.#8.station.#20 存在, 但是 device.vap.#8 卻不存在, 發生錯誤.
+系統處理 :
+device.vap.#8 被建立並貼上 MCM_DSERROR_LOSE_ENTRY.
+</pre>
+          <br>
+          範例程式 :<br>
+<pre class="css_pre_code">
+現在值檔案部分
+
+$version 1.0
+
+; device
+
+; device.system
+
+; device.vap.*
+
+; device.vap.*.extra
+
+; device.vap.*.station.*
+device.vap.#8.station.#20 mac_addr:00:11:22:33:44:55 rule:3
+
+; device.limit.*
+
+; device.client.*
+</pre>
+<pre class="css_pre_code">
+模組程式部分
+
+#include &lt;stdio.h&gt;
+#include &lt;string.h&gt;
+#include &lt;stdlib.h&gt;
+#include "../../mcm_lib/mcm_lheader/mcm_type.h"
+#include "../../mcm_lib/mcm_lheader/mcm_size.h"
+#include "../../mcm_lib/mcm_lheader/mcm_control.h"
+#include "../../mcm_lib/mcm_lheader/mcm_connect.h"
+#include "../../mcm_lib/mcm_lheader/mcm_return.h"
+#include "../../mcm_lib/mcm_lheader/mcm_debug.h"
+#include "../../mcm_lib/mcm_lheader/mcm_data_exinfo_auto.h"
+#include "../mcm_service_handle_extern.h"
+#include "../mcm_config_handle_extern.h"
+
+#define DMSG(msg_fmt, msgs...) printf("%s(%04u): " msg_fmt "\n", __FILE__, __LINE__, ##msgs)
+
+int mcm_module_check_test(
+    struct mcm_service_session_t *this_session)
+{
+    int fret = MCM_RCODE_MODULE_INTERNAL_ERROR;
+    char *path1;
+    struct mcm_ds_device_t device_s;
+    struct mcm_ds_device_system_t system_s;
+    struct mcm_ds_device_vap_t vap_s;
+    struct mcm_ds_device_vap_extra_t extra_s;
+
+    // 範例 (狀況-01) :
+    //   device 是根結點且不存在, 發生錯誤.
+    //   device 被建立並貼上 MCM_DSERROR_LOSE_ENTRY.
+    // 取得 device 狀態.
+    path1 = "device";
+    if(mcm_config_get_entry_all_status_by_path(this_session, path1, &device_s) < MCM_RCODE_PASS)
+    {
+        DMSG("call mcm_config_get_entry_all_status_by_path(%s) fail", path1);
+        goto FREE_01;
+    }
+    device_s.ekey &= MCM_DSERROR_MASK;
+    device_s.descript &= MCM_DSERROR_MASK;
+    device_s.serial_number &= MCM_DSERROR_MASK;
+    // 檢查是否有 MCM_DSERROR_LOSE_ENTRY.
+    if((device_s.ekey & MCM_DSERROR_LOSE_ENTRY) != 0)
+    {
+        DMSG("%s = MCM_DSERROR_LOSE_ENTRY", path1);
+    }
+
+    // 範例 (狀況-02) :
+    //   device 存在 (原本不存在但是系統會自動建立並貼上錯誤),
+    //   device.system 是 gs 類型但是不存在, 發生錯誤.
+    //   device.system 被建立並貼上 MCM_DSERROR_LOSE_ENTRY.
+    path1 = "device.system";
+    if(mcm_config_get_entry_all_status_by_path(this_session, path1, &device_s) < MCM_RCODE_PASS)
+    {
+        DMSG("call mcm_config_get_entry_all_status_by_path(%s) fail", path1);
+        goto FREE_01;
+    }
+    system_s.ekey &= MCM_DSERROR_MASK;
+    system_s.date &= MCM_DSERROR_MASK;
+    system_s.ip_addr &= MCM_DSERROR_MASK;
+    system_s.uptime &= MCM_DSERROR_MASK;
+    system_s.loading &= MCM_DSERROR_MASK;
+    // 檢查是否有 MCM_DSERROR_LOSE_ENTRY.
+    if((device_s.ekey & MCM_DSERROR_LOSE_ENTRY) != 0)
+    {
+        DMSG("%s = MCM_DSERROR_LOSE_ENTRY", path1);
+    }
+
+    // 範例 (狀況-03) :
+    //   device.vap.#8.station.#20 存在但是 device.vap.#8 不存在, 發生錯誤.
+    //   device.vap.#8 被建立並貼上 MCM_DSERROR_LOSE_ENTRY.
+    // 取得 device.vap.#8 狀態.
+    path1 = "device.vap.#8";
+    if(mcm_config_get_entry_all_status_by_path(this_session, path1, &vap_s) < MCM_RCODE_PASS)
+    {
+        DMSG("call mcm_config_get_entry_all_status_by_path(%s) fail", path1);
+        goto FREE_01;
+    }
+    vap_s.ekey &= MCM_DSERROR_MASK;
+    vap_s.ssid &= MCM_DSERROR_MASK;
+    vap_s.channel &= MCM_DSERROR_MASK;
+    // 檢查是否有 MCM_DSERROR_LOSE_ENTRY.
+    if((vap_s.ekey & MCM_DSERROR_LOSE_ENTRY) != 0)
+    {
+        DMSG("%s = MCM_DSERROR_LOSE_ENTRY", path1);
+    }
+
+    // 範例 (狀況-02) :
+    //   device.vap.#8 存在 (原本不存在但是系統會自動建立並貼上錯誤),
+    //   device.vap.#8.extra 是 gs 類型但是不存在, 發生錯誤.
+    //   device.vap.#8.extra 被建立並貼上 MCM_DSERROR_LOSE_ENTRY.
+    // 取得 device.vap.#8.extra 狀態.
+    path1 = "device.vap.#8.extra";
+    if(mcm_config_get_entry_all_status_by_path(this_session, path1, &vap_s) < MCM_RCODE_PASS)
+    {
+        DMSG("call mcm_config_get_entry_all_status_by_path(%s) fail", path1);
+        goto FREE_01;
+    }
+    extra_s.ekey &= MCM_DSERROR_MASK;
+    extra_s.hidden &= MCM_DSERROR_MASK;
+    extra_s.tx_power &= MCM_DSERROR_MASK;
+    // 檢查是否有 MCM_DSERROR_LOSE_ENTRY.
+    if((vap_s.ekey & MCM_DSERROR_LOSE_ENTRY) != 0)
+    {
+        DMSG("%s = MCM_DSERROR_LOSE_ENTRY", path1);
+    }
+
+    fret = MCM_RCODE_PASS;
+FREE_01:
+    return fret;
+}
+</pre>
+<pre class="css_pre_code">
+資料檢查啟動表部分
+
+struct mcm_action_module_t MCM_ACTION_CUSTOM_MODULE_BOOT_PROFILE_LIST_NAME[] =
+{
+    {"mcm_module_check_test"},
+    {""}
+};
+</pre>
+        </td>
+      </tr>
+    </table>
+    <br>
+
+    <table class="css_table_box">
+      <tr>
+        <td class="css_td_box">
+          <font class="css_font_b2">MCM_DSERROR_DUPLIC_ENTRY</font><br>
+          重複的 entry.
+          <br><br>
+          <table class="css_table_list2">
+            <tr>
+              <td class="css_td_list2_l1">
+                狀況-01 :<br>
+                相同的 entry 重複出現, 發生錯誤.<br>
+                entry 貼上 MCM_DSERROR_LOSE_ENTRY 狀態.
+              </td>
+            </tr>
+          </table>
+          <br>
+          被加上錯誤狀態的對象 :<br>
+          <table class="css_table_list2">
+            <tr>
+              <td class="css_td_list2_l1">entry</td>
+              <td class="css_td_list2_r1">是</td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l1">member</td>
+              <td class="css_td_list2_r1">否</td>
+            </tr>
+          </table>
+          <br>
+          注意事項 :<br>
+          <table class="css_table_list1">
+            <tr>
+              <td class="css_td_list1_l">01.&nbsp;</td>
+              <td class="css_td_list1_r">
+                只會留下第一次出現的 entry, 其餘的會放棄.
+              </td>
+            </tr>
+          </table>
+          <br>
+          示範 (狀況-01) :<br>
+<pre class="css_pre_code">
+$version 1.0
+
+; device
+device descript:Wireless%20Device serial_number:0022E5A1CC9F
+
+; device.system
+device.system date:2015/06/07 ip_addr:192.168.10.254 uptime:0 loading:45.678
+
+; device.vap.*
+device.vap.#8 ssid:open-1 channel:10
+
+; device.vap.*.extra
+device.vap.#8.extra hidden:1 tx_power:9
+
+; device.vap.*.station.*
+device.vap.#8.station.#20 mac_addr:00:11:22:33:44:55 rule:3
+device.vap.#8.station.#20 mac_addr:00:11:22:33:44:01 rule:5
+device.vap.#8.station.#20 mac_addr:00:11:22:33:44:02 rule:7
+
+; device.limit.*
+
+; device.client.*
+</pre>
+<pre class="css_pre_code">
+錯誤項目 :
+device.vap.#8.station.#20 重複出現, 發生錯誤.
+系統處理 :
+第一次出現的 device.vap.#8.station.#20 貼上 MCM_DSERROR_DUPLIC_ENTRY, 其餘的放棄.
+</pre>
+          <br>
+          範例程式 :<br>
+<pre class="css_pre_code">
+現在值檔案部分
+
+$version 1.0
+
+; device
+device descript:Wireless%20Device serial_number:0022E5A1CC9F
+device descript:
+
+; device.system
+device.system date:2015/06/07 ip_addr:192.168.10.254 uptime:0 loading:45.678
+
+; device.vap.*
+device.vap.#8 ssid:open-1 channel:10
+
+; device.vap.*.extra
+device.vap.#8.extra hidden:1 tx_power:9
+
+; device.vap.*.station.*
+device.vap.#8.station.#20 mac_addr:00:11:22:33:44:55 rule:3
+device.vap.#8.station.#20 mac_addr:00:11:22:33:44:01 rule:5
+device.vap.#8.station.#20 mac_addr:00:11:22:33:44:02 rule:7
+
+; device.limit.*
+
+; device.client.*
+</pre>
+<pre class="css_pre_code">
+模組程式部分
+
+#include &lt;stdio.h&gt;
+#include &lt;string.h&gt;
+#include &lt;stdlib.h&gt;
+#include "../../mcm_lib/mcm_lheader/mcm_type.h"
+#include "../../mcm_lib/mcm_lheader/mcm_size.h"
+#include "../../mcm_lib/mcm_lheader/mcm_control.h"
+#include "../../mcm_lib/mcm_lheader/mcm_connect.h"
+#include "../../mcm_lib/mcm_lheader/mcm_return.h"
+#include "../../mcm_lib/mcm_lheader/mcm_debug.h"
+#include "../../mcm_lib/mcm_lheader/mcm_data_exinfo_auto.h"
+#include "../mcm_service_handle_extern.h"
+#include "../mcm_config_handle_extern.h"
+
+#define DMSG(msg_fmt, msgs...) printf("%s(%04u): " msg_fmt "\n", __FILE__, __LINE__, ##msgs)
+
+int mcm_module_check_test(
+    struct mcm_service_session_t *this_session)
+{
+    int fret = MCM_RCODE_MODULE_INTERNAL_ERROR;
+    char *path1;
+    struct mcm_ds_device_t device_s;
+    struct mcm_ds_device_vap_station_t station_s;
+
+    // 範例 (狀況-01) :
+    //   device 有重複的 entry, 發生錯誤
+    //   device 被貼上 MCM_DSERROR_DUPLIC_ENTRY.
+    // 取得 device 狀態.
+    path1 = "device";
+    if(mcm_config_get_entry_all_status_by_path(this_session, path1, &device_s) < MCM_RCODE_PASS)
+    {
+        DMSG("call mcm_config_get_entry_all_status_by_path(%s) fail", path1);
+        goto FREE_01;
+    }
+    device_s.ekey &= MCM_DSERROR_MASK;
+    device_s.descript &= MCM_DSERROR_MASK;
+    device_s.serial_number &= MCM_DSERROR_MASK;
+    // 檢查是否有 MCM_DSERROR_DUPLIC_ENTRY.
+    if((device_s.ekey & MCM_DSERROR_DUPLIC_ENTRY) != 0)
+    {
+        DMSG("%s = MCM_DSERROR_DUPLIC_ENTRY", path1);
+    }
+
+    // 範例 (狀況-01) :
+    //   device.vap.#8.station.#20 有重複的 entry, 發生錯誤
+    //   device.vap.#8.station.#20 被貼上 MCM_DSERROR_DUPLIC_ENTRY.
+    // 取得 device.vap.#8.station.#20 狀態.
+    path1 = "device.vap.#8.station.#20";
+    if(mcm_config_get_entry_all_status_by_path(this_session, path1, &station_s) < MCM_RCODE_PASS)
+    {
+        DMSG("call mcm_config_get_entry_all_status_by_path(%s) fail", path1);
+        goto FREE_01;
+    }
+    station_s.ekey &= MCM_DSERROR_MASK;
+    station_s.mac_addr &= MCM_DSERROR_MASK;
+    station_s.rule &= MCM_DSERROR_MASK;
+    // 檢查是否有 MCM_DSERROR_DUPLIC_ENTRY.
+    if((device_s.ekey & MCM_DSERROR_DUPLIC_ENTRY) != 0)
+    {
+        DMSG("%s = MCM_DSERROR_DUPLIC_ENTRY", path1);
+    }
+
+    fret = MCM_RCODE_PASS;
+FREE_01:
+    return fret;
+}
+</pre>
+<pre class="css_pre_code">
+資料檢查啟動表部分
+
+struct mcm_action_module_t MCM_ACTION_CUSTOM_MODULE_BOOT_PROFILE_LIST_NAME[] =
+{
+    {"mcm_module_check_test"},
+    {""}
+};
+</pre>
+        </td>
+      </tr>
+    </table>
+    <br>
+
+    <table class="css_table_box">
+      <tr>
+        <td class="css_td_box">
+          <font class="css_font_b2">MCM_DSERROR_UNKNOWN_PARAMETER</font><br>
+          entry 有無法識別的項目.
+          <br><br>
+          <table class="css_table_list2">
+            <tr>
+              <td class="css_td_list2_l1">
+                狀況-01 :<br>
+                entry 該行出現無法分析的項目, 發生錯誤.<br>
+                entry 貼上 MCM_DSERROR_UNKNOWN_PARAMETER 狀態.
+              </td>
+            </tr>
+          </table>
+          <br>
+          被加上錯誤狀態的對象 :<br>
+          <table class="css_table_list2">
+            <tr>
+              <td class="css_td_list2_l1">entry</td>
+              <td class="css_td_list2_r1">是</td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l1">member</td>
+              <td class="css_td_list2_r1">否</td>
+            </tr>
+          </table>
+          <br>
+          注意事項 :<br>
+          <table class="css_table_list1">
+            <tr>
+              <td class="css_td_list1_l">01.&nbsp;</td>
+              <td class="css_td_list1_r">
+                無法識別的項目不會紀錄.
+              </td>
+            </tr>
+          </table>
+          <br>
+          示範 (狀況-01) :<br>
+<pre class="css_pre_code">
+$version 1.0
+
+; device
+device pFw%#1$(%^=? descript:Wireless%20Device serial_number:0022E5A1CC9F
+
+; device.system
+device.system date:2015/06/07 ip_addr:192.168.10.254 uptime:0 loading:45.678
+
+; device.vap.*
+device.vap.#8 ssid:open-1 channel:10 
+
+; device.vap.*.extra
+device.vap.#8.extra hidden:1 tx_power:9
+
+; device.vap.*.station.*
+device.vap.#8.station.#20 mac_addr:00:11:22:33:44:55 rule:3
+
+; device.limit.*
+
+; device.client.*
+</pre>
+<pre class="css_pre_code">
+錯誤項目 :
+device 該行出現無法識別的項目 "pFw%#1$(%^=?", 發生錯誤.
+系統處理 :
+device 貼上 MCM_DSERROR_UNKNOWN_PARAMETER.
+</pre>
+          <br>
+          範例程式 :<br>
+<pre class="css_pre_code">
+現在值檔案部分
+
+$version 1.0
+
+; device
+device wG#%&45Ef@-? descript:Wireless%20Device serial_number:0022E5A1CC9F
+
+; device.system
+device.system date:2015/06/07 ip_addr:192.168.10.254   !0$rW4%=(f+z  uptime:0 loading:45.678 mask=255.255.255.0
+
+; device.vap.*
+device.vap.#8 ssid:open-1 channel:10
+
+; device.vap.*.extra
+device.vap.#8.extra hidden:1 tx_power:9
+
+; device.vap.*.station.*
+device.vap.#8.station.#20 mac_addr:00:11:22:33:44:55 rule:3
+
+; device.limit.*
+
+; device.client.*
+</pre>
+<pre class="css_pre_code">
+模組程式部分
+
+#include &lt;stdio.h&gt;
+#include &lt;string.h&gt;
+#include &lt;stdlib.h&gt;
+#include "../../mcm_lib/mcm_lheader/mcm_type.h"
+#include "../../mcm_lib/mcm_lheader/mcm_size.h"
+#include "../../mcm_lib/mcm_lheader/mcm_control.h"
+#include "../../mcm_lib/mcm_lheader/mcm_connect.h"
+#include "../../mcm_lib/mcm_lheader/mcm_return.h"
+#include "../../mcm_lib/mcm_lheader/mcm_debug.h"
+#include "../../mcm_lib/mcm_lheader/mcm_data_exinfo_auto.h"
+#include "../mcm_service_handle_extern.h"
+#include "../mcm_config_handle_extern.h"
+
+#define DMSG(msg_fmt, msgs...) printf("%s(%04u): " msg_fmt "\n", __FILE__, __LINE__, ##msgs)
+
+int mcm_module_check_test(
+    struct mcm_service_session_t *this_session)
+{
+    int fret = MCM_RCODE_MODULE_INTERNAL_ERROR;
+    char *path1;
+    struct mcm_ds_device_t device_s;
+    struct mcm_ds_device_system_t system_s;
+
+    // 範例 (狀況-01) :
+    //   device 該行出現無法識別的項目 "wG#%&45Ef@-?", 發生錯誤.
+    //   device 被貼上 MCM_DSERROR_UNKNOWN_PARAMETER.
+    // 取得 device 狀態.
+    path1 = "device";
+    if(mcm_config_get_entry_all_status_by_path(this_session, path1, &device_s) < MCM_RCODE_PASS)
+    {
+        DMSG("call mcm_config_get_entry_all_status_by_path(%s) fail", path1);
+        goto FREE_01;
+    }
+    device_s.ekey &= MCM_DSERROR_MASK;
+    device_s.descript &= MCM_DSERROR_MASK;
+    device_s.serial_number &= MCM_DSERROR_MASK;
+    // 檢查是否有 MCM_DSERROR_UNKNOWN_PARAMETER.
+    if((device_s.ekey & MCM_DSERROR_UNKNOWN_PARAMETER) != 0)
+    {
+        DMSG("%s = MCM_DSERROR_UNKNOWN_PARAMETER", path1);
+    }
+
+    // 範例 (狀況-01) :
+    //   device.system 該行出現無法識別的項目 "!0$rW4%=(f+z", "mask=255.255.255.0", 發生錯誤.
+    //   device.system 被貼上 MCM_DSERROR_UNKNOWN_PARAMETER.
+    // 取得 device.system 狀態.
+    path1 = "device.system";
+    if(mcm_config_get_entry_all_status_by_path(this_session, path1, &system_s) < MCM_RCODE_PASS)
+    {
+        DMSG("call mcm_config_get_entry_all_status_by_path(%s) fail", path1);
+        goto FREE_01;
+    }
+    system_s.ekey &= MCM_DSERROR_MASK;
+    system_s.date &= MCM_DSERROR_MASK;
+    system_s.ip_addr &= MCM_DSERROR_MASK;
+    system_s.uptime &= MCM_DSERROR_MASK;
+    system_s.loading &= MCM_DSERROR_MASK;
+    // 檢查是否有 MCM_DSERROR_UNKNOWN_PARAMETER.
+    if((system_s.ekey & MCM_DSERROR_UNKNOWN_PARAMETER) != 0)
+    {
+        DMSG("%s = MCM_DSERROR_UNKNOWN_PARAMETER", path1);
+    }
+
+    fret = MCM_RCODE_PASS;
+FREE_01:
+    return fret;
+}
+</pre>
+<pre class="css_pre_code">
+資料檢查啟動表部分
+
+struct mcm_action_module_t MCM_ACTION_CUSTOM_MODULE_BOOT_PROFILE_LIST_NAME[] =
+{
+    {"mcm_module_check_test"},
+    {""}
+};
+</pre>
+        </td>
+      </tr>
+    </table>
+    <br>
+
+    <table class="css_table_box">
+      <tr>
+        <td class="css_td_box">
+          <font class="css_font_b2">MCM_DSERROR_UNKNOWN_MEMBER</font><br>
+          entry 有無法識別的 member.
+          <br><br>
+          <table class="css_table_list2">
+            <tr>
+              <td class="css_td_list2_l1">
+                狀況-01 :<br>
+                entry 該行出現無法識別的 member, 發生錯誤.<br>
+                entry 貼上 MCM_DSERROR_UNKNOWN_MEMBER 狀態.
+              </td>
+            </tr>
+          </table>
+          <br>
+          被加上錯誤狀態的對象 :<br>
+          <table class="css_table_list2">
+            <tr>
+              <td class="css_td_list2_l1">entry</td>
+              <td class="css_td_list2_r1">是</td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l1">member</td>
+              <td class="css_td_list2_r1">否</td>
+            </tr>
+          </table>
+          <br>
+          注意事項 :<br>
+          <table class="css_table_list1">
+            <tr>
+              <td class="css_td_list1_l">01.&nbsp;</td>
+              <td class="css_td_list1_r">
+                無法識別的 member 不會紀錄.
+              </td>
+            </tr>
+            <tr>
+              <td class="css_td_list1_l">02.&nbsp;</td>
+              <td class="css_td_list1_r">
+                MCM_DSERROR_UNKNOWN_PARAMETER 和 MCM_DSERROR_UNKNOWN_MBMER
+                的差異在於無法識別的項目內是否有 ":" 字元,
+                無的話就歸類在 MCM_DSERROR_UNKNOWN_PARAMETER,
+                有的話就歸類在 MCM_DSERROR_UNKNOWN_MBMER.
+              </td>
+            </tr>
+          </table>
+          <br>
+          示範 (狀況-01) :<br>
+<pre class="css_pre_code">
+$version 1.0
+
+; device
+device descript:Wireless%20Device serial_number:0022E5A1CC9F
+
+; device.system
+device.system date:2015/06/07 ip_addr:192.168.10.254 uptime:0 loading:45.678
+
+; device.vap.*
+device.vap.#8 ssid:open-1 channel:10 authentication:wpa2
+
+; device.vap.*.extra
+device.vap.#8.extra hidden:1 tx_power:9
+
+; device.vap.*.station.*
+device.vap.#8.station.#20 mac_addr:00:11:22:33:44:55 rule:3
+
+; device.limit.*
+
+; device.client.*
+</pre>
+<pre class="css_pre_code">
+錯誤項目 :
+device.vap.#8 該行出現無法識別的 member "authentication:wpa2", 發生錯誤.
+系統處理 :
+device.vap.#8 貼上 MCM_DSERROR_UNKNOWN_MEMBER.
+</pre>
+          <br>
+          範例程式 :<br>
+<pre class="css_pre_code">
+現在值檔案部分
+
+$version 1.0
+
+; device
+device descript:Wireless%20Device serial_number:0022E5A1CC9F
+
+; device.system
+device.system date:2015/06/07 ip_addr:192.168.10.254 uptime:0 loading:45.678
+
+; device.vap.*
+device.vap.#8 ssid:open-1 channel:10 authentication:wpa2
+
+; device.vap.*.extra
+device.vap.#8.extra hidden:1 tx_power:9
+
+; device.vap.*.station.*
+device.vap.#8.station.#20 mac_addr:00:11:22:33:44:55 rule:3
+
+; device.limit.*
+
+; device.client.*
+</pre>
+<pre class="css_pre_code">
+模組程式部分
+
+#include &lt;stdio.h&gt;
+#include &lt;string.h&gt;
+#include &lt;stdlib.h&gt;
+#include "../../mcm_lib/mcm_lheader/mcm_type.h"
+#include "../../mcm_lib/mcm_lheader/mcm_size.h"
+#include "../../mcm_lib/mcm_lheader/mcm_control.h"
+#include "../../mcm_lib/mcm_lheader/mcm_connect.h"
+#include "../../mcm_lib/mcm_lheader/mcm_return.h"
+#include "../../mcm_lib/mcm_lheader/mcm_debug.h"
+#include "../../mcm_lib/mcm_lheader/mcm_data_exinfo_auto.h"
+#include "../mcm_service_handle_extern.h"
+#include "../mcm_config_handle_extern.h"
+
+#define DMSG(msg_fmt, msgs...) printf("%s(%04u): " msg_fmt "\n", __FILE__, __LINE__, ##msgs)
+
+int mcm_module_check_test(
+    struct mcm_service_session_t *this_session)
+{
+    int fret = MCM_RCODE_MODULE_INTERNAL_ERROR;
+    char *path1;
+    struct mcm_ds_device_vap_t vap_s;
+
+    // 範例 (狀況-01) :
+    //   device.vap.#8 該行出現無法識別的 member "authentication:wpa2", 發生錯誤.
+    //   device.vap.#8 被貼上 MCM_DSERROR_UNKNOWN_MEMBER.
+    // 取得 device.vap.#8 狀態.
+    path1 = "device.vap.#8";
+    if(mcm_config_get_entry_all_status_by_path(this_session, path1, &vap_s) < MCM_RCODE_PASS)
+    {
+        DMSG("call mcm_config_get_entry_all_status_by_path(%s) fail", path1);
+        goto FREE_01;
+    }
+    vap_s.ekey &= MCM_DSERROR_MASK;
+    vap_s.ssid &= MCM_DSERROR_MASK;
+    vap_s.channel &= MCM_DSERROR_MASK;
+    // 檢查是否有 MCM_DSERROR_UNKNOWN_MEMBER.
+    if((vap_s.ekey & MCM_DSERROR_UNKNOWN_MEMBER) != 0)
+    {
+        DMSG("%s = MCM_DSERROR_UNKNOWN_MEMBER", path1);
+    }
+
+    fret = MCM_RCODE_PASS;
+FREE_01:
+    return fret;
+}
+</pre>
+<pre class="css_pre_code">
+資料檢查啟動表部分
+
+struct mcm_action_module_t MCM_ACTION_CUSTOM_MODULE_BOOT_PROFILE_LIST_NAME[] =
+{
+    {"mcm_module_check_test"},
+    {""}
+};
+</pre>
+        </td>
+      </tr>
+    </table>
+    <br>
+
+    <table class="css_table_box">
+      <tr>
+        <td class="css_td_box">
+          <font class="css_font_b2">MCM_DSERROR_LOSE_MEMBER</font><br>
+          遺失 member.
+          <br><br>
+          <table class="css_table_list2">
+            <tr>
+              <td class="css_td_list2_l1">
+                狀況-01 :<br>
+                member 遺失, 發生錯誤.<br>
+                entry 和遺失的 member 貼上 MCM_DSERROR_LOSE_MEMBER 狀態.
+              </td>
+            </tr>
+          </table>
+          <br>
+          被加上錯誤狀態的對象 :<br>
+          <table class="css_table_list2">
+            <tr>
+              <td class="css_td_list2_l1">entry</td>
+              <td class="css_td_list2_r1">是</td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l1">member</td>
+              <td class="css_td_list2_r1">是</td>
+            </tr>
+          </table>
+          <br>
+          注意事項 :<br>
+          <table class="css_table_list1">
+            <tr>
+              <td class="css_td_list1_l">01.&nbsp;</td>
+              <td class="css_td_list1_r">
+                發生 MCM_DSERROR_LOSE_ENTRY 時, 會一併附加此錯誤狀態.
+              </td>
+            </tr>
+            <tr>
+              <td class="css_td_list1_l">02.&nbsp;</td>
+              <td class="css_td_list1_r">
+                遺失的 member 會自動被建立, 資料數值會是初始值 (資料模型中設的 $(default)).
+              </td>
+            </tr>
+          </table>
+          <br>
+          示範 (狀況-01) :<br>
+<pre class="css_pre_code">
+$version 1.0
+
+; device
+device descript:Wireless%20Device serial_number:0022E5A1CC9F
+
+; device.system
+device.system ip_addr:192.168.10.254 loading:45.678
+
+; device.vap.*
+device.vap.#8 ssid:open-1 channel:10
+
+; device.vap.*.extra
+device.vap.#8.extra hidden:1 tx_power:9
+
+; device.vap.*.station.*
+device.vap.#8.station.#20 mac_addr:00:11:22:33:44:55 rule:3
+
+; device.limit.*
+
+; device.client.*
+</pre>
+<pre class="css_pre_code">
+錯誤項目 :
+device.system 的 date 和 uptime 遺失, 發生錯誤.
+系統處理 :
+device.system 和 date 和 uptime 貼上 MCM_DSERROR_LOSE_MEMBER.
+</pre>
+          <br>
+          範例程式 :<br>
+<pre class="css_pre_code">
+現在值檔案部分
+
+$version 1.0
+
+; device
+device descript:Wireless%20Device serial_number:0022E5A1CC9F
+
+; device.system
+device.system ip_addr:192.168.10.254 loading:45.678
+
+; device.vap.*
+device.vap.#8 ssid:open-1 channel:10
+
+; device.vap.*.extra
+device.vap.#8.extra hidden:1 tx_power:9
+
+; device.vap.*.station.*
+device.vap.#8.station.#20 mac_addr:00:11:22:33:44:55 rule:3
+
+; device.limit.*
+
+; device.client.*
+</pre>
+<pre class="css_pre_code">
+模組程式部分
+
+#include &lt;stdio.h&gt;
+#include &lt;string.h&gt;
+#include &lt;stdlib.h&gt;
+#include "../../mcm_lib/mcm_lheader/mcm_type.h"
+#include "../../mcm_lib/mcm_lheader/mcm_size.h"
+#include "../../mcm_lib/mcm_lheader/mcm_control.h"
+#include "../../mcm_lib/mcm_lheader/mcm_connect.h"
+#include "../../mcm_lib/mcm_lheader/mcm_return.h"
+#include "../../mcm_lib/mcm_lheader/mcm_debug.h"
+#include "../../mcm_lib/mcm_lheader/mcm_data_exinfo_auto.h"
+#include "../mcm_service_handle_extern.h"
+#include "../mcm_config_handle_extern.h"
+
+#define DMSG(msg_fmt, msgs...) printf("%s(%04u): " msg_fmt "\n", __FILE__, __LINE__, ##msgs)
+
+int mcm_module_check_test(
+    struct mcm_service_session_t *this_session)
+{
+    int fret = MCM_RCODE_MODULE_INTERNAL_ERROR;
+    char *path1;
+    struct mcm_ds_device_system_t system_s;
+
+    // 範例 (狀況-01) :
+    //   device.system 的 date 和 uptime 遺失, 發生錯誤.
+    //   device.system 和 date 和 uptime 被貼上 MCM_DSERROR_LOSE_MEMBER.
+    // 取得 device.system 狀態.
+    path1 = "device.system";
+    if(mcm_config_get_entry_all_status_by_path(this_session, path1, &system_s) < MCM_RCODE_PASS)
+    {
+        DMSG("call mcm_config_get_entry_all_status_by_path(%s) fail", path1);
+        goto FREE_01;
+    }
+    system_s.ekey &= MCM_DSERROR_MASK;
+    system_s.date &= MCM_DSERROR_MASK;
+    system_s.ip_addr &= MCM_DSERROR_MASK;
+    system_s.uptime &= MCM_DSERROR_MASK;
+    system_s.loading &= MCM_DSERROR_MASK;
+    // 檢查是否有 MCM_DSERROR_LOSE_MEMBER.
+    if((system_s.ekey & MCM_DSERROR_LOSE_MEMBER) != 0)
+    {
+        DMSG("%s = MCM_DSERROR_LOSE_MEMBER", path1);
+    }
+    if((system_s.date & MCM_DSERROR_LOSE_MEMBER) != 0)
+    {
+        DMSG("%s.date = MCM_DSERROR_LOSE_MEMBER", path1);
+    }
+    if((system_s.ip_addr & MCM_DSERROR_LOSE_MEMBER) != 0)
+    {
+        DMSG("%s.ip_addr = MCM_DSERROR_LOSE_MEMBER", path1);
+    }
+    if((system_s.uptime & MCM_DSERROR_LOSE_MEMBER) != 0)
+    {
+        DMSG("%s.uptime = MCM_DSERROR_LOSE_MEMBER", path1);
+    }
+    if((system_s.loading & MCM_DSERROR_LOSE_MEMBER) != 0)
+    {
+        DMSG("%s.loading = MCM_DSERROR_LOSE_MEMBER", path1);
+    }
+
+    fret = MCM_RCODE_PASS;
+FREE_01:
+    return fret;
+}
+</pre>
+<pre class="css_pre_code">
+資料檢查啟動表部分
+
+struct mcm_action_module_t MCM_ACTION_CUSTOM_MODULE_BOOT_PROFILE_LIST_NAME[] =
+{
+    {"mcm_module_check_test"},
+    {""}
+};
+</pre>
+        </td>
+      </tr>
+    </table>
+    <br>
+
+    <table class="css_table_box">
+      <tr>
+        <td class="css_td_box">
+          <font class="css_font_b2">MCM_DSERROR_DUPLIC_MEMBER</font><br>
+          重複的 member.
+          <br><br>
+          <table class="css_table_list2">
+            <tr>
+              <td class="css_td_list2_l1">
+                狀況-01 :<br>
+                相同的 member 重複出現, 發生錯誤.<br>
+                entry 和重複的 member 貼上 MCM_DSERROR_DUPLIC_MEMBER 狀態.
+              </td>
+            </tr>
+          </table>
+          <br>
+          被加上錯誤狀態的對象 :<br>
+          <table class="css_table_list2">
+            <tr>
+              <td class="css_td_list2_l1">entry</td>
+              <td class="css_td_list2_r1">是</td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l1">member</td>
+              <td class="css_td_list2_r1">是</td>
+            </tr>
+          </table>
+          <br>
+          注意事項 :<br>
+          <table class="css_table_list1">
+            <tr>
+              <td class="css_td_list1_l">01.&nbsp;</td>
+              <td class="css_td_list1_r">
+                只會留下第一次出現的 member, 其餘的會放棄.
+              </td>
+            </tr>
+          </table>
+          <br>
+          示範 (狀況-01) :<br>
+<pre class="css_pre_code">
+$version 1.0
+
+; device
+device descript:Wireless%20Device serial_number:0022E5A1CC9F
+
+; device.system
+device.system date:2015/06/07 ip_addr:192.168.10.254 uptime:0 loading:45.678 ip_addr:10.0.0.254 loading:-65.432
+
+; device.vap.*
+device.vap.#8 ssid:open-1 channel:10
+
+; device.vap.*.extra
+device.vap.#8.extra hidden:1 tx_power:9
+
+; device.vap.*.station.*
+device.vap.#8.station.#20 mac_addr:00:11:22:33:44:55 rule:3
+
+; device.limit.*
+
+; device.client.*
+</pre>
+<pre class="css_pre_code">
+錯誤項目 :
+device.system 的 ip_addr 和 loading 重複出現, 發生錯誤.
+系統處理 :
+device.system 和第一次出現的 ip_addr 和 loading 貼上 MCM_DSERROR_DUPLIC_MEMBER, 其餘的放棄.
+</pre>
+          <br>
+          範例程式 :<br>
+<pre class="css_pre_code">
+現在值檔案部分
+
+$version 1.0
+
+; device
+device descript:Wireless%20Device serial_number:0022E5A1CC9F
+
+; device.system
+device.system date:2015/06/07 ip_addr:192.168.10.254 uptime:0 loading:45.678 ip_addr:10.0.0.254 loading:-65.432
+
+; device.vap.*
+device.vap.#8 ssid:open-1 channel:10
+
+; device.vap.*.extra
+device.vap.#8.extra hidden:1 tx_power:9
+
+; device.vap.*.station.*
+device.vap.#8.station.#20 mac_addr:00:11:22:33:44:55 rule:3
+
+; device.limit.*
+
+; device.client.*
+</pre>
+<pre class="css_pre_code">
+模組程式部分
+
+#include &lt;stdio.h&gt;
+#include &lt;string.h&gt;
+#include &lt;stdlib.h&gt;
+#include "../../mcm_lib/mcm_lheader/mcm_type.h"
+#include "../../mcm_lib/mcm_lheader/mcm_size.h"
+#include "../../mcm_lib/mcm_lheader/mcm_control.h"
+#include "../../mcm_lib/mcm_lheader/mcm_connect.h"
+#include "../../mcm_lib/mcm_lheader/mcm_return.h"
+#include "../../mcm_lib/mcm_lheader/mcm_debug.h"
+#include "../../mcm_lib/mcm_lheader/mcm_data_exinfo_auto.h"
+#include "../mcm_service_handle_extern.h"
+#include "../mcm_config_handle_extern.h"
+
+#define DMSG(msg_fmt, msgs...) printf("%s(%04u): " msg_fmt "\n", __FILE__, __LINE__, ##msgs)
+
+int mcm_module_check_test(
+    struct mcm_service_session_t *this_session)
+{
+    int fret = MCM_RCODE_MODULE_INTERNAL_ERROR;
+    char *path1;
+    struct mcm_ds_device_system_t system_s;
+
+    // 範例 (狀況-01) :
+    //   device.system 的 ip_addr 和 loading 重複出現, 發生錯誤.
+    //   device.system 和第一次出現的 ip_addr 和 loading 貼上 MCM_DSERROR_DUPLIC_MEMBER.
+    // 取得 device.system 狀態.
+    path1 = "device.system";
+    if(mcm_config_get_entry_all_status_by_path(this_session, path1, &system_s) < MCM_RCODE_PASS)
+    {
+        DMSG("call mcm_config_get_entry_all_status_by_path(%s) fail", path1);
+        goto FREE_01;
+    }
+    system_s.ekey &= MCM_DSERROR_MASK;
+    system_s.date &= MCM_DSERROR_MASK;
+    system_s.ip_addr &= MCM_DSERROR_MASK;
+    system_s.uptime &= MCM_DSERROR_MASK;
+    system_s.loading &= MCM_DSERROR_MASK;
+    // 檢查是否有 MCM_DSERROR_DUPLIC_MEMBER.
+    if((system_s.ekey & MCM_DSERROR_DUPLIC_MEMBER) != 0)
+    {
+        DMSG("%s = MCM_DSERROR_DUPLIC_MEMBER", path1);
+    }
+    if((system_s.date & MCM_DSERROR_DUPLIC_MEMBER) != 0)
+    {
+        DMSG("%s.date = MCM_DSERROR_DUPLIC_MEMBER", path1);
+    }
+    if((system_s.ip_addr & MCM_DSERROR_DUPLIC_MEMBER) != 0)
+    {
+        DMSG("%s.ip_addr = MCM_DSERROR_DUPLIC_MEMBER", path1);
+    }
+    if((system_s.uptime & MCM_DSERROR_DUPLIC_MEMBER) != 0)
+    {
+        DMSG("%s.uptime = MCM_DSERROR_DUPLIC_MEMBER", path1);
+    }
+    if((system_s.loading & MCM_DSERROR_DUPLIC_MEMBER) != 0)
+    {
+        DMSG("%s.loading = MCM_DSERROR_DUPLIC_MEMBER", path1);
+    }
+
+    fret = MCM_RCODE_PASS;
+FREE_01:
+    return fret;
+}
+</pre>
+<pre class="css_pre_code">
+資料檢查啟動表部分
+
+struct mcm_action_module_t MCM_ACTION_CUSTOM_MODULE_BOOT_PROFILE_LIST_NAME[] =
+{
+    {"mcm_module_check_test"},
+    {""}
+};
+</pre>
+        </td>
+      </tr>
+    </table>
+    <br>
+
+    <table class="css_table_box">
+      <tr>
+        <td class="css_td_box">
+          <font class="css_font_b2">MCM_DSERROR_INVALID_VALUE</font><br>
+          無效的資料數值.
+          <br><br>
+          <table class="css_table_list2">
+            <tr>
+              <td class="css_td_list2_l1">
+                狀況-01 :<br>
+                資料數值無效, 發生錯誤. <a href="mcm_0201.html#hook_0201_default_format_01">[詳細]</a><br>
+                entry 和錯誤的 member 貼上 MCM_DSERROR_INVALID_VALUE 狀態.
+              </td>
+            </tr>
+          </table>
+          <br>
+          被加上錯誤狀態的對象 :<br>
+          <table class="css_table_list2">
+            <tr>
+              <td class="css_td_list2_l1">entry</td>
+              <td class="css_td_list2_r1">是</td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l1">member</td>
+              <td class="css_td_list2_r1">是</td>
+            </tr>
+          </table>
+          <br>
+          注意事項 :<br>
+          <table class="css_table_list1">
+            <tr>
+              <td class="css_td_list1_l">01.&nbsp;</td>
+              <td class="css_td_list1_r">
+                錯誤的 member 的資料數值會被改為初始值 (資料模型中設的 $(default)).
+              </td>
+            </tr>
+          </table>
+          <br>
+          示範 (狀況-01) :<br>
+<pre class="css_pre_code">
+$version 1.0
+
+; device
+device descript:Wireless%20Device serial_number:0022E5A1CC9F
+
+; device.system
+device.system date:2015/06/07-Sun ip_addr:192.168.10.254 uptime:184467440737095516159 loading:45.678a
+
+; device.vap.*
+device.vap.#8 ssid:open-1 channel:10
+
+; device.vap.*.extra
+device.vap.#8.extra hidden:1 tx_power:9
+
+; device.vap.*.station.*
+device.vap.#8.station.#20 mac_addr:00:11:22:33:44:55 rule:3
+
+; device.limit.*
+
+; device.client.*
+</pre>
+<pre class="css_pre_code">
+錯誤項目 :
+device.system 的 date 的長度超過設定的緩衝大小 (12), 發生錯誤.
+device.system 的 uptime 的範圍無效 (0 ~ 18446744073709551615), 發生錯誤.
+device.system 的 loading 的數值有無效的字元, 發生錯誤.
+系統處理 :
+device.system 和 date 和 uptime 和 loading 貼上 MCM_DSERROR_INVALID_VALUE.
+</pre>
+          <br>
+          範例程式 :<br>
+<pre class="css_pre_code">
+現在值檔案部分
+
+$version 1.0
+
+; device
+device descript:Wireless%20Device serial_number:0022E5A1CC9F
+
+; device.system
+device.system date:2015/06/07-Sun ip_addr:192.168.10.254 uptime:184467440737095516159 loading:45.678a
+
+; device.vap.*
+device.vap.#8 ssid:open-1 channel:10
+
+; device.vap.*.extra
+device.vap.#8.extra hidden:1 tx_power:9
+
+; device.vap.*.station.*
+device.vap.#8.station.#20 mac_addr:00:11:22:33:44:55 rule:3
+
+; device.limit.*
+
+; device.client.*
+</pre>
+<pre class="css_pre_code">
+模組程式部分
+
+#include &lt;stdio.h&gt;
+#include &lt;string.h&gt;
+#include &lt;stdlib.h&gt;
+#include "../../mcm_lib/mcm_lheader/mcm_type.h"
+#include "../../mcm_lib/mcm_lheader/mcm_size.h"
+#include "../../mcm_lib/mcm_lheader/mcm_control.h"
+#include "../../mcm_lib/mcm_lheader/mcm_connect.h"
+#include "../../mcm_lib/mcm_lheader/mcm_return.h"
+#include "../../mcm_lib/mcm_lheader/mcm_debug.h"
+#include "../../mcm_lib/mcm_lheader/mcm_data_exinfo_auto.h"
+#include "../mcm_service_handle_extern.h"
+#include "../mcm_config_handle_extern.h"
+
+#define DMSG(msg_fmt, msgs...) printf("%s(%04u): " msg_fmt "\n", __FILE__, __LINE__, ##msgs)
+
+int mcm_module_check_test(
+    struct mcm_service_session_t *this_session)
+{
+    int fret = MCM_RCODE_MODULE_INTERNAL_ERROR;
+    char *path1;
+    struct mcm_ds_device_system_t system_s;
+
+    // 範例 (狀況-01) :
+    //   device.system 的 date 的長度超過設定的緩衝大小 (12), 發生錯誤.
+    //   device.system 的 uptime 的範圍無效 (0 ~ 18446744073709551615), 發生錯誤.
+    //   device.system 的 loading 的數值有無效的字元, 發生錯誤.
+    //   device.system 和 date 和 uptime 和 loading 貼上 MCM_DSERROR_INVALID_VALUE.
+    // 取得 device.system 狀態.
+    path1 = "device.system";
+    if(mcm_config_get_entry_all_status_by_path(this_session, path1, &system_s) < MCM_RCODE_PASS)
+    {
+        DMSG("call mcm_config_get_entry_all_status_by_path(%s) fail", path1);
+        goto FREE_01;
+    }
+    system_s.ekey &= MCM_DSERROR_MASK;
+    system_s.date &= MCM_DSERROR_MASK;
+    system_s.ip_addr &= MCM_DSERROR_MASK;
+    system_s.uptime &= MCM_DSERROR_MASK;
+    system_s.loading &= MCM_DSERROR_MASK;
+    // 檢查是否有 MCM_DSERROR_INVALID_VALUE.
+    if((system_s.ekey & MCM_DSERROR_INVALID_VALUE) != 0)
+    {
+        DMSG("%s = MCM_DSERROR_INVALID_VALUE", path1);
+    }
+    if((system_s.date & MCM_DSERROR_INVALID_VALUE) != 0)
+    {
+        DMSG("%s.date = MCM_DSERROR_INVALID_VALUE", path1);
+    }
+    if((system_s.ip_addr & MCM_DSERROR_INVALID_VALUE) != 0)
+    {
+        DMSG("%s.ip_addr = MCM_DSERROR_INVALID_VALUE", path1);
+    }
+    if((system_s.uptime & MCM_DSERROR_INVALID_VALUE) != 0)
+    {
+        DMSG("%s.uptime = MCM_DSERROR_INVALID_VALUE", path1);
+    }
+    if((system_s.loading & MCM_DSERROR_INVALID_VALUE) != 0)
+    {
+        DMSG("%s.loading = MCM_DSERROR_INVALID_VALUE", path1);
+    }
+
+    fret = MCM_RCODE_PASS;
+FREE_01:
+    return fret;
+}
+</pre>
+<pre class="css_pre_code">
+資料檢查啟動表部分
+
+struct mcm_action_module_t MCM_ACTION_CUSTOM_MODULE_BOOT_PROFILE_LIST_NAME[] =
+{
+    {"mcm_module_check_test"},
+    {""}
+};
+</pre>
+        </td>
+      </tr>
+    </table>
+    <br>
+
+  </div>
+</div>
+<br>
+
+<div class="css_div_box_frame_full">
+  <div class="css_div_box_title">資料檔案版本的取得</div>
+  <div class="css_div_box_content">
+    <br>
+
+    在資料模型的建立的章節中設定的版本 <a href="mcm_0201.html#hook_0201_version_01">[詳細]</a>
+    也會紀錄在資料檔案中, 可以使用此版本資訊檢查資料現在值檔案的版本和資料模型的版本是否一致.
+    <br><br>
+
+    紀錄版本的變數 (皆為字串格式) :<br>
+    <table class="css_table_list2">
+      <tr>
+        <td class="css_td_list2_l1">
+          <font class="css_font_g1">MCM_CONFIG_PROFILE_VERSION</font><br>
+        </td>
+        <td class="css_td_list2_r1">
+          資料模型的版本
+        </td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l1">
+          <font class="css_font_g1">mcm_config_base_data.profile_current_version</font><br>
+        </td>
+        <td class="css_td_list2_r1">
+          資料現在值檔案的版本
+        </td>
+      </tr>
+    </table>
+    <br>
+
+  </div>
+</div>
+<br>
+
+<div class="css_div_box_frame_full">
+  <div class="css_div_box_title">相關的全域變數</div>
+  <div class="css_div_box_content">
+    <br>
+
+    <font class="css_font_b1">[MCM_DTYPE_LIST_TD mcm_config_store_profile_source]</font><br>
+    資料是從資料預設值檔案還是資料現在值檔案取得.<br>
+    <table class="css_table_list2">
+      <tr>
+        <td class="css_td_list2_t3" colspan="2">
+          <font class="css_font_g1">MCM_FILE_SOURCE</font><br>
+          <font class="css_font_b1">(mint_cm/mcm_lib/mcm_lheader/mcm_control.h)</font>
+        </td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l2">MCM_FSOURCE_DEFAULT</td>
+        <td class="css_td_list2_r1">資料預設值檔案</td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l2">MCM_FSOURCE_CURRENT</td>
+        <td class="css_td_list2_r1">資料現在值檔案</td>
+      </tr>
+    </table>
+    <br>
+
+    <font class="css_font_b1">[MCM_DTYPE_BOOL_TD mcm_config_data_error]</font><br>
+    是否有發生資料損毀的情況.<br>
+    <table class="css_table_list2">
+      <tr>
+        <td class="css_td_list2_l2">0</td>
+        <td class="css_td_list2_r1">
+          無
+        </td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l2">1</td>
+        <td class="css_td_list2_r1">
+          有<br>
+          (包含<font class="css_font_g1">可以標記的錯誤</font>或<font class="css_font_r1">無法標記的錯誤</font>)
+        </td>
+      </tr>
+    </table>
+    <br>
+
+  </div>
+</div>
+<br>
+
+<div class="css_div_box_frame_full">
+  <div class="css_div_box_title">範例程式的使用</div>
+  <div class="css_div_box_content">
+    <br>
+
+    <table class="css_table_list1">
+      <tr>
+        <td class="css_td_list1_l">01.&nbsp;</td>
+        <td class="css_td_list1_r">
+          範例程式目錄在 <font class="css_font_b1">mint_cm/usage/example/0704</font>.
+        </td>
+      </tr>
+    </table>
+    <br><br>
+
+    <table class="css_table_list1">
+      <tr>
+        <td class="css_td_list1_l">02.&nbsp;</td>
+        <td class="css_td_list1_r">
+          下面關於 <font class="css_font_p1">make</font> 的操作沒有特別註明的話都是在
+          <font class="css_font_b1">mint_cm</font> 目錄.
+        </td>
+      </tr>
+    </table>
+    <br><br>
+
+    <table class="css_table_list1">
+      <tr>
+        <td class="css_td_list1_l">03.&nbsp;</td>
+        <td class="css_td_list1_r">
+          第一次使用, 使用 <font class="css_font_p1">make example_add KEY=0704</font>
+          載入範例並編譯.
+        </td>
+      </tr>
+    </table>
+    <br><br>
+
+    <table class="css_table_list1">
+      <tr>
+        <td class="css_td_list1_l">04.&nbsp;</td>
+        <td class="css_td_list1_r">
+          執行 mcm_daemon 並加入 <font class="css_font_p1">-e 2</font> 參數就可以看到結果.<br>
+          注意當程式檢查到錯誤並執行處理後, mcm_store_profile_current.txt 會重新產生並且內容是正確的的.
+        </td>
+      </tr>
+    </table>
+    <br><br>
+
+    <table class="css_table_list1">
+      <tr>
+        <td class="css_td_list1_l">05.&nbsp;</td>
+        <td class="css_td_list1_r">
+          測試完畢不使用後, 使用 <font class="css_font_p1">make example_del KEY=0704</font>
+          將範例移除.
+        </td>
+      </tr>
+    </table>
+    <br><br>
+
+    <table class="css_table_list1">
+      <tr>
+        <td class="css_td_list1_l">06.&nbsp;</td>
+        <td class="css_td_list1_r">
+          範例程式目錄下的檔案在做完 <font class="css_font_p1">make example_add</font>
+          後會複製到真正使用的位置, 要修改做測試的話要改在複製後的.<br>
+          <table class="css_table_list2">
+            <tr>
+              <td class="css_td_list2_r1">
+                來源 <font class="css_font_b1">profile/mcm_data_profile_0704.xml</font><br>
+                目地 <font class="css_font_b1">mint_cm/mcm_build/mcm_data_profile.xml</font><br>
+                資料模型範例<br>
+                有修改要使用 <font class="css_font_p1">make all</font> 重新編譯
+              </td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_r1">
+                來源 <font class="css_font_b1">profile/mcm_store_profile_default_0704.txt</font><br>
+                目地 <font class="css_font_b1">mint_cm/mcm_build/mcm_store_profile_default.txt</font><br>
+                資料預設值範例<br>
+                使用 <font class="css_font_p1">make all</font> 後會再複製到 <font class="css_font_b1">mint_cm/run</font>
+              </td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_r1">
+                來源 <font class="css_font_b1">profile/mcm_store_profile_current_0704.txt</font><br>
+                目地 <font class="css_font_b1">mint_cm/run/mcm_store_profile_current.txt</font><br>
+                資料現在值範例<br>
+              </td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_r1">
+                來源 <font class="css_font_b1">module/mcm_custom_0704.c</font><br>
+                目地 <font class="css_font_b1">mint_cm/mcm_daemon/mcm_module</font><br>
+                處理函式範例<br>
+                有修改要使用 <font class="css_font_p1">make all</font> 重新編譯
+              </td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_r1">
+                來源 <font class="css_font_b1">module/mcm_module_0704.c</font><br>
+                目地 <font class="css_font_b1">mint_cm/mcm_daemon/mcm_module</font><br>
+                內部模組範例<br>
+                有修改要使用 <font class="css_font_p1">make all</font> 重新編譯
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+    <br>
+
+  </div>
+</div>
+<br>
+
+</body>
+
+</html>

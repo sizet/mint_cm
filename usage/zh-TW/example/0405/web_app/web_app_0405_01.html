@@ -1,0 +1,128 @@
+<!--
+Copyright © 2017, Che-Wei Hsu <cwxhsu@gmail.com>
+This file is part of the MintCM.
+Some rights reserved. See README.
+-->
+
+<html>
+
+<head>
+
+<meta http-equiv="cache-control" content="no-cache">
+<meta http-equiv="content-type" content="text/html; charset=utf-8">
+<script type="text/javascript" src="jquery_main.js"></script>
+<script type="text/javascript" src="json3.js"></script>
+<script type="text/javascript" src="mcm_jslib_api.js"></script>
+<script type="text/javascript" src="mcm_jslib_data_info_auto.js"></script>
+<link rel="stylesheet" href="web_app_0405_style.css">
+
+<script type="text/javascript">
+function body_init()
+{
+    var self_jslib, req_cmd = "", rep_ret, mcm_dv;
+
+
+    $("#descript_text").val();
+    $("#descript_check").prop("checked", false);
+    $("#serial_number_text").val();
+    $("#serial_number_check").prop("checked", false);
+
+    // 指定要讀出的資料.
+    req_cmd = "&get.device";
+
+    // 送出讀出資料請求.
+    self_jslib = new mcm_jslib_lib_t();
+    self_jslib.socket_path = "@mintcm";
+    self_jslib.session_permission = mcm_session_permission.ro;
+    self_jslib.session_stack_size = 0;
+    self_jslib.request_command = req_cmd;
+    self_jslib.data_format = mcm_data_format.all_default;
+    self_jslib.other_query = "";
+    rep_ret = mcm_jslib_obtain_config(self_jslib);
+    if(rep_ret.rep_code < mcm_return_code.pass)
+    {
+        alert("call mcm_jslib_obtain_config() fail" +
+              "[" + rep_ret.rep_code + "]");
+        mcm_jslib_run_script(rep_ret.rep_data);
+        return;
+    }
+    // 處理資料格式.
+    mcm_dv = JSON.parse(rep_ret.rep_data);
+
+    // 顯示 device
+    $("#descript_text").val(mcm_dv.device.descript);
+    $("#serial_number_text").val(mcm_dv.device.serial_number);
+}
+
+// 設定資料.
+function config_set()
+{
+    var self_jslib, req_cmd = "", rep_ret;
+
+
+    if($("#descript_check").prop("checked") == true)
+    {
+        // 設定 device.descript
+        req_cmd += "&set.s.device.descript=" +
+                   mcm_jslib_convert_submit_str($("#descript_text").val());
+    }
+
+    if($("#serial_number_check").prop("checked") == true)
+    {
+        // 設定 device.serial_number
+        req_cmd += "&set.b.device.serial_number=" +
+                   mcm_jslib_convert_submit_str($("#serial_number_text").val());
+    }
+
+    // 執行內部模組.
+    req_cmd += "&run.mcm_module_status_test_get_device";
+
+    // 送出修改資料請求.
+    self_jslib = new mcm_jslib_lib_t();
+    self_jslib.socket_path = "@mintcm";
+    self_jslib.session_permission = mcm_session_permission.rw;
+    self_jslib.session_stack_size = 0;
+    self_jslib.request_command = req_cmd;
+    self_jslib.after_complete = mcm_after_complete.reload;
+    self_jslib.other_query = "";
+    rep_ret = mcm_jslib_submit_config(self_jslib);
+    if(rep_ret.rep_code < mcm_return_code.pass)
+    {
+        alert("call mcm_jslib_submit_config() fail" +
+              "[" + rep_ret.rep_code + "]");
+        mcm_jslib_run_script(rep_ret.rep_data);
+        return;
+    }
+    mcm_jslib_run_script(rep_ret.rep_data);
+}
+</script>
+
+</head>
+
+<body onload="body_init()">
+
+  <div>[set][device]</div>
+
+  <table class="css_table1">
+    <tr>
+      <td class="css_td1"></td>
+      <td class="css_td1">value</td>
+      <td class="css_td1">set</td>
+    </tr>
+    <tr>
+      <td class="css_td1">device.descript</td>
+      <td class="css_td1"><input id="descript_text" type="text" size="24"></td>
+      <td class="css_td1"><input id="descript_check" type="checkbox"></td>
+    </tr>
+    <tr>
+      <td class="css_td1">device.serial_number</td>
+      <td class="css_td1"><input id="serial_number_text" type="text" size="24"></td>
+      <td class="css_td1"><input id="serial_number_check" type="checkbox"></td>
+    </tr>
+  </table>
+
+  <button type="button" onclick="config_set()">set</button>
+
+</body>
+
+</html>

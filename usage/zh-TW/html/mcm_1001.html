@@ -1,0 +1,94 @@
+<!--
+Copyright © 2017, Che-Wei Hsu <cwxhsu@gmail.com>
+This file is part of the MintCM.
+Some rights reserved. See README.
+-->
+
+<html>
+
+<head>
+<meta http-equiv="content-type" content="text/html; charset=utf-8">
+<link rel="stylesheet" href="../css/mcm_style.css">
+</head>
+
+<body class="css_body">
+
+<div class="css_div_box_frame_full">
+  <div class="css_div_box_title">chapter 10-01</div>
+  <div class="css_div_box_content">
+  </div>
+</div>
+<br>
+
+<div class="css_div_box_frame_full">
+  <div class="css_div_box_title">網頁端帳號登入登出的處理</div>
+  <div class="css_div_box_content">
+    <br>
+
+    <div class="css_div_figure">
+      <table class="css_table_figure">
+        <tr>
+          <td class="css_td_figure_image">
+            <img src="../image/mcm_1001_0101.png"/>
+          </td>
+        </tr>
+        <tr>
+          <td class="css_td_figure_text">系統架構</td>
+        </tr>
+      </table>
+    </div>
+    <br><br>
+
+    此套程式是針對 mini_httpd 設計, 只能搭配 mini_httpd 使用, 以下簡稱 MintAAM.
+    <br><br><br>
+
+    <font class="css_font_r2">mini_httpd</font><br>
+    使用的 HTTP Server.
+    <br><br><br>
+
+    <font class="css_font_r2">maam_buildin</font><br>
+    處理登入登出的程式, 和 mini_httpd 編譯成單一執行檔.
+    <br><br><br>
+
+    <font class="css_font_r2">maam_jslib_api.js</font><br>
+    提供介面給網頁程式做登入登出.
+    <br><br><br>
+
+    <font class="css_font_g2">Web program</font><br>
+    網頁程式部分.
+    <br><br><br>
+
+    <font class="css_font_r2">libmaam_lulib_api.so</font><br>
+    提供介面 (C 函式) 給其他用戶端程式存取目前登入的連線.
+    <br><br><br>
+
+    <font class="css_font_g2">User Space Program</font><br>
+    需要存取目前登入的連線的用戶端程式.
+    <br><br><br>
+
+    MintAAM 程式碼在 :<br>
+    <font class="css_font_b1">mint_cm/http_server/mini_httpd/mint_aam/source</font>.
+    <br><br>
+
+    mini_httpd 目錄在 :<br>
+    <font class="css_font_b1">mint_cm/http_server/mini_httpd/last</font>.
+    <br><br>
+
+    第一次使用先將 <font class="css_font_b1">[MintAAM 程式碼]</font> 複製到
+    <font class="css_font_b1">[mini_httpd 目錄]</font> 再編譯.
+    <br><br>
+
+    <font class="css_font_b1">mint_cm/http_server/mini_httpd/mint_aam/clean</font>
+    內的檔案是原本還沒加入 MintAAM 功能的 mini_httpd 的檔案.
+    <br><br>
+
+    MintAAM 使用 cookie 搭配 session 來管理.
+    <br><br>
+
+  </div>
+</div>
+<br>
+
+</body>
+
+</html>

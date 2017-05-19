@@ -1,0 +1,3008 @@
+<!--
+Copyright © 2017, Che-Wei Hsu <cwxhsu@gmail.com>
+This file is part of the MintCM.
+Some rights reserved. See README.
+-->
+
+<html>
+
+<head>
+<meta http-equiv="content-type" content="text/html; charset=utf-8">
+<link rel="stylesheet" href="../css/mcm_style.css">
+</head>
+
+<body class="css_body">
+
+<div class="css_div_box_frame_full">
+  <div class="css_div_box_title">chapter 04-06</div>
+  <div class="css_div_box_content">
+  </div>
+</div>
+<br>
+
+<div class="css_div_box_frame_full">
+  <div class="css_div_box_title">資料數值的存取 (模組端程式) (進階模式)</div>
+  <div class="css_div_box_content">
+    <br>
+
+    此章節說明內部模組如何存取資料數值.
+    <br><br>
+
+  </div>
+</div>
+<br>
+
+<div class="css_div_box_frame_full">
+  <div class="css_div_box_title">變數格式的說明</div>
+  <div class="css_div_box_content">
+    <br>
+
+    使用的資料模型範例, 參考 <a href="mcm_0202.html#hook_0202_data_profile_01">#02-02#</a>.
+    <br><br><br>
+
+    <div class="css_div_hook" id="hook_0406_this_session_01"></div>
+    <font class="css_font_b1">[struct mcm_service_session_t *this_session]</font><br>
+    請求端的連線資訊. <a href="mcm_0402.html#hook_0402_this_session_01">[詳細]</a>
+    <br><br><br>
+
+    <div class="css_div_hook" id="hook_0406_mask_path_01"></div>
+    <font class="css_font_b1">[char *mask_path]</font><br>
+    取得 group 的資訊的路徑. <a href="mcm_0302.html#hook_0302_mask_path_01">[詳細]</a>
+    <br><br><br>
+
+    <div class="css_div_hook" id="hook_0406_mix_path_01"></div>
+    <font class="css_font_b1">[char *mix_path]</font><br>
+    存取多個 entry 的路徑. <a href="mcm_0302.html#hook_0302_mix_path_01">[詳細]</a>
+    <br><br><br>
+
+    <div class="css_div_hook" id="hook_0406_full_path_01"></div>
+    <font class="css_font_b1">[char *full_path]</font><br>
+    存取的目標 entry 或 member 的路徑. <a href="mcm_0302.html#hook_0302_full_path_01">[詳細]</a>
+    <br><br><br>
+
+    <div class="css_div_hook" id="hook_0406_group_info_01"></div>
+    <font class="css_font_b1">[struct mcm_config_model_group_t *group_info]</font><br>
+    紀錄 group 的資訊的結構. <a href="mcm_0404.html#hook_0404_group_info_01">[詳細]</a>
+    <br><br><br>
+
+    <div class="css_div_hook" id="hook_0406_member_info_01"></div>
+    <font class="css_font_b1">[struct mcm_config_model_member_t *member_info]</font><br>
+    紀錄 member 的資訊的結構. <a href="mcm_0404.html#hook_0404_member_info_01">[詳細]</a>
+    <br><br><br>
+
+    <div class="css_div_hook" id="hook_0406_store_info_01"></div>
+    <font class="css_font_b1">[struct mcm_config_store_t *store_info]</font><br>
+    紀錄資料的狀態和數值的結構. <a href="mcm_0404.html#hook_0404_store_info_01">[詳細]</a>
+    <br><br><br>
+
+    <div class="css_div_hook" id="hook_0406_typedef_01"></div>
+    <font class="css_font_b1">存取 member 資料的變數的型態</font><br>
+    <a href="mcm_0302.html#hook_0302_typedef_01">[詳細]</a>
+    <br><br><br>
+
+    <div class="css_div_hook" id="hook_0406_typedef_02"></div>
+    <font class="css_font_b1">存取 entry 資料的變數的型態</font><br>
+    <a href="mcm_0302.html#hook_0302_typedef_02">[詳細]</a>
+    <br><br><br>
+
+    <div class="css_div_hook" id="hook_0406_data_access_01"></div>
+    <font class="css_font_b1">資料數值存取的模式</font><br>
+    <a href="mcm_0403.html#hook_0403_data_access_01">[詳細]</a>
+    <br><br>
+
+  </div>
+</div>
+<br>
+
+<div class="css_div_box_frame_full">
+  <div class="css_div_box_title">可用的函式</div>
+  <div class="css_div_box_content">
+    <br>
+
+    <div class="css_div_hook" id="hook_0406_mcm_config_get_max_count_by_info_01"></div>
+    <table class="css_table_box">
+      <tr>
+        <td class="css_td_box">
+          <font class="css_font_b2">mcm_config_get_max_count_by_info</font><br>
+          取得 group 的資料筆數上限, 也就是資料模型中的 $(max) 值.<br>
+          <table class="css_table_list2">
+            <tr>
+              <td class="css_td_list2_t1">參數</td>
+              <td class="css_td_list2_t1">說明</td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l1">
+                <font class="css_font_r1">struct mcm_service_session_t *</font><br>
+                <font class="css_font_g1">this_session</font>
+              </td>
+              <td class="css_td_list2_r1">
+                請求端的連線資訊
+              </td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l1">
+                <font class="css_font_r1">struct mcm_config_model_group_t *</font><br>
+                <font class="css_font_g1">this_model_group</font>
+              </td>
+              <td class="css_td_list2_r1">
+                目標的 group_info <a href="#hook_0406_group_info_01">[詳細]</a>
+              </td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l1">
+                <font class="css_font_r1">MCM_DTYPE_EK_TD *</font><br>
+                <font class="css_font_g1">count_buf</font>
+              </td>
+              <td class="css_td_list2_r1">
+                紀錄資料筆數的緩衝
+              </td>
+            </tr>
+          </table>
+          <table class="css_table_list2">
+            <tr>
+              <td class="css_td_list2_t1">回傳</td>
+              <td class="css_td_list2_t1">說明</td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l2">&gt;= MCM_RCODE_PASS</td>
+              <td class="css_td_list2_r1">成功</td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l2">&nbsp;&lt; MCM_RCODE_PASS</td>
+              <td class="css_td_list2_r1">錯誤</td>
+            </tr>
+          </table>
+          <br>
+          注意事項 :<br>
+          <table class="css_table_list1">
+            <tr>
+              <td class="css_td_list1_l">01.&nbsp;</td>
+              <td class="css_td_list1_r">
+                外部程式或網頁程式的資料存取模式 (session_permission) 可以是唯讀或讀寫.
+              </td>
+            </tr>
+          </table>
+          <br>
+          範例 :<br>
+<pre class="css_pre_code">
+外部程式部分
+
+#include &lt;time.h&gt;
+#include &lt;errno.h&gt;
+#include &lt;stdio.h&gt;
+#include &lt;string.h&gt;
+#include &lt;stdlib.h&gt;
+#include "mcm_lheader/mcm_type.h"
+#include "mcm_lheader/mcm_size.h"
+#include "mcm_lheader/mcm_connect.h"
+#include "mcm_lheader/mcm_return.h"
+#include "mcm_lheader/mcm_data_exinfo_auto.h"
+#include "mcm_lulib/mcm_lulib_api.h"
+
+#define DMSG(msg_fmt, msgs...) printf("%s(%04u): " msg_fmt "\n", __FILE__, __LINE__, ##msgs)
+
+int main(int argc, char **argv)
+{
+    char *path1;
+    struct mcm_lulib_lib_t self_lulib;
+
+    memset(&self_lulib, 0, sizeof(struct mcm_lulib_lib_t));
+    self_lulib.socket_path = "@mintcm";
+    self_lulib.call_from = MCM_CFROM_USER;
+    self_lulib.session_permission = MCM_SPERMISSION_RO;
+    self_lulib.session_stack_size = 0;
+    if(mcm_lulib_init(&self_lulib) < MCM_RCODE_PASS)
+    {
+        DMSG("call mcm_lulib_init() fail");
+        goto FREE_01;
+    }
+
+    // 呼叫內部模組.
+    path1 = "mcm_module_get_max_count_test_01";
+    DMSG("[run] %s", path1);
+    if(mcm_lulib_run(&self_lulib, path1) < MCM_RCODE_PASS)
+    {
+        DMSG("call mcm_lulib_run(%s) fail", path1);
+        goto FREE_02;
+    }
+
+FREE_02:
+    mcm_lulib_exit(&self_lulib);
+FREE_01:
+    return 0;
+}
+</pre>
+<pre class="css_pre_code">
+內部模組部分
+
+#include &lt;time.h&gt;
+#include &lt;errno.h&gt;
+#include &lt;stdio.h&gt;
+#include &lt;string.h&gt;
+#include &lt;stdlib.h&gt;
+#include "../../mcm_lib/mcm_lheader/mcm_type.h"
+#include "../../mcm_lib/mcm_lheader/mcm_size.h"
+#include "../../mcm_lib/mcm_lheader/mcm_control.h"
+#include "../../mcm_lib/mcm_lheader/mcm_connect.h"
+#include "../../mcm_lib/mcm_lheader/mcm_return.h"
+#include "../../mcm_lib/mcm_lheader/mcm_debug.h"
+#include "../../mcm_lib/mcm_lheader/mcm_data_exinfo_auto.h"
+#include "../mcm_service_handle_extern.h"
+#include "../mcm_config_handle_extern.h"
+
+#define DMSG(msg_fmt, msgs...) printf("%s(%04u): " msg_fmt "\n", __FILE__, __LINE__, ##msgs)
+
+int mcm_module_get_max_count_test_01(
+    struct mcm_service_session_t *this_session)
+{
+    int fret = MCM_RCODE_MODULE_INTERNAL_ERROR;
+    char *path1;
+    struct mcm_config_model_group_t *tmp_group;
+    MCM_DTYPE_EK_TD max_count;
+
+    // 範例 : 取得 device.system 的資料筆數上限.
+    path1 = "device.system";
+    // 先使用路徑取得資訊.
+    if(mcm_config_find_group_by_mask(this_session, path1, &tmp_group) < MCM_RCODE_PASS)
+    {
+        DMSG("call mcm_config_find_group_by_mask(%s) fail", path1);
+        goto FREE_01;
+    }
+    // 使用進階模式取得資料筆數上限.
+    if(mcm_config_get_max_count_by_info(this_session, tmp_group, &max_count) < MCM_RCODE_PASS)
+    {
+        DMSG("call mcm_config_get_max_count_by_info(%s) fail", path1);
+        goto FREE_01;
+    }
+    DMSG("[max-count] %s = " MCM_DTYPE_EK_PF, path1, max_count);
+
+    // 範例 : 取得 device.vap.* 的資料筆數上限.
+    path1 = "device.vap.*";
+    // 先使用路徑取得資訊.
+    if(mcm_config_find_group_by_mask(this_session, path1, &tmp_group) < MCM_RCODE_PASS)
+    {
+        DMSG("call mcm_config_find_group_by_mask(%s) fail", path1);
+        goto FREE_01;
+    }
+    // 使用進階模式取得資料筆數上限.
+    if(mcm_config_get_max_count_by_info(this_session, tmp_group, &max_count) < MCM_RCODE_PASS)
+    {
+        DMSG("call mcm_config_get_max_count_by_info(%s) fail", path1);
+        goto FREE_01;
+    }
+    DMSG("[max-count] %s = " MCM_DTYPE_EK_PF, path1, max_count);
+
+    // 範例 : 取得 device.vap.*.station.* 的資料筆數上限.
+    path1 = "device.vap.*.station.*";
+    // 先使用路徑取得資訊.
+    if(mcm_config_find_group_by_mask(this_session, path1, &tmp_group) < MCM_RCODE_PASS)
+    {
+        DMSG("call mcm_config_find_group_by_mask(%s) fail", path1);
+        goto FREE_01;
+    }
+    // 使用進階模式取得資料筆數上限.
+    if(mcm_config_get_max_count_by_info(this_session, tmp_group, &max_count) < MCM_RCODE_PASS)
+    {
+        DMSG("call mcm_config_get_max_count_by_info(%s) fail", path1);
+        goto FREE_01;
+    }
+    DMSG("[max-count] %s = " MCM_DTYPE_EK_PF, path1, max_count);
+
+    fret = MCM_RCODE_PASS;
+FREE_01:
+    return fret;
+}
+</pre>
+        </td>
+      </tr>
+    </table>
+    <br>
+
+    <div class="css_div_hook" id="hook_0406_mcm_config_get_count_by_info_01"></div>
+    <table class="css_table_box">
+      <tr>
+        <td class="css_td_box">
+          <font class="css_font_b2">mcm_config_get_count_by_info</font><br>
+          取得 group 內目前的 entry 數目.<br>
+          <table class="css_table_list2">
+            <tr>
+              <td class="css_td_list2_t1">參數</td>
+              <td class="css_td_list2_t1">說明</td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l1">
+                <font class="css_font_r1">struct mcm_service_session_t *</font><br>
+                <font class="css_font_g1">this_session</font>
+              </td>
+              <td class="css_td_list2_r1">
+                請求端的連線資訊
+              </td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l1">
+                <font class="css_font_r1">struct mcm_config_model_group_t *</font><br>
+                <font class="css_font_g1">this_model_group</font>
+              </td>
+              <td class="css_td_list2_r1">
+                目標的 group_info <a href="#hook_0406_group_info_01">[詳細]</a>
+              </td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l1">
+                <font class="css_font_r1">struct mcm_config_store_t *</font><br>
+                <font class="css_font_g1">parent_store</font>
+              </td>
+              <td class="css_td_list2_r1">
+                目標的 store_info 的 parent-store_info <a href="#hook_0406_store_info_01">[詳細]</a>
+              </td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l1">
+                <font class="css_font_r1">MCM_DTYPE_EK_TD *</font><br>
+                <font class="css_font_g1">count_buf</font>
+              </td>
+              <td class="css_td_list2_r1">
+                紀錄資料筆數的緩衝
+              </td>
+            </tr>
+          </table>
+          <table class="css_table_list2">
+            <tr>
+              <td class="css_td_list2_t1">回傳</td>
+              <td class="css_td_list2_t1">說明</td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l2">&gt;= MCM_RCODE_PASS</td>
+              <td class="css_td_list2_r1">成功</td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l2">&nbsp;&lt; MCM_RCODE_PASS</td>
+              <td class="css_td_list2_r1">錯誤</td>
+            </tr>
+          </table>
+          <br>
+          注意事項 :<br>
+          <table class="css_table_list1">
+            <tr>
+              <td class="css_td_list1_l">01.&nbsp;</td>
+              <td class="css_td_list1_r">
+                外部程式或網頁程式的資料存取模式 (session_permission) 可以是唯讀或讀寫.
+              </td>
+            </tr>
+          </table>
+          <br>
+          範例 :<br>
+<pre class="css_pre_code">
+外部程式部分
+
+#include &lt;time.h&gt;
+#include &lt;errno.h&gt;
+#include &lt;stdio.h&gt;
+#include &lt;string.h&gt;
+#include &lt;stdlib.h&gt;
+#include "mcm_lheader/mcm_type.h"
+#include "mcm_lheader/mcm_size.h"
+#include "mcm_lheader/mcm_connect.h"
+#include "mcm_lheader/mcm_return.h"
+#include "mcm_lheader/mcm_data_exinfo_auto.h"
+#include "mcm_lulib/mcm_lulib_api.h"
+
+#define DMSG(msg_fmt, msgs...) printf("%s(%04u): " msg_fmt "\n", __FILE__, __LINE__, ##msgs)
+
+int main(int argc, char **argv)
+{
+    char *path1;
+    struct mcm_lulib_lib_t self_lulib;
+
+    memset(&self_lulib, 0, sizeof(struct mcm_lulib_lib_t));
+    self_lulib.socket_path = "@mintcm";
+    self_lulib.call_from = MCM_CFROM_USER;
+    self_lulib.session_permission = MCM_SPERMISSION_RO;
+    self_lulib.session_stack_size = 0;
+    if(mcm_lulib_init(&self_lulib) < MCM_RCODE_PASS)
+    {
+        DMSG("call mcm_lulib_init() fail");
+        goto FREE_01;
+    }
+
+    // 呼叫內部模組.
+    path1 = "mcm_module_get_count_test";
+    DMSG("[run] %s", path1);
+    if(mcm_lulib_run(&self_lulib, path1) < MCM_RCODE_PASS)
+    {
+        DMSG("call mcm_lulib_run(%s) fail", path1);
+        goto FREE_02;
+    }
+
+FREE_02:
+    mcm_lulib_exit(&self_lulib);
+FREE_01:
+    return 0;
+}
+</pre>
+<pre class="css_pre_code">
+內部模組部分
+
+#include &lt;time.h&gt;
+#include &lt;errno.h&gt;
+#include &lt;stdio.h&gt;
+#include &lt;string.h&gt;
+#include &lt;stdlib.h&gt;
+#include "../../mcm_lib/mcm_lheader/mcm_type.h"
+#include "../../mcm_lib/mcm_lheader/mcm_size.h"
+#include "../../mcm_lib/mcm_lheader/mcm_control.h"
+#include "../../mcm_lib/mcm_lheader/mcm_connect.h"
+#include "../../mcm_lib/mcm_lheader/mcm_return.h"
+#include "../../mcm_lib/mcm_lheader/mcm_debug.h"
+#include "../../mcm_lib/mcm_lheader/mcm_data_exinfo_auto.h"
+#include "../mcm_service_handle_extern.h"
+#include "../mcm_config_handle_extern.h"
+
+#define DMSG(msg_fmt, msgs...) printf("%s(%04u): " msg_fmt "\n", __FILE__, __LINE__, ##msgs)
+
+int mcm_module_get_count_test(
+    struct mcm_service_session_t *this_session)
+{
+    int fret = MCM_RCODE_MODULE_INTERNAL_ERROR;
+    char *path1;
+    struct mcm_config_model_group_t *tmp_group;
+    struct mcm_config_store_t *tmp_parent_store;
+    MCM_DTYPE_EK_TD count;
+
+    // 範例 : 取得 device.system 的資料筆數.
+    path1 = "device.system";
+    // 先使用路徑取得資訊.
+    if(mcm_config_find_entry_by_mix(this_session, path1, &tmp_group, NULL, NULL,
+                                    &tmp_parent_store) < MCM_RCODE_PASS)
+    {
+        DMSG("call mcm_config_find_entry_by_mix(%s) fail", path1);
+        goto FREE_01;
+    }
+    // 使用進階模式取得資料筆數.
+    if(mcm_config_get_count_by_info(this_session, tmp_group, tmp_parent_store, &count)
+                                    < MCM_RCODE_PASS)
+    {
+        DMSG("call mcm_config_get_count_by_info(%s) fail", path1);
+        goto FREE_01;
+    }
+    DMSG("[count] %s = " MCM_DTYPE_EK_PF, path1, count);
+
+    // 範例 : 取得 device.system 的資料筆數.
+    path1 = "device.vap.*";
+    // 先使用路徑取得資訊.
+    if(mcm_config_find_entry_by_mix(this_session, path1, &tmp_group, NULL, NULL,
+                                    &tmp_parent_store) < MCM_RCODE_PASS)
+    {
+        DMSG("call mcm_config_find_entry_by_mix(%s) fail", path1);
+        goto FREE_01;
+    }
+    // 使用進階模式取得資料筆數.
+    if(mcm_config_get_count_by_info(this_session, tmp_group, tmp_parent_store, &count)
+                                    < MCM_RCODE_PASS)
+    {
+        DMSG("call mcm_config_get_count_by_info(%s) fail", path1);
+        goto FREE_01;
+    }
+    DMSG("[count] %s = " MCM_DTYPE_EK_PF, path1, count);
+
+    // 範例 : 取得 device.vap#@1.station.* 的資料筆數.
+    path1 = "device.vap.@1.station.*";
+    // 先使用路徑取得資訊.
+    if(mcm_config_find_entry_by_mix(this_session, path1, &tmp_group, NULL, NULL,
+                                    &tmp_parent_store) < MCM_RCODE_PASS)
+    {
+        DMSG("call mcm_config_find_entry_by_mix(%s) fail", path1);
+        goto FREE_01;
+    }
+    // 使用進階模式取得資料筆數.
+    if(mcm_config_get_count_by_info(this_session, tmp_group, tmp_parent_store, &count)
+                                    < MCM_RCODE_PASS)
+    {
+        DMSG("call mcm_config_get_count_by_info(%s) fail", path1);
+        goto FREE_01;
+    }
+    DMSG("[count] %s = " MCM_DTYPE_EK_PF, path1, count);
+
+    // 範例 : 取得 device.vap.#23.station.* 的資料筆數.
+    path1 = "device.vap.#23.station.*";
+    // 先使用路徑取得資訊.
+    if(mcm_config_find_entry_by_mix(this_session, path1, &tmp_group, NULL, NULL,
+                                    &tmp_parent_store) < MCM_RCODE_PASS)
+    {
+        DMSG("call mcm_config_find_entry_by_mix(%s) fail", path1);
+        goto FREE_01;
+    }
+    // 使用進階模式取得資料筆數.
+    if(mcm_config_get_count_by_info(this_session, tmp_group, tmp_parent_store, &count)
+                                    < MCM_RCODE_PASS)
+    {
+        DMSG("call mcm_config_get_count_by_info(%s) fail", path1);
+        goto FREE_01;
+    }
+    DMSG("[count] %s = " MCM_DTYPE_EK_PF, path1, count);
+
+    fret = MCM_RCODE_PASS;
+FREE_01:
+    return fret;
+}
+</pre>
+        </td>
+      </tr>
+    </table>
+    <br>
+
+    <div class="css_div_hook" id="hook_0406_mcm_config_get_alone_by_info_01"></div>
+    <table class="css_table_box">
+      <tr>
+        <td class="css_td_box">
+          <font class="css_font_b2">mcm_config_get_alone_by_info</font><br>
+          讀出 member 的資料.<br>
+          <table class="css_table_list2">
+            <tr>
+              <td class="css_td_list2_t1">參數</td>
+              <td class="css_td_list2_t1">說明</td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l1">
+                <font class="css_font_r1">struct mcm_service_session_t *</font><br>
+                <font class="css_font_g1">this_session</font>
+              </td>
+              <td class="css_td_list2_r1">
+                請求端的連線資訊
+              </td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l1">
+                <font class="css_font_r1">struct mcm_config_model_group_t *</font><br>
+                <font class="css_font_g1">this_model_group</font>
+              </td>
+              <td class="css_td_list2_r1">
+                目標的 group_info <a href="#hook_0406_group_info_01">[詳細]</a>
+              </td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l1">
+                <font class="css_font_r1">struct mcm_config_model_member_t *</font><br>
+                <font class="css_font_g1">this_model_member</font>
+              </td>
+              <td class="css_td_list2_r1">
+                目標的 member_info <a href="#hook_0405_member_info_01">[詳細]</a>
+              </td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l1">
+                <font class="css_font_r1">struct mcm_config_store_t *</font><br>
+                <font class="css_font_g1">this_store</font>
+              </td>
+              <td class="css_td_list2_r1">
+                目標的 store_info <a href="#hook_0406_store_info_01">[詳細]</a>
+              </td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l1">
+                <font class="css_font_r1">MCM_DTYPE_FLAG_TD</font><br>
+                <font class="css_font_g1">data_access</font><br>
+              </td>
+              <td class="css_td_list2_r1">
+                要使用何種模式 <a href="#hook_0406_data_access_01">[詳細]</a>
+              </td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l1">
+                <font class="css_font_r1">void *</font><br>
+                <font class="css_font_g1">data_buf</font>
+              </td>
+              <td class="css_td_list2_r1">
+                紀錄資料的變數的緩衝 (變數的資料型態 <a href="#hook_0406_typedef_01">[詳細]</a>)
+              </td>
+            </tr>
+          </table>
+          <table class="css_table_list2">
+            <tr>
+              <td class="css_td_list2_t1">回傳</td>
+              <td class="css_td_list2_t1">說明</td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l2">== MCM_DACCESS_SYS</td>
+              <td class="css_td_list2_r1">成功, 從系統資料區讀出資料</td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l2">== MCM_DACCESS_NEW</td>
+              <td class="css_td_list2_r1">成功, 從新進資料區讀出資料</td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l2">&nbsp;&lt; MCM_RCODE_PASS</td>
+              <td class="css_td_list2_r1">錯誤</td>
+            </tr>
+          </table>
+          <br>
+          注意事項 :<br>
+          <table class="css_table_list1">
+            <tr>
+              <td class="css_td_list1_l">01.&nbsp;</td>
+              <td class="css_td_list1_r">
+                外部程式或網頁程式的資料存取模式 (session_permission) 可以是唯讀或讀寫.
+              </td>
+            </tr>
+          </table>
+          <br>
+          範例 :<br>
+<pre class="css_pre_code">
+外部程式部分
+
+#include &lt;time.h&gt;
+#include &lt;errno.h&gt;
+#include &lt;stdio.h&gt;
+#include &lt;string.h&gt;
+#include &lt;stdlib.h&gt;
+#include "mcm_lheader/mcm_type.h"
+#include "mcm_lheader/mcm_size.h"
+#include "mcm_lheader/mcm_connect.h"
+#include "mcm_lheader/mcm_return.h"
+#include "mcm_lheader/mcm_data_exinfo_auto.h"
+#include "mcm_lulib/mcm_lulib_api.h"
+
+#define DMSG(msg_fmt, msgs...) printf("%s(%04u): " msg_fmt "\n", __FILE__, __LINE__, ##msgs)
+
+int main(int argc, char **argv)
+{
+    char *path1;
+    struct mcm_lulib_lib_t self_lulib;
+    MCM_DTYPE_S_TD date[MCM_BSIZE_DEVICE_SYSTEM_DATE];
+    MCM_DTYPE_RK_TD rule;
+
+    srand(time(NULL));
+
+    memset(&self_lulib, 0, sizeof(struct mcm_lulib_lib_t));
+    self_lulib.socket_path = "@mintcm";
+    self_lulib.call_from = MCM_CFROM_USER;
+    self_lulib.session_permission = MCM_SPERMISSION_RW;
+    self_lulib.session_stack_size = 0;
+    if(mcm_lulib_init(&self_lulib) < MCM_RCODE_PASS)
+    {
+        DMSG("call mcm_lulib_init() fail");
+        goto FREE_01;
+    }
+
+    // 範例-02 : 設定 device.system.date
+    path1 = "device.system.date";
+    snprintf(date, sizeof(date), "2013/05/%02u", rand() % 30);
+    DMSG("[set-alone] %s = " MCM_DTYPE_S_PF, path1, date);
+    if(mcm_lulib_set_alone(&self_lulib, path1, date, strlen(date)) < MCM_RCODE_PASS)
+    {
+        DMSG("call mcm_lulib_set_alone(%s) fail", path1);
+        goto FREE_02;
+    }
+
+    // 範例-03 : 設定 device.vap.#15.station.@1.rule
+    path1 = "device.vap.#15.station.@1.rule";
+    rule = rand() % 50;
+    DMSG("[set-alone] %s = " MCM_DTYPE_RK_PF, path1, rule);
+    if(mcm_lulib_set_alone(&self_lulib, path1, &rule, sizeof(rule)) < MCM_RCODE_PASS)
+    {
+        DMSG("call mcm_lulib_set_alone(%s) fail", path1);
+        goto FREE_02;
+    }
+
+    // 呼叫內部模組.
+    path1 = "mcm_module_get_alone_value_test";
+    DMSG("[run] %s", path1);
+    if(mcm_lulib_run(&self_lulib, path1) < MCM_RCODE_PASS)
+    {
+        DMSG("call mcm_lulib_run(%s) fail", path1);
+        goto FREE_02;
+    }
+
+FREE_02:
+    mcm_lulib_exit(&self_lulib);
+FREE_01:
+    return 0;
+}
+</pre>
+<pre class="css_pre_code">
+內部模組部分
+
+#include &lt;time.h&gt;
+#include &lt;errno.h&gt;
+#include &lt;stdio.h&gt;
+#include &lt;string.h&gt;
+#include &lt;stdlib.h&gt;
+#include "../../mcm_lib/mcm_lheader/mcm_type.h"
+#include "../../mcm_lib/mcm_lheader/mcm_size.h"
+#include "../../mcm_lib/mcm_lheader/mcm_control.h"
+#include "../../mcm_lib/mcm_lheader/mcm_connect.h"
+#include "../../mcm_lib/mcm_lheader/mcm_return.h"
+#include "../../mcm_lib/mcm_lheader/mcm_debug.h"
+#include "../../mcm_lib/mcm_lheader/mcm_data_exinfo_auto.h"
+#include "../mcm_service_handle_extern.h"
+#include "../mcm_config_handle_extern.h"
+
+#define DMSG(msg_fmt, msgs...) printf("%s(%04u): " msg_fmt "\n", __FILE__, __LINE__, ##msgs)
+
+int mcm_module_get_alone_value_test(
+    struct mcm_service_session_t *this_session)
+{
+    int fret = MCM_RCODE_MODULE_INTERNAL_ERROR;
+    char *path1;
+    struct mcm_config_model_group_t *tmp_group;
+    struct mcm_config_model_member_t *tmp_member;
+    struct mcm_config_store_t *tmp_store;
+    MCM_DTYPE_S_TD descript[MCM_BSIZE_DEVICE_DESCRIPT];
+    MCM_DTYPE_B_TD serial_number[MCM_BSIZE_DEVICE_SERIAL_NUMBER];
+    MCM_DTYPE_S_TD date[MCM_BSIZE_DEVICE_SYSTEM_DATE];
+    MCM_DTYPE_RK_TD rule;
+
+    path1 = "device.descript";
+    // 先使用路徑取得資訊.
+    if(mcm_config_find_alone_by_full(this_session, path1, &tmp_group, &tmp_member, &tmp_store)
+                                     < MCM_RCODE_PASS)
+    {
+        DMSG("call mcm_config_find_alone_by_full(%s) fail", path1);
+        goto FREE_01;
+    }
+    // 範例-01a : 取得 device.descript (SYS 模式)
+    fret = mcm_config_get_alone_by_info(this_session, tmp_group, tmp_member, tmp_store,
+                                        MCM_DACCESS_SYS, descript);
+    if(fret < MCM_RCODE_PASS)
+    {
+        DMSG("call mcm_config_get_alone_by_info(%s) fail", path1);
+        goto FREE_01;
+    }
+    DMSG("[get-alone][SYS ] %s = " MCM_DTYPE_S_PF, path1, descript);
+    // 範例-01b : 取得 device.descript (AUTO 模式)
+    fret = mcm_config_get_alone_by_info(this_session, tmp_group, tmp_member, tmp_store,
+                                        MCM_DACCESS_AUTO, descript);
+    if(fret < MCM_RCODE_PASS)
+    {
+        DMSG("call mcm_config_get_alone_by_info(%s) fail", path1);
+        goto FREE_01;
+    }
+    DMSG("[get-alone][AUTO] %s = " MCM_DTYPE_S_PF " [%s]",
+         path1, descript, fret == MCM_DACCESS_SYS ? "SYS" : "NEW");
+
+    path1 = "device.serial_number";
+    // 先使用路徑取得資訊.
+    if(mcm_config_find_alone_by_full(this_session, path1, &tmp_group, &tmp_member, &tmp_store)
+                                     < MCM_RCODE_PASS)
+    {
+        DMSG("call mcm_config_find_alone_by_full(%s) fail", path1);
+        goto FREE_01;
+    }
+    // 範例-01c : 取得 device.serial_number (SYS 模式)
+    fret = mcm_config_get_alone_by_info(this_session, tmp_group, tmp_member, tmp_store,
+                                        MCM_DACCESS_SYS, serial_number);
+    if(fret < MCM_RCODE_PASS)
+    {
+        DMSG("call mcm_config_get_alone_by_info(%s) fail", path1);
+        goto FREE_01;
+    }
+    DMSG("[get-alone][SYS ] %s = "
+         MCM_DTYPE_B_PF MCM_DTYPE_B_PF MCM_DTYPE_B_PF MCM_DTYPE_B_PF MCM_DTYPE_B_PF
+         MCM_DTYPE_B_PF MCM_DTYPE_B_PF MCM_DTYPE_B_PF MCM_DTYPE_B_PF MCM_DTYPE_B_PF,
+         path1,
+         serial_number[0], serial_number[1], serial_number[2], serial_number[3],
+         serial_number[4], serial_number[5], serial_number[6], serial_number[7],
+         serial_number[8], serial_number[9]);
+    // 範例-01d : 取得 device.serial_number (AUTO 模式)
+    fret = mcm_config_get_alone_by_info(this_session, tmp_group, tmp_member, tmp_store,
+                                        MCM_DACCESS_AUTO, serial_number);
+    if(fret < MCM_RCODE_PASS)
+    {
+        DMSG("call mcm_config_get_alone_by_info(%s) fail", path1);
+        goto FREE_01;
+    }
+    DMSG("[get-alone][AUTO] %s = "
+         MCM_DTYPE_B_PF MCM_DTYPE_B_PF MCM_DTYPE_B_PF MCM_DTYPE_B_PF MCM_DTYPE_B_PF
+         MCM_DTYPE_B_PF MCM_DTYPE_B_PF MCM_DTYPE_B_PF MCM_DTYPE_B_PF MCM_DTYPE_B_PF " [%s]",
+         path1,
+         serial_number[0], serial_number[1], serial_number[2], serial_number[3],
+         serial_number[4], serial_number[5], serial_number[6], serial_number[7],
+         serial_number[8], serial_number[9], fret == MCM_DACCESS_SYS ? "SYS" : "NEW");
+
+    path1 = "device.system.date";
+    // 先使用路徑取得資訊.
+    if(mcm_config_find_alone_by_full(this_session, path1, &tmp_group, &tmp_member, &tmp_store)
+                                     < MCM_RCODE_PASS)
+    {
+        DMSG("call mcm_config_find_alone_by_full(%s) fail", path1);
+        goto FREE_01;
+    }
+    // 範例-02a : 取得 device.system.date (SYS 模式)
+    fret = mcm_config_get_alone_by_info(this_session, tmp_group, tmp_member, tmp_store,
+                                        MCM_DACCESS_SYS, date);
+    if(fret < MCM_RCODE_PASS)
+    {
+        DMSG("call mcm_config_get_alone_by_info(%s) fail", path1);
+        goto FREE_01;
+    }
+    DMSG("[get-alone][SYS ] %s = " MCM_DTYPE_S_PF, path1, date);
+    // 範例-02b : 取得 device.system.date (NEW 模式)
+    fret = mcm_config_get_alone_by_info(this_session, tmp_group, tmp_member, tmp_store,
+                                        MCM_DACCESS_NEW, date);
+    if(fret < MCM_RCODE_PASS)
+    {
+        DMSG("call mcm_config_get_alone_by_info(%s) fail", path1);
+        goto FREE_01;
+    }
+    DMSG("[get-alone][NEW ] %s = " MCM_DTYPE_S_PF, path1, date);
+    // 範例-02c : 取得 device.system.date (AUTO 模式)
+    fret = mcm_config_get_alone_by_info(this_session, tmp_group, tmp_member, tmp_store,
+                                        MCM_DACCESS_AUTO, date);
+    if(fret < MCM_RCODE_PASS)
+    {
+        DMSG("call mcm_config_get_alone_by_info(%s) fail", path1);
+        goto FREE_01;
+    }
+    DMSG("[get-alone][AUTO] %s = " MCM_DTYPE_S_PF " [%s]",
+         path1, date, fret == MCM_DACCESS_SYS ? "SYS" : "NEW");
+
+    path1 = "device.vap.#15.station.@1.rule";
+    // 先使用路徑取得資訊.
+    if(mcm_config_find_alone_by_full(this_session, path1, &tmp_group, &tmp_member, &tmp_store)
+                                     < MCM_RCODE_PASS)
+    {
+        DMSG("call mcm_config_find_alone_by_full(%s) fail", path1);
+        goto FREE_01;
+    }
+    // 範例-03a : 取得 device.vap.#15.station.@1.rule (SYS 模式)
+    fret = mcm_config_get_alone_by_info(this_session, tmp_group, tmp_member, tmp_store,
+                                        MCM_DACCESS_SYS, &rule);
+    if(fret < MCM_RCODE_PASS)
+    {
+        DMSG("call mcm_config_get_alone_by_info(%s) fail", path1);
+        goto FREE_01;
+    }
+    DMSG("[get-alone][SYS ] %s = " MCM_DTYPE_RK_PF, path1, rule);
+    // 範例-03b : 取得 device.vap.#15.station.@1.rule (NEW 模式)
+    fret = mcm_config_get_alone_by_info(this_session, tmp_group, tmp_member, tmp_store,
+                                        MCM_DACCESS_NEW, &rule);
+    if(fret < MCM_RCODE_PASS)
+    {
+        DMSG("call mcm_config_get_alone_by_info(%s) fail", path1);
+        goto FREE_01;
+    }
+    DMSG("[get-alone][NEW ] %s = " MCM_DTYPE_RK_PF, path1, rule);
+    // 範例-03c : 取得 device.vap.#15.station.@1.rule (AUTO 模式)
+    fret = mcm_config_get_alone_by_info(this_session, tmp_group, tmp_member, tmp_store,
+                                        MCM_DACCESS_AUTO, &rule);
+    if(fret < MCM_RCODE_PASS)
+    {
+        DMSG("call mcm_config_get_alone_by_info(%s) fail", path1);
+        goto FREE_01;
+    }
+    DMSG("[get-alone][AUTO] %s = " MCM_DTYPE_RK_PF " [%s]",
+         path1, rule, fret == MCM_DACCESS_SYS ? "SYS" : "NEW");
+
+FREE_01:
+    return fret;
+}
+</pre>
+        </td>
+      </tr>
+    </table>
+    <br>
+
+    <div class="css_div_hook" id="hook_0406_mcm_config_set_alone_by_info_01"></div>
+    <table class="css_table_box">
+      <tr>
+        <td class="css_td_box">
+          <font class="css_font_b2">mcm_config_set_alone_by_info</font><br>
+          將資料寫入 member.<br>
+          <table class="css_table_list2">
+            <tr>
+              <td class="css_td_list2_t1">參數</td>
+              <td class="css_td_list2_t1">說明</td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l1">
+                <font class="css_font_r1">struct mcm_service_session_t *</font><br>
+                <font class="css_font_g1">this_session</font>
+              </td>
+              <td class="css_td_list2_r1">
+                請求端的連線資訊
+              </td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l1">
+                <font class="css_font_r1">struct mcm_config_model_group_t *</font><br>
+                <font class="css_font_g1">this_model_group</font>
+              </td>
+              <td class="css_td_list2_r1">
+                目標的 group_info <a href="#hook_0406_group_info_01">[詳細]</a>
+              </td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l1">
+                <font class="css_font_r1">struct mcm_config_model_member_t *</font><br>
+                <font class="css_font_g1">this_model_member</font>
+              </td>
+              <td class="css_td_list2_r1">
+                目標的 member_info <a href="#hook_0405_member_info_01">[詳細]</a>
+              </td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l1">
+                <font class="css_font_r1">struct mcm_config_store_t *</font><br>
+                <font class="css_font_g1">this_store</font>
+              </td>
+              <td class="css_td_list2_r1">
+                目標的 store_info <a href="#hook_0406_store_info_01">[詳細]</a>
+              </td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l1">
+                <font class="css_font_r1">MCM_DTYPE_FLAG_TD</font><br>
+                <font class="css_font_g1">data_access</font><br>
+              </td>
+              <td class="css_td_list2_r1">
+                要使用何種模式 <a href="#hook_0406_data_access_01">[詳細]</a>
+              </td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l1">
+                <font class="css_font_r1">void *</font><br>
+                <font class="css_font_g1">data_con</font>
+              </td>
+              <td class="css_td_list2_r1">
+                寫入的資料 (變數的資料型態 <a href="#hook_0406_typedef_01">[詳細]</a>)
+              </td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l1">
+                <font class="css_font_r1">MCM_DTYPE_USIZE_TD</font><br>
+                <font class="css_font_g1">data_len</font><br>
+              </td>
+              <td class="css_td_list2_r1">
+                寫入的資料的長度<br>
+                <font class="css_font_p1">字串類型填入字串長度, 其他類型填入變數大小</font>
+              </td>
+            </tr>
+          </table>
+          <table class="css_table_list2">
+            <tr>
+              <td class="css_td_list2_t1">回傳</td>
+              <td class="css_td_list2_t1">說明</td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l2">&gt;= MCM_RCODE_PASS</td>
+              <td class="css_td_list2_r1">成功</td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l2">&nbsp;&lt; MCM_RCODE_PASS</td>
+              <td class="css_td_list2_r1">錯誤</td>
+            </tr>
+          </table>
+          <br>
+          注意事項 :
+          <table class="css_table_list1">
+            <tr>
+              <td class="css_td_list1_l">01.&nbsp;</td>
+              <td class="css_td_list1_r">
+                外部程式或網頁程式的資料存取模式 (session_permission) 必須是讀寫.
+              </td>
+            </tr>
+            <tr>
+              <td class="css_td_list1_l">02.&nbsp;</td>
+              <td class="css_td_list1_r">
+                對於 ek 類型的 member 是唯讀的, 不可寫入.
+              </td>
+            </tr>
+          </table>
+          <br>
+          範例 :<br>
+<pre class="css_pre_code">
+外部程式部分
+
+#include &lt;time.h&gt;
+#include &lt;errno.h&gt;
+#include &lt;stdio.h&gt;
+#include &lt;string.h&gt;
+#include &lt;stdlib.h&gt;
+#include "mcm_lheader/mcm_type.h"
+#include "mcm_lheader/mcm_size.h"
+#include "mcm_lheader/mcm_connect.h"
+#include "mcm_lheader/mcm_return.h"
+#include "mcm_lheader/mcm_data_exinfo_auto.h"
+#include "mcm_lulib/mcm_lulib_api.h"
+
+#define DMSG(msg_fmt, msgs...) printf("%s(%04u): " msg_fmt "\n", __FILE__, __LINE__, ##msgs)
+
+int main(int argc, char **argv)
+{
+    char *path1;
+    struct mcm_lulib_lib_t self_lulib;
+    MCM_DTYPE_IUI_TD channel;
+
+    srand(time(NULL));
+
+    memset(&self_lulib, 0, sizeof(struct mcm_lulib_lib_t));
+    self_lulib.socket_path = "@mintcm";
+    self_lulib.call_from = MCM_CFROM_USER;
+    self_lulib.session_permission = MCM_SPERMISSION_RW;
+    self_lulib.session_stack_size = 0;
+    if(mcm_lulib_init(&self_lulib) < MCM_RCODE_PASS)
+    {
+        DMSG("call mcm_lulib_init() fail");
+        goto FREE_01;
+    }
+
+    // 範例-03 : 設定 device.vap.#8.channel
+    path1 = "device.vap.#8.channel";
+    channel = rand() % 200;
+    DMSG("[set-alone] %s = " MCM_DTYPE_IUI_PF, path1, channel);
+    if(mcm_lulib_set_alone(&self_lulib, path1, &channel, sizeof(channel)) < MCM_RCODE_PASS)
+    {
+        DMSG("call mcm_lulib_set_alone(%s) fail", path1);
+        goto FREE_02;
+    }
+
+    // 範例-04 : 增加 device.vap.@3.station.#1
+    path1 = "device.vap.@3.station.#1";
+    DMSG("[add-entry] %s", path1);
+    if(mcm_lulib_add_entry(&self_lulib, path1, NULL, 0) < MCM_RCODE_PASS)
+    {
+        DMSG("call mcm_lulib_add_entry(%s) fail", path1);
+        goto FREE_02;
+    }
+
+    // 呼叫內部模組.
+    path1 = "mcm_module_set_alone_value_test";
+    DMSG("[run] %s", path1);
+    if(mcm_lulib_run(&self_lulib, path1) < MCM_RCODE_PASS)
+    {
+        DMSG("call mcm_lulib_run(%s) fail", path1);
+        goto FREE_02;
+    }
+
+FREE_02:
+    mcm_lulib_exit(&self_lulib);
+FREE_01:
+    return 0;
+}
+</pre>
+<pre class="css_pre_code">
+內部模組部分
+
+#include &lt;time.h&gt;
+#include &lt;errno.h&gt;
+#include &lt;stdio.h&gt;
+#include &lt;string.h&gt;
+#include &lt;stdlib.h&gt;
+#include "../../mcm_lib/mcm_lheader/mcm_type.h"
+#include "../../mcm_lib/mcm_lheader/mcm_size.h"
+#include "../../mcm_lib/mcm_lheader/mcm_control.h"
+#include "../../mcm_lib/mcm_lheader/mcm_connect.h"
+#include "../../mcm_lib/mcm_lheader/mcm_return.h"
+#include "../../mcm_lib/mcm_lheader/mcm_debug.h"
+#include "../../mcm_lib/mcm_lheader/mcm_data_exinfo_auto.h"
+#include "../mcm_service_handle_extern.h"
+#include "../mcm_config_handle_extern.h"
+
+#define DMSG(msg_fmt, msgs...) printf("%s(%04u): " msg_fmt "\n", __FILE__, __LINE__, ##msgs)
+
+int mcm_module_set_alone_value_test(
+    struct mcm_service_session_t *this_session)
+{
+    int fret = MCM_RCODE_MODULE_INTERNAL_ERROR;
+    char *path1;
+    struct mcm_config_model_group_t *tmp_group;
+    struct mcm_config_model_member_t *tmp_member;
+    struct mcm_config_store_t *tmp_store;
+    MCM_DTYPE_S_TD descript[MCM_BSIZE_DEVICE_DESCRIPT];
+    MCM_DTYPE_B_TD serial_number[MCM_BSIZE_DEVICE_SERIAL_NUMBER];
+    MCM_DTYPE_IULL_TD uptime;
+    MCM_DTYPE_IUI_TD channel;
+    MCM_DTYPE_RK_TD rule;
+    MCM_DTYPE_USIZE_TD i;
+
+    srand(time(NULL));
+
+    // 範例-01a : 設定 device.descript (SYS 模式)
+    path1 = "device.descript";
+    // 先使用路徑取得資訊.
+    if(mcm_config_find_alone_by_full(this_session, path1, &tmp_group, &tmp_member, &tmp_store)
+                                     < MCM_RCODE_PASS)
+    {
+        DMSG("call mcm_config_find_alone_by_full(%s) fail", path1);
+        goto FREE_01;
+    }
+    // 設定.
+    snprintf(descript, sizeof(descript), "network-device-%02u", rand() % 100);
+    DMSG("[set-alone][SYS] %s = " MCM_DTYPE_S_PF, path1, descript);
+    if(mcm_config_set_alone_by_info(this_session, tmp_group, tmp_member, tmp_store,
+                                    MCM_DACCESS_SYS, descript, strlen(descript)) < MCM_RCODE_PASS)
+    {
+        DMSG("call mcm_config_set_alone_by_info(%s) fail", path1);
+        goto FREE_01;
+    }
+
+    // 範例-01b : 設定 device.serial_number (SYS 模式)
+    path1 = "device.serial_number";
+    // 先使用路徑取得資訊.
+    if(mcm_config_find_alone_by_full(this_session, path1, &tmp_group, &tmp_member, &tmp_store)
+                                     < MCM_RCODE_PASS)
+    {
+        DMSG("call mcm_config_find_alone_by_full(%s) fail", path1);
+        goto FREE_01;
+    }
+    // 設定.
+    for(i = 0; i < sizeof(serial_number); i++)
+        serial_number[i] = rand() % 256;
+    DMSG("[set-alone][SYS] %s = "
+         MCM_DTYPE_B_PF MCM_DTYPE_B_PF MCM_DTYPE_B_PF MCM_DTYPE_B_PF MCM_DTYPE_B_PF
+         MCM_DTYPE_B_PF MCM_DTYPE_B_PF MCM_DTYPE_B_PF MCM_DTYPE_B_PF MCM_DTYPE_B_PF,
+         path1,
+         serial_number[0], serial_number[1], serial_number[2], serial_number[3],
+         serial_number[4], serial_number[5], serial_number[6], serial_number[7],
+         serial_number[8], serial_number[9]);
+    if(mcm_config_set_alone_by_info(this_session, tmp_group, tmp_member, tmp_store,
+                                    MCM_DACCESS_SYS, serial_number, sizeof(serial_number))
+                                    < MCM_RCODE_PASS)
+    {
+        DMSG("call mcm_config_set_alone_by_info(%s) fail", path1);
+        goto FREE_01;
+    }
+
+    // 範例-02 : 設定 device.system.uptime (NEW 模式)
+    path1 = "device.system.uptime";
+    // 先使用路徑取得資訊.
+    if(mcm_config_find_alone_by_full(this_session, path1, &tmp_group, &tmp_member, &tmp_store)
+                                     < MCM_RCODE_PASS)
+    {
+        DMSG("call mcm_config_find_alone_by_full(%s) fail", path1);
+        goto FREE_01;
+    }
+    // 設定.
+    uptime = rand();
+    DMSG("[set-alone][NEW] %s = " MCM_DTYPE_IULL_PF, path1, uptime);
+    if(mcm_config_set_alone_by_info(this_session, tmp_group, tmp_member, tmp_store,
+                                    MCM_DACCESS_NEW, &uptime, sizeof(uptime)) < MCM_RCODE_PASS)
+    {
+        DMSG("call mcm_config_set_alone_by_info(%s) fail", path1);
+        goto FREE_01;
+    }
+
+    // 範例-03 : 設定 device.vap.#8.channel (NEW 模式)
+    path1 = "device.vap.#8.channel";
+    // 先使用路徑取得資訊.
+    if(mcm_config_find_alone_by_full(this_session, path1, &tmp_group, &tmp_member, &tmp_store)
+                                     < MCM_RCODE_PASS)
+    {
+        DMSG("call mcm_config_find_alone_by_full(%s) fail", path1);
+        goto FREE_01;
+    }
+    // 設定.
+    channel = rand() % 200;
+    DMSG("[set-alone][NEW] %s = " MCM_DTYPE_IUI_PF, path1, channel);
+    if(mcm_config_set_alone_by_info(this_session, tmp_group, tmp_member, tmp_store,
+                                    MCM_DACCESS_NEW, &channel, sizeof(channel)) < MCM_RCODE_PASS)
+    {
+        DMSG("call mcm_config_set_alone_by_info(%s) fail", path1);
+        goto FREE_01;
+    }
+
+    // 範例-04 : 設定 device.vap.@3.station.#1.rule (NEW 模式)
+    path1 = "device.vap.@3.station.#1.rule";
+    // 先使用路徑取得資訊.
+    if(mcm_config_find_alone_by_full(this_session, path1, &tmp_group, &tmp_member, &tmp_store)
+                                     < MCM_RCODE_PASS)
+    {
+        DMSG("call mcm_config_find_alone_by_full(%s) fail", path1);
+        goto FREE_01;
+    }
+    // 設定.
+    rule = rand() % 50;
+    DMSG("[set-alone][NEW] %s = " MCM_DTYPE_RK_PF, path1, rule);
+    if(mcm_config_set_alone_by_info(this_session, tmp_group, tmp_member, tmp_store,
+                                    MCM_DACCESS_NEW, &rule, sizeof(rule)) < MCM_RCODE_PASS)
+    {
+        DMSG("call mcm_config_set_alone_by_info(%s) fail", path1);
+        goto FREE_01;
+    }
+
+    fret = MCM_RCODE_PASS;
+FREE_01:
+    return fret;
+}
+</pre>
+        </td>
+      </tr>
+    </table>
+    <br>
+
+    <div class="css_div_hook" id="hook_0406_mcm_config_get_entry_by_info_01"></div>
+    <table class="css_table_box">
+      <tr>
+        <td class="css_td_box">
+          <font class="css_font_b2">mcm_config_get_entry_by_info</font><br>
+          讀出 entry 的資料.<br>
+          <table class="css_table_list2">
+            <tr>
+              <td class="css_td_list2_t1">參數</td>
+              <td class="css_td_list2_t1">說明</td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l1">
+                <font class="css_font_r1">struct mcm_service_session_t *</font><br>
+                <font class="css_font_g1">this_session</font>
+              </td>
+              <td class="css_td_list2_r1">
+                請求端的連線資訊
+              </td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l1">
+                <font class="css_font_r1">struct mcm_config_model_group_t *</font><br>
+                <font class="css_font_g1">this_model_group</font>
+              </td>
+              <td class="css_td_list2_r1">
+                目標的 group_info <a href="#hook_0406_group_info_01">[詳細]</a>
+              </td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l1">
+                <font class="css_font_r1">struct mcm_config_store_t *</font><br>
+                <font class="css_font_g1">this_store</font>
+              </td>
+              <td class="css_td_list2_r1">
+                目標的 store_info <a href="#hook_0406_store_info_01">[詳細]</a>
+              </td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l1">
+                <font class="css_font_r1">MCM_DTYPE_FLAG_TD</font><br>
+                <font class="css_font_g1">data_access</font><br>
+              </td>
+              <td class="css_td_list2_r1">
+                要使用何種模式 <a href="#hook_0406_data_access_01">[詳細]</a>
+              </td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l1">
+                <font class="css_font_r1">void *</font><br>
+                <font class="css_font_g1">data_buf</font>
+              </td>
+              <td class="css_td_list2_r1">
+                紀錄資料的變數的緩衝 (變數的資料型態 <a href="#hook_0406_typedef_02">[詳細]</a>)
+              </td>
+            </tr>
+          </table>
+          <table class="css_table_list2">
+            <tr>
+              <td class="css_td_list2_t1">回傳</td>
+              <td class="css_td_list2_t1">說明</td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l2">== MCM_DACCESS_SYS</td>
+              <td class="css_td_list2_r1">成功, 從系統資料區讀出資料</td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l2">== MCM_DACCESS_NEW</td>
+              <td class="css_td_list2_r1">成功, 從新進資料區讀出資料</td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l2">&nbsp;&lt; MCM_RCODE_PASS</td>
+              <td class="css_td_list2_r1">錯誤</td>
+            </tr>
+          </table>
+          <br>
+          注意事項 :<br>
+          <table class="css_table_list1">
+            <tr>
+              <td class="css_td_list1_l">01.&nbsp;</td>
+              <td class="css_td_list1_r">
+                外部程式或網頁程式的資料存取模式 (session_permission) 可以是唯讀或讀寫.
+              </td>
+            </tr>
+          </table>
+          <br>
+          範例 :<br>
+<pre class="css_pre_code">
+外部程式部分
+
+#include &lt;time.h&gt;
+#include &lt;errno.h&gt;
+#include &lt;stdio.h&gt;
+#include &lt;string.h&gt;
+#include &lt;stdlib.h&gt;
+#include "mcm_lheader/mcm_type.h"
+#include "mcm_lheader/mcm_size.h"
+#include "mcm_lheader/mcm_connect.h"
+#include "mcm_lheader/mcm_return.h"
+#include "mcm_lheader/mcm_data_exinfo_auto.h"
+#include "mcm_lulib/mcm_lulib_api.h"
+
+#define DMSG(msg_fmt, msgs...) printf("%s(%04u): " msg_fmt "\n", __FILE__, __LINE__, ##msgs)
+
+int main(int argc, char **argv)
+{
+    char *path1;
+    struct mcm_lulib_lib_t self_lulib;
+    struct mcm_dv_device_system_t system_v;
+    struct mcm_dv_device_vap_station_t station_v;
+
+    srand(time(NULL));
+
+    memset(&self_lulib, 0, sizeof(struct mcm_lulib_lib_t));
+    self_lulib.socket_path = "@mintcm";
+    self_lulib.call_from = MCM_CFROM_USER;
+    self_lulib.session_permission = MCM_SPERMISSION_RW;
+    self_lulib.session_stack_size = 0;
+    if(mcm_lulib_init(&self_lulib) < MCM_RCODE_PASS)
+    {
+        DMSG("call mcm_lulib_init() fail");
+        goto FREE_01;
+    }
+
+    // 範例-02 : 設定 device.system
+    path1 = "device.system";
+    memset(&system_v, 0, sizeof(system_v));
+    snprintf(system_v.date, sizeof(system_v.date), "2010/11/%u", rand() % 30);
+    snprintf(system_v.ip_addr, sizeof(system_v.ip_addr), "192.168.11.%u", rand() % 250);
+    system_v.uptime = rand();
+    system_v.loading = ((MCM_DTYPE_FD_TD) 25000) / ((rand() % 100) + 1);
+    DMSG("[set-entry] %s.date = " MCM_DTYPE_S_PF, path1, system_v.date);
+    DMSG("[set-entry] %s.ip_addr = " MCM_DTYPE_S_PF, path1, system_v.ip_addr);
+    DMSG("[set-entry] %s.uptime = " MCM_DTYPE_IULL_PF, path1, system_v.uptime);
+    DMSG("[set-entry] %s.loading = " MCM_DTYPE_FD_PF, path1, system_v.loading);
+    if(mcm_lulib_set_entry(&self_lulib, path1, &system_v, sizeof(system_v)) < MCM_RCODE_PASS)
+    {
+        DMSG("call mcm_lulib_set_entry(%s) fail", path1);
+        goto FREE_02;
+    }
+
+    // 範例-03 : 設定 device.vap.@2.station.@1
+    path1 = "device.vap.@2.station.@1";
+    memset(&station_v, 0, sizeof(station_v));
+    snprintf(station_v.mac_addr, sizeof(station_v.mac_addr), "00:22:44:66:BB:%02X", rand() % 255);
+    station_v.rule = rand() % 50;
+    DMSG("[set-entry] %s.mac_addr = " MCM_DTYPE_S_PF, path1, station_v.mac_addr);
+    DMSG("[set-entry] %s.rule = " MCM_DTYPE_RK_PF, path1, station_v.rule);
+    if(mcm_lulib_set_entry(&self_lulib, path1, &station_v, sizeof(station_v)) < MCM_RCODE_PASS)
+    {
+        DMSG("call mcm_lulib_set_entry(%s) fail", path1);
+        goto FREE_02;
+    }
+
+    // 呼叫內部模組.
+    path1 = "mcm_module_get_entry_value_test";
+    DMSG("[run] %s", path1);
+    if(mcm_lulib_run(&self_lulib, path1) < MCM_RCODE_PASS)
+    {
+        DMSG("call mcm_lulib_run(%s) fail", path1);
+        goto FREE_02;
+    }
+
+FREE_02:
+    mcm_lulib_exit(&self_lulib);
+FREE_01:
+    return 0;
+}
+</pre>
+<pre class="css_pre_code">
+內部模組部分
+
+#include &lt;time.h&gt;
+#include &lt;errno.h&gt;
+#include &lt;stdio.h&gt;
+#include &lt;string.h&gt;
+#include &lt;stdlib.h&gt;
+#include "../../mcm_lib/mcm_lheader/mcm_type.h"
+#include "../../mcm_lib/mcm_lheader/mcm_size.h"
+#include "../../mcm_lib/mcm_lheader/mcm_control.h"
+#include "../../mcm_lib/mcm_lheader/mcm_connect.h"
+#include "../../mcm_lib/mcm_lheader/mcm_return.h"
+#include "../../mcm_lib/mcm_lheader/mcm_debug.h"
+#include "../../mcm_lib/mcm_lheader/mcm_data_exinfo_auto.h"
+#include "../mcm_service_handle_extern.h"
+#include "../mcm_config_handle_extern.h"
+
+#define DMSG(msg_fmt, msgs...) printf("%s(%04u): " msg_fmt "\n", __FILE__, __LINE__, ##msgs)
+
+int mcm_module_get_entry_value_test(
+    struct mcm_service_session_t *this_session)
+{
+    int fret = MCM_RCODE_MODULE_INTERNAL_ERROR;
+    char *path1, *source;
+    struct mcm_config_model_group_t *tmp_group;
+    struct mcm_config_store_t *tmp_store;
+    struct mcm_dv_device_t device_v;
+    struct mcm_dv_device_system_t system_v;
+    struct mcm_dv_device_vap_station_t station_v;
+
+    path1 = "device";
+    // 先使用路徑取得資訊.
+    if(mcm_config_find_entry_by_full(this_session, path1, &tmp_group, &tmp_store)
+                                     < MCM_RCODE_PASS)
+    {
+        DMSG("call mcm_config_find_entry_by_full(%s) fail", path1);
+        goto FREE_01;
+    }
+    // 範例-01a : 取得 device (SYS 模式).
+    fret = mcm_config_get_entry_by_info(this_session, tmp_group, tmp_store, MCM_DACCESS_SYS,
+                                        &device_v);
+    if(fret < MCM_RCODE_PASS)
+    {
+        DMSG("call mcm_config_get_entry_by_info(%s) fail", path1);
+        goto FREE_01;
+    }
+    DMSG("[get-entry][SYS ] %s.descript = " MCM_DTYPE_S_PF, path1, device_v.descript);
+    DMSG("[get-entry][SYS ] %s.serial_number = "
+         MCM_DTYPE_B_PF MCM_DTYPE_B_PF MCM_DTYPE_B_PF MCM_DTYPE_B_PF MCM_DTYPE_B_PF
+         MCM_DTYPE_B_PF MCM_DTYPE_B_PF MCM_DTYPE_B_PF MCM_DTYPE_B_PF MCM_DTYPE_B_PF,
+         path1,
+         device_v.serial_number[0], device_v.serial_number[1], device_v.serial_number[2],
+         device_v.serial_number[3], device_v.serial_number[4], device_v.serial_number[5],
+         device_v.serial_number[6], device_v.serial_number[7], device_v.serial_number[8],
+         device_v.serial_number[9]);
+    // 範例-01b : 取得 device (AUTO 模式).
+    fret = mcm_config_get_entry_by_info(this_session, tmp_group, tmp_store, MCM_DACCESS_AUTO,
+                                        &device_v);
+    if(fret < MCM_RCODE_PASS)
+    {
+        DMSG("call mcm_config_get_entry_by_info(%s) fail", path1);
+        goto FREE_01;
+    }
+    source = fret == MCM_DACCESS_SYS ? "SYS" : "NEW";
+    DMSG("[get-entry][AUTO] %s.descript = " MCM_DTYPE_S_PF " [%s]",
+         path1, device_v.descript, source);
+    DMSG("[get-entry][AUTO] %s.serial_number = "
+         MCM_DTYPE_B_PF MCM_DTYPE_B_PF MCM_DTYPE_B_PF MCM_DTYPE_B_PF MCM_DTYPE_B_PF
+         MCM_DTYPE_B_PF MCM_DTYPE_B_PF MCM_DTYPE_B_PF MCM_DTYPE_B_PF MCM_DTYPE_B_PF " [%s]",
+         path1,
+         device_v.serial_number[0], device_v.serial_number[1], device_v.serial_number[2],
+         device_v.serial_number[3], device_v.serial_number[4], device_v.serial_number[5],
+         device_v.serial_number[6], device_v.serial_number[7], device_v.serial_number[8],
+         device_v.serial_number[9], source);
+
+    path1 = "device.system";
+    // 先使用路徑取得資訊.
+    if(mcm_config_find_entry_by_full(this_session, path1, &tmp_group, &tmp_store)
+                                     < MCM_RCODE_PASS)
+    {
+        DMSG("call mcm_config_find_entry_by_full(%s) fail", path1);
+        goto FREE_01;
+    }
+    // 範例-02a : 取得 device.system (SYS 模式)
+    fret = mcm_config_get_entry_by_info(this_session, tmp_group, tmp_store, MCM_DACCESS_SYS,
+                                        &system_v);
+    if(fret < MCM_RCODE_PASS)
+    {
+        DMSG("call mcm_config_get_entry_by_info(%s) fail", path1);
+        goto FREE_01;
+    }
+    DMSG("[get-entry][SYS ] %s.date = " MCM_DTYPE_S_PF, path1, system_v.date);
+    DMSG("[get-entry][SYS ] %s.ip_addr = " MCM_DTYPE_S_PF, path1, system_v.ip_addr);
+    DMSG("[get-entry][SYS ] %s.uptime = " MCM_DTYPE_IULL_PF, path1, system_v.uptime);
+    DMSG("[get-entry][SYS ] %s.loading = " MCM_DTYPE_FD_PF, path1, system_v.loading);
+    // 範例-02b : 取得 device.system (NEW 模式)
+    fret = mcm_config_get_entry_by_info(this_session, tmp_group, tmp_store, MCM_DACCESS_NEW,
+                                        &system_v);
+    if(fret < MCM_RCODE_PASS)
+    {
+        DMSG("call mcm_config_get_entry_by_info(%s) fail", path1);
+        goto FREE_01;
+    }
+    DMSG("[get-entry][NEW ] %s.date = " MCM_DTYPE_S_PF, path1, system_v.date);
+    DMSG("[get-entry][NEW ] %s.ip_addr = " MCM_DTYPE_S_PF, path1, system_v.ip_addr);
+    DMSG("[get-entry][NEW ] %s.uptime = " MCM_DTYPE_IULL_PF, path1, system_v.uptime);
+    DMSG("[get-entry][NEW ] %s.loading = " MCM_DTYPE_FD_PF, path1, system_v.loading);
+    // 範例-02c : 取得 device.system (AUTO 模式)
+    fret = mcm_config_get_entry_by_info(this_session, tmp_group, tmp_store, MCM_DACCESS_AUTO,
+                                        &system_v);
+    if(fret < MCM_RCODE_PASS)
+    {
+        DMSG("call mcm_config_get_entry_by_info(%s) fail", path1);
+        goto FREE_01;
+    }
+    source = fret == MCM_DACCESS_SYS ? "SYS" : "NEW";
+    DMSG("[get-entry][AUTO] %s.date = " MCM_DTYPE_S_PF " [%s]",
+         path1, system_v.date, source);
+    DMSG("[get-entry][AUTO] %s.ip_addr = " MCM_DTYPE_S_PF " [%s]",
+         path1, system_v.ip_addr, source);
+    DMSG("[get-entry][AUTO] %s.uptime = " MCM_DTYPE_IULL_PF " [%s]",
+         path1, system_v.uptime, source);
+    DMSG("[get-entry][AUTO] %s.loading = " MCM_DTYPE_FD_PF " [%s]",
+         path1, system_v.loading, source);
+
+    path1 = "device.vap.@2.station.@1";
+    // 先使用路徑取得資訊.
+    if(mcm_config_find_entry_by_full(this_session, path1, &tmp_group, &tmp_store)
+                                     < MCM_RCODE_PASS)
+    {
+        DMSG("call mcm_config_find_entry_by_full(%s) fail", path1);
+        goto FREE_01;
+    }
+    // 範例-03a : 取得 device.vap.#15.station.@1 (SYS 模式)
+    fret = mcm_config_get_entry_by_info(this_session, tmp_group, tmp_store, MCM_DACCESS_SYS,
+                                        &station_v);
+    if(fret < MCM_RCODE_PASS)
+    {
+        DMSG("call mcm_config_get_entry_by_info(%s) fail", path1);
+        goto FREE_01;
+    }
+    DMSG("[get-entry][SYS ] %s.ekey = " MCM_DTYPE_EK_PF, path1, station_v.ekey);
+    DMSG("[get-entry][SYS ] %s.mac_addr = " MCM_DTYPE_S_PF, path1, station_v.mac_addr);
+    DMSG("[get-entry][SYS ] %s.rule = " MCM_DTYPE_RK_PF, path1, station_v.rule);
+    // 範例-03b : 取得 device.vap.#15.station.@1 (NEW 模式)
+    fret = mcm_config_get_entry_by_info(this_session, tmp_group, tmp_store, MCM_DACCESS_NEW,
+                                        &station_v);
+    if(fret < MCM_RCODE_PASS)
+    {
+        DMSG("call mcm_config_get_entry_by_info(%s) fail", path1);
+        goto FREE_01;
+    }
+    DMSG("[get-entry][NEW ] %s.ekey = " MCM_DTYPE_EK_PF, path1, station_v.ekey);
+    DMSG("[get-entry][NEW ] %s.mac_addr = " MCM_DTYPE_S_PF, path1, station_v.mac_addr);
+    DMSG("[get-entry][NEW ] %s.rule = " MCM_DTYPE_RK_PF, path1, station_v.rule);
+    // 範例-03c : 取得 device.vap.#15.station.@1 (AUTO 模式)
+    fret = mcm_config_get_entry_by_info(this_session, tmp_group, tmp_store, MCM_DACCESS_AUTO,
+                                        &station_v);
+    if(fret < MCM_RCODE_PASS)
+    {
+        DMSG("call mcm_config_get_entry_by_info(%s) fail", path1);
+        goto FREE_01;
+    }
+    source = fret == MCM_DACCESS_SYS ? "SYS" : "NEW";
+    DMSG("[get-entry][AUTO] %s.ekey = " MCM_DTYPE_EK_PF " [%s]",
+         path1, station_v.ekey, source);
+    DMSG("[get-entry][AUTO] %s.mac_addr = " MCM_DTYPE_S_PF " [%s]",
+         path1, station_v.mac_addr, source);
+    DMSG("[get-entry][AUTO] %s.rule = " MCM_DTYPE_RK_PF " [%s]",
+         path1, station_v.rule, source);
+
+FREE_01:
+    return fret;
+}
+</pre>
+        </td>
+      </tr>
+    </table>
+    <br>
+
+    <div class="css_div_hook" id="hook_0406_mcm_config_set_entry_by_info_01"></div>
+    <table class="css_table_box">
+      <tr>
+        <td class="css_td_box">
+          <font class="css_font_b2">mcm_config_set_entry_by_info</font><br>
+          將寫入資料 entry.<br>
+          <table class="css_table_list2">
+            <tr>
+              <td class="css_td_list2_t1">參數</td>
+              <td class="css_td_list2_t1">說明</td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l1">
+                <font class="css_font_r1">struct mcm_service_session_t *</font><br>
+                <font class="css_font_g1">this_session</font>
+              </td>
+              <td class="css_td_list2_r1">
+                請求端的連線資訊
+              </td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l1">
+                <font class="css_font_r1">struct mcm_config_model_group_t *</font><br>
+                <font class="css_font_g1">this_model_group</font>
+              </td>
+              <td class="css_td_list2_r1">
+                目標的 group_info <a href="#hook_0406_group_info_01">[詳細]</a>
+              </td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l1">
+                <font class="css_font_r1">struct mcm_config_store_t *</font><br>
+                <font class="css_font_g1">this_store</font>
+              </td>
+              <td class="css_td_list2_r1">
+                目標的 store_info <a href="#hook_0406_store_info_01">[詳細]</a>
+              </td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l1">
+                <font class="css_font_r1">MCM_DTYPE_FLAG_TD</font><br>
+                <font class="css_font_g1">data_access</font><br>
+              </td>
+              <td class="css_td_list2_r1">
+                要使用何種模式 <a href="#hook_0406_data_access_01">[詳細]</a>
+              </td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l1">
+                <font class="css_font_r1">void *</font><br>
+                <font class="css_font_g1">data_con</font>
+              </td>
+              <td class="css_td_list2_r1">
+                寫入的資料 (變數的資料型態 <a href="#hook_0406_typedef_02">[詳細]</a>)
+              </td>
+            </tr>
+          </table>
+          <table class="css_table_list2">
+            <tr>
+              <td class="css_td_list2_t1">回傳</td>
+              <td class="css_td_list2_t1">說明</td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l2">&gt;= MCM_RCODE_PASS</td>
+              <td class="css_td_list2_r1">成功</td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l2">&nbsp;&lt; MCM_RCODE_PASS</td>
+              <td class="css_td_list2_r1">錯誤</td>
+            </tr>
+          </table>
+          <br>
+          注意事項 :
+          <table class="css_table_list1">
+            <tr>
+              <td class="css_td_list1_l">01.&nbsp;</td>
+              <td class="css_td_list1_r">
+                外部程式或網頁程式的資料存取模式 (session_permission) 必須是讀寫.
+              </td>
+            </tr>
+            <tr>
+              <td class="css_td_list1_l">02.&nbsp;</td>
+              <td class="css_td_list1_r">
+                因為 ek 類型的 member 是唯讀的, 所以資料庫內 ek 的數值不會被寫入的資料覆蓋.
+              </td>
+            </tr>
+          </table>
+          <br>
+          範例 :<br>
+<pre class="css_pre_code">
+外部程式部分
+
+#include &lt;time.h&gt;
+#include &lt;errno.h&gt;
+#include &lt;stdio.h&gt;
+#include &lt;string.h&gt;
+#include &lt;stdlib.h&gt;
+#include "mcm_lheader/mcm_type.h"
+#include "mcm_lheader/mcm_size.h"
+#include "mcm_lheader/mcm_connect.h"
+#include "mcm_lheader/mcm_return.h"
+#include "mcm_lheader/mcm_data_exinfo_auto.h"
+#include "mcm_lulib/mcm_lulib_api.h"
+
+#define DMSG(msg_fmt, msgs...) printf("%s(%04u): " msg_fmt "\n", __FILE__, __LINE__, ##msgs)
+
+int main(int argc, char **argv)
+{
+    char *path1;
+    struct mcm_lulib_lib_t self_lulib;
+    struct mcm_dv_device_vap_t vap_v;
+
+    srand(time(NULL));
+
+    memset(&self_lulib, 0, sizeof(struct mcm_lulib_lib_t));
+    self_lulib.socket_path = "@mintcm";
+    self_lulib.call_from = MCM_CFROM_USER;
+    self_lulib.session_permission = MCM_SPERMISSION_RW;
+    self_lulib.session_stack_size = 0;
+    if(mcm_lulib_init(&self_lulib) < MCM_RCODE_PASS)
+    {
+        DMSG("call mcm_lulib_init() fail");
+        goto FREE_01;
+    }
+
+    // 範例-03 : 設定 device.vap.@1
+    path1 = "device.vap.@1";
+    memset(&vap_v, 0, sizeof(vap_v));
+    snprintf(vap_v.ssid, sizeof(vap_v.ssid), "ssid-%u", rand() % 100);
+    vap_v.channel = rand() % 150;
+    DMSG("[set-entry] %s.ssid = " MCM_DTYPE_S_PF, path1, vap_v.ssid);
+    DMSG("[set-entry] %s.channel = " MCM_DTYPE_IUI_PF, path1, vap_v.channel);
+    if(mcm_lulib_set_entry(&self_lulib, path1, &vap_v, sizeof(vap_v)) < MCM_RCODE_PASS)
+    {
+        DMSG("call mcm_lulib_set_entry(%s) fail", path1);
+        goto FREE_02;
+    }
+
+    // 範例-04 : 增加 device.vap.#23.station.#1
+    path1 = "device.vap.#23.station.#1";
+    DMSG("[add-entry] %s", path1);
+    if(mcm_lulib_add_entry(&self_lulib, path1, NULL, 0) < MCM_RCODE_PASS)
+    {
+        DMSG("call mcm_lulib_add_entry(%s) fail", path1);
+        goto FREE_02;
+    }
+
+    // 呼叫內部模組.
+    path1 = "mcm_module_set_entry_value_test";
+    DMSG("[run] %s", path1);
+    if(mcm_lulib_run(&self_lulib, path1) < MCM_RCODE_PASS)
+    {
+        DMSG("call mcm_lulib_run(%s) fail", path1);
+        goto FREE_02;
+    }
+
+FREE_02:
+    mcm_lulib_exit(&self_lulib);
+FREE_01:
+    return 0;
+}
+</pre>
+<pre class="css_pre_code">
+內部模組部分
+
+#include &lt;time.h&gt;
+#include &lt;errno.h&gt;
+#include &lt;stdio.h&gt;
+#include &lt;string.h&gt;
+#include &lt;stdlib.h&gt;
+#include "../../mcm_lib/mcm_lheader/mcm_type.h"
+#include "../../mcm_lib/mcm_lheader/mcm_size.h"
+#include "../../mcm_lib/mcm_lheader/mcm_control.h"
+#include "../../mcm_lib/mcm_lheader/mcm_connect.h"
+#include "../../mcm_lib/mcm_lheader/mcm_return.h"
+#include "../../mcm_lib/mcm_lheader/mcm_debug.h"
+#include "../../mcm_lib/mcm_lheader/mcm_data_exinfo_auto.h"
+#include "../mcm_service_handle_extern.h"
+#include "../mcm_config_handle_extern.h"
+
+#define DMSG(msg_fmt, msgs...) printf("%s(%04u): " msg_fmt "\n", __FILE__, __LINE__, ##msgs)
+
+int mcm_module_set_entry_value_test(
+    struct mcm_service_session_t *this_session)
+{
+    int fret = MCM_RCODE_MODULE_INTERNAL_ERROR;
+    char *path1;
+    struct mcm_config_model_group_t *tmp_group;
+    struct mcm_config_store_t *tmp_store;
+    struct mcm_dv_device_t device_v;
+    struct mcm_dv_device_system_t system_v;
+    struct mcm_dv_device_vap_t vap_v;
+    struct mcm_dv_device_vap_station_t station_v;
+    MCM_DTYPE_USIZE_TD i;
+
+    srand(time(NULL));
+
+    // 範例-01 : 設定 device (SYS 模式)
+    path1 = "device";
+    // 先使用路徑取得資訊.
+    if(mcm_config_find_entry_by_full(this_session, path1, &tmp_group, &tmp_store)
+                                     < MCM_RCODE_PASS)
+    {
+        DMSG("call mcm_config_find_entry_by_full(%s) fail", path1);
+        goto FREE_01;
+    }
+    // 設定.
+    memset(&device_v, 0, sizeof(device_v));
+    snprintf(device_v.descript, sizeof(device_v.descript), "network-device-%02u", rand() % 100);
+    for(i = 0; i < sizeof(device_v.serial_number); i++)
+        device_v.serial_number[i] = rand() % 256;
+    DMSG("[set-entry][SYS] %s.descript = " MCM_DTYPE_S_PF, path1, device_v.descript);
+    DMSG("[set-entry][SYS] %s.serial_number = "
+         MCM_DTYPE_B_PF MCM_DTYPE_B_PF MCM_DTYPE_B_PF MCM_DTYPE_B_PF MCM_DTYPE_B_PF
+         MCM_DTYPE_B_PF MCM_DTYPE_B_PF MCM_DTYPE_B_PF MCM_DTYPE_B_PF MCM_DTYPE_B_PF,
+         path1,
+         device_v.serial_number[0], device_v.serial_number[1], device_v.serial_number[2],
+         device_v.serial_number[3], device_v.serial_number[4], device_v.serial_number[5],
+         device_v.serial_number[6], device_v.serial_number[7], device_v.serial_number[8],
+         device_v.serial_number[9]);
+    if(mcm_config_set_entry_by_info(this_session, tmp_group, tmp_store, MCM_DACCESS_SYS,
+                                    &device_v) < MCM_RCODE_PASS)
+    {
+        DMSG("call mcm_config_set_entry_by_info(%s) fail", path1);
+        goto FREE_01;
+    }
+
+    // 範例-02 : 設定 device.system (NEW 模式)
+    path1 = "device.system";
+    // 先使用路徑取得資訊.
+    if(mcm_config_find_entry_by_full(this_session, path1, &tmp_group, &tmp_store)
+                                     < MCM_RCODE_PASS)
+    {
+        DMSG("call mcm_config_find_entry_by_full(%s) fail", path1);
+        goto FREE_01;
+    }
+    // 設定.
+    memset(&system_v, 0, sizeof(system_v));
+    snprintf(system_v.date, sizeof(system_v.date), "2008/01/%02u", rand() % 30);
+    snprintf(system_v.ip_addr, sizeof(system_v.ip_addr), "192.168.20.%u", rand() % 250);
+    system_v.uptime = rand();
+    system_v.loading = ((MCM_DTYPE_FD_TD) 25000) / ((rand() % 100) + 1);
+    DMSG("[set-entry][NEW] %s.date = " MCM_DTYPE_S_PF, path1, system_v.date);
+    DMSG("[set-entry][NEW] %s.ip_addr = " MCM_DTYPE_S_PF, path1, system_v.ip_addr);
+    DMSG("[set-entry][NEW] %s.uptime = " MCM_DTYPE_IULL_PF, path1, system_v.uptime);
+    DMSG("[set-entry][NEW] %s.loading = " MCM_DTYPE_FD_PF, path1, system_v.loading);
+    if(mcm_config_set_entry_by_info(this_session, tmp_group, tmp_store, MCM_DACCESS_NEW,
+                                    &system_v) < MCM_RCODE_PASS)
+    {
+        DMSG("call mcm_config_set_entry_by_info(%s) fail", path1);
+        goto FREE_01;
+    }
+
+    // 範例-03 : 設定 device.vap.@1 (NEW 模式)
+    path1 = "device.vap.@1";
+    // 先使用路徑取得資訊.
+    if(mcm_config_find_entry_by_full(this_session, path1, &tmp_group, &tmp_store)
+                                     < MCM_RCODE_PASS)
+    {
+        DMSG("call mcm_config_find_entry_by_full(%s) fail", path1);
+        goto FREE_01;
+    }
+    // 設定.
+    memset(&vap_v, 0, sizeof(vap_v));
+    snprintf(vap_v.ssid, sizeof(vap_v.ssid), "ssid-%u", rand() % 100);
+    vap_v.channel = rand() % 200;
+    DMSG("[set-entry][NEW] %s.ssid = " MCM_DTYPE_S_PF, path1, vap_v.ssid);
+    DMSG("[set-entry][NEW] %s.channel = " MCM_DTYPE_IUI_PF, path1, vap_v.channel);
+    if(mcm_config_set_entry_by_info(this_session, tmp_group, tmp_store, MCM_DACCESS_NEW, &vap_v)
+                                    < MCM_RCODE_PASS)
+    {
+        DMSG("call mcm_config_set_entry_by_info(%s) fail", path1);
+        goto FREE_01;
+    }
+
+    // 範例-04 : 設定 device.vap.#23.station.#1 (NEW 模式)
+    path1 = "device.vap.#23.station.#1";
+    // 先使用路徑取得資訊.
+    if(mcm_config_find_entry_by_full(this_session, path1, &tmp_group, &tmp_store)
+                                     < MCM_RCODE_PASS)
+    {
+        DMSG("call mcm_config_find_entry_by_full(%s) fail", path1);
+        goto FREE_01;
+    }
+    // 設定.
+    memset(&station_v, 0, sizeof(station_v));
+    snprintf(station_v.mac_addr, sizeof(station_v.mac_addr), "00:AA:CC:22:44:%02X", rand() % 255);
+    station_v.rule = rand() % 50;
+    DMSG("[set-entry][NEW] %s.mac_addr = " MCM_DTYPE_S_PF, path1, station_v.mac_addr);
+    DMSG("[set-entry][NEW] %s.rule = " MCM_DTYPE_RK_PF, path1, station_v.rule);
+    if(mcm_config_set_entry_by_info(this_session, tmp_group, tmp_store, MCM_DACCESS_NEW,
+                                    &station_v) < MCM_RCODE_PASS)
+    {
+        DMSG("call mcm_config_set_entry_by_info(%s) fail", path1);
+        goto FREE_01;
+    }
+
+    fret = MCM_RCODE_PASS;
+FREE_01:
+    return fret;
+}
+</pre>
+        </td>
+      </tr>
+    </table>
+    <br>
+
+    <div class="css_div_hook" id="hook_0406_mcm_config_add_entry_by_info_01"></div>
+    <table class="css_table_box">
+      <tr>
+        <td class="css_td_box">
+          <font class="css_font_b2">mcm_config_add_entry_by_info</font><br>
+          增加一筆 entry.<br>
+          <table class="css_table_list2">
+            <tr>
+              <td class="css_td_list2_t1">參數</td>
+              <td class="css_td_list2_t1">說明</td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l1">
+                <font class="css_font_r1">struct mcm_service_session_t *</font><br>
+                <font class="css_font_g1">this_session</font>
+              </td>
+              <td class="css_td_list2_r1">
+                請求端的連線資訊
+              </td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l1">
+                <font class="css_font_r1">struct mcm_config_model_group_t *</font><br>
+                <font class="css_font_g1">this_model_group</font>
+              </td>
+              <td class="css_td_list2_r1">
+                目標的 group_info <a href="#hook_0406_group_info_01">[詳細]</a>
+              </td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l1">
+                <font class="css_font_r1">struct mcm_config_store_t *</font><br>
+                <font class="css_font_g1">parent_store</font>
+              </td>
+              <td class="css_td_list2_r1">
+                目標的 store_info 的 parent-store_info <a href="#hook_0406_store_info_01">[詳細]</a>
+              </td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l1">
+                <font class="css_font_r1">MCM_DTYPE_FLAG_TD</font><br>
+                <font class="css_font_g1">data_access</font><br>
+              </td>
+              <td class="css_td_list2_r1">
+                要使用何種模式 <a href="#hook_0406_data_access_01">[詳細]</a>
+              </td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l1">
+                <font class="css_font_r1">MCM_DTYPE_EK_TD</font><br>
+                <font class="css_font_g1">this_key</font>
+              </td>
+              <td class="css_td_list2_r1">
+                加入的 entry 的 key
+              </td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l1">
+                <font class="css_font_r1">void *</font><br>
+                <font class="css_font_g1">data_con</font>
+              </td>
+              <td class="css_td_list2_r1">
+                寫入的資料 (變數的資料型態 <a href="#hook_0406_typedef_02">[詳細]</a>)<br>
+                <font class="css_font_p1">可為 NULL, 表示使用初始值 (資料模型中設的 $(default))</font>
+                <a href="mcm_0201.html#hook_0201_default_format_01">[詳細]</a>
+              </td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l1">
+                <font class="css_font_r1">struct mcm_config_store_t **</font><br>
+                <font class="css_font_g1">new_store_buf</font>
+              </td>
+              <td class="css_td_list2_r1">
+                紀錄加入的 entry 的 store_info 位址 <a href="#hook_0406_store_info_01">[詳細]</a><br>
+                <font class="css_font_p1">可為 NULL, 表示不記錄</font><br>
+              </td>
+            </tr>
+          </table>
+          <table class="css_table_list2">
+            <tr>
+              <td class="css_td_list2_t1">回傳</td>
+              <td class="css_td_list2_t1">說明</td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l2">&gt;= MCM_RCODE_PASS</td>
+              <td class="css_td_list2_r1">成功</td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l2">&nbsp;&lt; MCM_RCODE_PASS</td>
+              <td class="css_td_list2_r1">錯誤</td>
+            </tr>
+          </table>
+          <br>
+          注意事項 :<br>
+          <table class="css_table_list1">
+            <tr>
+              <td class="css_td_list1_l">01.&nbsp;</td>
+              <td class="css_td_list1_r">
+                外部程式或網頁程式的資料存取模式 (session_permission) 必須是讀寫.
+              </td>
+            </tr>
+            <tr>
+              <td class="css_td_list1_l">02.&nbsp;</td>
+              <td class="css_td_list1_r">
+                增加 entry 需要指定新的 key (不可和存在的 entry 的 key 相同).
+              </td>
+            </tr>
+            <tr>
+              <td class="css_td_list1_l">03.&nbsp;</td>
+              <td class="css_td_list1_r">
+                key 值會使用 this_key 的值, data_con 內的 key 值會被忽略.
+              </td>
+            </tr>
+            <tr>
+              <td class="css_td_list1_l">04.&nbsp;</td>
+              <td class="css_td_list1_r">
+                增加多層資料時, 要逐層增加.
+              </td>
+            </tr>
+          </table>
+          <br>
+          範例 :<br>
+<pre class="css_pre_code">
+外部程式部分
+
+#include &lt;time.h&gt;
+#include &lt;errno.h&gt;
+#include &lt;stdio.h&gt;
+#include &lt;string.h&gt;
+#include &lt;stdlib.h&gt;
+#include "mcm_lheader/mcm_type.h"
+#include "mcm_lheader/mcm_size.h"
+#include "mcm_lheader/mcm_connect.h"
+#include "mcm_lheader/mcm_return.h"
+#include "mcm_lheader/mcm_data_exinfo_auto.h"
+#include "mcm_lulib/mcm_lulib_api.h"
+
+#define DMSG(msg_fmt, msgs...) printf("%s(%04u): " msg_fmt "\n", __FILE__, __LINE__, ##msgs)
+
+int main(int argc, char **argv)
+{
+    char *path1;
+    struct mcm_lulib_lib_t self_lulib;
+
+    srand(time(NULL));
+
+    memset(&self_lulib, 0, sizeof(struct mcm_lulib_lib_t));
+    self_lulib.socket_path = "@mintcm";
+    self_lulib.call_from = MCM_CFROM_USER;
+    self_lulib.session_permission = MCM_SPERMISSION_RW;
+    self_lulib.session_stack_size = 0;
+    if(mcm_lulib_init(&self_lulib) < MCM_RCODE_PASS)
+    {
+        DMSG("call mcm_lulib_init() fail");
+        goto FREE_01;
+    }
+
+    // 範例-03 : 增加 device.vap.#200
+    path1 = "device.vap.#200";
+    DMSG("[add-entry] %s", path1);
+    if(mcm_lulib_add_entry(&self_lulib, path1, NULL, 0) < MCM_RCODE_PASS)
+    {
+        DMSG("call mcm_lulib_add_entry(%s) fail", path1);
+        goto FREE_02;
+    }
+
+    // 呼叫內部模組.
+    path1 = "mcm_module_add_entry_value_test";
+    DMSG("[run] %s", path1);
+    if(mcm_lulib_run(&self_lulib, path1) < MCM_RCODE_PASS)
+    {
+        DMSG("call mcm_lulib_run(%s) fail", path1);
+        goto FREE_02;
+    }
+
+FREE_02:
+    mcm_lulib_exit(&self_lulib);
+FREE_01:
+    return 0;
+}
+</pre>
+<pre class="css_pre_code">
+內部模組部分
+
+#include &lt;time.h&gt;
+#include &lt;errno.h&gt;
+#include &lt;stdio.h&gt;
+#include &lt;string.h&gt;
+#include &lt;stdlib.h&gt;
+#include "../../mcm_lib/mcm_lheader/mcm_type.h"
+#include "../../mcm_lib/mcm_lheader/mcm_size.h"
+#include "../../mcm_lib/mcm_lheader/mcm_control.h"
+#include "../../mcm_lib/mcm_lheader/mcm_connect.h"
+#include "../../mcm_lib/mcm_lheader/mcm_return.h"
+#include "../../mcm_lib/mcm_lheader/mcm_debug.h"
+#include "../../mcm_lib/mcm_lheader/mcm_data_exinfo_auto.h"
+#include "../mcm_service_handle_extern.h"
+#include "../mcm_config_handle_extern.h"
+
+#define DMSG(msg_fmt, msgs...) printf("%s(%04u): " msg_fmt "\n", __FILE__, __LINE__, ##msgs)
+
+int mcm_module_add_entry_value_test(
+    struct mcm_service_session_t *this_session)
+{
+    int fret = MCM_RCODE_MODULE_INTERNAL_ERROR;
+    char *path1, path2[MCM_PATH_MAX_LENGTH];
+    struct mcm_config_model_group_t *tmp_group;
+    struct mcm_config_store_t *tmp_parent_store, *new_store;
+    struct mcm_dv_device_vap_station_t station_v;
+    struct mcm_dv_device_limit_t limit_v;
+    MCM_DTYPE_EK_TD tmp_key;
+
+    srand(time(NULL));
+
+    // 範例-01 : 增加 device.vap.#100 (SYS 模式)
+    path1 = "device.vap.*";
+    // 先使用路徑取得資訊.
+    if(mcm_config_find_entry_by_mix(this_session, path1, &tmp_group, NULL, NULL,
+                                    &tmp_parent_store) < MCM_RCODE_PASS)
+    {
+        DMSG("call mcm_config_find_entry_by_mix(%s) fail", path1);
+        goto FREE_01;
+    }
+    // 增加.
+    tmp_key = 100;
+    snprintf(path2, sizeof(path2), "device.vap.#%u", tmp_key);
+    DMSG("[add-entry][SYS] %s", path2);
+    if(mcm_config_add_entry_by_info(this_session, tmp_group, tmp_parent_store, MCM_DACCESS_SYS,
+                                    tmp_key, NULL, NULL) < MCM_RCODE_PASS)
+    {
+        DMSG("call mcm_config_add_entry_by_info(%s) fail", path2);
+        goto FREE_01;
+    }
+
+    // 範例-02 : 增加 device.vap.@1.station.#10 (SYS 模式)
+    path1 = "device.vap.@1.station.*";
+    // 先使用路徑取得資訊.
+    if(mcm_config_find_entry_by_mix(this_session, path1, &tmp_group, NULL, NULL,
+                                    &tmp_parent_store) < MCM_RCODE_PASS)
+    {
+        DMSG("call mcm_config_find_entry_by_mix(%s) fail", path1);
+        goto FREE_01;
+    }
+    // 增加.
+    tmp_key = 10;
+    snprintf(path2, sizeof(path2), "device.vap.@1.station.#%u", tmp_key);
+    DMSG("[add-entry][SYS] %s", path2);
+    if(mcm_config_add_entry_by_info(this_session, tmp_group, tmp_parent_store, MCM_DACCESS_SYS,
+                                    tmp_key, NULL, &new_store) < MCM_RCODE_PASS)
+    {
+        DMSG("call mcm_config_add_entry_by_info(%s) fail", path2);
+        goto FREE_01;
+    }
+
+    // 範例-04 : 增加 device.vap.#200.station.#10 (NEW 模式)
+    // 先使用路徑取得資訊.
+    path1 = "device.vap.#200.station.*";
+    if(mcm_config_find_entry_by_mix(this_session, path1, &tmp_group, NULL, NULL,
+                                    &tmp_parent_store) < MCM_RCODE_PASS)
+    {
+        DMSG("call mcm_config_find_entry_by_mix(%s) fail", path1);
+        goto FREE_01;
+    }
+    // 增加.
+    tmp_key = 10;
+    snprintf(path2, sizeof(path2), "device.vap.#200.station.#%u", tmp_key);
+    memset(&station_v, 0, sizeof(station_v));
+    snprintf(station_v.mac_addr, sizeof(station_v.mac_addr), "00:1a:2b:c3:4d:%02X", rand() % 255);
+    station_v.rule = rand() % 50;
+    DMSG("[add-entry][NEW] %s.mac_addr = " MCM_DTYPE_S_PF, path2, station_v.mac_addr);
+    DMSG("[add-entry][NEW] %s.rule = " MCM_DTYPE_RK_PF, path2, station_v.rule);
+    if(mcm_config_add_entry_by_info(this_session, tmp_group, tmp_parent_store, MCM_DACCESS_NEW,
+                                    tmp_key, &station_v, NULL) < MCM_RCODE_PASS)
+    {
+        DMSG("call mcm_config_add_entry_by_info(%s) fail", path2);
+        goto FREE_01;
+    }
+
+    // 範例-05 : 增加 device.limit.#50 (NEW 模式)
+    // 先使用路徑取得資訊.
+    path1 = "device.limit.*";
+    if(mcm_config_find_entry_by_mix(this_session, path1, &tmp_group, NULL, NULL,
+                                    &tmp_parent_store) < MCM_RCODE_PASS)
+    {
+        DMSG("call mcm_config_find_entry_by_mix(%s) fail", path1);
+        goto FREE_01;
+    }
+    // 增加.
+    tmp_key = 50;
+    snprintf(path2, sizeof(path2), "device.limit.#%u", tmp_key);
+    memset(&limit_v, 0, sizeof(limit_v));
+    snprintf(limit_v.name, sizeof(limit_v.name), "rule-%u", rand() % 100);
+    limit_v.priority = rand() % 100;
+    DMSG("[add-entry][NEW] %s.name = " MCM_DTYPE_S_PF, path2, limit_v.name);
+    DMSG("[add-entry][NEW] %s.priority = " MCM_DTYPE_ISI_PF, path2, limit_v.priority);
+    if(mcm_config_add_entry_by_info(this_session, tmp_group, tmp_parent_store, MCM_DACCESS_NEW,
+                                    tmp_key, &limit_v, &new_store) < MCM_RCODE_PASS)
+    {
+        DMSG("call mcm_config_add_entry_by_info(%s) fail", path2);
+        goto FREE_01;
+    }
+
+    fret = MCM_RCODE_PASS;
+FREE_01:
+    return fret;
+}
+</pre>
+        </td>
+      </tr>
+    </table>
+    <br>
+
+    <div class="css_div_hook" id="hook_0406_mcm_config_del_entry_by_info_01"></div>
+    <table class="css_table_box">
+      <tr>
+        <td class="css_td_box">
+          <font class="css_font_b2">mcm_config_del_entry_by_info</font><br>
+          刪除一筆 entry.<br>
+          <table class="css_table_list2">
+            <tr>
+              <td class="css_td_list2_t1">參數</td>
+              <td class="css_td_list2_t1">說明</td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l1">
+                <font class="css_font_r1">struct mcm_service_session_t *</font><br>
+                <font class="css_font_g1">this_session</font>
+              </td>
+              <td class="css_td_list2_r1">
+                請求端的連線資訊
+              </td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l1">
+                <font class="css_font_r1">struct mcm_config_model_group_t *</font><br>
+                <font class="css_font_g1">this_model_group</font>
+              </td>
+              <td class="css_td_list2_r1">
+                目標的 group_info <a href="#hook_0406_group_info_01">[詳細]</a>
+              </td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l1">
+                <font class="css_font_r1">struct mcm_config_store_t *</font><br>
+                <font class="css_font_g1">this_store</font>
+              </td>
+              <td class="css_td_list2_r1">
+                目標的 store_info <a href="#hook_0406_store_info_01">[詳細]</a>
+              </td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l1">
+                <font class="css_font_r1">MCM_DTYPE_FLAG_TD</font><br>
+                <font class="css_font_g1">data_access</font><br>
+              </td>
+              <td class="css_td_list2_r1">
+                要使用何種模式 <a href="#hook_0406_data_access_01">[詳細]</a>
+              </td>
+            </tr>
+          </table>
+          <table class="css_table_list2">
+            <tr>
+              <td class="css_td_list2_t1">回傳</td>
+              <td class="css_td_list2_t1">說明</td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l2">&gt;= MCM_RCODE_PASS</td>
+              <td class="css_td_list2_r1">成功</td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l2">&nbsp;&lt; MCM_RCODE_PASS</td>
+              <td class="css_td_list2_r1">錯誤</td>
+            </tr>
+          </table>
+          <br>
+          注意事項 :<br>
+          <table class="css_table_list1">
+            <tr>
+              <td class="css_td_list1_l">01.&nbsp;</td>
+              <td class="css_td_list1_r">
+                外部程式或網頁程式的資料存取模式 (session_permission) 必須是讀寫.
+              </td>
+            </tr>
+          </table>
+          <br>
+          範例 :<br>
+<pre class="css_pre_code">
+外部程式部分
+
+#include &lt;time.h&gt;
+#include &lt;errno.h&gt;
+#include &lt;stdio.h&gt;
+#include &lt;string.h&gt;
+#include &lt;stdlib.h&gt;
+#include "mcm_lheader/mcm_type.h"
+#include "mcm_lheader/mcm_size.h"
+#include "mcm_lheader/mcm_connect.h"
+#include "mcm_lheader/mcm_return.h"
+#include "mcm_lheader/mcm_data_exinfo_auto.h"
+#include "mcm_lulib/mcm_lulib_api.h"
+
+#define DMSG(msg_fmt, msgs...) printf("%s(%04u): " msg_fmt "\n", __FILE__, __LINE__, ##msgs)
+
+int main(int argc, char **argv)
+{
+    char *path1;
+    struct mcm_lulib_lib_t self_lulib;
+
+    srand(time(NULL));
+
+    memset(&self_lulib, 0, sizeof(struct mcm_lulib_lib_t));
+    self_lulib.socket_path = "@mintcm";
+    self_lulib.call_from = MCM_CFROM_USER;
+    self_lulib.session_permission = MCM_SPERMISSION_RW;
+    self_lulib.session_stack_size = 0;
+    if(mcm_lulib_init(&self_lulib) < MCM_RCODE_PASS)
+    {
+        DMSG("call mcm_lulib_init() fail");
+        goto FREE_01;
+    }
+
+    // 呼叫內部模組.
+    path1 = "mcm_module_del_entry_value_test";
+    DMSG("[run] %s", path1);
+    if(mcm_lulib_run(&self_lulib, path1) < MCM_RCODE_PASS)
+    {
+        DMSG("call mcm_lulib_run(%s) fail", path1);
+        goto FREE_02;
+    }
+
+FREE_02:
+    mcm_lulib_exit(&self_lulib);
+FREE_01:
+    return 0;
+}
+</pre>
+<pre class="css_pre_code">
+內部模組部分
+
+#include &lt;time.h&gt;
+#include &lt;errno.h&gt;
+#include &lt;stdio.h&gt;
+#include &lt;string.h&gt;
+#include &lt;stdlib.h&gt;
+#include "../../mcm_lib/mcm_lheader/mcm_type.h"
+#include "../../mcm_lib/mcm_lheader/mcm_size.h"
+#include "../../mcm_lib/mcm_lheader/mcm_control.h"
+#include "../../mcm_lib/mcm_lheader/mcm_connect.h"
+#include "../../mcm_lib/mcm_lheader/mcm_return.h"
+#include "../../mcm_lib/mcm_lheader/mcm_debug.h"
+#include "../../mcm_lib/mcm_lheader/mcm_data_exinfo_auto.h"
+#include "../mcm_service_handle_extern.h"
+#include "../mcm_config_handle_extern.h"
+
+#define DMSG(msg_fmt, msgs...) printf("%s(%04u): " msg_fmt "\n", __FILE__, __LINE__, ##msgs)
+
+int mcm_module_del_entry_value_test(
+    struct mcm_service_session_t *this_session)
+{
+    int fret = MCM_RCODE_MODULE_INTERNAL_ERROR;
+    struct mcm_config_model_group_t *tmp_group;
+    struct mcm_config_store_t *tmp_store;
+    char *path1;
+
+    srand(time(NULL));
+
+    // 範例-01 : 刪除 device.vap.@1 (SYS 模式)
+    path1 = "device.vap.@1";
+    // 先使用路徑取得資訊.
+    if(mcm_config_find_entry_by_full(this_session, path1, &tmp_group, &tmp_store)
+                                     < MCM_RCODE_PASS)
+    {
+        DMSG("call mcm_config_find_entry_by_full(%s) fail", path1);
+        goto FREE_01;
+    }
+    // 刪除.
+    DMSG("[del-entry][SYS] %s", path1);
+    if(mcm_config_del_entry_by_info(this_session, tmp_group, tmp_store, MCM_DACCESS_SYS)
+                                    < MCM_RCODE_PASS)
+    {
+        DMSG("call mcm_config_del_entry_by_info(%s) fail", path1);
+        goto FREE_01;
+    }
+
+    // 範例-02 : 刪除 device.vap.#15.station.#33 (NEW 模式)
+    path1 = "device.vap.#15.station.#33";
+    // 先使用路徑取得資訊.
+    if(mcm_config_find_entry_by_full(this_session, path1, &tmp_group, &tmp_store)
+                                     < MCM_RCODE_PASS)
+    {
+        DMSG("call mcm_config_find_entry_by_full(%s) fail", path1);
+        goto FREE_01;
+    }
+    // 刪除.
+    DMSG("[del-entry][NEW] %s", path1);
+    if(mcm_config_del_entry_by_info(this_session, tmp_group, tmp_store, MCM_DACCESS_NEW)
+                                    < MCM_RCODE_PASS)
+    {
+        DMSG("call mcm_config_del_entry_by_info(%s) fail", path1);
+        goto FREE_01;
+    }
+
+    fret = MCM_RCODE_PASS;
+FREE_01:
+    return fret;
+}
+</pre>
+        </td>
+      </tr>
+    </table>
+    <br>
+
+    <div class="css_div_hook" id="hook_0406_mcm_config_del_all_entry_by_info_01"></div>
+    <table class="css_table_box">
+      <tr>
+        <td class="css_td_box">
+          <font class="css_font_b2">mcm_config_del_all_entry_by_info</font><br>
+          刪除 group 內所有的 entry.<br>
+          <table class="css_table_list2">
+            <tr>
+              <td class="css_td_list2_t1">參數</td>
+              <td class="css_td_list2_t1">說明</td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l1">
+                <font class="css_font_r1">struct mcm_service_session_t *</font><br>
+                <font class="css_font_g1">this_session</font>
+              </td>
+              <td class="css_td_list2_r1">
+                請求端的連線資訊
+              </td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l1">
+                <font class="css_font_r1">struct mcm_config_model_group_t *</font><br>
+                <font class="css_font_g1">this_model_group</font>
+              </td>
+              <td class="css_td_list2_r1">
+                目標的 group_info <a href="#hook_0406_group_info_01">[詳細]</a>
+              </td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l1">
+                <font class="css_font_r1">struct mcm_config_store_t *</font><br>
+                <font class="css_font_g1">parent_store</font>
+              </td>
+              <td class="css_td_list2_r1">
+                目標的 store_info 的 parent-store_info <a href="#hook_0406_store_info_01">[詳細]</a>
+              </td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l1">
+                <font class="css_font_r1">MCM_DTYPE_FLAG_TD</font><br>
+                <font class="css_font_g1">data_access</font><br>
+              </td>
+              <td class="css_td_list2_r1">
+                要使用何種模式 <a href="#hook_0406_data_access_01">[詳細]</a>
+              </td>
+            </tr>
+          </table>
+          <table class="css_table_list2">
+            <tr>
+              <td class="css_td_list2_t1">回傳</td>
+              <td class="css_td_list2_t1">說明</td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l2">&gt;= MCM_RCODE_PASS</td>
+              <td class="css_td_list2_r1">成功</td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l2">&nbsp;&lt; MCM_RCODE_PASS</td>
+              <td class="css_td_list2_r1">錯誤</td>
+            </tr>
+          </table>
+          <br>
+          注意事項 :<br>
+          <table class="css_table_list1">
+            <tr>
+              <td class="css_td_list1_l">01.&nbsp;</td>
+              <td class="css_td_list1_r">
+                外部程式或網頁程式的資料存取模式 (session_permission) 必須是讀寫.
+              </td>
+            </tr>
+          </table>
+          <br>
+          範例 :<br>
+<pre class="css_pre_code">
+外部程式部分
+
+#include &lt;time.h&gt;
+#include &lt;errno.h&gt;
+#include &lt;stdio.h&gt;
+#include &lt;string.h&gt;
+#include &lt;stdlib.h&gt;
+#include "mcm_lheader/mcm_type.h"
+#include "mcm_lheader/mcm_size.h"
+#include "mcm_lheader/mcm_connect.h"
+#include "mcm_lheader/mcm_return.h"
+#include "mcm_lheader/mcm_data_exinfo_auto.h"
+#include "mcm_lulib/mcm_lulib_api.h"
+
+#define DMSG(msg_fmt, msgs...) printf("%s(%04u): " msg_fmt "\n", __FILE__, __LINE__, ##msgs)
+
+int main(int argc, char **argv)
+{
+    char *path1;
+    struct mcm_lulib_lib_t self_lulib;
+
+    srand(time(NULL));
+
+    memset(&self_lulib, 0, sizeof(struct mcm_lulib_lib_t));
+    self_lulib.socket_path = "@mintcm";
+    self_lulib.call_from = MCM_CFROM_USER;
+    self_lulib.session_permission = MCM_SPERMISSION_RW;
+    self_lulib.session_stack_size = 0;
+    if(mcm_lulib_init(&self_lulib) < MCM_RCODE_PASS)
+    {
+        DMSG("call mcm_lulib_init() fail");
+        goto FREE_01;
+    }
+
+    // 呼叫內部模組.
+    path1 = "mcm_module_del_all_entry_value_test";
+    DMSG("[run] %s", path1);
+    if(mcm_lulib_run(&self_lulib, path1) < MCM_RCODE_PASS)
+    {
+        DMSG("call mcm_lulib_run(%s) fail", path1);
+        goto FREE_02;
+    }
+
+FREE_02:
+    mcm_lulib_exit(&self_lulib);
+FREE_01:
+    return 0;
+}
+</pre>
+<pre class="css_pre_code">
+內部模組部分
+
+#include &lt;time.h&gt;
+#include &lt;errno.h&gt;
+#include &lt;stdio.h&gt;
+#include &lt;string.h&gt;
+#include &lt;stdlib.h&gt;
+#include "../../mcm_lib/mcm_lheader/mcm_type.h"
+#include "../../mcm_lib/mcm_lheader/mcm_size.h"
+#include "../../mcm_lib/mcm_lheader/mcm_control.h"
+#include "../../mcm_lib/mcm_lheader/mcm_connect.h"
+#include "../../mcm_lib/mcm_lheader/mcm_return.h"
+#include "../../mcm_lib/mcm_lheader/mcm_debug.h"
+#include "../../mcm_lib/mcm_lheader/mcm_data_exinfo_auto.h"
+#include "../mcm_service_handle_extern.h"
+#include "../mcm_config_handle_extern.h"
+
+#define DMSG(msg_fmt, msgs...) printf("%s(%04u): " msg_fmt "\n", __FILE__, __LINE__, ##msgs)
+
+int mcm_module_del_all_entry_value_test(
+    struct mcm_service_session_t *this_session)
+{
+    int fret = MCM_RCODE_MODULE_INTERNAL_ERROR;
+    char *path1;
+    struct mcm_config_model_group_t *tmp_group;
+    struct mcm_config_store_t *tmp_parent_store;
+
+    srand(time(NULL));
+
+    // 範例-01 : 刪除 device.vap.@1.* (SYS 模式)
+    path1 = "device.vap.@1.station.*";
+    // 先使用路徑取得資訊.
+    if(mcm_config_find_entry_by_mix(this_session, path1, &tmp_group, NULL, NULL,
+                                    &tmp_parent_store) < MCM_RCODE_PASS)
+    {
+        DMSG("call mcm_config_find_entry_by_mix(%s) fail", path1);
+        goto FREE_01;
+    }
+    // 刪除.
+    DMSG("[del-all-entry][SYS] %s", path1);
+    if(mcm_config_del_all_entry_by_info(this_session, tmp_group, tmp_parent_store,
+                                        MCM_DACCESS_SYS) < MCM_RCODE_PASS)
+    {
+        DMSG("call mcm_config_del_all_entry_by_info(%s) fail", path1);
+        goto FREE_01;
+    }
+
+    // 範例-02 : 刪除 device.vap.#15.* (NEW 模式)
+    path1 = "device.vap.#15.station.*";
+    // 先使用路徑取得資訊.
+    if(mcm_config_find_entry_by_mix(this_session, path1, &tmp_group, NULL, NULL,
+                                    &tmp_parent_store) < MCM_RCODE_PASS)
+    {
+        DMSG("call mcm_config_find_entry_by_mix(%s) fail", path1);
+        goto FREE_01;
+    }
+    // 刪除.
+    DMSG("[del-all-entry][NEW] %s", path1);
+    if(mcm_config_del_all_entry_by_info(this_session, tmp_group, tmp_parent_store,
+                                        MCM_DACCESS_NEW) < MCM_RCODE_PASS)
+    {
+        DMSG("call mcm_config_del_all_entry_by_info(%s) fail", path1);
+        goto FREE_01;
+    }
+
+    // 範例-03 : 刪除 device.limit.* (NEW 模式)
+    path1 = "device.limit.*";
+    // 先使用路徑取得資訊.
+    if(mcm_config_find_entry_by_mix(this_session, path1, &tmp_group, NULL, NULL,
+                                    &tmp_parent_store) < MCM_RCODE_PASS)
+    {
+        DMSG("call mcm_config_find_entry_by_mix(%s) fail", path1);
+        goto FREE_01;
+    }
+    // 刪除.
+    DMSG("[del-all-entry][NEW] %s", path1);
+    if(mcm_config_del_all_entry_by_info(this_session, tmp_group, tmp_parent_store,
+                                        MCM_DACCESS_NEW) < MCM_RCODE_PASS)
+    {
+        DMSG("call mcm_config_del_all_entry_by_info(%s) fail", path1);
+        goto FREE_01;
+    }
+
+    fret = MCM_RCODE_PASS;
+FREE_01:
+    return fret;
+}
+</pre>
+        </td>
+      </tr>
+    </table>
+    <br>
+
+    <div class="css_div_hook" id="hook_0406_mcm_config_get_usable_key_by_info_01"></div>
+    <table class="css_table_box">
+      <tr>
+        <td class="css_td_box">
+          <font class="css_font_b2">mcm_config_get_usable_key_by_info</font><br>
+          取得 group 內可用的 key.<br>
+          <table class="css_table_list2">
+            <tr>
+              <td class="css_td_list2_t1">參數</td>
+              <td class="css_td_list2_t1">說明</td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l1">
+                <font class="css_font_r1">struct mcm_service_session_t *</font><br>
+                <font class="css_font_g1">this_session</font>
+              </td>
+              <td class="css_td_list2_r1">
+                請求端的連線資訊
+              </td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l1">
+                <font class="css_font_r1">struct mcm_config_model_group_t *</font><br>
+                <font class="css_font_g1">this_model_group</font>
+              </td>
+              <td class="css_td_list2_r1">
+                目標的 group_info <a href="#hook_0406_group_info_01">[詳細]</a>
+              </td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l1">
+                <font class="css_font_r1">struct mcm_config_store_t *</font><br>
+                <font class="css_font_g1">parent_store</font>
+              </td>
+              <td class="css_td_list2_r1">
+                目標的 store_info 的 parent-store_info <a href="#hook_0406_store_info_01">[詳細]</a>
+              </td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l1">
+                <font class="css_font_r1">MCM_DTYPE_EK_TD *</font><br>
+                <font class="css_font_g1">key_buf</font><br>
+              </td>
+              <td class="css_td_list2_r1">
+                紀錄可用的 key 的緩衝
+              </td>
+            </tr>
+          </table>
+          <table class="css_table_list2">
+            <tr>
+              <td class="css_td_list2_t1">回傳</td>
+              <td class="css_td_list2_t1">說明</td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l2">&gt;= MCM_RCODE_PASS</td>
+              <td class="css_td_list2_r1">成功</td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l2">&nbsp;&lt; MCM_RCODE_PASS</td>
+              <td class="css_td_list2_r1">錯誤</td>
+            </tr>
+          </table>
+          <br>
+          注意事項 :<br>
+          <table class="css_table_list1">
+            <tr>
+              <td class="css_td_list1_l">01.&nbsp;</td>
+              <td class="css_td_list1_r">
+                外部程式或網頁程式的資料存取模式 (session_permission) 可以是唯讀或讀寫.
+              </td>
+            </tr>
+            <tr>
+              <td class="css_td_list1_l">02.&nbsp;</td>
+              <td class="css_td_list1_r">
+                key_buf 返回的值大於 0 才表示有可用的 key.
+              </td>
+            </tr>
+          </table>
+          <br>
+          範例 :<br>
+<pre class="css_pre_code">
+外部程式部分
+
+#include &lt;time.h&gt;
+#include &lt;errno.h&gt;
+#include &lt;stdio.h&gt;
+#include &lt;string.h&gt;
+#include &lt;stdlib.h&gt;
+#include "mcm_lheader/mcm_type.h"
+#include "mcm_lheader/mcm_size.h"
+#include "mcm_lheader/mcm_connect.h"
+#include "mcm_lheader/mcm_return.h"
+#include "mcm_lheader/mcm_data_exinfo_auto.h"
+#include "mcm_lulib/mcm_lulib_api.h"
+
+#define DMSG(msg_fmt, msgs...) printf("%s(%04u): " msg_fmt "\n", __FILE__, __LINE__, ##msgs)
+
+int main(int argc, char **argv)
+{
+    char *path1;
+    struct mcm_lulib_lib_t self_lulib;
+
+    srand(time(NULL));
+
+    memset(&self_lulib, 0, sizeof(struct mcm_lulib_lib_t));
+    self_lulib.socket_path = "@mintcm";
+    self_lulib.call_from = MCM_CFROM_USER;
+    self_lulib.session_permission = MCM_SPERMISSION_RW;
+    self_lulib.session_stack_size = 0;
+    if(mcm_lulib_init(&self_lulib) < MCM_RCODE_PASS)
+    {
+        DMSG("call mcm_lulib_init() fail");
+        goto FREE_01;
+    }
+
+    // 呼叫內部模組.
+    path1 = "mcm_module_get_usable_key_test";
+    DMSG("[run] %s", path1);
+    if(mcm_lulib_run(&self_lulib, path1) < MCM_RCODE_PASS)
+    {
+        DMSG("call mcm_lulib_run(%s) fail", path1);
+        goto FREE_02;
+    }
+
+FREE_02:
+    mcm_lulib_exit(&self_lulib);
+FREE_01:
+    return 0;
+}
+</pre>
+<pre class="css_pre_code">
+內部模組部分
+
+#include &lt;time.h&gt;
+#include &lt;errno.h&gt;
+#include &lt;stdio.h&gt;
+#include &lt;string.h&gt;
+#include &lt;stdlib.h&gt;
+#include "../../mcm_lib/mcm_lheader/mcm_type.h"
+#include "../../mcm_lib/mcm_lheader/mcm_size.h"
+#include "../../mcm_lib/mcm_lheader/mcm_control.h"
+#include "../../mcm_lib/mcm_lheader/mcm_connect.h"
+#include "../../mcm_lib/mcm_lheader/mcm_return.h"
+#include "../../mcm_lib/mcm_lheader/mcm_debug.h"
+#include "../../mcm_lib/mcm_lheader/mcm_data_exinfo_auto.h"
+#include "../mcm_service_handle_extern.h"
+#include "../mcm_config_handle_extern.h"
+
+#define DMSG(msg_fmt, msgs...) printf("%s(%04u): " msg_fmt "\n", __FILE__, __LINE__, ##msgs)
+
+int mcm_module_get_usable_key_test(
+    struct mcm_service_session_t *this_session)
+{
+    int fret = MCM_RCODE_MODULE_INTERNAL_ERROR;
+    char *path1;
+    struct mcm_config_model_group_t *tmp_group;
+    struct mcm_config_store_t *tmp_parent_store;
+    MCM_DTYPE_EK_TD key;
+
+    // 範例-01 : 取得 device.vap.* 可用的 key
+    path1 = "device.vap.*";
+    // 先使用路徑取得資訊.
+    if(mcm_config_find_entry_by_mix(this_session, path1, &tmp_group, NULL, NULL,
+                                    &tmp_parent_store) < MCM_RCODE_PASS)
+    {
+        DMSG("call mcm_config_find_entry_by_mix(%s) fail", path1);
+        goto FREE_01;
+    }
+    // 取得可用的 key
+    if(mcm_config_get_usable_key_by_info(this_session, tmp_group, tmp_parent_store, &key)
+                                         < MCM_RCODE_PASS)
+    {
+        DMSG("call mcm_config_get_usable_key_by_info(%s) fail", path1);
+        goto FREE_01;
+    }
+    if(key == 0)
+    {
+        DMSG("[usable-key] %s = entry is full", path1, key);
+    }
+    else
+    {
+        DMSG("[usable-key] %s = " MCM_DTYPE_EK_PF, path1, key);
+    }
+
+    // 範例-02 : 取得 device.vap.#15.station.* 可用的 key
+    path1 = "device.vap.#15.station.*";
+    // 先使用路徑取得資訊.
+    if(mcm_config_find_entry_by_mix(this_session, path1, &tmp_group, NULL, NULL,
+                                    &tmp_parent_store) < MCM_RCODE_PASS)
+    {
+        DMSG("call mcm_config_find_entry_by_mix(%s) fail", path1);
+        goto FREE_01;
+    }
+    // 取得可用的 key
+    if(mcm_config_get_usable_key_by_info(this_session, tmp_group, tmp_parent_store, &key)
+                                         < MCM_RCODE_PASS)
+    {
+        DMSG("call mcm_config_get_usable_key_by_info(%s) fail", path1);
+        goto FREE_01;
+    }
+    if(key == 0)
+    {
+        DMSG("[usable-key] %s = entry is full", path1, key);
+    }
+    else
+    {
+        DMSG("[usable-key] %s = " MCM_DTYPE_EK_PF, path1, key);
+    }
+
+    fret = MCM_RCODE_PASS;
+FREE_01:
+    return fret;
+}
+</pre>
+        </td>
+      </tr>
+    </table>
+    <br>
+
+  </div>
+</div>
+<br>
+
+<div class="css_div_box_frame_full">
+  <div class="css_div_box_title">範例程式的使用</div>
+  <div class="css_div_box_content">
+    <br>
+
+    <table class="css_table_list1">
+      <tr>
+        <td class="css_td_list1_l">01.&nbsp;</td>
+        <td class="css_td_list1_r">
+          範例程式目錄在 <font class="css_font_b1">mint_cm/usage/example/0406</font>.
+        </td>
+      </tr>
+    </table>
+    <br><br>
+
+    <table class="css_table_list1">
+      <tr>
+        <td class="css_td_list1_l">02.&nbsp;</td>
+        <td class="css_td_list1_r">
+          下面關於 <font class="css_font_p1">make</font> 的操作沒有特別註明的話都是在
+          <font class="css_font_b1">mint_cm</font> 目錄.
+        </td>
+      </tr>
+    </table>
+    <br><br>
+
+    <table class="css_table_list1">
+      <tr>
+        <td class="css_td_list1_l">03.&nbsp;</td>
+        <td class="css_td_list1_r">
+          第一次使用, 使用 <font class="css_font_p1">make example_add KEY=0406</font>
+          載入範例並編譯.
+        </td>
+      </tr>
+    </table>
+    <br><br>
+
+    <table class="css_table_list1">
+      <tr>
+        <td class="css_td_list1_l">04.&nbsp;</td>
+        <td class="css_td_list1_r">
+          <font class="css_font_b1">web_app</font> 是範例程式.<br><br>
+          範例項目 :<br>
+          <table class="css_table_list2">
+            <tr>
+              <td class="css_td_list2_l2">case-01</td>
+              <td class="css_td_list2_r1">
+                測試項目<br>
+                mcm_config_get_max_count_by_info
+              </td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l2">case-02</td>
+              <td class="css_td_list2_r1">
+                測試項目<br>
+                mcm_config_get_count_by_info
+              </td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l2">case-03</td>
+              <td class="css_td_list2_r1">
+                測試項目<br>
+                mcm_config_get_alone_by_info
+              </td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l2">case-04</td>
+              <td class="css_td_list2_r1">
+                測試項目<br>
+                mcm_config_get_entry_by_info
+              </td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l2">case-05</td>
+              <td class="css_td_list2_r1">
+                測試項目<br>
+                mcm_config_set_alone_by_info<br>
+                mcm_config_set_entry_by_info
+              </td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l2">case-06</td>
+              <td class="css_td_list2_r1">
+                測試項目<br>
+                mcm_config_del_entry_by_info<br>
+                mcm_config_get_usable_key_by_info<br>
+                mcm_config_add_entry_by_info
+              </td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l2">case-07</td>
+              <td class="css_td_list2_r1">
+                測試項目<br>
+                mcm_config_del_all_entry_by_info<br>
+                mcm_config_add_entry_by_info
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+    <br><br>
+
+    <table class="css_table_list1">
+      <tr>
+        <td class="css_td_list1_l">05.&nbsp;</td>
+        <td class="css_td_list1_r">
+          先執行 mcm_daemon 和 mini_httpd 才可測試.
+        </td>
+      </tr>
+    </table>
+    <br><br>
+
+    <table class="css_table_list1">
+      <tr>
+        <td class="css_td_list1_l">06.&nbsp;</td>
+        <td class="css_td_list1_r">
+          瀏覽器連至 <font class="css_font_b1">http://&lt;server-address&gt;/web_app_0406_index.html</font>
+          就可以看到範例頁面.
+        </td>
+      </tr>
+    </table>
+    <br><br>
+
+    <table class="css_table_list1">
+      <tr>
+        <td class="css_td_list1_l">07.&nbsp;</td>
+        <td class="css_td_list1_r">
+          測試完畢不使用後, 使用 <font class="css_font_p1">make example_del KEY=0406</font>
+          將範例移除.
+        </td>
+      </tr>
+    </table>
+    <br><br>
+
+    <table class="css_table_list1">
+      <tr>
+        <td class="css_td_list1_l">08.&nbsp;</td>
+        <td class="css_td_list1_r">
+          範例程式目錄下的檔案在做完 <font class="css_font_p1">make example_add</font>
+          後會複製到真正使用的位置, 要修改做測試的話要改在複製後的.<br>
+          <table class="css_table_list2">
+            <tr>
+              <td class="css_td_list2_r1">
+                來源 <font class="css_font_b1">profile/mcm_data_profile_0406.xml</font><br>
+                目地 <font class="css_font_b1">mint_cm/mcm_build/mcm_data_profile.xml</font><br>
+                資料模型範例<br>
+                有修改要使用 <font class="css_font_p1">make all</font> 重新編譯
+              </td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_r1">
+                來源 <font class="css_font_b1">profile/mcm_store_profile_default_0406.txt</font><br>
+                目地 <font class="css_font_b1">mint_cm/mcm_build/mcm_store_profile_default.txt</font><br>
+                資料預設值範例<br>
+                使用 <font class="css_font_p1">make all</font> 後會再複製到 <font class="css_font_b1">mint_cm/run</font>
+              </td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_r1">
+                來源 <font class="css_font_b1">web_app</font><br>
+                目地 <font class="css_font_b1">mint_cm/run/web</font><br>
+                網頁程式範例
+              </td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_r1">
+                來源 <font class="css_font_b1">module/mcm_module_0406.c</font><br>
+                目地 <font class="css_font_b1">mint_cm/mcm_daemon/mcm_module</font><br>
+                內部模組範例<br>
+                有修改要使用 <font class="css_font_p1">make all</font> 重新編譯
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+    <br>
+
+  </div>
+</div>
+<br>
+
+</body>
+
+</html>

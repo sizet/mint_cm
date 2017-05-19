@@ -1,0 +1,237 @@
+<!--
+Copyright © 2017, Che-Wei Hsu <cwxhsu@gmail.com>
+This file is part of the MintCM.
+Some rights reserved. See README.
+-->
+
+<html>
+
+<head>
+<meta http-equiv="content-type" content="text/html; charset=utf-8">
+<link rel="stylesheet" href="../css/mcm_style.css">
+</head>
+
+<body class="css_body">
+
+<div class="css_div_box_frame_full">
+  <div class="css_div_box_title">chapter 10-03</div>
+  <div class="css_div_box_content">
+  </div>
+</div>
+<br>
+
+<div class="css_div_box_frame_full">
+  <div class="css_div_box_title">Cookie 的資料 (網頁端)</div>
+  <div class="css_div_box_content">
+    <br>
+
+    此章節說明網頁程式可以取得哪些 cookie 資料.
+    <br><br><br>
+
+
+    網頁的編碼格式必須是 UTF-8, 如下的宣告 :<br>
+    <font class="css_font_p1">&lt;meta http-equiv="content-type" content="text/html; charset=utf-8"&gt;</font>
+    <br><br>
+
+    需要的 JS 檔 :<br>
+    <font class="css_font_p1">
+    jquery_main.js<br>
+    jquery_cookie.js
+    </font>
+    <br><br>
+
+  </div>
+</div>
+<br>
+
+<div class="css_div_box_frame_full">
+  <div class="css_div_box_title">使用方式</div>
+  <div class="css_div_box_content">
+    <br>
+
+    登入成功後, MintAAM 會傳送以下的 cookie 資料給瀏覽器 :<br>
+    <table class="css_table_list2">
+      <tr>
+        <td class="css_td_list2_l1">
+          <font class="css_font_b1">[session_key]</font><br>
+          登入的使用者的識別資料 (MintAAM 產生的隨機字串).
+        </td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l1">
+          <font class="css_font_b1">[account_name]</font><br>
+          登入的帳號的名稱. <a href="mcm_1002.html#hook_1002_account_name_01">[詳細]</a>
+        </td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l1">
+          <font class="css_font_b1">[account_permission]</font><br>
+          登入的帳號的權限. <a href="mcm_1002.html#hook_1002_account_permission_01">[詳細]</a>
+        </td>
+      </tr>
+    </table>
+    <br>
+
+    使用 jquery 的 <font class="css_font_b1">$.cookie()</font> 函式取出 cookie 的值.
+    <br><br>
+
+    範例 :<br>
+<pre class="css_pre_code">
+// 取出 session_key.
+console.log("session_key = ", $.cookie("session_key"));
+// 取出 account_name.
+console.log("account_name = ", $.cookie("account_name"));
+// 取出 account_permission.
+console.log("account_permission = ", $.cookie("account_permission"));
+</pre>
+    <br>
+
+  </div>
+</div>
+<br>
+
+<div class="css_div_box_frame_full">
+  <div class="css_div_box_title">範例程式的使用</div>
+  <div class="css_div_box_content">
+    <br>
+
+    <table class="css_table_list1">
+      <tr>
+        <td class="css_td_list1_l">01.&nbsp;</td>
+        <td class="css_td_list1_r">
+          範例程式目錄在 <font class="css_font_b1">mint_cm/usage/example/1003</font>.
+        </td>
+      </tr>
+    </table>
+    <br><br>
+
+    <table class="css_table_list1">
+      <tr>
+        <td class="css_td_list1_l">02.&nbsp;</td>
+        <td class="css_td_list1_r">
+          下面關於 <font class="css_font_p1">make</font> 的操作沒有特別註明的話都是在
+          <font class="css_font_b1">mint_cm</font> 目錄.
+        </td>
+      </tr>
+    </table>
+    <br><br>
+
+    <table class="css_table_list1">
+      <tr>
+        <td class="css_td_list1_l">03.&nbsp;</td>
+        <td class="css_td_list1_r">
+          第一次使用, 使用 <font class="css_font_p1">make example_add KEY=1003</font>
+          載入範例並編譯.
+        </td>
+      </tr>
+    </table>
+    <br><br>
+
+    <table class="css_table_list1">
+      <tr>
+        <td class="css_td_list1_l">04.&nbsp;</td>
+        <td class="css_td_list1_r">
+          <font class="css_font_b1">web_app</font> 是範例程式.<br><br>
+          範例項目 :<br>
+          <table class="css_table_list2">
+            <tr>
+              <td class="css_td_list2_l2">case-01</td>
+              <td class="css_td_list2_r1">測試取得 cookie</font>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+    <br><br>
+
+    <table class="css_table_list1">
+      <tr>
+        <td class="css_td_list1_l">05.&nbsp;</td>
+        <td class="css_td_list1_r">
+          先執行 mcm_daemon 和 mini_httpd 才可測試.
+        </td>
+      </tr>
+    </table>
+    <br><br>
+
+    <table class="css_table_list1">
+      <tr>
+        <td class="css_td_list1_l">06.&nbsp;</td>
+        <td class="css_td_list1_r">
+          瀏覽器連至 <font class="css_font_b1">http://&lt;server-address&gt;</font>
+          會自動導到登入頁面.
+        </td>
+      </tr>
+    </table>
+    <br><br>
+
+    <table class="css_table_list1">
+      <tr>
+        <td class="css_td_list1_l">07.&nbsp;</td>
+        <td class="css_td_list1_r">
+          測試完畢不使用後, 使用 <font class="css_font_p1">make example_del KEY=1003</font>
+          將範例移除.
+        </td>
+      </tr>
+    </table>
+    <br><br>
+
+    <table class="css_table_list1">
+      <tr>
+        <td class="css_td_list1_l">08.&nbsp;</td>
+        <td class="css_td_list1_r">
+          範例程式目錄下的檔案在做完 <font class="css_font_p1">make example_add</font>
+          後會複製到真正使用的位置, 要修改做測試的話要改在複製後的.<br>
+          <table class="css_table_list2">
+            <tr>
+              <td class="css_td_list2_r1">
+                來源 <font class="css_font_b1">profile/mcm_data_profile_1003.xml</font><br>
+                目地 <font class="css_font_b1">mint_cm/mcm_build/mcm_data_profile.xml</font><br>
+                資料模型範例<br>
+                有修改要使用 <font class="css_font_p1">make all</font> 重新編譯
+              </td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_r1">
+                來源 <font class="css_font_b1">profile/mcm_store_profile_default_1003.txt</font><br>
+                目地 <font class="css_font_b1">mint_cm/mcm_build/mcm_store_profile_default.txt</font><br>
+                資料預設值範例<br>
+                使用 <font class="css_font_p1">make all</font> 後會再複製到 <font class="css_font_b1">mint_cm/run</font>
+              </td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_r1">
+                來源 <font class="css_font_b1">web_app</font><br>
+                目地 <font class="css_font_b1">mint_cm/run/web</font><br>
+                網頁程式範例
+              </td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_r1">
+                來源 <font class="css_font_b1">maam_buildin</font><br>
+                目地 <font class="css_font_b1">http_server/mini_httpd/last/mint_aam/maam_buildin</font><br>
+                MintAAM 端範例範例<br>
+                有修改要使用 <font class="css_font_p1">make all</font> 重新編譯
+              </td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_r1">
+                來源 <font class="css_font_b1">mini_httpd/Makefile</font><br>
+                目地 <font class="css_font_b1">http_server/mini_httpd/last</font><br>
+                mini_httpd 的 Makefile, 主要是加入使用 MintCM 函式庫的連結<br>
+                有修改要使用 <font class="css_font_p1">make all</font> 重新編譯
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+    <br>
+
+  </div>
+</div>
+<br>
+
+</body>
+
+</html>

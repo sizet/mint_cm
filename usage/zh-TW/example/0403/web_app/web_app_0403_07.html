@@ -1,0 +1,97 @@
+<!--
+Copyright © 2017, Che-Wei Hsu <cwxhsu@gmail.com>
+This file is part of the MintCM.
+Some rights reserved. See README.
+-->
+
+<html>
+
+<head>
+
+<meta http-equiv="cache-control" content="no-cache">
+<meta http-equiv="content-type" content="text/html; charset=utf-8">
+<script type="text/javascript" src="jquery_main.js"></script>
+<script type="text/javascript" src="json3.js"></script>
+<script type="text/javascript" src="mcm_jslib_api.js"></script>
+<script type="text/javascript" src="mcm_jslib_data_info_auto.js"></script>
+<script type="text/javascript" src="web_app_0403_script.js"></script>
+<link rel="stylesheet" href="web_app_0403_style.css">
+
+<script type="text/javascript">
+function body_init()
+{
+    $("#client_table").find("tbody").empty();
+}
+
+// 讀取 device.client.*
+function module_run()
+{
+    var self_jslib, req_cmd = "", rep_ret, mcm_dv, data_array, tmp_html, i;
+
+
+    $("#client_table").find("tbody").empty();
+
+    // 執行模組, 模組修改資料, 在讀出 device.client.*
+    req_cmd += "&run.mcm_module_delall_add_entry";
+    req_cmd += "&get.device.client.*";
+
+    // 送出讀出資料請求.
+    self_jslib = new mcm_jslib_lib_t();
+    self_jslib.socket_path = "@mintcm";
+    self_jslib.session_permission = mcm_session_permission.rw;
+    self_jslib.session_stack_size = 0;
+    self_jslib.request_command = req_cmd;
+    self_jslib.data_format = mcm_data_format.all_default;
+    self_jslib.other_query = "";
+    rep_ret = mcm_jslib_obtain_config(self_jslib);
+    if(rep_ret.rep_code < mcm_return_code.pass)
+    {
+        alert("call mcm_jslib_obtain_config() fail" +
+              "[" + rep_ret.rep_code + "]");
+        mcm_jslib_run_script(rep_ret.rep_data);
+        return;
+    }
+    // 處理資料格式.
+    mcm_dv = JSON.parse(rep_ret.rep_data);
+
+    // 顯示 device.client.{i}
+    for(i = 0; i < mcm_dv.device.client.length; i++)
+    {
+        data_array = new Array(5);
+        data_array[0] = "device.client.@" + (i + 1);
+        data_array[1] = mcm_dv.device.client[i].ekey;
+        data_array[2] = mcm_dv.device.client[i].mac_addr;
+        data_array[3] = mcm_dv.device.client[i].location_x;
+        data_array[4] = mcm_dv.device.client[i].location_y;
+        tmp_html = jsapi_make_trtd("css_td1", data_array);
+        $("#client_table").find("tbody").append(tmp_html);
+    }
+}
+</script>
+
+</head>
+
+<body onload="body_init()">
+
+  <div>[del-all-entry]</div>
+  <div>[add-entry]</div>
+
+  <table id="client_table" class="css_table1">
+    <thead>
+      <tr>
+        <td class="css_td1"></td>
+        <td class="css_td1">ekey</td>
+        <td class="css_td1">mac_addr</td>
+        <td class="css_td1">location_x</td>
+        <td class="css_td1">location_y</td>
+      </tr>
+    </thead>
+    <tbody>
+    </tbody>
+  </table>
+
+  <button type="button" onclick="module_run()">run</button>
+
+</body>
+
+</html>

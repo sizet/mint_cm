@@ -1,0 +1,101 @@
+<!--
+Copyright © 2017, Che-Wei Hsu <cwxhsu@gmail.com>
+This file is part of the MintCM.
+Some rights reserved. See README.
+-->
+
+<html>
+
+<head>
+<meta http-equiv="content-type" content="text/html; charset=utf-8">
+<link rel="stylesheet" href="../css/mcm_style.css">
+</head>
+
+<body class="css_body">
+
+<div class="css_div_box_frame_full">
+  <div class="css_div_box_title">chapter 01-01</div>
+  <div class="css_div_box_content">
+  </div>
+</div>
+<br>
+
+<div class="css_div_box_frame_full">
+  <div class="css_div_box_title">程式架構</div>
+  <div class="css_div_box_content">
+    <br>
+
+    <div class="css_div_figure">
+      <table class="css_table_figure">
+        <tr>
+          <td class="css_td_figure_image">
+            <img src="../image/mcm_0101_0101.png"/>
+          </td>
+        </tr>
+        <tr>
+          <td class="css_td_figure_text">系統架構</td>
+        </tr>
+      </table>
+    </div>
+    <br><br>
+
+    <font class="css_font_r2">mcm_build</font><br>
+    資料模型的分析處理程式, 將給人看的資料模型檔案轉成給程式讀的, 此程式是在 PC 平台上執行.
+    <br><br><br>
+
+    <font class="css_font_r2">mcm_daemon</font><br>
+    資料管理的主程式, 提供設資料取服務, 使用 Unix Domain Socket 和其他程式溝通,
+    可以同時接受多個連線, 每個連線會建立一個執行緒處理, 讀取請求可以多個程式同時使用,
+    寫入請求同時只能一個程式使用 (讀寫鎖搭配先入先出列隊).<br>
+    <font class="css_font_p2">[custom data handle]</font><br>
+    客制化的資料處理函式庫, 處理資料的運用, 其他程式修改資料後可以指定要執行哪個處理函式做處理,
+    例如其他程式要修改網路介面的位址, 先設定新的網路介面位址, 之後指定要執行資料處理函式庫內處理修改網路介面的函式,
+    修改網路介面的函式被 mcm_daemon 執行後, 取出新的網路介面位址, 在套用到網路介面上. 
+    此部分會編譯成動態連結函式檔給 mcm_daemon 使用.
+    <br><br><br>
+
+    <font class="css_font_r2">libmcm_lulib_api.so</font><br>
+    提供介面 (C 函式) 給其他用戶端 (User Space) 程式做資料的存取.
+    <br><br><br>
+
+    <font class="css_font_g2">User Space Program</font><br>
+    需要資料存取服務的用戶端程式.
+    <br><br><br>
+
+    <font class="css_font_r2">mcm_lklib_api.ko</font><br>
+    提供介面 (C 函式) 給其他核心端 (Kernel Space) 程式做資料的存取.
+    <br><br><br>
+
+    <font class="css_font_g2">Kernel Space Program</font><br>
+    需要資料存取服務的核心端程式.
+    <br><br><br>
+
+    <font class="css_font_r2">mini_httpd</font><br>
+    使用的 HTTP Server.<br><br>
+    <font class="css_font_r2">mcm_cgi_config.cgi</font><br>
+    處理網頁程式的資料存取.<br><br>
+    <font class="css_font_r2">mcm_cgi_upload.cgi</font><br>
+    處理網頁程式的檔案上傳.<br>
+    <font class="css_font_p2">[custom upload handle]</font><br>
+    自訂的檔案處理函式, 處理網頁程式上傳的檔案, 此部分和 mcm_cgi_upload.cgi 編譯在一起.
+    <br><br><br>
+
+    <font class="css_font_r2">mcm_jslib_api.js</font><br>
+    提供介面給網頁程式做資料的存取和檔案的上傳, 資料存取部分使用 AJAX + JSON 機制,
+    檔案上傳部分使用 form 機制.
+    <br><br><br>
+
+    <font class="css_font_g2">Web program</font><br>
+    需要資料存取服務的網頁端程式.
+    <br><br><br>
+
+    除了 mcm_build 要在 PC 上執行, 其他部分可以編譯到使用 Linux 的不同硬體平台上執行.
+    <br><br>
+
+  </div>
+</div>
+<br>
+
+</body>
+
+</html>

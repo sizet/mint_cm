@@ -1,0 +1,62 @@
+<!--
+Copyright © 2017, Che-Wei Hsu <cwxhsu@gmail.com>
+This file is part of the MintCM.
+Some rights reserved. See README.
+-->
+
+<?xml version="1.0"?>
+
+<base version="1.0">
+<device type="gs" max="1" save="1">
+  <ekey type="ek">0</ekey>
+  <descript type="s:256">Wireless%20Device</descript>
+  <serial_number type="b:10">0022E5A1CC9F</serial_number>
+
+  <system type="gs" max="1" save="1">
+    <ekey type="ek">0</ekey>
+    <date type="s:12">2016/01/01</date>
+    <ip_addr type="s:46">192.168.1.1</ip_addr>
+    <uptime type="iull">0</uptime>
+    <loading type="fd">0</loading>
+  </system>
+
+  <vap type="gd" max="16" save="1">
+    <ekey type="ek">0</ekey>
+    <ssid type="s:64"></ssid>
+    <channel type="iui">0</channel>
+
+    <extra type="gs" max="1" save="1">
+      <ekey type="ek">0</ekey>
+      <hidden type="isc">0</hidden>
+      <tx_power type="iss">0</tx_power>
+    </extra>
+
+    <station type="gd" max="32" save="1">
+      <ekey type="ek">0</ekey>
+      <mac_addr type="s:18">00:00:00:00:00:00</mac_addr>
+      <rule type="rk">0</rule>
+    </station>
+  </vap>
+
+  <limit type="gd" max="64" save="1">
+    <ekey type="ek">0</ekey>
+    <name type="s:32"></name>
+    <priority type="isi">-1</priority>
+  </limit>
+
+  <client type="gd" max="128" save="0">
+    <ekey type="ek">0</ekey>
+    <mac_addr type="s:18"></mac_addr>
+    <location_x type="fld">0</location_x>
+    <location_y type="fld">0</location_y>
+  </client>
+
+  <web_upload type="gs" max="1" save="0">
+    <ekey type="ek">0</ekey>
+    <file_name type="s:128"></file_name>
+    <file_size type="iui">0</file_size>
+    <save_path type="s:128"></save_path>
+    <addition_data type="s:64"></addition_data>
+  </web_upload>
+</device>
+</base>

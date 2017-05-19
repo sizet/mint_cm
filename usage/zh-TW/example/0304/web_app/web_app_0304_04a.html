@@ -1,0 +1,205 @@
+<!--
+Copyright © 2017, Che-Wei Hsu <cwxhsu@gmail.com>
+This file is part of the MintCM.
+Some rights reserved. See README.
+-->
+
+<html>
+
+<head>
+
+<meta http-equiv="cache-control" content="no-cache">
+<meta http-equiv="content-type" content="text/html; charset=utf-8">
+<script type="text/javascript" src="jquery_main.js"></script>
+<script type="text/javascript" src="json3.js"></script>
+<script type="text/javascript" src="mcm_jslib_api.js"></script>
+<script type="text/javascript" src="mcm_jslib_data_info_auto.js"></script>
+<script type="text/javascript" src="web_app_0304_script.js"></script>
+<link rel="stylesheet" href="web_app_0304_style.css">
+
+<script type="text/javascript">
+function body_init()
+{
+    var self_jslib, req_cmd, rep_ret, mcm_dv, data_array, i, tmp_html;
+
+
+    $("#ekey_text").val("");
+    $("#ssid_text").val("");
+    $("#channel_text").val("");
+    $("#hidden_text").val("");
+    $("#tx_power_text").val("");
+
+    // 指定要讀出的資料.
+    req_cmd = "&get.device.vap.*" +
+              "&get.device.vap.*.extra";
+
+    // 送出讀出資料請求.
+    self_jslib = new mcm_jslib_lib_t();
+    self_jslib.socket_path = "@mintcm";
+    self_jslib.session_permission = mcm_session_permission.ro;
+    self_jslib.session_stack_size = 0;
+    self_jslib.request_command = req_cmd;
+    self_jslib.data_format = mcm_data_format.all_default;
+    self_jslib.other_query = "";
+    rep_ret = mcm_jslib_obtain_config(self_jslib);
+    if(rep_ret.rep_code < mcm_return_code.pass)
+    {
+        alert("call mcm_jslib_obtain_config() fail" +
+              "[" + rep_ret.rep_code + "]");
+        mcm_jslib_run_script(rep_ret.rep_data);
+        return;
+    }
+    // 處理資料格式.
+    mcm_dv = JSON.parse(rep_ret.rep_data);
+
+    for(i = 0; i < mcm_dv.device.vap.length; i++)
+    {
+        // 顯示 device.vap.{i}
+        data_array = new Array(4);
+        data_array[0] = i + 1;
+        data_array[1] = mcm_dv.device.vap[i].ekey;
+        data_array[2] = mcm_jslib_convert_html_str(mcm_dv.device.vap[i].ssid);
+        data_array[3] = mcm_dv.device.vap[i].channel;
+        tmp_html = jsapi_make_trtd("css_td1", data_array);
+        $("#vap_list").find("tbody").append(tmp_html);
+
+        // 顯示 device.vap.{i}.extra
+        data_array = new Array(3);
+        data_array[0] = i + 1;
+        data_array[1] = mcm_dv.device.vap[i].extra.hidden;
+        data_array[2] = mcm_dv.device.vap[i].extra.tx_power;
+        tmp_html = jsapi_make_trtd("css_td1", data_array);
+        $("#extra_list").find("tbody").append(tmp_html);
+    }
+}
+
+// 增加 device.vap.*
+function config_vap_add()
+{
+    var self_jslib, req_cmd = "", rep_ret, tmp_path;
+
+
+    // 填充 device.vap.{vap_key} 路徑.
+    tmp_path = "device.vap.#" + $("#ekey_text").val();
+
+    // 增加 device.vap.{vap_key}
+    req_cmd += "&add." + tmp_path;
+    // 設定 device.vap.{vap_key}
+    req_cmd += "&set.s." + tmp_path + ".ssid=" +
+               mcm_jslib_convert_submit_str($("#ssid_text").val());
+    req_cmd += "&set.iui." + tmp_path + ".channel=" +
+               $("#channel_text").val();
+
+
+    // 填充 device.vap.{vap_key}.extra 路徑.
+    tmp_path = "device.vap.#" + $("#ekey_text").val() + ".extra";
+
+    // 設定 device.vap.{vap_key}.extra
+    req_cmd += "&set.isc." + tmp_path + ".hidden=" +
+               $("#hidden_text").val();
+    req_cmd += "&set.iss." + tmp_path + ".tx_power=" +
+               $("#tx_power_text").val();
+
+    // 送出修改資料請求.
+    self_jslib = new mcm_jslib_lib_t();
+    self_jslib.socket_path = "@mintcm";
+    self_jslib.session_permission = mcm_session_permission.rw;
+    self_jslib.session_stack_size = 0;
+    self_jslib.request_command = req_cmd;
+    self_jslib.after_complete = mcm_after_complete.reload;
+    self_jslib.other_query = "";
+    rep_ret = mcm_jslib_submit_config(self_jslib);
+    if(rep_ret.rep_code < mcm_return_code.pass)
+    {
+        alert("call mcm_jslib_submit_config() fail" +
+              "[" + rep_ret.rep_code + "]");
+        mcm_jslib_run_script(rep_ret.rep_data);
+        return;
+    }
+    mcm_jslib_run_script(rep_ret.rep_data);
+}
+</script>
+
+</head>
+
+<body onload="body_init()">
+
+  <div>[add][device.vap.*]</div>
+
+  <table class="css_table1">
+    <tr>
+      <td class="css_td1" colspan="3">device.vap.*</td>
+    </tr>
+    <tr>
+      <td class="css_td1">ekey</td>
+      <td class="css_td1">ssid</td>
+      <td class="css_td1">channel</td>
+    </tr>
+    <tr>
+      <td class="css_td1">
+        <input id="ekey_text" type="text" size="8">
+      </td>
+      <td class="css_td1">
+        <input id="ssid_text" type="text" size="32">
+      </td>
+      <td class="css_td1">
+        <input id="channel_text" type="text" size="8">
+      </td>
+    </tr>
+  </table>
+
+  <table class="css_table1">
+    <tr>
+      <td class="css_td1" colspan="2">device.vap.*.extra</td>
+    </tr>
+  	  <tr>
+      <td class="css_td1">hidden</td>
+      <td class="css_td1">tx_power</td>
+    </tr>
+    <tr>
+      <td class="css_td1">
+        <input id="hidden_text" type="text" size="4">
+      </td>
+      <td class="css_td1">
+        <input id="tx_power_text" type="text" size="8">
+      </td>
+    </tr>
+  </table>
+
+  <button type="button" onclick="config_vap_add()">add</button>
+  <br><br>
+
+  <table id="vap_list" class="css_table1">
+    <thead>
+      <tr>
+        <td class="css_td1" colspan="4">device.vap.*</td>
+      </tr>
+      <tr>
+        <td class="css_td1">no</td>
+        <td class="css_td1">ekey</td>
+        <td class="css_td1">ssid</td>
+        <td class="css_td1">channel</td>
+      </tr>
+    </thead>
+    <tbody>
+    </tbody>
+  </table>
+
+  <table id="extra_list" class="css_table1">
+    <thead>
+      <tr>
+        <td class="css_td1" colspan="3">device.vap.*.extra</td>
+      </tr>
+      <tr>
+        <td class="css_td1">no</td>
+        <td class="css_td1">hidden</td>
+        <td class="css_td1">tx_power</td>
+      </tr>
+    </thead>
+    <tbody>
+    </tbody>
+  </table>
+
+</body>
+
+</html>

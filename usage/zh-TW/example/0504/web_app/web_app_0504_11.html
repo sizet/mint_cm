@@ -1,0 +1,71 @@
+<!--
+Copyright © 2017, Che-Wei Hsu <cwxhsu@gmail.com>
+This file is part of the MintCM.
+Some rights reserved. See README.
+-->
+
+<html>
+
+<head>
+
+<meta http-equiv="cache-control" content="no-cache">
+<meta http-equiv="content-type" content="text/html; charset=utf-8">
+<script type="text/javascript" src="jquery_main.js"></script>
+<script type="text/javascript" src="json3.js"></script>
+<script type="text/javascript" src="mcm_jslib_api.js"></script>
+<script type="text/javascript" src="mcm_jslib_data_info_auto.js"></script>
+<link rel="stylesheet" href="web_app_0504_style.css">
+
+<script type="text/javascript">
+function do_test()
+{
+    var self_jslib, req_cmd = "", rep_ret;
+
+
+    req_cmd += "&set.s.device.descript=" +
+               mcm_jslib_convert_submit_str($("#descript_text").val());
+
+    req_cmd += "&run.mcm_module_submit_javascript_redirect_page_test";
+
+    self_jslib = new mcm_jslib_lib_t();
+    self_jslib.socket_path = "@mintcm";
+    self_jslib.session_permission = mcm_session_permission.rw;
+    self_jslib.session_stack_size = 0;
+    self_jslib.request_command = req_cmd;
+    self_jslib.after_complete = mcm_after_complete.reload;
+    self_jslib.other_query = "";
+    rep_ret = mcm_jslib_submit_config(self_jslib);
+    if(rep_ret.rep_code < mcm_return_code.pass)
+    {
+        alert("call mcm_jslib_submit_config() fail" +
+              "[" + rep_ret.rep_code + "]");
+        mcm_jslib_run_script(rep_ret.rep_data);
+        return;
+    }
+
+    // 執行回傳的文字.
+    mcm_jslib_run_script(rep_ret.rep_data);
+}
+</script>
+
+</head>
+
+<body>
+
+  <div>[submit_config]<br>[module JavaScript]<br>[redirect page]</div>
+
+  <table>
+    <tr>
+      <td>input url : </td>
+      <td>
+        <input id="descript_text" type="text" size="32" value="http://www.pchome.com.tw">
+      </td>
+      <td>
+        <button type="button" onclick="do_test()">submit</button>
+      </td>
+    </tr>
+  </table>
+
+</body>
+
+</html>

@@ -1,0 +1,108 @@
+<!--
+Copyright © 2017, Che-Wei Hsu <cwxhsu@gmail.com>
+This file is part of the MintCM.
+Some rights reserved. See README.
+-->
+
+<html>
+
+<head>
+
+<meta http-equiv="cache-control" content="no-cache">
+<meta http-equiv="content-type" content="text/html; charset=utf-8">
+<script type="text/javascript" src="jquery_main.js"></script>
+<script type="text/javascript" src="json3.js"></script>
+<script type="text/javascript" src="mcm_jslib_api.js"></script>
+<script type="text/javascript" src="mcm_jslib_data_info_auto.js"></script>
+<script type="text/javascript" src="web_app_0304_script.js"></script>
+<link rel="stylesheet" href="web_app_0304_style.css">
+
+<script type="text/javascript">
+function body_init()
+{
+    var self_jslib, req_cmd, rep_ret, mcm_dv, data_array, tmp_html = "";
+
+
+    // 指定要讀出的資料.
+    req_cmd = "&get.device" +
+              "&get.device.system" +
+              "&get.device.vap.*" +
+              "&get.device.vap.*.extra" +
+              "&get.device.vap.*.station.*" +
+              "&get.device.limit.*" +
+              "&get.device.client.*";
+
+    // 送出讀出資料請求.
+    self_jslib = new mcm_jslib_lib_t();
+    self_jslib.socket_path = "@mintcm";
+    self_jslib.session_permission = mcm_session_permission.ro;
+    self_jslib.session_stack_size = 0;
+    self_jslib.request_command = req_cmd;
+    self_jslib.other_query = "";
+    rep_ret = mcm_jslib_obtain_max_count(self_jslib);
+    if(rep_ret.rep_code < mcm_return_code.pass)
+    {
+        alert("call mcm_jslib_obtain_max_count() fail" +
+              "[" + rep_ret.rep_code + "]");
+        mcm_jslib_run_script(rep_ret.rep_data);
+        return;
+    }
+    // 處理資料格式.
+    mcm_dv = JSON.parse(rep_ret.rep_data);
+
+    // 顯示最大資料筆數 (方法 1).
+    data_array = new Array(2);
+    data_array[0] = new Array();
+    data_array[1] = new Array();
+    data_array[0].push("device");
+    data_array[1].push(mcm_dv.device.$max_count);
+    data_array[0].push("device.system");
+    data_array[1].push(mcm_dv.device.system.$max_count);
+    data_array[0].push("device.vap.*");
+    data_array[1].push(mcm_dv.device.vap.$max_count);
+    data_array[0].push("device.vap.*.extra");
+    data_array[1].push(mcm_dv.device.vap.extra.$max_count);
+    data_array[0].push("device.vap.*.station.*");
+    data_array[1].push(mcm_dv.device.vap.station.$max_count);
+    data_array[0].push("device.limit.*");
+    data_array[1].push(mcm_dv.device.limit.$max_count);
+    data_array[0].push("device.client.*");
+    data_array[1].push(mcm_dv.device.client.$max_count);
+    tmp_html += "[max-count] method-1";
+    tmp_html += jsapi_make_table("css_table1", "css_td1", data_array);
+    tmp_html += "<br>";
+
+    // 顯示最大資料筆數 (方法 2).
+    data_array = new Array(2);
+    data_array[0] = new Array();
+    data_array[1] = new Array();
+    data_array[0].push("device");
+    data_array[1].push(mcm_mcount_device_max_count);
+    data_array[0].push("device.system");
+    data_array[1].push(mcm_mcount_device_system_max_count);
+    data_array[0].push("device.vap.*");
+    data_array[1].push(mcm_mcount_device_vap_max_count);
+    data_array[0].push("device.vap.*.extra");
+    data_array[1].push(mcm_mcount_device_vap_extra_max_count);
+    data_array[0].push("device.vap.*.station.*");
+    data_array[1].push(mcm_mcount_device_vap_station_max_count);
+    data_array[0].push("device.limit.*");
+    data_array[1].push(mcm_mcount_device_limit_max_count);
+    data_array[0].push("device.client.*");
+    data_array[1].push(mcm_mcount_device_client_max_count);
+    tmp_html += "[max-count] method-2";
+    tmp_html += jsapi_make_table("css_table1", "css_td1", data_array);
+
+    $("#show_box").html(tmp_html);
+}
+</script>
+
+</head>
+
+<body onload="body_init()">
+
+  <div id="show_box"></div>
+
+</body>
+
+</html>

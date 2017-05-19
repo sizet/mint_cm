@@ -1,0 +1,194 @@
+<!--
+Copyright © 2017, Che-Wei Hsu <cwxhsu@gmail.com>
+This file is part of the MintCM.
+Some rights reserved. See README.
+-->
+
+<html>
+
+<head>
+<meta http-equiv="content-type" content="text/html; charset=utf-8">
+<link rel="stylesheet" href="../css/mcm_style.css">
+</head>
+
+<body class="css_body">
+
+<div class="css_div_box_frame_full">
+  <div class="css_div_box_title">chapter 04-01</div>
+  <div class="css_div_box_content">
+  </div>
+</div>
+<br>
+
+<div class="css_div_box_frame_full">
+  <div class="css_div_box_title">資料的存取 (內部模組)</div>
+  <div class="css_div_box_content">
+    <br>
+
+    內部模組存取資料庫的時機點有二個.
+    <br><br><br>
+
+    <div class="css_div_hook" id="hook_0401_obtain_flow_01"></div>
+    一是在 <a href="mcm_0301.html#hook_0301_case_obtain_01">#03-01#</a> 中 [從系統中取出資料] 的情況,
+    這時候 mcm_daemon 的處理步驟 :<br>
+    <table class="css_table_list1">
+      <tr>
+        <td class="css_td_list1_l">A01.&nbsp;</td>
+        <td class="css_td_list1_r">
+          外部程式取得使用權.
+        </td>
+      </tr>
+      <tr>
+        <td class="css_td_list1_l">A02.&nbsp;</td>
+        <td class="css_td_list1_r">
+          外部程式呼叫內部模組處理要取得的資料.
+        </td>
+      </tr>
+      <tr>
+        <td class="css_td_list1_l">A03.&nbsp;</td>
+        <td class="css_td_list1_r">
+          內部模組處理要取得的資料並放到資料庫中.
+        </td>
+      </tr>
+      <tr>
+        <td class="css_td_list1_l">A04.&nbsp;</td>
+        <td class="css_td_list1_r">
+          外部程式取得資料.
+        </td>
+      </tr>
+      <tr>
+        <td class="css_td_list1_l">A5.&nbsp;</td>
+        <td class="css_td_list1_r">
+          外部程式釋放使用權.
+        </td>
+      </tr>
+    </table>
+    <br><br>
+
+    <div class="css_div_hook" id="hook_0401_submit_flow_01"></div>
+    二是在 <a href="mcm_0301.html#hook_0301_case_submit_01">#03-01#</a> 中 [操控系統] 的情況,
+    這時候 mcm_daemon 的處理步驟 :<br>
+    <table class="css_table_list1">
+      <tr>
+        <td class="css_td_list1_l">B01.&nbsp;</td>
+        <td class="css_td_list1_r">
+          外部程式取得使用權.
+        </td>
+      </tr>
+      <tr>
+        <td class="css_td_list1_l">B02.&nbsp;</td>
+        <td class="css_td_list1_r">
+          外部程式修改資料 (設定/增加/刪除).
+        </td>
+      </tr>
+      <tr>
+        <td class="css_td_list1_l">B03.&nbsp;</td>
+        <td class="css_td_list1_r">
+          mcm_daemon 根據不同的修改方式處理資料.
+          <table class="css_table_list1">
+            <tr>
+              <td class="css_td_list1_l" width="50px">設定:</td>
+              <td class="css_td_list1_r">
+                將設定的資料放到資料庫的新進資料區, 並標註資料被設定. (原始的資料放在系統資料區)
+              </td>
+            </tr>
+            <tr>
+              <td class="css_td_list1_l">增加:</td>
+              <td class="css_td_list1_r">
+                在資料庫增加紀錄, 並將增加的資料放到新進資料區, 並標註資料被增加.
+              </td>
+            </tr>
+            <tr>
+              <td class="css_td_list1_l">刪除:</td>
+              <td class="css_td_list1_r">
+                複製系統資料區的資料到新進資料區, 並標註資料被刪除.
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+      <tr>
+        <td class="css_td_list1_l">B04.&nbsp;</td>
+        <td class="css_td_list1_r">
+          外部程式呼叫內部模組處理修改的資料.
+        </td>
+      </tr>
+      <tr>
+        <td class="css_td_list1_l">B05.&nbsp;</td>
+        <td class="css_td_list1_r">
+          外部程式釋放使用權.
+        </td>
+      </tr>
+      <tr>
+        <td class="css_td_list1_l">B06.&nbsp;</td>
+        <td class="css_td_list1_r">
+          mcm_daemon 根據最後一次的執行結果決定如何處理修改的資料.<br>
+          <table class="css_table_list1">
+            <tr>
+              <td class="css_td_list1_l" width="50px">成功:</td>
+              <td class="css_td_list1_r">
+                將資料庫新進資料區的資料套用回系統資料區.
+              </td>
+            </tr>
+            <tr>
+              <td class="css_td_list1_l">失敗:</td>
+              <td class="css_td_list1_r">
+                放棄資料庫新進資料區的資料.
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+    <br><br>
+
+    此章節是說明在 [A03] [B04] 的內部模組要如何存取資料庫.
+    <br><br>
+
+  </div>
+</div>
+<br>
+
+<div class="css_div_box_frame_full">
+  <div class="css_div_box_title">模組程式的格式</div>
+  <div class="css_div_box_content">
+    <br>
+
+    內部模組必須放在 <font class="css_font_b1">mint_cm/cm_daemon/mcm_module</font><br>
+    沒有限制函式的放置方式, 可以依據不同的功能將各種函式分類放在不同的檔案.
+    <br><br>
+
+    <div class="css_div_hook" id="hook_0402_module_include_01"></div>
+    需要的標頭檔 :<br>
+    <font class="css_font_p1">#include "../../mcm_lib/mcm_lheader/mcm_type.h"</font><br>
+    <font class="css_font_p1">#include "../../mcm_lib/mcm_lheader/mcm_size.h"</font><br>
+    <font class="css_font_p1">#include "../../mcm_lib/mcm_lheader/mcm_control.h"</font><br>
+    <font class="css_font_p1">#include "../../mcm_lib/mcm_lheader/mcm_connect.h"</font><br>
+    <font class="css_font_p1">#include "../../mcm_lib/mcm_lheader/mcm_return.h"</font><br>
+    <font class="css_font_p1">#include "../../mcm_lib/mcm_lheader/mcm_debug.h"</font><br>
+    <font class="css_font_p1">#include "../../mcm_lib/mcm_lheader/mcm_data_exinfo_auto.h"</font><br>
+    <font class="css_font_p1">#include "../mcm_service_handle_extern.h"</font><br>
+    <font class="css_font_p1">#include "../mcm_config_handle_extern.h"</font>
+    <br><br>
+
+    函式格式 :<br>
+    <font class="css_font_p1">int</font>
+    <font class="css_font_b1">&lt;function_name&gt;</font><font class="css_font_g1">(struct mcm_service_session_t *this_session)</font>
+    <br><br>
+
+    範例 :<br>
+<pre class="css_pre_code">
+int system_config(struct mcm_service_session_t *this_session)
+{
+    ...
+}
+</pre>
+<br>
+
+  </div>
+</div>
+<br>
+
+</body>
+
+</html>

@@ -1,0 +1,44 @@
+; Copyright © 2017, Che-Wei Hsu <cwxhsu@gmail.com>
+; This file is part of the MintCM.
+; Some rights reserved. See README.
+
+$version 1.0
+
+; device
+device descript:Wireless%20Device serial_number:0022E5A1CC9F
+
+; device.system
+device.system date:2015/06/07 ip_addr:192.168.10.254 uptime:0 loading:45.678
+
+; device.vap.*
+device.vap.#8 ssid:open-1 channel:10
+device.vap.#15 ssid:radius-2 channel:44
+device.vap.#23 ssid:wap2-3 channel:0
+
+; device.vap.*.extra
+device.vap.#8.extra hidden:1 tx_power:9
+device.vap.#15.extra hidden:0 tx_power:10
+device.vap.#23.extra hidden:0 tx_power:3
+
+; device.vap.*.station.*
+device.vap.#8.station.#20 mac_addr:00:11:22:33:44:55 rule:3
+device.vap.#15.station.#30 mac_addr:00:aa:bb:cc:dd:ee rule:5
+device.vap.#15.station.#33 mac_addr:00:aa:bb:cc:dd:ff rule:6
+
+; device.limit.*
+device.limit.#3 name:normal priority:10
+device.limit.#5 name:height priority:15
+device.limit.#6 name:low priority:5
+
+; device.client.*
+
+; device.web
+
+; device.web.account.*
+device.web.account.#1 name:root password:root permission:0 idle_timeout:60
+device.web.account.#2 name:admin password:admin123 permission:1 idle_timeout:45
+device.web.account.#3 name:user password:123456 permission:2 idle_timeout:30
+device.web.account.#4 name:guest password: permission:3 idle_timeout:15
+
+; device.web.session.*
+

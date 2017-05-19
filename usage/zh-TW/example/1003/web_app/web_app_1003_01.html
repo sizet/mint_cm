@@ -1,0 +1,81 @@
+<!--
+Copyright © 2017, Che-Wei Hsu <cwxhsu@gmail.com>
+This file is part of the MintCM.
+Some rights reserved. See README.
+-->
+
+<html>
+
+<head>
+
+<meta http-equiv="cache-control" content="no-cache">
+<meta http-equiv="content-type" content="text/html; charset=utf-8">
+<script type="text/javascript" src="jquery_main.js"></script>
+<script type="text/javascript" src="jquery_cookie.js"></script>
+<script type="text/javascript" src="maam_jslib_api.js"></script>
+<link rel="stylesheet" href="web_app_1003_style.css">
+
+<script type="text/javascript">
+function body_init()
+{
+    var tmp_html = "";
+
+
+    // 取出 session_key.
+    tmp_html += "session_key = " + $.cookie("session_key") + "<br>";
+    // 取出 account_name.
+    tmp_html += "account_name = " + $.cookie("account_name") + "<br>";
+    // 取出 account_permission.
+    tmp_html += "account_permission = " + $.cookie("account_permission");
+
+    $("#show_box").html(tmp_html);
+}
+
+function account_logout()
+{
+    var self_maam_jslib, rep_ret, tmp_html;
+
+
+    // 登出.
+    self_maam_jslib = new maam_jslib_lib_t();
+    self_maam_jslib.request_action = maaam_request_action.logout;
+    self_maam_jslib.request_data = "";
+    self_maam_jslib.other_query = "";
+    rep_ret = maam_jslib_account_auth(self_maam_jslib);
+    if(rep_ret.rep_code < maam_return_code.pass)
+    {
+        switch(rep_ret.rep_code)
+        {
+            case maam_return_code.miss_session_key:
+            case maam_return_code.invalid_session_key:
+                tmp_html = "invalid access, please login";
+                break;
+            case maam_return_code.idle_timeout:
+                tmp_html = "idle timeout, please re-login";
+                break;
+            default:
+                tmp_html = "call maam_jslib_account_auth() fail" +
+                           "[" + rep_ret.rep_code + "]";
+        }
+        alert(tmp_html);
+    }
+    // 導向登入頁面.
+    maam_jslib_run_script(rep_ret.rep_data);
+}
+</script>
+
+</head>
+
+<body onload="body_init()">
+
+  <div>[cookie]</div>
+  <br>
+
+  <div id="show_box"></div>
+  <br>
+
+  <button type="button" onclick="account_logout()">logout</button>
+
+</body>
+
+</html>

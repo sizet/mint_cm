@@ -1,0 +1,134 @@
+<!--
+Copyright © 2017, Che-Wei Hsu <cwxhsu@gmail.com>
+This file is part of the MintCM.
+Some rights reserved. See README.
+-->
+
+<html>
+
+<head>
+
+<meta http-equiv="cache-control" content="no-cache">
+<meta http-equiv="content-type" content="text/html; charset=utf-8">
+<script type="text/javascript" src="jquery_main.js"></script>
+<script type="text/javascript" src="json3.js"></script>
+<script type="text/javascript" src="mcm_jslib_api.js"></script>
+<script type="text/javascript" src="mcm_jslib_data_info_auto.js"></script>
+<link rel="stylesheet" href="web_app_0406_style.css">
+
+<script type="text/javascript">
+function body_init()
+{
+    $("#descript_div").html();
+    $("#serial_number_div").html();
+    $("#date_div").html();
+    $("#ip_addr_div").html();
+    $("#uptime_div").html();
+    $("#loading_div").html();
+}
+
+// 讀取資料.
+function module_run()
+{
+    var self_jslib, req_cmd = "", rep_ret, mcm_dv;
+
+
+    $("#descript_div").html();
+    $("#serial_number_div").html();
+    $("#date_div").html();
+    $("#ip_addr_div").html();
+    $("#uptime_div").html();
+    $("#loading_div").html();
+
+    // 執行模組, 模組修改資料, 在讀出 device
+    req_cmd += "&run.mcm_module_set_alone";
+    req_cmd += "&get.device";
+    // 執行模組, 模組修改資料, 在讀出 device.system
+    req_cmd += "&run.mcm_module_set_entry";
+    req_cmd += "&get.device.system";
+
+    // 送出讀出資料請求.
+    self_jslib = new mcm_jslib_lib_t();
+    self_jslib.socket_path = "@mintcm";
+    self_jslib.session_permission = mcm_session_permission.rw;
+    self_jslib.session_stack_size = 0;
+    self_jslib.request_command = req_cmd;
+    self_jslib.data_format = mcm_data_format.all_default;
+    self_jslib.other_query = "";
+    rep_ret = mcm_jslib_obtain_config(self_jslib);
+    if(rep_ret.rep_code < mcm_return_code.pass)
+    {
+        alert("call mcm_jslib_obtain_config() fail" +
+              "[" + rep_ret.rep_code + "]");
+        mcm_jslib_run_script(rep_ret.rep_data);
+        return;
+    }
+    // 處理資料格式.
+    mcm_dv = JSON.parse(rep_ret.rep_data);
+
+    // 顯示 device
+    $("#descript_div").html(mcm_dv.device.descript);
+    $("#serial_number_div").html(mcm_dv.device.serial_number);
+
+    // 顯示 device.system
+    $("#date_div").html(mcm_dv.device.system.date);
+    $("#ip_addr_div").html(mcm_dv.device.system.ip_addr);
+    $("#uptime_div").html(mcm_dv.device.system.uptime);
+    $("#loading_div").html(mcm_dv.device.system.loading);
+}
+</script>
+
+</head>
+
+<body onload="body_init()">
+
+  <div>[set-alone]</div>
+  <div>[set-entry]</div>
+
+  <table class="css_table1">
+    <tr>
+      <td class="css_td1">device.descript</td>
+      <td class="css_td1">
+        <div id="descript_div"></div>
+      </td>
+    </tr>
+    <tr>
+      <td class="css_td1">device.serial_number</td>
+      <td class="css_td1">
+        <div id="serial_number_div"></div>
+      </td>
+    </tr>
+  </table>
+
+  <table class="css_table1">
+    <tr>
+      <td class="css_td1">device.system.date</td>
+      <td class="css_td1">
+        <div id="date_div"></div>
+      </td>
+    </tr>
+    <tr>
+      <td class="css_td1">device.system.ip_addr</td>
+      <td class="css_td1">
+        <div id="ip_addr_div"></div>
+      </td>
+    </tr>
+    <tr>
+      <td class="css_td1">device.system.uptime</td>
+      <td class="css_td1">
+        <div id="uptime_div"></div>
+      </td>
+    </tr>
+    <tr>
+      <td class="css_td1">device.system.loading</td>
+      <td class="css_td1">
+        <div id="loading_div"></div>
+      </td>
+    </tr>
+  </table>
+
+  <button type="button" onclick="module_run()">run</button>
+
+</body>
+
+</html>

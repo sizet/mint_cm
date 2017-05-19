@@ -1,0 +1,330 @@
+<!--
+Copyright © 2017, Che-Wei Hsu <cwxhsu@gmail.com>
+This file is part of the MintCM.
+Some rights reserved. See README.
+-->
+
+<html>
+
+<head>
+<meta http-equiv="content-type" content="text/html; charset=utf-8">
+<link rel="stylesheet" href="../css/mcm_style.css">
+</head>
+
+<body class="css_body">
+
+<div class="css_div_box_frame_full">
+  <div class="css_div_box_title">chapter 07-01</div>
+  <div class="css_div_box_content">
+  </div>
+</div>
+<br>
+
+<div class="css_div_box_frame_full">
+  <div class="css_div_box_title">資料現在值檔案的錯誤處理</div>
+  <div class="css_div_box_content">
+    <br>
+
+    mcm_daemon 啟動後, 會檢查資料檔案是否有錯誤 <a href="mcm_0601.html#hook_0601_mint_cm_boot_01">[詳細][04]</a>,
+    當發現到有錯誤時, 會做處理.
+    <br><br>
+
+    有四種處理方式 :<br>
+    <table class="css_table_list2">
+      <tr>
+        <td class="css_td_list2_l1" width="190px">還原預設值 (內部)</td>
+        <td class="css_td_list2_r1">
+          mcm_daemon 自動將資料還原到預設值<br>
+        </td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l1">還原預設值 (外部)</td>
+        <td class="css_td_list2_r1">
+          如果設備需要重新開機做處理, 使用此方式執行外部批次檔或程式實行
+        </td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l1">除錯 (還原預設值-內部)</td>
+        <td class="css_td_list2_r1">
+          手動檢查發生的錯誤並嘗試修正, 如果無法處理需要還原到預設值則使用 [還原預設值 (內部)]
+          方式處理
+        </td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l1">除錯 (還原預設值-外部)</td>
+        <td class="css_td_list2_r1">
+          手動檢查發生的錯誤並嘗試修正, 如果無法處理需要還原到預設值則使用 [還原預設值 (外部)]
+          方式處理
+        </td>
+      </tr>
+    </table>
+    <br>
+
+    啟用方式為在執行 mcm_daemon 時帶入 <font class="css_font_b1">-e ?</font> 參數<br>
+    <table class="css_table_list2">
+      <tr>
+        <td class="css_td_list2_r1"><font class="css_font_r1">0</font></td>
+        <td class="css_td_list2_l1">還原預設值 (內部)</td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_r1"><font class="css_font_r1">1</font></td>
+        <td class="css_td_list2_l1">還原預設值 (外部)</td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_r1"><font class="css_font_r1">2</font></td>
+        <td class="css_td_list2_l1">除錯 (還原預設值-內部)</td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_r1"><font class="css_font_r1">3</font></td>
+        <td class="css_td_list2_l1">除錯 (還原預設值-外部)</td>
+      </tr>
+    </table>
+    <br>
+
+    當發現到有錯誤時, 程式會顯示錯誤訊息 <a href="mcm_0202.html#hook_0202_error_message_01">[詳細]</a>.
+    <br><br>
+
+  </div>
+</div>
+<br>
+
+<div class="css_div_box_frame_full">
+  <div class="css_div_box_title">資料錯誤的種類</div>
+  <div class="css_div_box_content">
+    <br>
+
+    <div class="css_div_hook" id="hook_0701_detect_and_mark_01"></div>
+    <font class="css_font_g1">以下是能夠檢測到並且可以標記的錯誤.</font>
+    <br><br>
+
+    <table class="css_table_box">
+      <tr>
+        <td class="css_td_box">
+          <font class="css_font_b2">遺失 parent-entry</font>
+          <br><br>
+          範例 :<br>
+          <div class="css_div_block">
+            有如下的資料<br>
+            device.vap.#8.station.#20 mac_addr:00:11:22:33:44:55 rule:3
+            <br><br>
+            如果 device.vap.#8 的資料不存在, 就會檢查到發生錯誤<br>
+          </div>
+        </td>
+      </tr>
+    </table>
+    <br>
+
+    <table class="css_table_box">
+      <tr>
+        <td class="css_td_box">
+          <font class="css_font_b2">遺失 entry</font>
+          <br><br>
+          範例-01 :<br>
+          <div class="css_div_block">
+            有如下的資料<br>
+            device.vap.#8.station.#20 mac_addr:00:11:22:33:44:55 rule:3<br><br>
+            如果 device.vap.#8 的資料不存在, 就會檢查到發生錯誤<br>
+          </div>
+          範例-02 :<br>
+          <div class="css_div_block">
+            device.system 是 gs 類型的資料, 但是卻不存在, 就會檢查到發生錯誤.
+          </div>
+          範例-03 :<br>
+          <div class="css_div_block">
+            有如下的資料<br>
+            device.vap.#8 ssid:open-1 channel:10<br><br>
+            但是 device.vap.#8.extra 不存在.<br>
+            device.vap 是 gs 類型的資料, 但是卻不存在, 就會檢查到發生錯誤.
+          </div>
+        </td>
+      </tr>
+    </table>
+    <br>
+
+    <table class="css_table_box">
+      <tr>
+        <td class="css_td_box">
+          <font class="css_font_b2">重複的 entry</font>
+          <br><br>
+          範例 :<br>
+          <div class="css_div_block">
+            有如下的資料<br>
+            device.vap.#23 ssid:wap2-3 channel:0<br>
+            device.vap.#23 ssid:wap2-3 channel:0<br><br>
+            device.vap.#23 重複, 檢查到發生錯誤<br>
+          </div>
+        </td>
+      </tr>
+    </table>
+    <br>
+
+    <table class="css_table_box">
+      <tr>
+        <td class="css_td_box">
+          <font class="css_font_b2">未知的參數</font>
+          <br><br>
+          範例 :<br>
+          <div class="css_div_block">
+            有如下的資料<br>
+            device descript:Wireless%20Device abc123<br><br>
+            abc123 是無法識別的資料, 檢查到發生錯誤<br>
+          </div>
+        </td>
+      </tr>
+    </table>
+    <br>
+
+    <table class="css_table_box">
+      <tr>
+        <td class="css_td_box">
+          <font class="css_font_b2">未知的 member</font>
+          <br><br>
+          範例 :<br>
+          <div class="css_div_block">
+            有如下的資料<br>
+            device.limit.#3 name:normal priority:10 type:app<br><br>
+            type:app 是無法識別的 member, 檢查到發生錯誤<br>
+          </div>
+        </td>
+      </tr>
+    </table>
+    <br>
+
+    <table class="css_table_box">
+      <tr>
+        <td class="css_td_box">
+          <font class="css_font_b2">遺失 member</font>
+          <br><br>
+          範例 :<br>
+          <div class="css_div_block">
+            有如下的資料<br>
+            device.system date:2015/06/07 ip_addr:192.168.10.254 loading:45.678<br><br>
+            uptime 遺失, 檢查到發生錯誤<br>
+          </div>
+        </td>
+      </tr>
+    </table>
+    <br>
+
+    <table class="css_table_box">
+      <tr>
+        <td class="css_td_box">
+          <font class="css_font_b2">重複的 member</font>
+          <br><br>
+          範例 :<br>
+          <div class="css_div_block">
+            有如下的資料<br>
+            device.vap.#23.extra hidden:0 tx_power:3 tx_power:5<br><br>
+            tx_power 重複, 檢查到發生錯誤<br>
+          </div>
+        </td>
+      </tr>
+    </table>
+    <br>
+
+    <table class="css_table_box">
+      <tr>
+        <td class="css_td_box">
+          <font class="css_font_b2">無效的數值</font>
+          <br><br>
+          範例 :<br>
+          <div class="css_div_block">
+            有如下的資料<br>
+            device.vap.#23.extra hidden:1234 tx_power:3<br><br>
+            hidden 是 isc 類型, 範圍 -128 ~ 127, 檢查到發生錯誤<br>
+          </div>
+        </td>
+      </tr>
+    </table>
+    <br>
+
+    <div class="css_div_hook" id="hook_0701_detect_not_mark_01"></div>
+    <font class="css_font_g1">以下是能夠檢測到<font class="css_font_r1">但是無法標記</font>的錯誤.</font>
+    <br><br>
+
+    <table class="css_table_box">
+      <tr>
+        <td class="css_td_box">
+          <font class="css_font_b2">錯誤的格式</font>
+          <font class="css_font_r1">(INVALID_FORMAT_01)</font>
+          <br><br>
+          範例 :<br>
+          <div class="css_div_block">
+            有如下的資料<br>
+            abc123<br><br>
+            資料格式是 $(entry-path) $(member-list), 缺少中間的分隔符號 [ ]<br>
+          </div>
+        </td>
+      </tr>
+    </table>
+    <br>
+
+    <table class="css_table_box">
+      <tr>
+        <td class="css_td_box">
+          <font class="css_font_b2">未知的 group</font>
+          <font class="css_font_r1">(INVALID_ENTRY-FORMAT_03)</font>
+          <br><br>
+          範例 :<br>
+          <div class="css_div_block">
+            有如下的資料<br>
+            device.management name:admin password:123456<br><br>
+            management 是不存在的 group
+          </div>
+        </td>
+      </tr>
+    </table>
+    <br>
+
+    <font class="css_font_r1">以下是無法檢測到的資料錯誤.</font>
+    <br><br>
+
+    <table class="css_table_box">
+      <tr>
+        <td class="css_td_box">
+          <font class="css_font_b2">資料筆數超過上限</font>
+          <br><br>
+          資料筆數超過 $(max) 的上限時, 多的資料會被遺棄, 但是不會標記錯誤.
+          <br><br>
+          範例 :<br>
+          <div class="css_div_block">
+            有如下的資料<br>
+            device.vap.#1 ssid:open-1 channel:10<br>
+            device.vap.#2 ssid:open-2 channel:20<br>
+            ...<br>
+            device.vap.#64 ssid:open-64 channel:640<br>
+            device.vap.#65 ssid:open-65 channel:650<br>
+            device.vap.#66 ssid:open-66 channel:660<br><br>
+            device.vap.* 的上限是 64 筆, 所以 #65 和 #66 會被遺棄但是不會被標記錯誤
+          </div>
+        </td>
+      </tr>
+    </table>
+    <br>
+
+    <table class="css_table_box">
+      <tr>
+        <td class="css_td_box">
+          <font class="css_font_b2">無法發現的 entry 遺失</font>
+          <br><br>
+          遺失 entry 要被發現必須是 child-entry 存在而 parent-entry 不存在才能被發現.
+          <br><br>
+          範例 :<br>
+          <div class="css_div_block">
+            device.limit.#3 name:normal priority:10<br>
+            device.limit.#5 name:height priority:15<br>
+            device.limit.#6 name:low priority:5<br><br>
+            假如 device.limit.#5 遺失, 則無法檢測出來有錯誤
+          </div>
+        </td>
+      </tr>
+    </table>
+    <br>
+
+  </div>
+</div>
+<br>
+
+</body>
+
+</html>

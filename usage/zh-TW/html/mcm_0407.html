@@ -1,0 +1,581 @@
+<!--
+Copyright © 2017, Che-Wei Hsu <cwxhsu@gmail.com>
+This file is part of the MintCM.
+Some rights reserved. See README.
+-->
+
+<html>
+
+<head>
+<meta http-equiv="content-type" content="text/html; charset=utf-8">
+<link rel="stylesheet" href="../css/mcm_style.css">
+</head>
+
+<body class="css_body">
+
+<div class="css_div_box_frame_full">
+  <div class="css_div_box_title">chapter 04-07</div>
+  <div class="css_div_box_content">
+  </div>
+</div>
+<br>
+
+<div class="css_div_box_frame_full">
+  <div class="css_div_box_title">其他</div>
+  <div class="css_div_box_content">
+    <br>
+
+    此章節說明內部模組其他可用的函式和相關的全域變數以及其他要注意的事項.
+    <br><br>
+
+  </div>
+</div>
+<br>
+
+<div class="css_div_box_frame_full">
+  <div class="css_div_box_title">可用的函式</div>
+  <div class="css_div_box_content">
+    <br>
+
+    <div class="css_div_hook" id="hook_0407_mcm_config_save_01"></div>
+    <table class="css_table_box">
+      <tr>
+        <td class="css_td_box">
+          <font class="css_font_b2">mcm_config_save</font><br>
+          要求 mcm_daemon 儲存資料到資料現在值檔案.<br>
+          <table class="css_table_list2">
+            <tr>
+              <td class="css_td_list2_t1">參數</td>
+              <td class="css_td_list2_t1">說明</td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l1">
+                <font class="css_font_r1">struct mcm_service_session_t *</font><br>
+                <font class="css_font_g1">this_session</font>
+              </td>
+              <td class="css_td_list2_r1">
+                請求端的連線資訊
+              </td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l1">
+                <font class="css_font_r1">MCM_DTYPE_LIST_TD</font><br>
+                <font class="css_font_g1">update_type</font><br>
+              </td>
+              <td class="css_td_list2_r1">
+                更新資料的方式<br>
+                <font class="css_font_p1">固定設 MCM_DUPDATE_SYNC</font>
+              </td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l1">
+                <font class="css_font_r1">MCM_DTYPE_BOOL_TD</font><br>
+                <font class="css_font_g1">check_save_mode</font><br>
+              </td>
+              <td class="css_td_list2_r1">
+                是否檢查儲存模式<br>
+                <font class="css_font_p1">固定設 0</font>
+              </td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l1">
+                <font class="css_font_r1">MCM_DTYPE_BOOL_TD</font><br>
+                <font class="css_font_g1">force_save</font><br>
+              </td>
+              <td class="css_td_list2_r1">
+                是否強制要求儲存資料<br>
+                <font class="css_font_p1">0 : 否, 有需要儲存的資料被修改才儲存</font><br>
+                <font class="css_font_p1">1 : 是, 不論有無修改都要儲存</font>
+              </td>
+            </tr>
+          </table>
+          <table class="css_table_list2">
+            <tr>
+              <td class="css_td_list2_t1">回傳</td>
+              <td class="css_td_list2_t1">說明</td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l2">&gt;= MCM_RCODE_PASS</td>
+              <td class="css_td_list2_r1">成功</td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l2">&nbsp;&lt; MCM_RCODE_PASS</td>
+              <td class="css_td_list2_r1">錯誤</td>
+            </tr>
+          </table>
+          <br>
+          注意事項 :<br>
+          <table class="css_table_list1">
+            <tr>
+              <td class="css_td_list1_l">01.&nbsp;</td>
+              <td class="css_td_list1_r">
+                外部程式或網頁程式的資料存取模式 (session_permission) 必須是讀寫.
+              </td>
+            </tr>
+          </table>
+          <br>
+          範例 :<br>
+<pre class="css_pre_code">
+外部程式部分
+
+#include &lt;time.h&gt;
+#include &lt;errno.h&gt;
+#include &lt;stdio.h&gt;
+#include &lt;string.h&gt;
+#include &lt;stdlib.h&gt;
+#include "mcm_lheader/mcm_type.h"
+#include "mcm_lheader/mcm_size.h"
+#include "mcm_lheader/mcm_connect.h"
+#include "mcm_lheader/mcm_return.h"
+#include "mcm_lheader/mcm_data_exinfo_auto.h"
+#include "mcm_lulib/mcm_lulib_api.h"
+
+#define DMSG(msg_fmt, msgs...) printf("%s(%04u): " msg_fmt "\n", __FILE__, __LINE__, ##msgs)
+
+int main(int argc, char **argv)
+{
+    char *path1;
+    struct mcm_lulib_lib_t self_lulib;
+
+    memset(&self_lulib, 0, sizeof(struct mcm_lulib_lib_t));
+    self_lulib.socket_path = "@mintcm";
+    self_lulib.call_from = MCM_CFROM_USER;
+    self_lulib.session_permission = MCM_SPERMISSION_RW;
+    self_lulib.session_stack_size = 0;
+    if(mcm_lulib_init(&self_lulib) < MCM_RCODE_PASS)
+    {
+        DMSG("call mcm_lulib_init() fail");
+        goto FREE_01;
+    }
+
+    // 呼叫內部模組.
+    path1 = "mcm_module_save_test";
+    DMSG("[run] %s", path1);
+    if(mcm_lulib_run(&self_lulib, path1) < MCM_RCODE_PASS)
+    {
+        DMSG("call mcm_lulib_run(%s) fail", path1);
+        goto FREE_02;
+    }
+
+FREE_02:
+    mcm_lulib_exit(&self_lulib);
+FREE_01:
+    return 0;
+}
+</pre>
+<pre class="css_pre_code">
+內部模組部分
+
+#include &lt;time.h&gt;
+#include &lt;errno.h&gt;
+#include &lt;stdio.h&gt;
+#include &lt;string.h&gt;
+#include &lt;stdlib.h&gt;
+#include "../../mcm_lib/mcm_lheader/mcm_type.h"
+#include "../../mcm_lib/mcm_lheader/mcm_size.h"
+#include "../../mcm_lib/mcm_lheader/mcm_control.h"
+#include "../../mcm_lib/mcm_lheader/mcm_connect.h"
+#include "../../mcm_lib/mcm_lheader/mcm_return.h"
+#include "../../mcm_lib/mcm_lheader/mcm_debug.h"
+#include "../../mcm_lib/mcm_lheader/mcm_data_exinfo_auto.h"
+#include "../mcm_service_handle_extern.h"
+#include "../mcm_config_handle_extern.h"
+
+#define DMSG(msg_fmt, msgs...) printf("%s(%04u): " msg_fmt "\n", __FILE__, __LINE__, ##msgs)
+
+int mcm_module_save_test(
+    struct mcm_service_session_t *this_session)
+{
+    int fret = MCM_RCODE_MODULE_INTERNAL_ERROR;
+    MCM_DTYPE_BOOL_TD force_save = 1;
+
+    DMSG("[save] %s", force_save == 0 ? "check" : "force");
+    if(mcm_config_save(this_session, MCM_DUPDATE_SYNC, 0, force_save) < MCM_RCODE_PASS)
+    {
+        DMSG("call mcm_config_save() fail");
+        goto FREE_01;
+    }
+
+    fret = MCM_RCODE_PASS;
+FREE_01:
+    return fret;
+}
+</pre>
+        </td>
+      </tr>
+    </table>
+    <br>
+
+    <div class="css_div_hook" id="hook_0407_mcm_config_shutdown_01"></div>
+    <table class="css_table_box">
+      <tr>
+        <td class="css_td_box">
+          <font class="css_font_b2">mcm_config_shutdown</font><br>
+          關閉 mcm_daemon, 當系統需要關機或重開機時先讓 mcm_daemon 正常關閉.<br>
+          <table class="css_table_list2">
+            <tr>
+              <td class="css_td_list2_t1">參數</td>
+              <td class="css_td_list2_t1">說明</td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l1">
+                <font class="css_font_r1">struct mcm_service_session_t *</font><br>
+                <font class="css_font_g1">this_session</font>
+              </td>
+              <td class="css_td_list2_r1">
+                請求端的連線資訊
+              </td>
+            </tr>
+          </table>
+          <table class="css_table_list2">
+            <tr>
+              <td class="css_td_list2_t1">回傳</td>
+              <td class="css_td_list2_t1">說明</td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l2">&gt;= MCM_RCODE_PASS</td>
+              <td class="css_td_list2_r1">成功</td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l2">&nbsp;&lt; MCM_RCODE_PASS</td>
+              <td class="css_td_list2_r1">錯誤</td>
+            </tr>
+          </table>
+          <br>
+          注意事項 :
+          <table class="css_table_list1">
+            <tr>
+              <td class="css_td_list1_l">01.&nbsp;</td>
+              <td class="css_td_list1_r">
+                外部程式或網頁程式的資料存取模式 (session_permission) 必須是讀寫.
+              </td>
+            </tr>
+            <tr>
+              <td class="css_td_list1_l">02.&nbsp;</td>
+              <td class="css_td_list1_r">
+                使用後並不會馬上關閉, 要等到 mcm_lulib_exit() / mcm_lklib_exit() 之後才會關閉.
+              </td>
+            </tr>
+          </table>
+          <br>
+          範例 :<br>
+<pre class="css_pre_code">
+外部程式部分
+
+#include &lt;time.h&gt;
+#include &lt;errno.h&gt;
+#include &lt;stdio.h&gt;
+#include &lt;string.h&gt;
+#include &lt;stdlib.h&gt;
+#include "mcm_lheader/mcm_type.h"
+#include "mcm_lheader/mcm_size.h"
+#include "mcm_lheader/mcm_connect.h"
+#include "mcm_lheader/mcm_return.h"
+#include "mcm_lheader/mcm_data_exinfo_auto.h"
+#include "mcm_lulib/mcm_lulib_api.h"
+
+#define DMSG(msg_fmt, msgs...) printf("%s(%04u): " msg_fmt "\n", __FILE__, __LINE__, ##msgs)
+
+int main(int argc, char **argv)
+{
+    char *path1;
+    struct mcm_lulib_lib_t self_lulib;
+
+    memset(&self_lulib, 0, sizeof(struct mcm_lulib_lib_t));
+    self_lulib.socket_path = "@mintcm";
+    self_lulib.call_from = MCM_CFROM_USER;
+    self_lulib.session_permission = MCM_SPERMISSION_RW;
+    self_lulib.session_stack_size = 0;
+    if(mcm_lulib_init(&self_lulib) < MCM_RCODE_PASS)
+    {
+        DMSG("call mcm_lulib_init() fail");
+        goto FREE_01;
+    }
+
+    // 呼叫內部模組.
+    path1 = "mcm_module_shutdown_test";
+    DMSG("[run] %s", path1);
+    if(mcm_lulib_run(&self_lulib, path1) < MCM_RCODE_PASS)
+    {
+        DMSG("call mcm_lulib_run(%s) fail", path1);
+        goto FREE_02;
+    }
+
+FREE_02:
+    mcm_lulib_exit(&self_lulib);
+FREE_01:
+    return 0;
+}
+</pre>
+<pre class="css_pre_code">
+內部模組部分
+
+#include &lt;time.h&gt;
+#include &lt;errno.h&gt;
+#include &lt;stdio.h&gt;
+#include &lt;string.h&gt;
+#include &lt;stdlib.h&gt;
+#include "../../mcm_lib/mcm_lheader/mcm_type.h"
+#include "../../mcm_lib/mcm_lheader/mcm_size.h"
+#include "../../mcm_lib/mcm_lheader/mcm_control.h"
+#include "../../mcm_lib/mcm_lheader/mcm_connect.h"
+#include "../../mcm_lib/mcm_lheader/mcm_return.h"
+#include "../../mcm_lib/mcm_lheader/mcm_debug.h"
+#include "../../mcm_lib/mcm_lheader/mcm_data_exinfo_auto.h"
+#include "../mcm_service_handle_extern.h"
+#include "../mcm_config_handle_extern.h"
+
+#define DMSG(msg_fmt, msgs...) printf("%s(%04u): " msg_fmt "\n", __FILE__, __LINE__, ##msgs)
+
+int mcm_module_shutdown_test(
+    struct mcm_service_session_t *this_session)
+{
+    int fret = MCM_RCODE_MODULE_INTERNAL_ERROR;
+
+    DMSG("[shutdown]");
+    if(mcm_config_shutdown(this_session) < MCM_RCODE_PASS)
+    {
+        DMSG("call mcm_config_shutdown() fail");
+        goto FREE_01;
+    }
+
+    fret = MCM_RCODE_PASS;
+FREE_01:
+    return fret;
+}
+</pre>
+        </td>
+      </tr>
+    </table>
+    <br>
+
+    <div class="css_div_hook" id="hook_0407_mcm_config_remove_store_current_profile_01"></div>
+    <table class="css_table_box">
+      <tr>
+        <td class="css_td_box">
+          <font class="css_font_b2">mcm_config_remove_store_current_profile</font><br>
+          如果需要做還原到預設值操作, 方法是先移除資料現在值檔案, 之後重新啟動 mcm_daemon,
+          mcm_daemon 發現資料現在值檔案不存在就會讀取資料預設值檔案. 使用此函式移除移除資料現在值檔案.<br>
+          <table class="css_table_list2">
+            <tr>
+              <td class="css_td_list2_t1">參數</td>
+              <td class="css_td_list2_t1">說明</td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l1">
+                <font class="css_font_r1">struct mcm_service_session_t *</font><br>
+                <font class="css_font_g1">this_session</font>
+              </td>
+              <td class="css_td_list2_r1">
+                請求端的連線資訊
+              </td>
+            </tr>
+          </table>
+          <table class="css_table_list2">
+            <tr>
+              <td class="css_td_list2_t1">回傳</td>
+              <td class="css_td_list2_t1">說明</td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l2">&gt;= MCM_RCODE_PASS</td>
+              <td class="css_td_list2_r1">成功</td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l2">&nbsp;&lt; MCM_RCODE_PASS</td>
+              <td class="css_td_list2_r1">錯誤</td>
+            </tr>
+          </table>
+          <br>
+          注意事項 :
+          <table class="css_table_list1">
+            <tr>
+              <td class="css_td_list1_l">01.&nbsp;</td>
+              <td class="css_td_list1_r">
+                外部程式或網頁程式的資料存取模式 (session_permission) 必須是讀寫.
+              </td>
+            </tr>
+          </table>
+          <br>
+          範例 :<br>
+<pre class="css_pre_code">
+外部程式部分
+
+#include &lt;time.h&gt;
+#include &lt;errno.h&gt;
+#include &lt;stdio.h&gt;
+#include &lt;string.h&gt;
+#include &lt;stdlib.h&gt;
+#include "mcm_lheader/mcm_type.h"
+#include "mcm_lheader/mcm_size.h"
+#include "mcm_lheader/mcm_connect.h"
+#include "mcm_lheader/mcm_return.h"
+#include "mcm_lheader/mcm_data_exinfo_auto.h"
+#include "mcm_lulib/mcm_lulib_api.h"
+
+#define DMSG(msg_fmt, msgs...) printf("%s(%04u): " msg_fmt "\n", __FILE__, __LINE__, ##msgs)
+
+int main(int argc, char **argv)
+{
+    char *path1;
+    struct mcm_lulib_lib_t self_lulib;
+
+    memset(&self_lulib, 0, sizeof(struct mcm_lulib_lib_t));
+    self_lulib.socket_path = "@mintcm";
+    self_lulib.call_from = MCM_CFROM_USER;
+    self_lulib.session_permission = MCM_SPERMISSION_RW;
+    self_lulib.session_stack_size = 0;
+    if(mcm_lulib_init(&self_lulib) < MCM_RCODE_PASS)
+    {
+        DMSG("call mcm_lulib_init() fail");
+        goto FREE_01;
+    }
+
+    // 呼叫內部模組.
+    path1 = "mcm_module_remove_store_current_profile_test";
+    DMSG("[run] %s", path1);
+    if(mcm_lulib_run(&self_lulib, path1) < MCM_RCODE_PASS)
+    {
+        DMSG("call mcm_lulib_run(%s) fail", path1);
+        goto FREE_02;
+    }
+
+FREE_02:
+    mcm_lulib_exit(&self_lulib);
+FREE_01:
+    return 0;
+}
+</pre>
+<pre class="css_pre_code">
+內部模組部分
+
+#include &lt;time.h&gt;
+#include &lt;errno.h&gt;
+#include &lt;stdio.h&gt;
+#include &lt;string.h&gt;
+#include &lt;stdlib.h&gt;
+#include "../../mcm_lib/mcm_lheader/mcm_type.h"
+#include "../../mcm_lib/mcm_lheader/mcm_size.h"
+#include "../../mcm_lib/mcm_lheader/mcm_control.h"
+#include "../../mcm_lib/mcm_lheader/mcm_connect.h"
+#include "../../mcm_lib/mcm_lheader/mcm_return.h"
+#include "../../mcm_lib/mcm_lheader/mcm_debug.h"
+#include "../../mcm_lib/mcm_lheader/mcm_data_exinfo_auto.h"
+#include "../mcm_service_handle_extern.h"
+#include "../mcm_config_handle_extern.h"
+
+#define DMSG(msg_fmt, msgs...) printf("%s(%04u): " msg_fmt "\n", __FILE__, __LINE__, ##msgs)
+
+int mcm_module_remove_store_current_profile_test(
+    struct mcm_service_session_t *this_session)
+{
+    int fret = MCM_RCODE_MODULE_INTERNAL_ERROR;
+
+    DMSG("[remove_store_current_profile]");
+    if(mcm_config_remove_store_current_profile(this_session) < MCM_RCODE_PASS)
+    {
+        DMSG("call mcm_config_remove_store_current_profile() fail");
+        goto FREE_01;
+    }
+
+    fret = MCM_RCODE_PASS;
+FREE_01:
+    return fret;
+}
+</pre>
+        </td>
+      </tr>
+    </table>
+    <br>
+
+  </div>
+</div>
+<br>
+
+<div class="css_div_box_frame_full">
+  <div class="css_div_box_title">相關的全域變數</div>
+  <div class="css_div_box_content">
+    <br>
+
+    <font class="css_font_b1">[char *mcm_config_store_default_profile_path]</font><br>
+    資料預設值檔案的路徑.
+    <br><br>
+
+    <font class="css_font_b1">[char *mcm_config_store_current_profile_path]</font><br>
+    資料現在值檔案的路徑.
+    <br><br>
+
+    <font class="css_font_b1">[MCM_DTYPE_LIST_TD mcm_config_store_profile_save_mode]</font><br>
+    資料現在值檔案的儲存方式. <a href="mcm_0203.html#hook_0203_save_mode_01">[詳細]</a><br>
+    如果有特別情況需要在執行期間更改儲存方式的話, 外部程式或網頁程式的資料存取模式 (session_permission) 必須是讀寫.<br>
+    <table class="css_table_list2">
+      <tr>
+        <td class="css_td_list2_t3" colspan="2">
+          <font class="css_font_g1">MCM_STORE_SAVE_MODE</font><br>
+          <font class="css_font_b1">(mint_cm/mcm_lib/mcm_lheader/mcm_control.h)</font>
+        </td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l2">MCM_SSAVE_AUTO</td>
+        <td class="css_td_list2_r1">自動儲存</td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l2">MCM_SSAVE_MANUAL</td>
+        <td class="css_td_list2_r1">手動儲存</td>
+      </tr>
+    </table>
+    <br>
+
+  </div>
+</div>
+<br>
+
+<div class="css_div_box_frame_full">
+  <div class="css_div_box_title">資料狀態的注意事項</div>
+  <div class="css_div_box_content">
+    <br>
+
+    <div class="css_div_hook" id="hook_0407_mcm_jslib_obtain_config_01"></div>
+    <table class="css_table_box">
+      <tr>
+        <td class="css_td_box">
+          <font class="css_font_b2">在網頁端使用 mcm_jslib_obtain_config() 的注意事項</font>
+          <br><br>
+          CGI 端在處理 [get] 時, 會檢查 [get] 之前是否有做資料設定
+          (也就是 [set] [add] [del] [delall] [run]), 有的話會先進行資料同步的處理
+          (mcm_lulib_update()), 之後才處理 [get].
+          <br><br>
+          資料被同步後, 所有的資料狀態都會清除, 再使用 [run] 執行內部模組時會抓不到資料狀態.
+          <br><br>
+          所以如果在指令序列中 [run] 在 [get] 之後, 執行內部模組時會抓不到資料狀態.
+          <br><br>
+          範例 :<br>
+<pre class="css_pre_code">
+req_cmd = "&set.s.device.system.ip_addr=192.168.0.1" +
+          "&add.device.vap.#30" +
+          "&run.module1" +
+          "&get.device.system" +
+          "&get.device.vap.*" +
+          "&run.module2" +
+          "&get.device.client.*";
+
+CGI 處理流程 :
+01. 處理 [set.s.device.system.ip_addr=192.168.0.1].
+02. 處理 [add.device.vap.#30].
+03. 處理 [run.module1], 這時資料還沒被同步, 內部模組抓的到在 [01] [02] 的資料狀態.
+04. 處理 [get.device.system], 發現在 [01] [02] [03] 有修改資料, 先做資料同步在抓資料.
+05. 處理 [get.device.vap.*], 在 [04] 做過資料同步, 不需要再同步直接抓資料.
+06. 處理 [run.module2], 在 [04] 做過資料同步, 內部模組抓不到在 [01] [02] 的資料狀態.
+07. 處理 [get.device.client.*], 發現在 [06] 有修改資料, 先做資料同步在抓資料.
+</pre>
+        </td>
+      </tr>
+    </table>
+    <br>
+
+  </div>
+</div>
+<br>
+
+</body>
+
+</html>

@@ -1,0 +1,47 @@
+/*
+Copyright © 2017, Che-Wei Hsu <cwxhsu@gmail.com>
+This file is part of the MintCM.
+Some rights reserved. See README.
+*/
+
+*
+{
+    font-family: Courier New, Courier;
+    font-size: 16px;
+}
+
+.css_table1
+{
+    border: 1px solid #000000;
+    border-collapse: collapse;
+    margin: 5px 5px 5px 5px;
+    padding: 0px;
+}
+.css_td1
+{
+    vertical-align: middle;
+    text-align: left;
+    border: 1px solid #000000;
+    padding: 5px;
+}
+
+a:link
+{
+    color: #0000ff;
+    text-decoration: none;
+}
+a:active
+{
+    color: #0000ff;
+    text-decoration: none;
+}
+a:visited
+{
+    color: #0000ff;
+    text-decoration: none;
+}
+a:hover
+{
+    color: #007f00;
+    text-decoration: none;
+}

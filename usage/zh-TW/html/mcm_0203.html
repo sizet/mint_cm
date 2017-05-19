@@ -1,0 +1,232 @@
+<!--
+Copyright © 2017, Che-Wei Hsu <cwxhsu@gmail.com>
+This file is part of the MintCM.
+Some rights reserved. See README.
+-->
+
+<html>
+
+<head>
+<meta http-equiv="content-type" content="text/html; charset=utf-8">
+<link rel="stylesheet" href="../css/mcm_style.css">
+</head>
+
+<body class="css_body">
+
+<div class="css_div_box_frame_full">
+  <div class="css_div_box_title">chapter 02-03</div>
+  <div class="css_div_box_content">
+  </div>
+</div>
+<br>
+
+<div class="css_div_box_frame_full">
+  <div class="css_div_box_title">程式執行參數的說明</div>
+  <div class="css_div_box_content">
+    <br>
+
+    此章節說明執行程式的參數.
+    <br><br><br>
+
+    mcm_daemon 需要的參數 :<br>
+    <table class="css_table_list2">
+      <tr>
+        <td class="css_td_list2_l1">
+          <font class="css_font_r1">[-t $(max_session_count)]</font><br>
+          同時間最多可以處理的連線數目 (建立的執行緒數目).<br>
+          <table class="css_table_list2">
+            <tr>
+              <td class="css_td_list2_l1"><font class="css_font_g1">0</font></td>
+              <td class="css_td_list2_l1">不限制</td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l1"><font class="css_font_g1">1 ~ N</font></td>
+              <td class="css_td_list2_l1">限制的數目</td>
+            </tr>
+          </table>
+          預設值 : <font class="css_font_p1">0</font><br>
+          <font class="css_font_g1">MCM_DEFAULT_MAX_SESSION_COUNT</font>
+          <font class="css_font_b1">(mint_cm/mcm_daemon/mcm_daemon.c)</font>
+        </td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l1">
+          <div class="css_div_hook" id="hook_0203_server_socket_path_01"></div>
+          <font class="css_font_r1">[-a $(server_socket_path)]</font><br>
+          開啟服務的 Unix Domain Socket 路徑.<br>
+          建議的位址路徑格式 :<br>
+          開頭使用 <font class="css_font_r1">@</font> 符號, 後面使用
+          <font class="css_font_r1">A ~ Z</font>,
+          <font class="css_font_r1">a ~ z</font>,
+          <font class="css_font_r1">0 ~ 9</font>,
+          <font class="css_font_r1">-</font>,
+          <font class="css_font_r1">_</font>.<br>
+          預設值 : <font class="css_font_p1">@mintcm</font><br>
+          <font class="css_font_g1">MCM_DEFAULT_SOCKET_PATH</font>
+          <font class="css_font_b1">(mint_cm/mcm_daemon/mcm_daemon.c)</font>
+        </td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l1">
+          <font class="css_font_r1">[-l $(module_path)]</font><br>
+          內部模組函式庫的路徑, 也就是 <font class="css_font_b1">mint_cm/mcm_daemon/module/mcm_module.lib</font>.<br>
+          注意如果檔案和程式在同目錄, 需要在路徑前面加上 <font class="css_font_b1">./</font>
+          (例如 ./mcm_module.lib).<br>
+          模組的撰寫在 <a href="mcm_0401.html">#04-01#</a> 說明.<br>
+          預設值 : <font class="css_font_p1">./mcm_module.lib</font><br>
+          <font class="css_font_g1">MCM_DEFAULT_MODULE_PATH</font>
+          <font class="css_font_b1">(mint_cm/mcm_daemon/mcm_daemon.c)</font>
+        </td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l1">
+          <font class="css_font_r1">[-m $(model_profile_path)]</font><br>
+          資料模型檔案的路徑, 也就是 <font class="css_font_b1">mint_cm/mcm_build/mcm_model_profile.txt</font>.<br>
+          資料模型的撰寫在 <a href="mcm_0201.html">#02-01#</a> 說明.<br>
+          預設值 : <font class="css_font_p1">mcm_model_profile.txt</font><br>
+          <font class="css_font_g1">MCM_DEFAULT_MODEL_PATH</font>
+          <font class="css_font_b1">(mint_cm/mcm_daemon/mcm_daemon.c)</font>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l1">
+          <font class="css_font_r1">[-d $(store_default_profile_path)]</font><br>
+          資料預設值檔案的路徑.<br>
+          資料預設值的撰寫在 <a href="mcm_0202.html">#02-02#</a> 說明.<br>
+          預設值 : <font class="css_font_p1">mcm_store_profile_default.txt</font><br>
+          <font class="css_font_g1">MCM_DEFAULT_STORE_DEFAULT_PATH</font>
+          <font class="css_font_b1">(mint_cm/mcm_daemon/mcm_daemon.c)</font>
+        </td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l1">
+          <font class="css_font_r1">[-c $(store_current_profile_path)]</font><br>
+          紀錄資料現在值檔案的路徑 (此路徑的檔案系統必須要可讀寫).<br>
+          預設值 : <font class="css_font_p1">mcm_store_profile_current.txt</font><br>
+          <font class="css_font_g1">MCM_DEFAULT_STORE_CURRENT_PATH</font>
+          <font class="css_font_b1">(mint_cm/mcm_daemon/mcm_daemon.c)</font>
+        </td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l1">
+          <div class="css_div_hook" id="hook_0203_save_mode_01"></div>
+          <font class="css_font_r1">[-s $(save_mode)]</font><br>
+          資料現在值檔案的儲存方式.<br>
+          <table class="css_table_list2">
+            <tr>
+              <td class="css_td_list2_l1"><font class="css_font_g1">0</font></td>
+              <td class="css_td_list2_l1">
+                自動儲存<br>
+                每次有修改到需要儲存的資料 (資料模型中 $(save) 為 1), 就自動儲存
+              </td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l1"><font class="css_font_g1">1</font></td>
+              <td class="css_td_list2_l1">
+                手動儲存<br>
+                需要手動通知程式儲存資料<br>
+                使用方式會在 <a href="mcm_0201.html">#03-02#</a>,
+                <a href="mcm_0201.html">#03-03#</a>,
+                <a href="mcm_0201.html">#03-04#</a>,
+                <a href="mcm_0201.html">#04-07#</a> 說明
+              </td>
+            </tr>
+          </table>
+          預設值 : <font class="css_font_p1">0</font><br>
+          <font class="css_font_g1">MCM_DEFAULT_STORE_SAVE_MODE</font>
+          <font class="css_font_b1">(mint_cm/mcm_daemon/mcm_daemon.c)</font>
+        </td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l1">
+          <font class="css_font_r1">[-e $(error_handle)]</font><br>
+          資料現在值檔案錯誤時的處理方式.<br>
+          處理方式在 <a href="mcm_0701.html">#07-01#</a> 說明.<br>
+          <table class="css_table_list2">
+            <tr>
+              <td class="css_td_list2_r1"><font class="css_font_g1">0</font></td>
+              <td class="css_td_list2_l1">還原預設值 (內部) <a href="mcm_0702.html">#07-02#</a></td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_r1"><font class="css_font_g1">1</font></td>
+              <td class="css_td_list2_l1">還原預設值 (外部) <a href="mcm_0703.html">#07-03#</a></td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_r1"><font class="css_font_g1">2</font></td>
+              <td class="css_td_list2_l1">除錯 (還原預設值-內部) <a href="mcm_0704.html">#07-04#</a></td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_r1"><font class="css_font_g1">3</font></td>
+              <td class="css_td_list2_l1">除錯 (還原預設值-外部) <a href="mcm_0705.html">#07-05#</a></td>
+            </tr>
+          </table>
+
+          預設值 : <font class="css_font_p1">0</font><br>
+          <font class="css_font_g1">MCM_DEFAULT_STORE_ERROR_HANDLE</font>
+          <font class="css_font_b1">(mint_cm/mcm_daemon/mcm_daemon.c)</font>
+        </td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l1">
+          <font class="css_font_r1">[-p $(pid_path)]</font><br>
+          紀錄 mcm_daemon 的 PID 的檔案的路徑.<br>
+          預設值 : <font class="css_font_p1">/var/run/mcm_daemon.pid</font><br>
+          <font class="css_font_g1">MCM_DEFAULT_PID_PATH</font>
+          <font class="css_font_b1">(mint_cm/mcm_daemon/mcm_daemon.c)</font>
+        </td>
+      </tr>
+    </table>
+    <br>
+
+    沒有特別需求使用以下預設參數 (或是不帶任何參數使用預設值) :<br>
+    <table class="css_table_list2">
+      <tr>
+        <td class="css_td_list2_l2">-t 0</td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l2">-a @mintcm</td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l2">-l ./mcm_module.lib</td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l2">-m mcm_model_profile.txt</td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l2">-d mcm_store_profile_default.txt</td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l2">-c mcm_store_profile_current.txt</td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l2">-s 0</td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l2">-e 0</td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l2">-p /var/run/mcm_daemon.pid</td>
+      </tr>
+    </table>
+    <br>
+
+    可以使用以下信號終止程式 :<br>
+    <table class="css_table_list2">
+      <tr>
+        <td class="css_td_list2_l2">SIGINT</td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l2">SIGQUIT</td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l2">SIGTERM</td>
+      </tr>
+    </table>
+    <br>
+
+  </div>
+</div>
+<br>
+
+</body>
+
+</html>

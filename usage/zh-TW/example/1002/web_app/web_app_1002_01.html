@@ -1,0 +1,212 @@
+<!--
+Copyright © 2017, Che-Wei Hsu <cwxhsu@gmail.com>
+This file is part of the MintCM.
+Some rights reserved. See README.
+-->
+
+<html>
+
+<head>
+
+<meta http-equiv="cache-control" content="no-cache">
+<meta http-equiv="content-type" content="text/html; charset=utf-8">
+<script type="text/javascript" src="jquery_main.js"></script>
+<script type="text/javascript" src="json3.js"></script>
+<script type="text/javascript" src="mcm_jslib_api.js"></script>
+<script type="text/javascript" src="mcm_jslib_data_info_auto.js"></script>
+<script type="text/javascript" src="maam_jslib_api.js"></script>
+<script type="text/javascript" src="web_app_1002_script.js"></script>
+<link rel="stylesheet" href="web_app_1002_style.css">
+
+<script type="text/javascript">
+var mcm_dv = null;
+
+function body_init()
+{
+    var self_jslib, eq_cmd = "", rep_ret, data_array, tmp_html;
+
+
+    // 指定要讀出的資料.
+    req_cmd = "&get.device.vap.*";
+
+    // 送出讀出資料請求.
+    self_jslib = new mcm_jslib_lib_t();
+    self_jslib.socket_path = "@mintcm";
+    self_jslib.session_permission = mcm_session_permission.ro;
+    self_jslib.session_stack_size = 0;
+    self_jslib.request_command = req_cmd;
+    self_jslib.data_format = mcm_data_format.all_default;
+    self_jslib.other_query = "";
+    rep_ret = mcm_jslib_obtain_config(self_jslib);
+    if(rep_ret.rep_code < mcm_return_code.pass)
+    {
+        if((maam_return_code.internal_error >= rep_ret.rep_code) &&
+           (rep_ret.rep_code >= maam_return_code.boundary))
+        {
+            switch(rep_ret.rep_code)
+            {
+                case maam_return_code.miss_session_key:
+                case maam_return_code.invalid_session_key:
+                    tmp_html = "invalid access, please login";
+                    break;
+                case maam_return_code.idle_timeout:
+                    tmp_html = "idle timeout, please re-login";
+                    break;
+                default:
+                    tmp_html = "call mcm_jslib_obtain_config() fail [MintAAM]" +
+                               "[" + rep_ret.rep_code + "]";
+            }
+        }
+        else
+        {
+            tmp_html = "call mcm_jslib_obtain_config() fail [MintCM]" +
+                       "[" + rep_ret.rep_code + "]";
+        }
+        alert(tmp_html);
+        mcm_jslib_run_script(rep_ret.rep_data);
+        return;
+    }
+    // 處理資料格式.
+    mcm_dv = JSON.parse(rep_ret.rep_data);
+
+    for(i = 0; i < mcm_mcount_device_vap_max_count; i++)
+    {
+        data_array = new Array(5);
+        if(i < mcm_dv.device.vap.length)
+        {
+            // 顯示 device.vap.{i}
+            data_array[0] = "device.vap.@" + (i + 1);
+            data_array[1] = jsapi_make_text("ekey_text_" + i, 4, mcm_dv.device.vap[i].ekey);
+            data_array[2] = jsapi_make_text("ssid_text_" + i, 24, mcm_dv.device.vap[i].ssid);
+            data_array[3] = jsapi_make_text("channel_text_" + i, 6, mcm_dv.device.vap[i].channel);
+            data_array[4] = jsapi_make_select("vap_select_" + i, 1, 0, 1);
+        }
+        else
+        {
+            // 顯示空白表格.
+            data_array[0] = "device.vap.*";
+            data_array[1] = jsapi_make_text("ekey_text_" + i, 4, "");
+            data_array[2] = jsapi_make_text("ssid_text_" + i, 24, "");
+            data_array[3] = jsapi_make_text("channel_text_" + i, 6, "");
+            data_array[4] = jsapi_make_select("vap_select_" + i, 0, 1, 0);
+        }
+        tmp_html = jsapi_make_trtd("css_td1", data_array);
+        $("#vap_table").find("tbody").append(tmp_html);
+    }
+}
+
+// 設定/增加/刪除 device.vap.*
+function modify_vap()
+{
+    var self_jslib, req_cmd = "", rep_ret, tmp_path, i;
+
+
+    for(i = 0; i < mcm_mcount_device_vap_max_count; i++)
+    {
+        if($("#vap_select_" + i).val() == "set")
+        {
+            // 填充 device.vap.{i} 路徑.
+            tmp_path = "device.vap.#" + mcm_dv.device.vap[i].ekey;
+
+            // 設定 device.vap.{i}.ssid
+            req_cmd += "&set.s." + tmp_path + ".ssid=" +
+                       mcm_jslib_convert_submit_str($("#ssid_text_" + i).val());
+
+            // 設定 device.vap.{i}.channel
+            req_cmd += "&set.iui." + tmp_path + ".channel=" +
+                       $("#channel_text_" + i).val();
+        }
+        else
+        if($("#vap_select_" + i).val() == "add")
+        {
+            // 填充 device.vap.{i} 路徑.
+            tmp_path = "device.vap.#" + $("#ekey_text_" + i).val();
+
+            // 增加 device.vap.{i}
+            req_cmd += "&add." + tmp_path;
+
+            // 設定 device.vap.{i}.ssid
+            req_cmd += "&set.s." + tmp_path + ".ssid=" +
+                       mcm_jslib_convert_submit_str($("#ssid_text_" + i).val());
+
+            // 設定 device.vap.{i}.channel
+            req_cmd += "&set.iui." + tmp_path + ".channel=" +
+                       $("#channel_text_" + i).val();
+        }
+        else
+        if($("#vap_select_" + i).val() == "del")
+        {
+            // 填充 device.vap.{i} 路徑.
+            tmp_path = "device.vap.#" + mcm_dv.device.vap[i].ekey;
+
+            // 刪除 device.vap.{i}
+            req_cmd += "&del." + tmp_path;
+        }
+    }
+
+    // 送出修改資料請求.
+    self_jslib = new mcm_jslib_lib_t();
+    self_jslib.socket_path = "@mintcm";
+    self_jslib.session_permission = mcm_session_permission.rw;
+    self_jslib.session_stack_size = 0;
+    self_jslib.request_command = req_cmd;
+    self_jslib.after_complete = mcm_after_complete.reload;
+    self_jslib.other_query = "";
+    rep_ret = mcm_jslib_submit_config(self_jslib);
+    if(rep_ret.rep_code < mcm_return_code.pass)
+    {
+        if((maam_return_code.internal_error >= rep_ret.rep_code) &&
+           (rep_ret.rep_code >= maam_return_code.boundary))
+        {
+            switch(rep_ret.rep_code)
+            {
+                case maam_return_code.miss_session_key:
+                case maam_return_code.invalid_session_key:
+                    tmp_html = "invalid access, please login";
+                    break;
+                case maam_return_code.idle_timeout:
+                    tmp_html = "idle timeout, please re-login";
+                    break;
+                default:
+                    tmp_html = "call mcm_jslib_submit_config() fail [MintAAM]" +
+                               "[" + rep_ret.rep_code + "]";
+            }
+        }
+        else
+        {
+            tmp_html = "call mcm_jslib_submit_config() fail [MintCM]" +
+                       "[" + rep_ret.rep_code + "]";
+        }
+        alert(tmp_html);
+        mcm_jslib_run_script(rep_ret.rep_data);
+        return;
+    }
+    mcm_jslib_run_script(rep_ret.rep_data);
+}
+</script>
+
+</head>
+
+<body onload="body_init()">
+
+  <div>[normal]</div>
+
+  <table id="vap_table" class="css_table1">
+    <thead>
+      <tr>
+        <td class="css_td1"></td>
+        <td class="css_td1">ekey</td>
+        <td class="css_td1">ssid</td>
+        <td class="css_td1">channel</td>
+        <td class="css_td1"></td>
+      </tr>
+    </thead>
+    <tbody>
+    </tbody>
+  </table>
+
+  <button type="button" onclick="modify_vap()">modify</button>
+
+</body>
+
+</html>

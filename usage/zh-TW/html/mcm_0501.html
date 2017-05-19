@@ -1,0 +1,179 @@
+<!--
+Copyright © 2017, Che-Wei Hsu <cwxhsu@gmail.com>
+This file is part of the MintCM.
+Some rights reserved. See README.
+-->
+
+<html>
+
+<head>
+<meta http-equiv="content-type" content="text/html; charset=utf-8">
+<link rel="stylesheet" href="../css/mcm_style.css">
+</head>
+
+<body class="css_body">
+
+<div class="css_div_box_frame_full">
+  <div class="css_div_box_title">chapter 05-01</div>
+  <div class="css_div_box_content">
+  </div>
+</div>
+<br>
+
+<div class="css_div_box_frame_full">
+  <div class="css_div_box_title">內部模組的回傳資訊</div>
+  <div class="css_div_box_content">
+    <br>
+
+    內部模組可以回傳資訊給外部程式, 例如外部程式修改完資料後, 內部模組在套用資料前先檢查資料的正確性,
+    內部模組可以回傳資料資訊告知外部程式修改的資料是否正確.
+    <br><br>
+
+  </div>
+</div>
+<br>
+
+<div class="css_div_box_frame_full">
+  <div class="css_div_box_title">變數格式的說明</div>
+  <div class="css_div_box_content">
+    <br>
+
+    <div class="css_div_hook" id="hook_0501_this_session_01"></div>
+    <font class="css_font_b1">[struct mcm_service_session_t *this_session]</font><br>
+    請求端的連線資訊. <a href="mcm_0402.html#hook_0402_this_session_01">[詳細]</a><br>
+    會使用到的結構成員 :<br>
+    <table class="css_table_list2">
+      <tr>
+        <td class="css_td_list2_l1">
+          <font class="css_font_r1">char *</font><br>
+          <font class="css_font_g1">rep_msg_buf</font>
+        </td>
+        <td class="css_td_list2_r1">儲存字串的緩衝的位址</td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l1">
+          <font class="css_font_r1">MCM_DTYPE_USIZE_TD</font><br>
+          <font class="css_font_g1">rep_msg_size</font>
+        </td>
+        <td class="css_td_list2_r1">儲存字串的緩衝的大小</td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l1">
+          <font class="css_font_r1">MCM_DTYPE_LIST_TD</font><br>
+          <font class="css_font_g1">call_from</font>
+        </td>
+        <td class="css_td_list2_r1">
+          表示是誰呼叫內部模組 <a href="mcm_0302.html#hook_0302_call_from_01">[詳細]</a>
+        </td>
+      </tr>
+    </table>
+    <br>
+
+  </div>
+</div>
+<br>
+
+<div class="css_div_box_frame_full">
+  <div class="css_div_box_title">回傳的資訊的類型</div>
+  <div class="css_div_box_content">
+    <br>
+
+    內部模組可以回傳整數和字串二種資料.
+    <br><br><br>
+
+    <div class="css_div_hook" id="hook_0501_return_integer_01"></div>
+    <font class="css_font_b1">整數</font><br>
+    表是回傳的事件.<br>
+    內部有預留部分範圍來使用, 參考 <font class="css_font_b1">mint_cm/mcm_lib/mcm_lheader/mcm_return.h</font>
+    的 <font class="css_font_g1">MCM_RCODE_TABLE</font>.<br>
+    注意, 如果回傳的整數小於 MCM_RCODE_PASS, 會觸發資料有錯誤需要放棄資料的動作.
+    <a href="mcm_0401.html#hook_0401_submit_flow_01">[詳細][B06]</a>
+    <br><br><br>
+
+    <div class="css_div_hook" id="hook_0501_return_string_01"></div>
+    <font class="css_font_b1">字串</font><br>
+    表示回傳的描述或資料, 需要事先指定緩衝的大小.
+    <br><br>
+
+  </div>
+</div>
+<br>
+
+<div class="css_div_box_frame_full">
+  <div class="css_div_box_title">可用的函式</div>
+  <div class="css_div_box_content">
+    <br>
+
+    <div class="css_div_hook" id="hook_0501_mcm_service_response_init_01"></div>
+    <table class="css_table_box">
+      <tr>
+        <td class="css_td_box">
+          <font class="css_font_b2">mcm_service_response_init</font><br>
+          分配回傳的字串的緩衝空間.<br>
+          <table class="css_table_list2">
+            <tr>
+              <td class="css_td_list2_t1">參數</td>
+              <td class="css_td_list2_t1">說明</td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l1">
+                <font class="css_font_r1">struct mcm_service_session_t *</font><br>
+                <font class="css_font_g1">this_session</font><br>
+              </td>
+              <td class="css_td_list2_r1">
+                請求端的連線資訊
+              </td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l1">
+                <font class="css_font_r1">MCM_DTYPE_USIZE_TD</font><br>
+                <font class="css_font_g1">buf_size</font><br>
+              </td>
+              <td class="css_td_list2_r1">
+                要分配的緩衝大小
+              </td>
+            </tr>
+          </table>
+          <table class="css_table_list2">
+            <tr>
+              <td class="css_td_list2_t1">回傳</td>
+              <td class="css_td_list2_t1">說明</td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l2">&gt;= MCM_RCODE_PASS</td>
+              <td class="css_td_list2_r1">成功</td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l2">&nbsp;&lt; MCM_RCODE_PASS</td>
+              <td class="css_td_list2_r1">錯誤</td>
+            </tr>
+          </table>
+          <br>
+          注意事項 :<br>
+          <table class="css_table_list1">
+            <tr>
+              <td class="css_td_list1_l">01.&nbsp;</td>
+              <td class="css_td_list1_r">
+                每個模組函式內只可使用一次.
+              </td>
+            </tr>
+            <tr>
+              <td class="css_td_list1_l">02.&nbsp;</td>
+              <td class="css_td_list1_r">
+                使用 this_session 的內部成員取得緩衝位址.
+                <a href="#hook_0501_this_session_01">[詳細]</a>
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+    <br>
+
+  </div>
+</div>
+<br>
+
+</body>
+
+</html>

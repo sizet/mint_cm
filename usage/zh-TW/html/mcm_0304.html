@@ -1,0 +1,2654 @@
+<!--
+Copyright © 2017, Che-Wei Hsu <cwxhsu@gmail.com>
+This file is part of the MintCM.
+Some rights reserved. See README.
+-->
+
+<html>
+
+<head>
+<meta http-equiv="content-type" content="text/html; charset=utf-8">
+<link rel="stylesheet" href="../css/mcm_style.css">
+</head>
+
+<body class="css_body">
+
+<div class="css_div_box_frame_full">
+  <div class="css_div_box_title">chapter 03-04</div>
+  <div class="css_div_box_content">
+  </div>
+</div>
+<br>
+
+<div class="css_div_box_frame_full">
+  <div class="css_div_box_title">資料的存取 (網頁端程式)</div>
+  <div class="css_div_box_content">
+    <br>
+
+    此章節說明網頁程式如何透過提供的介面存取資料.
+    <br><br><br>
+
+    網頁的編碼格式必須是 UTF-8, 如下的宣告 :<br>
+    <font class="css_font_p1">&lt;meta http-equiv="content-type" content="text/html; charset=utf-8"&gt;</font>
+    <br><br>
+
+    需要的 JS 檔 :<br>
+    <font class="css_font_p1">
+    jquery_main.js<br>
+    json3.js<br>
+    mcm_jslib_api.js<br>
+    mcm_jslib_data_info_auto.js
+    </font>
+    <br><br>
+
+    CGI 的標準輸出會被重定向, 顯示錯誤訊息或除錯訊息需要直接寫入 tty 設備, 需要指定 tty 設備 :<br>
+    <font class="css_font_b1">mint_cm/mcm_lib/mcm_lheader/mcm_debug.h</font><br>
+    <div class="css_div_block">
+      大部分是 tty 或 ttyS0<br>
+      <font class="css_font_g1">#define MCM_DBG_DEV_TTY "/dev/tty"</font>
+      <br><br>
+      <font class="css_font_r1">如果不支援 tty 設備, 必須把顯示訊息關閉, 將以下的值設 0 關閉 :</font>
+      <br><br>
+      是否顯示錯誤訊息 (所有 CGI 檔案)<br>
+      <font class="css_font_g1">#define MCM_CGIEMODE 1</font><br>
+      是否顯示除錯訊息 (mcm_cgi_config.c 部分)<br>
+      <font class="css_font_g1">#define MCM_CCDMODE 0</font><br>
+      是否顯示除錯訊息 (mcm_cgi_upload_handle.c 部分)<br>
+      <font class="css_font_g1">#define MCM_CUHDMODE 0</font><br>
+      是否顯示除錯訊息 (mcm_cgi_upload_custom.c 部分)<br>
+      <font class="css_font_g1">#define MCM_CUCDMODE 0</font>
+    </div>
+    <br>
+
+    CGI 部分預設是使用靜態連結的方式使用 MintCM 函式庫, 實際使用可以改用動態連結的方式.<br>
+    <table class="css_table_list2">
+      <tr>
+        <td class="css_td_list2_t3" colspan="2">
+          <font class="css_font_g1">USE_STATIC_MCM_LIB</font><br>
+          <font class="css_font_b1">(mint_cm/mcm_cgi/Makefile)</font>
+        </td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l2">YES</td>
+        <td class="css_td_list2_r1">使用靜態鏈結</td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l2">NO</td>
+        <td class="css_td_list2_r1">使用動態鏈結</td>
+      </tr>
+    </table>
+    <br>
+
+  </div>
+</div>
+<br>
+
+<div class="css_div_box_frame_full">
+  <div class="css_div_box_title">變數格式的說明</div>
+  <div class="css_div_box_content">
+    <br>
+
+    使用的資料模型範例, 參考 <a href="mcm_0202.html#hook_0202_data_profile_01">#02-02#</a>.
+    <br><br><br>
+
+    <div class="css_div_hook" id="hook_0304_this_jslib_01"></div>
+    <font class="css_font_b1">[mcm_jslib_lib_t this_jslib]</font><br>
+    用來儲存相關的的資訊.<br>
+    會用到的結構成員 :<br>
+    <table class="css_table_list2">
+      <tr>
+        <td class="css_td_list2_l1">
+          <div class="css_div_hook" id="hook_0304_socket_path_01"></div>
+          <font class="css_font_b1">[socket_path]</font><br>
+          伺服器的位址路徑. <a href="mcm_0203.html#hook_0203_server_socket_path_01">[詳細]</a>
+        </td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l1">
+          <div class="css_div_hook" id="hook_0304_session_permission_01"></div>
+          <font class="css_font_b1">[session_permission]</font><br>
+          表示資料存取的模式.<br>
+          <table class="css_table_list2">
+            <tr>
+              <td class="css_td_list2_t3" colspan="2">
+                <font class="css_font_g1">mcm_session_permission</font><br>
+                <font class="css_font_b1">(mint_cm/mcm_lib/mcm_jslib/mcm_jslib_api.js)</font>
+              </td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l2">mcm_session_permission.ro</td>
+              <td class="css_td_list2_r1">唯讀</td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l2">mcm_session_permission.rw</td>
+              <td class="css_td_list2_r1">讀寫</td>
+            </tr>
+          </table>
+          如果只要讀取資料, 使用 mcm_session_permission.ro,
+          如果要修改 (設定/增加/刪除) 資料, 使用 mcm_session_permission.rw.
+        </td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l1">
+          <div class="css_div_hook" id="hook_0304_session_stack_size_01"></div>
+          <font class="css_font_b1">[session_stack_size]</font><br>
+          伺服器端負責此連線的執行緒的堆疊大小. <a href="mcm_0302.html#hook_0302_session_stack_size_01">[詳細]</a>
+        </td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l1">
+          <div class="css_div_hook" id="hook_0304_request_command_01"></div>
+          <font class="css_font_b1">[request_command]</font><br>
+          要傳送的指令串.<br>
+        </td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l1">
+          <div class="css_div_hook" id="hook_0304_data_format_01"></div>
+          <font class="css_font_b1">[data_format]</font><br>
+          回傳的資料的格式,  指定資料要用 整數/浮點數/字串 格式輸出, 或是用字串格式輸出.<br>
+          可指定的格式 :<br>
+          <table class="css_table_list2">
+            <tr>
+              <td class="css_td_list2_t3" colspan="2">
+                <font class="css_font_g1">mcm_data_format</font><br>
+                <font class="css_font_b1">(mint_cm/mcm_lib/mcm_jslib/mcm_jslib_api.js)</font>
+              </td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l2">mcm_data_format.all_default</td>
+              <td class="css_td_list2_r1">所有類型資料都使用原始 (整數/浮點數/字串) 格式輸出</td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l2">mcm_data_format.ek_string</td>
+              <td class="css_td_list2_r1">ek 類型的資料使用字串格式輸出</td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l2">mcm_data_format.rk_string</td>
+              <td class="css_td_list2_r1">rk 類型的資料使用字串格式輸出</td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l2">mcm_data_format.isc_string</td>
+              <td class="css_td_list2_r1">isc 類型的資料使用字串格式輸出</td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l2">mcm_data_format.iuc_string</td>
+              <td class="css_td_list2_r1">iuc 類型的資料使用字串格式輸出</td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l2">mcm_data_format.iss_string</td>
+              <td class="css_td_list2_r1">iss 類型的資料使用字串格式輸出</td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l2">mcm_data_format.ius_string</td>
+              <td class="css_td_list2_r1">ius 類型的資料使用字串格式輸出</td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l2">mcm_data_format.isi_string</td>
+              <td class="css_td_list2_r1">isi 類型的資料使用字串格式輸出</td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l2">mcm_data_format.iui_string</td>
+              <td class="css_td_list2_r1">iui 類型的資料使用字串格式輸出</td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l2">mcm_data_format.isll_string</td>
+              <td class="css_td_list2_r1">isll 類型的資料使用字串格式輸出</td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l2">mcm_data_format.iull_string</td>
+              <td class="css_td_list2_r1">iull 類型的資料使用字串格式輸出</td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l2">mcm_data_format.ff_string</td>
+              <td class="css_td_list2_r1">ff 類型的資料使用字串格式輸出</td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l2">mcm_data_format.fd_string</td>
+              <td class="css_td_list2_r1">fd 類型的資料使用字串格式輸出</td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l2">mcm_data_format.fld_string</td>
+              <td class="css_td_list2_r1">fld 類型的資料使用字串格式輸出</td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l2">mcm_data_format.all_string</td>
+              <td class="css_td_list2_r1">所有類型資料都使用字串格式輸出</td>
+            </tr>
+          </table>
+          如果要指定多種類型的資料使用字串格式輸出, 使用 <font class="css_font_b1">OR</font> 運算疊加.<br><br>
+          JavaScript 使用 IEEE-754 (雙精度) 來記錄數字資料, 小數的精確值是 52 位元
+          (紀錄整數部分), isll 和 iull 的原型是 long long 類型, 在一般系統是 64 位元,
+          超過 JavaScript 能記錄的上限, 如果有使用 isll 或 iull 類型的資料而且數值大小會超過
+          52 位元的話, 必須改用字串格式輸出
+        </td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l1">
+          <div class="css_div_hook" id="hook_0304_after_complete_01"></div>
+          <font class="css_font_b1">[after_complete]</font><br>
+          CGI 端處理完後預設要如何回應 (回傳訊息).<br>
+          <table class="css_table_list2">
+            <tr>
+              <td class="css_td_list2_t3" colspan="2">
+                <font class="css_font_g1">mcm_after_complete</font><br>
+                <font class="css_font_b1">(mint_cm/mcm_lib/mcm_jslib/mcm_jslib_api.js)</font>
+              </td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l2">mcm_after_complete.none</td>
+              <td class="css_td_list2_r1">
+                不回傳任何訊息
+              </td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l2">mcm_after_complete.reload</td>
+              <td class="css_td_list2_r1">
+                回傳重新載入頁面的訊息<br>
+                必須使用 <font class="css_font_b1">mcm_jslib_run_script()</font> 執行回傳的訊息
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l1">
+          <div class="css_div_hook" id="hook_0304_other_query_01"></div>
+          <font class="css_font_b1">[other_query]</font><br>
+          額外的查詢參數, 不需要使用的話填入空字串.
+        </td>
+      </tr>
+    </table>
+    <br><br>
+
+    <div class="css_div_hook" id="hook_0304_mask_path_01"></div>
+    <font class="css_font_b1">mask_path</font><br>
+    <a href="mcm_0302.html#hook_0302_mask_path_01">[詳細]</a><br>
+    用途 :<br>
+    <table class="css_table_list1">
+      <tr>
+        <td class="css_td_list1_l">01.&nbsp;</td>
+        <td class="css_td_list1_r">讀出 group 的最大筆數限制. (max-count)</td>
+      </tr>
+      <tr>
+        <td class="css_td_list1_l">02.&nbsp;</td>
+        <td class="css_td_list1_r">讀出資料. (get)</td>
+      </tr>
+    </table>
+    <br><br>
+
+    <div class="css_div_hook" id="hook_0304_mix_path_01"></div>
+    <font class="css_font_b1">mix_path</font><br>
+    <a href="mcm_0302.html#hook_0302_mix_path_01">[詳細]</a><br>
+    <font class="css_font_r1">在網頁端使用只能使用 [key 模式].</font><br>
+    用途 :<br>
+    <table class="css_table_list1">
+      <tr>
+        <td class="css_td_list1_l">01.&nbsp;</td>
+        <td class="css_td_list1_r">刪除資料. (delall)</td>
+      </tr>
+    </table>
+    <br><br>
+
+    <div class="css_div_hook" id="hook_0304_full_path_01"></div>
+    <font class="css_font_b1">full_path</font><br>
+    <a href="mcm_0302.html#hook_0302_full_path_01">[詳細]</a><br>
+    <font class="css_font_r1">在網頁端使用只能使用 [key 模式].</font><br>
+    用途 :<br>
+    <table class="css_table_list1">
+      <tr>
+        <td class="css_td_list1_l">01.&nbsp;</td>
+        <td class="css_td_list1_r">寫入資料. (set)</td>
+      </tr>
+      <tr>
+        <td class="css_td_list1_l">02.&nbsp;</td>
+        <td class="css_td_list1_r">增加資料. (add)</td>
+      </tr>
+      <tr>
+        <td class="css_td_list1_l">03.&nbsp;</td>
+        <td class="css_td_list1_r">刪除資料. (del)</td>
+      </tr>
+    </table>
+    <br><br>
+
+    <div class="css_div_hook" id="hook_0304_data_type_01"></div>
+    <font class="css_font_b1">資料類型 (data_type)</font><br>
+    寫入資料時目標 member 的資料型態.<br>
+    <table class="css_table_list2">
+      <tr>
+        <td class="css_td_list2_t1">$(type)</td>
+        <td class="css_td_list2_t1">對應類型</td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l2">ek</td>
+        <td class="css_td_list2_r1">唯讀</td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l2">rk</td>
+        <td class="css_td_list2_r1">rk</td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l2">isc</td>
+        <td class="css_td_list2_r1">isc</td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l2">iuc</td>
+        <td class="css_td_list2_r1">iuc</td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l2">iss</td>
+        <td class="css_td_list2_r1">iss</td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l2">ius</td>
+        <td class="css_td_list2_r1">ius</td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l2">isi</td>
+        <td class="css_td_list2_r1">isi</td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l2">iui</td>
+        <td class="css_td_list2_r1">iui</td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l2">isll</td>
+        <td class="css_td_list2_r1">isll</td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l2">iull</td>
+        <td class="css_td_list2_r1">iull</td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l2">ff</td>
+        <td class="css_td_list2_r1">ff</td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l2">fd</td>
+        <td class="css_td_list2_r1">fd</td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l2">fld</td>
+        <td class="css_td_list2_r1">fld</td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l2">s:$(size)</td>
+        <td class="css_td_list2_r1">s</td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l2">b:$(size)</td>
+        <td class="css_td_list2_r1">b</td>
+      </tr>
+    </table>
+    <br><br>
+
+    網頁程式要存取資料庫時, 要將需求組合成一條條的指令送給 mcm_cgi_config 處理.
+    <br><br>
+
+  </div>
+</div>
+<br>
+
+<div class="css_div_box_frame_full">
+  <div class="css_div_box_title">使用的函式</div>
+  <div class="css_div_box_content">
+    <br>
+
+    <div class="css_div_hook" id="hook_0304_mcm_jslib_convert_html_str_01"></div>
+    <table class="css_table_box">
+      <tr>
+        <td class="css_td_box">
+          <font class="css_font_b2">mcm_jslib_convert_html_str</font><br>
+          要將字串資料使用動態產生網頁元素的方式顯示時 (document.write, innerHTML, ...), 需要注意特殊字元 ["] [&] [&lt;] [&gt;] [ ],
+          透過此函式將特殊字元做轉換.<br>
+          <table class="css_table_list2">
+            <tr>
+              <td class="css_td_list2_t1">參數</td>
+              <td class="css_td_list2_t1">說明</td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l1"><font class="css_font_g1">data_con</font></td>
+              <td class="css_td_list2_r1">要轉換的字串</td>
+            </tr>
+          </table>
+          <table class="css_table_list2">
+            <tr>
+              <td class="css_td_list2_t1">回傳</td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_r1">轉換後的字串</td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+    <br>
+
+    <div class="css_div_hook" id="hook_0304_mcm_jslib_convert_submit_str_01"></div>
+    <table class="css_table_box">
+      <tr>
+        <td class="css_td_box">
+          <font class="css_font_b2">mcm_jslib_convert_submit_str</font><br>
+          要將字串資料寫入資料庫時, 需要將特殊字元轉換成 %$(HEX) 格式, 透過此函式做轉換.<br>
+          <table class="css_table_list2">
+            <tr>
+              <td class="css_td_list2_t1">參數</td>
+              <td class="css_td_list2_t1">說明</td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l1"><font class="css_font_g1">data_con</font></td>
+              <td class="css_td_list2_r1">要轉換的字串</td>
+            </tr>
+          </table>
+          <table class="css_table_list2">
+            <tr>
+              <td class="css_td_list2_t1">回傳</td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_r1">轉換後的字串</td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+    <br>
+
+    <div class="css_div_hook" id="hook_0304_mcm_jslib_run_script_01"></div>
+    <table class="css_table_box">
+      <tr>
+        <td class="css_td_box">
+          <font class="css_font_b2">mcm_jslib_run_script</font><br>
+          執行指令後, 回應的訊息可以是 JavaScript 格式, 使用此函式執行.<br>
+          <table class="css_table_list2">
+            <tr>
+              <td class="css_td_list2_t1">參數</td>
+              <td class="css_td_list2_t1">說明</td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l1"><font class="css_font_g1">script_con</font></td>
+              <td class="css_td_list2_r1">要執行的 JavaScript 內容</td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+    <br>
+
+    <div class="css_div_hook" id="hook_0304_mcm_jslib_obtain_max_count_01"></div>
+    <table class="css_table_box">
+      <tr>
+        <td class="css_td_box">
+          <font class="css_font_b2">mcm_jslib_obtain_max_count</font><br>
+          要求取得 group 的最大資料筆數限制.<br>
+          <table class="css_table_list2">
+            <tr>
+              <td class="css_td_list2_t1">參數</td>
+              <td class="css_td_list2_t1">說明</td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l1"><font class="css_font_g1">this_jslib</font></td>
+              <td class="css_td_list2_r1">
+                用來儲存相關的的資訊<br>
+                需要先設定以下的結構成員 :<br>
+                <font class="css_font_p1">socket_path</font>
+                <a href="#hook_0304_socket_path_01">[詳細]</a><br>
+                <font class="css_font_p1">session_permission</font>
+                <a href="#hook_0304_session_permission_01">[詳細]</a><br>
+                <font class="css_font_p1">session_stack_size</font>
+                <a href="#hook_0304_session_stack_size_01">[詳細]</a><br>
+                <font class="css_font_p1">request_command</font>
+                <a href="#hook_0304_request_command_01">[詳細]</a><br>
+                <font class="css_font_p1">other_query</font>
+                <a href="#hook_0304_other_query_01">[詳細]</a><br>
+              </td>
+            </tr>
+          </table>
+          <table class="css_table_list2">
+            <tr>
+              <td class="css_td_list2_t1">回傳</td>
+              <td class="css_td_list2_t1" colspan="3">說明</td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l1" rowspan="2">
+                <font class="css_font_g1">$.rep_code</font>
+              </td>
+              <td class="css_td_list2_r1" rowspan="2">指令結果</td>
+              <td class="css_td_list2_l2">&gt;= mcm_return_code.pass</td>
+              <td class="css_td_list2_r1">成功</td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l2">&nbsp;&lt; mcm_return_code.pass</td>
+              <td class="css_td_list2_r1">錯誤</td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l1" rowspan="2">
+                <font class="css_font_g1">$.rep_data</font>
+              </td>
+              <td class="css_td_list2_r1" colspan="3">
+                如果指令結果是成功 :<br>
+                JSON 格式的實際資料, 需要使用 <font class="css_font_b1">JSON.parse()</font> 轉換
+              </td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_r1" colspan="3">
+                如果指令結果是錯誤 :<br>
+                JavaScript 格式的錯誤訊息, 需要使用 <font class="css_font_b1">mcm_jslib_run_script()</font> 執行
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+    <br>
+
+    <div class="css_div_hook" id="hook_0304_mcm_jslib_obtain_config_01"></div>
+    <table class="css_table_box">
+      <tr>
+        <td class="css_td_box">
+          <font class="css_font_b2">mcm_jslib_obtain_config</font><br>
+          要求取得資料.<br>
+          <table class="css_table_list2">
+            <tr>
+              <td class="css_td_list2_t1">參數</td>
+              <td class="css_td_list2_t1">說明</td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l1"><font class="css_font_g1">this_jslib</font></td>
+              <td class="css_td_list2_r1">
+                用來儲存相關的的資訊<br>
+                需要先設定以下的結構成員 :<br>
+                <font class="css_font_p1">socket_path</font>
+                <a href="#hook_0304_socket_path_01">[詳細]</a><br>
+                <font class="css_font_p1">session_permission</font>
+                <a href="#hook_0304_session_permission_01">[詳細]</a><br>
+                <font class="css_font_p1">session_stack_size</font>
+                <a href="#hook_0304_session_stack_size_01">[詳細]</a><br>
+                <font class="css_font_p1">request_command</font>
+                <a href="#hook_0304_request_command_01">[詳細]</a><br>
+                <font class="css_font_p1">data_format</font>
+                <a href="#hook_0304_data_format_01">[詳細]</a><br>
+                <font class="css_font_p1">other_query</font>
+                <a href="#hook_0304_other_query_01">[詳細]</a><br>
+              </td>
+            </tr>
+          </table>
+          <table class="css_table_list2">
+            <tr>
+              <td class="css_td_list2_t1">回傳</td>
+              <td class="css_td_list2_t1" colspan="3">說明</td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l1" rowspan="2">
+                <font class="css_font_g1">$.rep_code</font>
+              </td>
+              <td class="css_td_list2_r1" rowspan="2">指令結果</td>
+              <td class="css_td_list2_l2">&gt;= mcm_return_code.pass</td>
+              <td class="css_td_list2_r1">成功</td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l2">&nbsp;&lt; mcm_return_code.pass</td>
+              <td class="css_td_list2_r1">錯誤</td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l1" rowspan="2">
+                <font class="css_font_g1">$.rep_data</font>
+              </td>
+              <td class="css_td_list2_r1" colspan="3">
+                如果指令結果是成功 :<br>
+                JSON 格式的實際資料, 需要使用 <font class="css_font_b1">JSON.parse()</font> 轉換
+              </td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_r1" colspan="3">
+                如果指令結果是錯誤 :<br>
+                自定格式的錯誤訊息 (訊息的撰寫參考 <a href="mcm_0504.html">#05-04#</a>)
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+    <br>
+
+    <div class="css_div_hook" id="hook_0304_mcm_jslib_submit_config_01"></div>
+    <table class="css_table_box">
+      <tr>
+        <td class="css_td_box">
+          <font class="css_font_b2">mcm_jslib_submit_config</font><br>
+          要求設定資料.<br>
+          <table class="css_table_list2">
+            <tr>
+              <td class="css_td_list2_t1">參數</td>
+              <td class="css_td_list2_t1">說明</td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l1"><font class="css_font_g1">this_jslib</font></td>
+              <td class="css_td_list2_r1">
+                用來儲存相關的的資訊<br>
+                需要先設定以下的結構成員 :<br>
+                <font class="css_font_p1">socket_path</font>
+                <a href="#hook_0304_socket_path_01">[詳細]</a><br>
+                <font class="css_font_p1">session_permission</font>
+                <a href="#hook_0304_session_permission_01">[詳細]</a><br>
+                <font class="css_font_p1">session_stack_size</font>
+                <a href="#hook_0304_session_stack_size_01">[詳細]</a><br>
+                <font class="css_font_p1">request_command</font>
+                <a href="#hook_0304_request_command_01">[詳細]</a><br>
+                <font class="css_font_p1">after_complete</font>
+                <a href="#hook_0304_after_complete_01">[詳細]</a><br>
+                <font class="css_font_p1">other_query</font>
+                <a href="#hook_0304_other_query_01">[詳細]</a><br>
+              </td>
+            </tr>
+          </table>
+          <table class="css_table_list2">
+            <tr>
+              <td class="css_td_list2_t1">回傳</td>
+              <td class="css_td_list2_t1" colspan="3">說明</td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l1" rowspan="2">
+                <font class="css_font_g1">$.rep_code</font>
+              </td>
+              <td class="css_td_list2_r1" rowspan="2">指令結果</td>
+              <td class="css_td_list2_l2">&gt;= mcm_return_code.pass</td>
+              <td class="css_td_list2_r1">成功</td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l2">&nbsp;&lt; mcm_return_code.pass</td>
+              <td class="css_td_list2_r1">錯誤</td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l1">
+                <font class="css_font_g1">$.rep_data</font>
+              </td>
+              <td class="css_td_list2_r1" colspan="3">
+                自定格式的訊息 (訊息的撰寫參考 <a href="mcm_0504.html">#05-04#</a>)
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+    <br>
+
+  </div>
+</div>
+<br>
+
+<div class="css_div_box_frame_full">
+  <div class="css_div_box_title">指令的格式</div>
+  <div class="css_div_box_content">
+    <br>
+
+    根據使用的功能說明指令的格式和用法.
+    <br><br>
+
+    <div class="css_div_hook" id="hook_0304_get_max_01"></div>
+    <table class="css_table_box">
+      <tr>
+        <td class="css_td_box">
+          <font class="css_font_b2">讀出 group 的最大資料筆數限制 (max-count)</font>
+          <br><br>
+          格式 :<br>
+          <div class="css_div_block">
+            <font class="css_font_g1">"&get.$(mask_path)"</font>
+          </div>
+          <br>
+          <table class="css_table_list2">
+            <tr>
+              <td class="css_td_list2_l2">$(mask_path)</td>
+              <td class="css_td_list2_r1">
+                目標的路徑 <a href="#hook_0304_mask_path_01">[詳細]</a>
+              </td>
+            </tr>
+          </table>
+          <br>
+          注意事項 :<br>
+          <table class="css_table_list1">
+            <tr>
+              <td class="css_td_list1_l">01.&nbsp;</td>
+              <td class="css_td_list1_r">
+                資料存取模式可以是 mcm_session_permission.ro 或 mcm_session_permission.rw.
+              </td>
+            </tr>
+            <tr>
+              <td class="css_td_list1_l">02.&nbsp;</td>
+              <td class="css_td_list1_r">
+                得到的資料是 JSON 格式.
+              </td>
+            </tr>
+            <tr>
+              <td class="css_td_list1_l">03.&nbsp;</td>
+              <td class="css_td_list1_r">
+                得到的數值是整數格式.
+              </td>
+            </tr>
+          </table>
+          <br>
+          建立指令.<br>
+          範例 :<br>
+<pre class="css_pre_code">
+var req_cmd = "";
+
+// 取得 device.system 的資料筆數上限.
+req_cmd += "&get.device.system";
+
+// 取得 device.vap.* 的資料筆數上限.
+req_cmd += "&get.device.vap.*";
+
+// 取得 device.vap.*.station.* 的資料筆數上限.
+req_cmd += "&get.device.vap.*.station.*";
+</pre>
+<br>
+          之後使用 <font class="css_font_b1">mcm_jslib_obtain_max_count()</font> 送出請求.<br>
+          範例 :<br>
+<pre class="css_pre_code">
+var self_jslib, rep_ret;
+
+self_jslib = new mcm_jslib_lib_t();
+self_jslib.socket_path = "@mintcm";
+self_jslib.session_permission = mcm_session_permission.ro;
+self_jslib.session_stack_size = 0;
+self_jslib.request_command = req_cmd;
+self_jslib.other_query = "";
+rep_ret = mcm_jslib_obtain_max_count(self_jslib);
+</pre>
+<br>
+          之後檢查返回的結果, 返回成功的話, 使用 <font class="css_font_b1">JSON.parse()</font>
+          將回傳的資料轉為 JSON 格式才可使用.<br>
+          範例 :<br>
+<pre class="css_pre_code">
+var mcm_dv;
+
+if(rep_ret.rep_code < mcm_return_code.pass)
+{
+    alert("call mcm_jslib_obtain_max_count() fail" +
+          "[" + rep_ret.rep_code + "]");
+    mcm_jslib_run_script(rep_ret.rep_data);
+    return;
+}
+mcm_dv = JSON.parse(rep_ret.rep_data);
+</pre>
+<br>
+          紀錄最大資料數目限制的變數名稱是 <font class="css_font_b1">$max_count</font><br>
+          範例 :<br>
+<pre class="css_pre_code">
+// device.system 的資料筆數上限.
+console.log("[max-count] device.system = ",
+            mcm_dv.device.system.$max_count);
+
+// device.vap.* 的資料筆數上限.
+console.log("[max-count] device.vap.* = ",
+            mcm_dv.device.vap.$max_count);
+
+// device.vap.*.station.* 的資料筆數上限.
+console.log("[max-count] device.vap.*.station.* = ",
+            mcm_dv.device.vap.station.$max_count);
+</pre>
+<br>
+          完整程式 :<br>
+<pre class="css_pre_code">
+&lt;html&gt;
+&lt;head&gt;
+&lt;meta http-equiv="cache-control" content="no-cache"&gt;
+&lt;meta http-equiv="content-type" content="text/html; charset=utf-8"&gt;
+&lt;script type="text/javascript" src="jquery_main.js"&gt;&lt;/script&gt;
+&lt;script type="text/javascript" src="json3.js"&gt;&lt;/script&gt;
+&lt;script type="text/javascript" src="mcm_jslib_api.js"&gt;&lt;/script&gt;
+&lt;script type="text/javascript" src="mcm_jslib_data_info_auto.js"&gt;&lt;/script&gt;
+&lt;script type="text/javascript"&gt;
+function main_init()
+{
+    var self_jslib, req_cmd, rep_ret, mcm_dv;
+
+    req_cmd = "&get.device.system" +
+              "&get.device.vap.*" +
+              "&get.device.vap.*.station.*";
+
+    self_jslib = new mcm_jslib_lib_t();
+    self_jslib.socket_path = "@mintcm";
+    self_jslib.session_permission = mcm_session_permission.ro;
+    self_jslib.session_stack_size = 0;
+    self_jslib.request_command = req_cmd;
+    self_jslib.other_query = "";
+    rep_ret = mcm_jslib_obtain_max_count(self_jslib);
+    if(rep_ret.rep_code < mcm_return_code.pass)
+    {
+        alert("call mcm_jslib_obtain_max_count() fail" +
+              "[" + rep_ret.rep_code + "]");
+        mcm_jslib_run_script(rep_ret.rep_data);
+        return;
+    }
+    mcm_dv = JSON.parse(rep_ret.rep_data);
+
+    console.log("[max-count] device.system = ",
+                mcm_dv.device.system.$max_count);
+    console.log("[max-count] device.vap.* = ",
+                mcm_dv.device.vap.$max_count);
+    console.log("[max-count] device.vap.*.station.* = ",
+                mcm_dv.device.vap.station.$max_count);
+}
+&lt;/script&gt;
+&lt;/head&gt;
+&lt;body&gt;
+  &lt;button type="button" onclick="main_init()"&gt;test&lt;/button&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+</pre>
+<br>
+
+          除了上述方式外, 可以使用另一種方式取得 group 的資料筆數限制.<br>
+          必須先寫好資料模型檔並編譯完成, <font class="css_font_b1">mint_cm/mcm_lib/mcm_jslib/mcm_jslib_data_info_auto.js</font>
+          會產生對應的資料變數.<br><br>
+          以 <a href="mcm_0202.html#hook_0202_data_profile_01">#02-02#</a> 的資料模型為例, 會產生 :<br>
+          <div class="css_div_block">
+            // device<br>
+            <font class="css_font_r1">var mcm_mcount_device_max_count = 1;</font><br><br>
+            // device.system<br>
+            <font class="css_font_r1">var mcm_mcount_device_system_max_count = 1;</font><br><br>
+            // device.vap.*<br>
+            <font class="css_font_r1">var mcm_mcount_device_vap_max_count = 16;</font><br><br>
+            // device.vap.*.extra<br>
+            <font class="css_font_r1">var mcm_mcount_device_vap_extra_max_count = 1;</font><br><br>
+            // device.vap.*.station.*<br>
+            <font class="css_font_r1">var mcm_mcount_device_vap_station_max_count = 32;</font><br><br>
+            // device.limit.*<br>
+            <font class="css_font_r1">var mcm_mcount_device_limit_max_count = 64;</font><br><br>
+            // device.client.*<br>
+            <font class="css_font_r1">var mcm_mcount_device_client_max_count = 128;</font><br>
+          </div>
+          變數內的值就是實際的 $(max) 值.
+          <br><br>
+          範例 :<br>
+<pre class="css_pre_code">
+&lt;html&gt;
+&lt;head&gt;
+&lt;meta http-equiv="cache-control" content="no-cache"&gt;
+&lt;meta http-equiv="content-type" content="text/html; charset=utf-8"&gt;
+&lt;script type="text/javascript" src="jquery_main.js"&gt;&lt;/script&gt;
+&lt;script type="text/javascript" src="json3.js"&gt;&lt;/script&gt;
+&lt;script type="text/javascript" src="mcm_jslib_api.js"&gt;&lt;/script&gt;
+&lt;script type="text/javascript" src="mcm_jslib_data_info_auto.js"&gt;&lt;/script&gt;
+&lt;script type="text/javascript"&gt;
+function main_init()
+{
+    // device.system 的資料筆數上限.
+    console.log("[max-count] device.system = ",
+                mcm_mcount_device_system_max_count);
+
+    // device.vap.* 的資料筆數上限.
+    console.log("[max-count] device.vap.* = ",
+                mcm_mcount_device_vap_max_count);
+
+    // device.vap.*.station.* 的資料筆數上限.
+    console.log("[max-count] device.vap.*.station.* = ",
+                mcm_mcount_device_vap_station_max_count);
+}
+&lt;/script&gt;
+&lt;/head&gt;
+&lt;body&gt;
+  &lt;button type="button" onclick="main_init()"&gt;test&lt;/button&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+</pre>
+        </td>
+      </tr>
+    </table>
+    <br>
+
+    <div class="css_div_hook" id="hook_0304_get_01"></div>
+    <table class="css_table_box">
+      <tr>
+        <td class="css_td_box">
+          <font class="css_font_b2">讀出資料 (get)</font>
+          <br><br>
+          格式 :<br>
+          <div class="css_div_block">
+            <font class="css_font_g1">"&get.$(mask_path)"</font>
+          </div>
+          <br>
+          <table class="css_table_list2">
+            <tr>
+              <td class="css_td_list2_l2">$(mask_path)</td>
+              <td class="css_td_list2_r1">
+                目標的路徑 <a href="#hook_0304_mask_path_01">[詳細]</a>
+              </td>
+            </tr>
+          </table>
+          <br>
+          注意事項 :<br>
+          <table class="css_table_list1">
+            <tr>
+              <td class="css_td_list1_l">01.&nbsp;</td>
+              <td class="css_td_list1_r">
+                資料存取模式可以是 mcm_session_permission.ro 或 mcm_session_permission.rw.
+              </td>
+            </tr>
+            <tr>
+              <td class="css_td_list1_l">02.&nbsp;</td>
+              <td class="css_td_list1_r">
+                只會讀出目標本身的資料, 不會讀出 child-group 的資料.
+              </td>
+            </tr>
+            <tr>
+              <td class="css_td_list1_l">03.&nbsp;</td>
+              <td class="css_td_list1_r">
+                會讀出目標的全部資料, 無法指定只讀出某筆資料.
+              </td>
+            </tr>
+            <tr>
+              <td class="css_td_list1_l">04.&nbsp;</td>
+              <td class="css_td_list1_r">
+                得到的資料是 JSON 格式.
+              </td>
+            </tr>
+          </table>
+          <br>
+          建立指令.<br>
+          範例 :<br>
+<pre class="css_pre_code">
+var req_cmd = "";
+
+// 讀出 device
+req_cmd += "&get.device";
+
+// 讀出 device.system
+req_cmd += "&get.device.system";
+
+// 讀出 device.vap.*
+req_cmd += "&get.device.vap.*";
+
+// 讀出 device.vap.*.extra
+req_cmd += "&get.device.vap.*.extra";
+
+// 讀出 device.vap.*.station.*
+req_cmd += "&get.device.vap.*.station.*";
+
+// 讀出 device.limit.*
+req_cmd += "&get.device.limit.*";
+</pre>
+<br>
+          之後使用 <font class="css_font_b1">mcm_jslib_obtain_config()</font>
+          送出請求.<br>
+          範例 :<br>
+<pre class="css_pre_code">
+var self_jslib, rep_ret;
+
+self_jslib = new mcm_jslib_lib_t();
+self_jslib.socket_path = "@mintcm";
+self_jslib.session_permission = mcm_session_permission.ro;
+self_jslib.session_stack_size = 0;
+self_jslib.request_command = req_cmd;
+self_jslib.data_format = mcm_data_format.all_default;
+self_jslib.other_query = "";
+rep_ret = mcm_jslib_obtain_config(self_jslib);
+</pre>
+<br>
+          之後檢查返回的結果, 返回成功的話, 使用 <font class="css_font_b1">JSON.parse()</font>
+          將回傳的資料轉為 JSON 格式才可使用.<br>
+          範例 :<br>
+<pre class="css_pre_code">
+var mcm_dv;
+
+if(rep_ret.rep_code < mcm_return_code.pass)
+{
+    alert("call mcm_jslib_obtain_config() fail" +
+          "[" + rep_ret.rep_code + "]");
+    mcm_jslib_run_script(rep_ret.rep_data);
+    return;
+}
+mcm_dv = JSON.parse(rep_ret.rep_data);
+</pre>
+<br>
+          如果要取得目前的資料筆數, 可以使用 <font class="css_font_b1">length</font> 此方法.<br>
+          範例 :<br>
+<pre class="css_pre_code">
+// device.vap.* 的資料筆數.
+console.log("[count] device.vap.* = ",
+            mcm_dv.device.vap.length);
+
+// device.vap.@2 的 station 的資料筆數.
+console.log("[count] device.vap.@2.station = ",
+            mcm_dv.device.vap[1].station.length);
+
+// device.limit.* 的資料筆數.
+console.log("[count] device.limit.* = ",
+            mcm_dv.device.vap.length);
+</pre>
+<br>
+          實際的資料使用階層方式取得.<br>
+          範例 :<br>
+<pre class="css_pre_code">
+// device 的資料.
+console.log("[get] device.descript = ", 
+            mcm_dv.device.descript);
+console.log("[get] device.serial_number = ", 
+            mcm_dv.device.serial_number);
+
+// device.system 的資料.
+console.log("[get] device.system.date = ", 
+            mcm_dv.device.system.date);
+console.log("[get] device.system.ip_addr = ", 
+            mcm_dv.device.system.ip_addr);
+console.log("[get] device.system.uptime = ", 
+            mcm_dv.device.system.uptime);
+console.log("[get] device.system.loading = ", 
+            mcm_dv.device.system.loading);
+
+// device.vap.@3 的資料.
+console.log("[get] device.vap.@3.ekey = ",
+            mcm_dv.device.vap[2].ekey);
+console.log("[get] device.vap.@3.ssid = ",
+            mcm_dv.device.vap[2].ssid);
+console.log("[get] device.vap.@3.channel = ",
+            mcm_dv.device.vap[2].channel);
+
+// device.vap.@1.extra 的資料.
+console.log("[get] device.vap.@1.extra.hidden = ",
+            mcm_dv.device.vap[0].extra.hidden);
+console.log("[get] device.vap.@1.extra.tx_power = ",
+            mcm_dv.device.vap[0].extra.tx_power);
+
+// device.vap.@2.station.@1 的資料.
+console.log("[get] device.vap.@2.station.@1.ekey = ",
+            mcm_dv.device.vap[1].station[0].ekey);
+console.log("[get] device.vap.@2.station.@1.mac_addr = ",
+            mcm_dv.device.vap[1].station[0].mac_addr);
+console.log("[get] device.vap.@2.station.@1.rule = ",
+            mcm_dv.device.vap[1].station[0].rule);
+
+// device.limit.@1 的資料.
+console.log("[get] device.limit.@1.ekey = ",
+            mcm_dv.device.limit[0].ekey);
+console.log("[get] device.limit.@1.name = ",
+            mcm_dv.device.limit[0].name);
+console.log("[get] device.limit.@1.priority = ",
+            mcm_dv.device.limit[0].priority);
+</pre>
+<br>
+          完整程式 :<br>
+<pre class="css_pre_code">
+&lt;html&gt;
+&lt;head&gt;
+&lt;meta http-equiv="cache-control" content="no-cache"&gt;
+&lt;meta http-equiv="content-type" content="text/html; charset=utf-8"&gt;
+&lt;script type="text/javascript" src="jquery_main.js"&gt;&lt;/script&gt;
+&lt;script type="text/javascript" src="json3.js"&gt;&lt;/script&gt;
+&lt;script type="text/javascript" src="mcm_jslib_api.js"&gt;&lt;/script&gt;
+&lt;script type="text/javascript" src="mcm_jslib_data_info_auto.js"&gt;&lt;/script&gt;
+&lt;script type="text/javascript"&gt;
+function main_init()
+{
+    var self_jslib, req_cmd, mcm_dv;
+
+    req_cmd = "&get.device" +
+              "&get.device.system" +
+              "&get.device.vap.*" +
+              "&get.device.vap.*.extra" +
+              "&get.device.vap.*.station.*" +
+              "&get.device.limit.*";
+
+    self_jslib = new mcm_jslib_lib_t();
+    self_jslib.socket_path = "@mintcm";
+    self_jslib.session_permission = mcm_session_permission.ro;
+    self_jslib.session_stack_size = 0;
+    self_jslib.request_command = req_cmd;
+    self_jslib.data_format = mcm_data_format.all_default;
+    self_jslib.other_query = "";
+    rep_ret = mcm_jslib_obtain_config(self_jslib);
+    if(rep_ret.rep_code < mcm_return_code.pass)
+    {
+        alert("call mcm_jslib_obtain_config() fail" +
+              "[" + rep_ret.rep_code + "]");
+        mcm_jslib_run_script(rep_ret.rep_data);
+        return;
+    }
+    mcm_dv = JSON.parse(rep_ret.rep_data);
+
+    console.log("[count] device.vap.* = ", 
+                mcm_dv.device.vap.length);
+    console.log("[count] device.vap.@2.station.* = ", 
+                mcm_dv.device.vap[1].station.length);
+    console.log("[count] device.limit.* = ", 
+                mcm_dv.device.limit.length);
+
+    console.log("[get] device.descript = ", 
+                mcm_dv.device.descript);
+    console.log("[get] device.serial_number = ", 
+                mcm_dv.device.serial_number);
+
+    console.log("[get] device.system.date = ", 
+                mcm_dv.device.system.date);
+    console.log("[get] device.system.ip_addr = ", 
+                mcm_dv.device.system.ip_addr);
+    console.log("[get] device.system.uptime = ", 
+                mcm_dv.device.system.uptime);
+    console.log("[get] device.system.loading = ", 
+                mcm_dv.device.system.loading);
+
+    console.log("[get] device.vap.@3.ekey = ",
+                mcm_dv.device.vap[2].ekey);
+    console.log("[get] device.vap.@3.ssid = ",
+                mcm_dv.device.vap[2].ssid);
+    console.log("[get] device.vap.@3.channel = ",
+                mcm_dv.device.vap[2].channel);
+
+    console.log("[get] device.vap.@2.station.@1.ekey = ",
+                mcm_dv.device.vap[1].station[0].ekey);
+    console.log("[get] device.vap.@2.station.@1.mac_addr = ",
+                mcm_dv.device.vap[1].station[0].mac_addr);
+    console.log("[get] device.vap.@2.station.@1.rule = ",
+                mcm_dv.device.vap[1].station[0].rule);
+
+    console.log("[get] device.limit.@1.ekey = ",
+                mcm_dv.device.limit[0].ekey);
+    console.log("[get] device.limit.@1.name = ",
+                mcm_dv.device.limit[0].name);
+    console.log("[get] device.limit.@1.priority = ",
+                mcm_dv.device.limit[0].priority);
+}
+&lt;/script&gt;
+&lt;/head&gt;
+&lt;body&gt;
+  &lt;button type="button" onclick="main_init()"&gt;test&lt;/button&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+</pre>
+          <br>
+          範例 : 所有類型資料都使用字串格式輸出<br>
+<pre class="css_pre_code">
+&lt;html&gt;
+&lt;head&gt;
+&lt;meta http-equiv="cache-control" content="no-cache"&gt;
+&lt;meta http-equiv="content-type" content="text/html; charset=utf-8"&gt;
+&lt;script type="text/javascript" src="jquery_main.js"&gt;&lt;/script&gt;
+&lt;script type="text/javascript" src="json3.js"&gt;&lt;/script&gt;
+&lt;script type="text/javascript" src="mcm_jslib_api.js"&gt;&lt;/script&gt;
+&lt;script type="text/javascript" src="mcm_jslib_data_info_auto.js"&gt;&lt;/script&gt;
+&lt;script type="text/javascript"&gt;
+function main_init()
+{
+    var self_jslib, req_cmd, mcm_dv;
+
+    req_cmd = "&get.device" +
+              "&get.device.system";
+
+    self_jslib = new mcm_jslib_lib_t();
+    self_jslib.socket_path = "@mintcm";
+    self_jslib.session_permission = mcm_session_permission.ro;
+    self_jslib.session_stack_size = 0;
+    self_jslib.request_command = req_cmd;
+    // 所有類型資料都使用字串格式輸出.
+    self_jslib.data_format = mcm_data_format.all_string;
+    self_jslib.other_query = "";
+    rep_ret = mcm_jslib_obtain_config(self_jslib);
+    if(rep_ret.rep_code < mcm_return_code.pass)
+    {
+        alert("call mcm_jslib_obtain_config() fail" +
+              "[" + rep_ret.rep_code + "]");
+        mcm_jslib_run_script(rep_ret.rep_data);
+        return;
+    }
+    mcm_dv = JSON.parse(rep_ret.rep_data);
+
+    console.log("[get] device.descript = ", 
+                mcm_dv.device.descript);
+    console.log("[get] device.serial_number = ", 
+                mcm_dv.device.serial_number);
+
+    console.log("[get] device.system.date = ", 
+                mcm_dv.device.system.date);
+    console.log("[get] device.system.ip_addr = ", 
+                mcm_dv.device.system.ip_addr);
+    console.log("[get] device.system.uptime = ", 
+                mcm_dv.device.system.uptime);
+    console.log("[get] device.system.loading = ", 
+                mcm_dv.device.system.loading);
+}
+&lt;/script&gt;
+&lt;/head&gt;
+&lt;body&gt;
+  &lt;button type="button" onclick="main_init()"&gt;test&lt;/button&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+</pre>
+          <br>
+          範例 : isll 和 iull 類型的資料使用字串格式輸出<br>
+<pre class="css_pre_code">
+&lt;html&gt;
+&lt;head&gt;
+&lt;meta http-equiv="cache-control" content="no-cache"&gt;
+&lt;meta http-equiv="content-type" content="text/html; charset=utf-8"&gt;
+&lt;script type="text/javascript" src="jquery_main.js"&gt;&lt;/script&gt;
+&lt;script type="text/javascript" src="json3.js"&gt;&lt;/script&gt;
+&lt;script type="text/javascript" src="mcm_jslib_api.js"&gt;&lt;/script&gt;
+&lt;script type="text/javascript" src="mcm_jslib_data_info_auto.js"&gt;&lt;/script&gt;
+&lt;script type="text/javascript"&gt;
+function main_init()
+{
+    var self_jslib, req_cmd, mcm_dv;
+
+    req_cmd = "&get.device" +
+              "&get.device.system";
+
+    self_jslib = new mcm_jslib_lib_t();
+    self_jslib.socket_path = "@mintcm";
+    self_jslib.session_permission = mcm_session_permission.ro;
+    self_jslib.session_stack_size = 0;
+    self_jslib.request_command = req_cmd;
+    // isll 和 iull 類型的資料使用字串格式輸出.
+    self_jslib.data_format = mcm_data_format.all_default |
+        mcm_data_format.isll_string | mcm_data_format.iull_string;
+    self_jslib.other_query = "";
+    rep_ret = mcm_jslib_obtain_config(self_jslib);
+    if(rep_ret.rep_code < mcm_return_code.pass)
+    {
+        alert("call mcm_jslib_obtain_config() fail" +
+              "[" + rep_ret.rep_code + "]");
+        mcm_jslib_run_script(rep_ret.rep_data);
+        return;
+    }
+    mcm_dv = JSON.parse(rep_ret.rep_data);
+
+    console.log("[get] device.descript = ", 
+                mcm_dv.device.descript);
+    console.log("[get] device.serial_number = ", 
+                mcm_dv.device.serial_number);
+
+    console.log("[get] device.system.date = ", 
+                mcm_dv.device.system.date);
+    console.log("[get] device.system.ip_addr = ", 
+                mcm_dv.device.system.ip_addr);
+    console.log("[get] device.system.uptime = ", 
+                mcm_dv.device.system.uptime);
+    console.log("[get] device.system.loading = ", 
+                mcm_dv.device.system.loading);
+}
+&lt;/script&gt;
+&lt;/head&gt;
+&lt;body&gt;
+  &lt;button type="button" onclick="main_init()"&gt;test&lt;/button&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+</pre>
+        </td>
+      </tr>
+    </table>
+    <br>
+
+    <div class="css_div_hook" id="hook_0304_set_01"></div>
+    <table class="css_table_box">
+      <tr>
+        <td class="css_td_box">
+          <font class="css_font_b2">寫入資料 (set)</font>
+          <br><br>
+          格式 :<br>
+          <div class="css_div_block">
+            <font class="css_font_g1">"&set.$(data_type).$(full_path)=$(value)"</font>
+          </div>
+          <br>
+          <table class="css_table_list2">
+            <tr>
+              <td class="css_td_list2_l2">$(data_type)</td>
+              <td class="css_td_list2_r1">
+                目標 member 的資料類型 <a href="#hook_0304_data_type_01">[詳細]</a>
+              </td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l2">$(full_path)</td>
+              <td class="css_td_list2_r1">
+                目標的路徑 <a href="#hook_0304_full_path_01">[詳細]</a><br>
+                <font class="css_font_p1">[member 格式][key 模式]</font>
+              </td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l2">$(value)</td>
+              <td class="css_td_list2_r1">
+                要寫入的資料
+              </td>
+            </tr>
+          </table>
+          <br>
+          注意事項 :<br>
+          <table class="css_table_list1">
+            <tr>
+              <td class="css_td_list1_l">01.&nbsp;</td>
+              <td class="css_td_list1_r">
+                資料存取模式必須是 mcm_session_permission.rw.
+              </td>
+            </tr>
+            <tr>
+              <td class="css_td_list1_l">02.&nbsp;</td>
+              <td class="css_td_list1_r">
+                字串類型的資料如果有值要用 <font class="css_font_b1">mcm_jslib_convert_submit_str()</font>
+                調整過.
+              </td>
+            </tr>
+            <tr>
+              <td class="css_td_list1_l">03.&nbsp;</td>
+              <td class="css_td_list1_r">
+                字節流類型的資料如果有值要用 <font class="css_font_p1">雙位數 16 進制</font> 格式.
+              </td>
+            </tr>
+          </table>
+          <br>
+          建立指令.<br>
+          範例 :<br>
+<pre class="css_pre_code">
+var req_cmd = "", tmp_data;
+
+// 設定 device
+tmp_data = "網路設備-" + Math.floor(Math.random() * 10);
+req_cmd += "&set.s.device.descript=" +
+           mcm_jslib_convert_submit_str(tmp_data);
+req_cmd += "&set.b.device.serial_number=" + "0120A6B70099";
+
+// 設定 device.system.uptime
+tmp_data = Math.floor(Math.random() * 1000000000);
+req_cmd += "&set.iull.device.system.uptime=" + tmp_data;
+// 設定 device.system.loading
+tmp_data = Math.random() * 500;
+req_cmd += "&set.fd.device.system.loading=" + tmp_data;
+
+// 設定 device.vap.#23
+tmp_data = "ssid " + Math.floor(Math.random() * 20);
+req_cmd += "&set.s.device.vap.#23.ssid=" +
+           mcm_jslib_convert_submit_str(tmp_data);
+tmp_data = Math.floor(Math.random() * 200);
+req_cmd += "&set.iui.device.vap.#23.channel=" + tmp_data;
+
+// 設定 device.vap.#8.extra.tx_power
+tmp_data = Math.floor(Math.random() * 120);
+req_cmd += "&set.s.device.vap.#8.extra.tx_power=" + tmp_data;
+
+// 設定 device.vap.#15.station.#30
+tmp_data = "00:11:aa:22:bb:" + Math.floor(Math.random() * 100);
+req_cmd += "&set.s.device.vap.#15.station.#30.mac_addr=" +
+           mcm_jslib_convert_submit_str(tmp_data);
+tmp_data = Math.floor(Math.random() * 10);
+req_cmd += "&set.s.device.vap.#15.station.#30.rule=" + tmp_data;
+
+// 設定 device.limit.#6.name
+req_cmd += "&set.s.device.limit.#6.name=" +
+           mcm_jslib_convert_submit_str("")
+</pre>
+<br>
+          指令建立後, 使用 <font class="css_font_b1">mcm_jslib_submit_config()</font>
+          送出請求, 之後檢查返回的結果是否成功.<br>
+          範例 :<br>
+<pre class="css_pre_code">
+var self_jslib, rep_ret;
+
+self_jslib = new mcm_jslib_lib_t();
+self_jslib.socket_path = "@mintcm";
+self_jslib.session_permission = mcm_session_permission.rw;
+self_jslib.session_stack_size = 0;
+self_jslib.request_command = req_cmd;
+self_jslib.after_complete = mcm_after_complete.reload;
+self_jslib.other_query = "";
+rep_ret = mcm_jslib_submit_config(self_jslib);
+if(rep_ret.rep_code < mcm_return_code.pass)
+{
+    alert("call mcm_jslib_submit_config() fail" +
+          "[" + rep_ret.rep_code + "]");
+    mcm_jslib_run_script(rep_ret.rep_data);
+    return;
+}
+mcm_jslib_run_script(rep_ret.rep_data);
+</pre>
+<br>
+          完整程式 :<br>
+<pre class="css_pre_code">
+&lt;html&gt;
+&lt;head&gt;
+&lt;meta http-equiv="cache-control" content="no-cache"&gt;
+&lt;meta http-equiv="content-type" content="text/html; charset=utf-8"&gt;
+&lt;script type="text/javascript" src="jquery_main.js"&gt;&lt;/script&gt;
+&lt;script type="text/javascript" src="json3.js"&gt;&lt;/script&gt;
+&lt;script type="text/javascript" src="mcm_jslib_api.js"&gt;&lt;/script&gt;
+&lt;script type="text/javascript" src="mcm_jslib_data_info_auto.js"&gt;&lt;/script&gt;
+&lt;script type="text/javascript"&gt;
+var req_cmd = "";
+function main_command()
+{
+    var tmp_data, tmp_cmd;
+
+    req_cmd = "";
+    console.clear();
+
+    tmp_data = "網路設備-" + Math.floor(Math.random() * 10);
+    tmp_cmd = "&set.s.device.descript=" +
+              mcm_jslib_convert_submit_str(tmp_data);
+    req_cmd += tmp_cmd;
+    console.log("[set] ", tmp_cmd);
+
+    tmp_data = "120A0BF" + Math.floor(Math.random() * 10);
+    tmp_cmd = "&set.b.device.serial_number=" + tmp_data;
+    req_cmd += tmp_cmd;
+    console.log("[set] ", tmp_cmd);
+
+
+    tmp_data = Math.floor(Math.random() * 1000000000);
+    tmp_cmd = "&set.iull.device.system.uptime=" + tmp_data;
+    req_cmd += tmp_cmd;
+    console.log("[set] ", tmp_cmd);
+
+    tmp_data = Math.random() * 500;
+    tmp_cmd = "&set.fd.device.system.loading=" + tmp_data;
+    req_cmd += tmp_cmd;
+    console.log("[set] ", tmp_cmd);
+
+
+    tmp_data = "ssid " + Math.floor(Math.random() * 20);
+    tmp_cmd = "&set.s.device.vap.#23.ssid=" +
+              mcm_jslib_convert_submit_str(tmp_data);
+    req_cmd += tmp_cmd;
+    console.log("[set] ", tmp_cmd);
+
+    tmp_data = Math.floor(Math.random() * 200);
+    tmp_cmd = "&set.iui.device.vap.#23.channel=" + tmp_data;
+    req_cmd += tmp_cmd;
+    console.log("[set] ", tmp_cmd);
+
+
+    tmp_data = Math.floor(Math.random() * 120);
+    tmp_cmd = "&set.iss.device.vap.#8.extra.tx_power=" + tmp_data;
+    req_cmd += tmp_cmd;
+    console.log("[set] ", tmp_cmd);
+
+
+    tmp_data = "00:11:aa:22:bb:" + Math.floor(Math.random() * 100);
+    tmp_cmd = "&set.s.device.vap.#15.station.#30.mac_addr=" +
+              mcm_jslib_convert_submit_str(tmp_data);
+    req_cmd += tmp_cmd;
+    console.log("[set] ", tmp_cmd);
+
+    tmp_data = Math.floor(Math.random() * 10);
+    tmp_cmd = "&set.rk.device.vap.#15.station.#30.rule=" + tmp_data;
+    req_cmd += tmp_cmd;
+    console.log("[set] ", tmp_cmd);
+
+
+    tmp_cmd = "&set.s.device.limit.#6.name=" +
+              mcm_jslib_convert_submit_str("");
+    req_cmd += tmp_cmd;
+    console.log("[set] ", tmp_cmd);
+}
+function main_submit()
+{
+    var self_jslib, rep_ret;
+
+    if(req_cmd == "")
+        return;
+
+    self_jslib = new mcm_jslib_lib_t();
+    self_jslib.socket_path = "@mintcm";
+    self_jslib.session_permission = mcm_session_permission.rw;
+    self_jslib.session_stack_size = 0;
+    self_jslib.request_command = req_cmd;
+    self_jslib.after_complete = mcm_after_complete.reload;
+    self_jslib.other_query = "";
+    rep_ret = mcm_jslib_submit_config(self_jslib);
+    if(rep_ret.rep_code < mcm_return_code.pass)
+    {
+        alert("call mcm_jslib_submit_config() fail" +
+              "[" + rep_ret.rep_code + "]");
+        mcm_jslib_run_script(rep_ret.rep_data);
+        return;
+    }
+    mcm_jslib_run_script(rep_ret.rep_data);
+}
+&lt;/script&gt;
+&lt;/head&gt;
+&lt;body&gt;
+  &lt;button type="button" onclick="main_command()"&gt;01. command&lt;/button&gt;
+  &lt;button type="button" onclick="main_submit()"&gt;02. submit&lt;/button&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+</pre>
+          <br>
+          範例 : 設定 CGI 端處理完後預設不回傳訊息<br>
+<pre class="css_pre_code">
+&lt;html&gt;
+&lt;head&gt;
+&lt;meta http-equiv="cache-control" content="no-cache"&gt;
+&lt;meta http-equiv="content-type" content="text/html; charset=utf-8"&gt;
+&lt;script type="text/javascript" src="jquery_main.js"&gt;&lt;/script&gt;
+&lt;script type="text/javascript" src="json3.js"&gt;&lt;/script&gt;
+&lt;script type="text/javascript" src="mcm_jslib_api.js"&gt;&lt;/script&gt;
+&lt;script type="text/javascript" src="mcm_jslib_data_info_auto.js"&gt;&lt;/script&gt;
+&lt;script type="text/javascript"&gt;
+var req_cmd = "";
+function main_command()
+{
+    var tmp_data, tmp_cmd;
+
+    req_cmd = "";
+    console.clear();
+
+    tmp_data = "網路設備-" + Math.floor(Math.random() * 10);
+    tmp_cmd = "&set.s.device.descript=" +
+              mcm_jslib_convert_submit_str(tmp_data);
+    req_cmd += tmp_cmd;
+    console.log("[set] ", tmp_cmd);
+}
+function main_submit()
+{
+    var self_jslib, rep_ret;
+
+    if(req_cmd == "")
+        return;
+
+    self_jslib = new mcm_jslib_lib_t();
+    self_jslib.socket_path = "@mintcm";
+    self_jslib.session_permission = mcm_session_permission.rw;
+    self_jslib.session_stack_size = 0;
+    self_jslib.request_command = req_cmd;
+    // 設定 CGI 端處理完後預設不回傳訊息.
+    self_jslib.after_complete = mcm_after_complete.none;
+    self_jslib.other_query = "";
+    rep_ret = mcm_jslib_submit_config(self_jslib);
+    if(rep_ret.rep_code < mcm_return_code.pass)
+    {
+        alert("call mcm_jslib_submit_config() fail" +
+              "[" + rep_ret.rep_code + "]");
+        mcm_jslib_run_script(rep_ret.rep_data);
+        return;
+    }
+
+    // 預設不回傳訊息, 不需要執行.
+    //mcm_jslib_run_script(rep_ret.rep_data);
+}
+&lt;/script&gt;
+&lt;/head&gt;
+&lt;body&gt;
+  &lt;button type="button" onclick="main_command()"&gt;01. command&lt;/button&gt;
+  &lt;button type="button" onclick="main_submit()"&gt;02. submit&lt;/button&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+</pre>
+        </td>
+      </tr>
+    </table>
+    <br>
+
+    <div class="css_div_hook" id="hook_0304_add_01"></div>
+    <table class="css_table_box">
+      <tr>
+        <td class="css_td_box">
+          <font class="css_font_b2">增加一筆資料 (add)</font>
+          <br><br>
+          格式 :<br>
+          <div class="css_div_block">
+            <font class="css_font_g1">"&add.$(full_path)"</font>
+          </div>
+          <br>
+          <table class="css_table_list2">
+            <tr>
+              <td class="css_td_list2_l2">$(full_path)</td>
+              <td class="css_td_list2_r1">
+                目標的路徑 <a href="#hook_0304_full_path_01">[詳細]</a><br>
+                <font class="css_font_p1">[entry 格式][key 模式]</font>
+              </td>
+            </tr>
+          </table>
+          <br>
+          注意事項 :<br>
+          <table class="css_table_list1">
+            <tr>
+              <td class="css_td_list1_l">01.&nbsp;</td>
+              <td class="css_td_list1_r">
+                資料存取模式必須是 mcm_session_permission.rw.
+              </td>
+            </tr>
+            <tr>
+              <td class="css_td_list1_l">02.&nbsp;</td>
+              <td class="css_td_list1_r">
+                增加的資料的 key 值不可和存在的資料的 key 相同, 否則會操作失敗.
+              </td>
+            </tr>
+            <tr>
+              <td class="css_td_list1_l">03.&nbsp;</td>
+              <td class="css_td_list1_r">
+                增加資料後要使用 set 替資料設值, 否則會使用資料模型中設定的初始值.
+              </td>
+            </tr>
+            <tr>
+              <td class="css_td_list1_l">04.&nbsp;</td>
+              <td class="css_td_list1_r">
+                增加多層資料時, 要逐層增加.
+              </td>
+            </tr>
+          </table>
+          <br>
+          建立指令.<br>
+          範例 :<br>
+<pre class="css_pre_code">
+var req_cmd = "", tmp_data;
+
+// 增加 device.vap.#123
+req_cmd += "&add.device.vap.#123";
+tmp_data = "public-" + Math.floor(Math.random() * 20);
+req_cmd += "&set.s.device.vap.#123.ssid=" +
+           mcm_jslib_convert_submit_str(tmp_data);
+tmp_data = Math.floor(Math.random() * 200);
+req_cmd += "&set.iui.device.vap.#123.channel=" + tmp_data;
+
+// device.vap.*.extra 是 device.vap.* 的 child-group 而且又是 gs 類型,
+// 所以增加 device.vap.#123 後, 資料庫會自動增加 device.vap.#123.extra,
+// 替 device.vap.#123.extra 加上值. (不設的話就是使用資料模型中設定的初始值)
+tmp_data = Math.floor(Math.random() * 10) % 2;
+req_cmd += "&set.isc.device.vap.#123.extra.hidden=" + tmp_data;
+tmp_data = Math.floor(Math.random() * 20);
+req_cmd += "&set.iss.device.vap.#123.extra.txpower=" + tmp_data;
+
+// 增加 device.vap.#234.station.#1
+// 一開始 device.vap.#234 並不存在, 所以要逐層增加.
+// 增加 device.vap.#234
+// 不設值使用初始值.
+req_cmd += "&add.device.vap.#234";
+// 增加 device.vap.#234.station.#1
+req_cmd += "&add.device.vap.#234.station.#1";
+tmp_data = "00:AA:22:BB:33:" + Math.floor(Math.random() * 100);
+req_cmd += "&set.s.device.vap.#234.station.#1.mac_addr=" +
+           mcm_jslib_convert_submit_str(tmp_data);
+tmp_data = Math.floor(Math.random() * 20);
+req_cmd += "&set.rk.device.vap.#234.station.#1.rule=" + tmp_data;
+
+// 增加 device.limit.#51
+// 不設值使用初始值.
+req_cmd += "&add.device.limit.#51";
+</pre>
+<br>
+          指令建立後, 使用 <font class="css_font_b1">mcm_jslib_submit_config()</font>
+          送出請求, 之後檢查返回的結果是否成功.<br>
+          範例 :<br>
+<pre class="css_pre_code">
+var self_jslib, rep_ret;
+
+self_jslib = new mcm_jslib_lib_t();
+self_jslib.socket_path = "@mintcm";
+self_jslib.session_permission = mcm_session_permission.rw;
+self_jslib.session_stack_size = 0;
+self_jslib.request_command = req_cmd;
+self_jslib.after_complete = mcm_after_complete.reload;
+self_jslib.other_query = "";
+rep_ret = mcm_jslib_submit_config(self_jslib);
+if(rep_ret.rep_code < mcm_return_code.pass)
+{
+    alert("call mcm_jslib_submit_config() fail" +
+          "[" + rep_ret.rep_code + "]");
+    mcm_jslib_run_script(rep_ret.rep_data);
+    return;
+}
+mcm_jslib_run_script(rep_ret.rep_data);
+</pre>
+<br>
+          完整程式 :<br>
+<pre class="css_pre_code">
+&lt;html&gt;
+&lt;head&gt;
+&lt;meta http-equiv="cache-control" content="no-cache"&gt;
+&lt;meta http-equiv="content-type" content="text/html; charset=utf-8"&gt;
+&lt;script type="text/javascript" src="jquery_main.js"&gt;&lt;/script&gt;
+&lt;script type="text/javascript" src="json3.js"&gt;&lt;/script&gt;
+&lt;script type="text/javascript" src="mcm_jslib_api.js"&gt;&lt;/script&gt;
+&lt;script type="text/javascript" src="mcm_jslib_data_info_auto.js"&gt;&lt;/script&gt;
+&lt;script type="text/javascript"&gt;
+var req_cmd = "";
+function main_command()
+{
+    var tmp_data, tmp_cmd;
+
+    req_cmd = "";
+    console.clear();
+
+    tmp_cmd = "&add.device.vap.#123";
+    req_cmd += tmp_cmd;
+    console.log("[add] ", tmp_cmd);
+
+    tmp_data = "public-" + Math.floor(Math.random() * 20);
+    tmp_cmd = "&set.s.device.vap.#123.ssid=" +
+              mcm_jslib_convert_submit_str(tmp_data);
+    req_cmd += tmp_cmd;
+    console.log("[set] ", tmp_cmd);
+
+    tmp_data = Math.floor(Math.random() * 200);
+    tmp_cmd = "&set.iui.device.vap.#123.channel=" + tmp_data;
+    req_cmd += tmp_cmd;
+    console.log("[set] ", tmp_cmd);
+
+
+    tmp_data = Math.floor(Math.random() * 10) % 2;
+    tmp_cmd = "&set.isc.device.vap.#123.extra.hidden=" + tmp_data;
+    req_cmd += tmp_cmd;
+    console.log("[set] ", tmp_cmd);
+
+    tmp_data = Math.floor(Math.random() * 20);
+    tmp_cmd = "&set.iss.device.vap.#123.extra.tx_power=" + tmp_data;
+    req_cmd += tmp_cmd;
+    console.log("[set] ", tmp_cmd);
+
+
+    tmp_cmd = "&add.device.vap.#234";
+    req_cmd += tmp_cmd;
+    console.log("[add] ", tmp_cmd);
+
+    tmp_cmd = "&add.device.vap.#234.station.#1";
+    req_cmd += tmp_cmd;
+    console.log("[add] ", tmp_cmd);
+
+    tmp_data = "00:AA:22:BB:33:" + Math.floor(Math.random() * 100);
+    tmp_cmd = "&set.s.device.vap.#234.station.#1.mac_addr=" +
+              mcm_jslib_convert_submit_str(tmp_data);
+    req_cmd += tmp_cmd;
+    console.log("[set] ", tmp_cmd);
+
+    tmp_data = Math.floor(Math.random() * 20);
+    tmp_cmd = "&set.rk.device.vap.#234.station.#1.rule=" + tmp_data;
+    req_cmd += tmp_cmd;
+    console.log("[set] ", tmp_cmd);
+
+
+    tmp_cmd = "&add.device.limit.#51";
+    req_cmd += tmp_cmd;
+    console.log("[add] ", tmp_cmd);
+}
+function main_submit()
+{
+    var self_jslib, rep_ret;
+
+    if(req_cmd == "")
+        return;
+
+    self_jslib = new mcm_jslib_lib_t();
+    self_jslib.socket_path = "@mintcm";
+    self_jslib.session_permission = mcm_session_permission.rw;
+    self_jslib.session_stack_size = 0;
+    self_jslib.request_command = req_cmd;
+    self_jslib.after_complete = mcm_after_complete.reload;
+    self_jslib.other_query = "";
+    rep_ret = mcm_jslib_submit_config(self_jslib);
+    if(rep_ret.rep_code < mcm_return_code.pass)
+    {
+        alert("call mcm_jslib_submit_config() fail" +
+              "[" + rep_ret.rep_code + "]");
+        mcm_jslib_run_script(rep_ret.rep_data);
+        return;
+    }
+    mcm_jslib_run_script(rep_ret.rep_data);
+}
+&lt;/script&gt;
+&lt;/head&gt;
+&lt;body&gt;
+  &lt;button type="button" onclick="main_command()"&gt;01. command&lt;/button&gt;
+  &lt;button type="button" onclick="main_submit()"&gt;02. submit&lt;/button&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+</pre>
+        </td>
+      </tr>
+    </table>
+    <br>
+
+    <div class="css_div_hook" id="hook_0304_del_01"></div>
+    <table class="css_table_box">
+      <tr>
+        <td class="css_td_box">
+          <font class="css_font_b2">刪除一筆資料 (del)</font>
+          <br><br>
+          格式 :<br>
+          <div class="css_div_block">
+            <font class="css_font_g1">"&del.$(full_path)"</font>
+          </div>
+          <br>
+          <table class="css_table_list2">
+            <tr>
+              <td class="css_td_list2_l2">$(full_path)</td>
+              <td class="css_td_list2_r1">
+                目標的路徑 <a href="#hook_0304_full_path_01">[詳細]</a><br>
+                <font class="css_font_p1">[entry 格式][key 模式]</font>
+              </td>
+            </tr>
+          </table>
+          <br>
+          注意事項 :<br>
+          <table class="css_table_list1">
+            <tr>
+              <td class="css_td_list1_l">01.&nbsp;</td>
+              <td class="css_td_list1_r">
+                資料存取模式必須是 mcm_session_permission.rw.
+              </td>
+            </tr>
+          </table>
+          <br>
+          建立指令.<br>
+          範例 :<br>
+<pre class="css_pre_code">
+var req_cmd = "";
+
+// 刪除 device.vap.#8
+req_cmd += "&del.device.vap.#8";
+
+// 刪除 device.vap.#15.station.#30
+req_cmd += "&del.device.vap.#15.station.#30";
+</pre>
+<br>
+          指令建立後, 使用 <font class="css_font_b1">mcm_jslib_submit_config()</font>
+          送出請求, 之後檢查返回的結果是否成功.<br>
+          範例 :<br>
+<pre class="css_pre_code">
+var self_jslib, rep_ret;
+
+self_jslib = new mcm_jslib_lib_t();
+self_jslib.socket_path = "@mintcm";
+self_jslib.session_permission = mcm_session_permission.rw;
+self_jslib.session_stack_size = 0;
+self_jslib.request_command = req_cmd;
+self_jslib.after_complete = mcm_after_complete.reload;
+self_jslib.other_query = "";
+rep_ret = mcm_jslib_submit_config(self_jslib);
+if(rep_ret.rep_code < mcm_return_code.pass)
+{
+    alert("call mcm_jslib_submit_config() fail" +
+          "[" + rep_ret.rep_code + "]");
+    mcm_jslib_run_script(rep_ret.rep_data);
+    return;
+}
+mcm_jslib_run_script(rep_ret.rep_data);
+</pre>
+<br>
+          完整程式 :<br>
+<pre class="css_pre_code">
+&lt;html&gt;
+&lt;head&gt;
+&lt;meta http-equiv="cache-control" content="no-cache"&gt;
+&lt;meta http-equiv="content-type" content="text/html; charset=utf-8"&gt;
+&lt;script type="text/javascript" src="jquery_main.js"&gt;&lt;/script&gt;
+&lt;script type="text/javascript" src="json3.js"&gt;&lt;/script&gt;
+&lt;script type="text/javascript" src="mcm_jslib_api.js"&gt;&lt;/script&gt;
+&lt;script type="text/javascript" src="mcm_jslib_data_info_auto.js"&gt;&lt;/script&gt;
+&lt;script type="text/javascript"&gt;
+var req_cmd = "";
+function main_command()
+{
+    var tmp_data, tmp_cmd;
+
+    req_cmd = "";
+    console.clear();
+
+    tmp_cmd = "&del.device.vap.#8";
+    req_cmd += tmp_cmd;
+    console.log("[del] ", tmp_cmd);
+
+    tmp_cmd = "&del.device.vap.#15.station.#30";
+    req_cmd += tmp_cmd;
+    console.log("[del] ", tmp_cmd);
+}
+function main_submit()
+{
+    var self_jslib, rep_ret;
+
+    if(req_cmd == "")
+        return;
+
+    self_jslib = new mcm_jslib_lib_t();
+    self_jslib.socket_path = "@mintcm";
+    self_jslib.session_permission = mcm_session_permission.rw;
+    self_jslib.session_stack_size = 0;
+    self_jslib.request_command = req_cmd;
+    self_jslib.after_complete = mcm_after_complete.reload;
+    self_jslib.other_query = "";
+    rep_ret = mcm_jslib_submit_config(self_jslib);
+    if(rep_ret.rep_code < mcm_return_code.pass)
+    {
+        alert("call mcm_jslib_submit_config() fail" +
+              "[" + rep_ret.rep_code + "]");
+        mcm_jslib_run_script(rep_ret.rep_data);
+        return;
+    }
+    mcm_jslib_run_script(rep_ret.rep_data);
+}
+&lt;/script&gt;
+&lt;/head&gt;
+&lt;body&gt;
+  &lt;button type="button" onclick="main_command()"&gt;01. command&lt;/button&gt;
+  &lt;button type="button" onclick="main_submit()"&gt;02. submit&lt;/button&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+</pre>
+        </td>
+      </tr>
+    </table>
+    <br>
+
+    <div class="css_div_hook" id="hook_0304_delall_01"></div>
+    <table class="css_table_box">
+      <tr>
+        <td class="css_td_box">
+          <font class="css_font_b2">刪除 group 內的所有資料 (delall)</font>
+          <br><br>
+          格式 :<br>
+          <div class="css_div_block">
+            <font class="css_font_g1">"&delall.$(mix_path)"</font>
+          </div>
+          <br>
+          <table class="css_table_list2">
+            <tr>
+              <td class="css_td_list2_l2">$(mix_path)</td>
+              <td class="css_td_list2_r1">
+                目標的路徑 <a href="#hook_0304_mix_path_01">[詳細]</a><br>
+                <font class="css_font_p1">[key 模式]</font>
+              </td>
+            </tr>
+          </table>
+          <br>
+          注意事項 :<br>
+          <table class="css_table_list1">
+            <tr>
+              <td class="css_td_list1_l">01.&nbsp;</td>
+              <td class="css_td_list1_r">
+                資料存取模式必須是 mcm_session_permission.rw.
+              </td>
+            </tr>
+          </table>
+          <br>
+          建立指令.<br>
+          範例 :<br>
+<pre class="css_pre_code">
+var req_cmd = "";
+
+// 刪除 device.vap.#15.station.*
+req_cmd += "&delall.device.vap.#15.station.*";
+
+// 刪除 device.limit.*
+req_cmd += "&delall.device.limit.*";
+</pre>
+<br>
+          指令建立後, 使用 <font class="css_font_b1">mcm_jslib_submit_config()</font>
+          送出請求, 之後檢查返回的結果是否成功.<br>
+          範例 :<br>
+<pre class="css_pre_code">
+var self_jslib, rep_ret;
+
+self_jslib = new mcm_jslib_lib_t();
+self_jslib.socket_path = "@mintcm";
+self_jslib.session_permission = mcm_session_permission.rw;
+self_jslib.session_stack_size = 0;
+self_jslib.request_command = req_cmd;
+self_jslib.after_complete = mcm_after_complete.reload;
+self_jslib.other_query = "";
+rep_ret = mcm_jslib_submit_config(self_jslib);
+if(rep_ret.rep_code < mcm_return_code.pass)
+{
+    alert("call mcm_jslib_submit_config() fail" +
+          "[" + rep_ret.rep_code + "]");
+    mcm_jslib_run_script(rep_ret.rep_data);
+    return;
+}
+mcm_jslib_run_script(rep_ret.rep_data);
+</pre>
+<br>
+          完整程式 :<br>
+<pre class="css_pre_code">
+&lt;html&gt;
+&lt;head&gt;
+&lt;meta http-equiv="cache-control" content="no-cache"&gt;
+&lt;meta http-equiv="content-type" content="text/html; charset=utf-8"&gt;
+&lt;script type="text/javascript" src="jquery_main.js"&gt;&lt;/script&gt;
+&lt;script type="text/javascript" src="json3.js"&gt;&lt;/script&gt;
+&lt;script type="text/javascript" src="mcm_jslib_api.js"&gt;&lt;/script&gt;
+&lt;script type="text/javascript" src="mcm_jslib_data_info_auto.js"&gt;&lt;/script&gt;
+&lt;script type="text/javascript"&gt;
+var req_cmd = "";
+function main_command()
+{
+    var tmp_data, tmp_cmd;
+
+    req_cmd = "";
+    console.clear();
+
+    tmp_cmd = "&delall.device.vap.#15.station.*";
+    req_cmd += tmp_cmd;
+    console.log("[delall] ", tmp_cmd);
+
+    tmp_cmd = "&delall.device.limit.*";
+    req_cmd += tmp_cmd;
+    console.log("[delall] ", tmp_cmd);
+}
+function main_submit()
+{
+    var self_jslib, rep_ret;
+
+    if(req_cmd == "")
+        return;
+
+    self_jslib = new mcm_jslib_lib_t();
+    self_jslib.socket_path = "@mintcm";
+    self_jslib.session_permission = mcm_session_permission.rw;
+    self_jslib.session_stack_size = 0;
+    self_jslib.request_command = req_cmd;
+    self_jslib.after_complete = mcm_after_complete.reload;
+    self_jslib.other_query = "";
+    rep_ret = mcm_jslib_submit_config(self_jslib);
+    if(rep_ret.rep_code < mcm_return_code.pass)
+    {
+        alert("call mcm_jslib_submit_config() fail" +
+              "[" + rep_ret.rep_code + "]");
+        mcm_jslib_run_script(rep_ret.rep_data);
+        return;
+    }
+    mcm_jslib_run_script(rep_ret.rep_data);
+}
+&lt;/script&gt;
+&lt;/head&gt;
+&lt;body&gt;
+  &lt;button type="button" onclick="main_command()"&gt;01. command&lt;/button&gt;
+  &lt;button type="button" onclick="main_submit()"&gt;02. submit&lt;/button&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+</pre>
+        </td>
+      </tr>
+    </table>
+    <br>
+
+    <div class="css_div_hook" id="hook_0304_run_01"></div>
+    <table class="css_table_box">
+      <tr>
+        <td class="css_td_box">
+          <font class="css_font_b2">執行 <font class="css_font_p1">mint_cm/mcm_daemon/mcm_module</font> 內的模組函式 (run)</font>
+          <br><br>
+          格式 :<br>
+          <div class="css_div_block">
+            <font class="css_font_g1">"&run.$(module_function)"</font>
+          </div>
+          <br>
+          <table class="css_table_list2">
+            <tr>
+              <td class="css_td_list2_l2">$(module_function)</td>
+              <td class="css_td_list2_r1">
+                目標的函式名稱
+              </td>
+            </tr>
+          </table>
+          <br>
+          注意事項 :<br>
+          <table class="css_table_list1">
+            <tr>
+              <td class="css_td_list1_l">01.&nbsp;</td>
+              <td class="css_td_list1_r">
+                如果內部模組函式只需要讀取資料, 資料存取模式可以是 mcm_session_permission.ro 或 mcm_session_permission.rw,
+                如果內部模組函式需要修改資料, 資料存取模必須是 mcm_session_permission.rw.
+              </td>
+            </tr>
+            <tr>
+              <td class="css_td_list1_l">02.&nbsp;</td>
+              <td class="css_td_list1_r">
+                因為內部模組函式的內容是客制化的, 所以需要的堆疊空間不固定
+                (區域變數的多寡和函式呼叫的層數都會影響需要的堆疊空間),
+                透過 session_stack_size 調整伺服器端處理此連線的執行緒的堆疊空間.
+              </td>
+            </tr>
+          </table>
+          <br>
+          建立指令.<br>
+          範例 :<br>
+<pre class="css_pre_code">
+var req_cmd = "";
+
+// 執行 mcm_module_web_test_01
+req_cmd += "&run.mcm_module_web_test_01";
+</pre>
+<br>
+          指令建立後, 使用 <font class="css_font_b1">mcm_jslib_submit_config()</font>
+          送出請求, 之後檢查返回的結果是否成功.<br>
+          範例 :<br>
+<pre class="css_pre_code">
+var self_jslib, rep_ret;
+
+self_jslib = new mcm_jslib_lib_t();
+self_jslib.socket_path = "@mintcm";
+self_jslib.session_permission = mcm_session_permission.ro;
+self_jslib.session_stack_size = 1048576;
+self_jslib.request_command = req_cmd;
+self_jslib.after_complete = mcm_after_complete.reload;
+self_jslib.other_query = "";
+rep_ret = mcm_jslib_submit_config(self_jslib);
+if(rep_ret.rep_code < mcm_return_code.pass)
+{
+    alert("call mcm_jslib_submit_config() fail" +
+          "[" + rep_ret.rep_code + "]");
+    mcm_jslib_run_script(rep_ret.rep_data);
+    return;
+}
+mcm_jslib_run_script(rep_ret.rep_data);
+</pre>
+<br>
+          完整程式 :<br>
+<pre class="css_pre_code">
+&lt;html&gt;
+&lt;head&gt;
+&lt;meta http-equiv="cache-control" content="no-cache"&gt;
+&lt;meta http-equiv="content-type" content="text/html; charset=utf-8"&gt;
+&lt;script type="text/javascript" src="jquery_main.js"&gt;&lt;/script&gt;
+&lt;script type="text/javascript" src="json3.js"&gt;&lt;/script&gt;
+&lt;script type="text/javascript" src="mcm_jslib_api.js"&gt;&lt;/script&gt;
+&lt;script type="text/javascript" src="mcm_jslib_data_info_auto.js"&gt;&lt;/script&gt;
+&lt;script type="text/javascript"&gt;
+var req_cmd = "";
+function main_command()
+{
+    var tmp_data, tmp_cmd;
+
+    req_cmd = "";
+    console.clear();
+
+    tmp_cmd = "&run.mcm_module_web_test_01";
+    req_cmd += tmp_cmd;
+    console.log("[run] ", tmp_cmd);
+}
+function main_submit()
+{
+    var self_jslib, rep_ret;
+
+    if(req_cmd == "")
+        return;
+
+    self_jslib = new mcm_jslib_lib_t();
+    self_jslib.socket_path = "@mintcm";
+    self_jslib.session_permission = mcm_session_permission.ro;
+    self_jslib.session_stack_size = 1048576;
+    self_jslib.request_command = req_cmd;
+    self_jslib.after_complete = mcm_after_complete.reload;
+    self_jslib.other_query = "";
+    rep_ret = mcm_jslib_submit_config(self_jslib);
+    if(rep_ret.rep_code < mcm_return_code.pass)
+    {
+        alert("call mcm_jslib_submit_config() fail" +
+              "[" + rep_ret.rep_code + "]");
+        mcm_jslib_run_script(rep_ret.rep_data);
+        return;
+    }
+    mcm_jslib_run_script(rep_ret.rep_data);
+}
+&lt;/script&gt;
+&lt;/head&gt;
+&lt;body&gt;
+  &lt;button type="button" onclick="main_command()"&gt;01. command&lt;/button&gt;
+  &lt;button type="button" onclick="main_submit()"&gt;02. submit&lt;/button&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+</pre>
+<pre class="css_pre_code">
+模組部分 :
+這部分程式要放在 mint_cm/mcm_daemon/mcm_module 之下, 檔案名稱隨意 (*.c),
+之後在 mint_cm 使用 make all 重新編譯.
+
+#include &lt;time.h&gt;
+#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+#include "../../mcm_lib/mcm_lheader/mcm_type.h"
+#include "../../mcm_lib/mcm_lheader/mcm_size.h"
+#include "../../mcm_lib/mcm_lheader/mcm_control.h"
+#include "../../mcm_lib/mcm_lheader/mcm_connect.h"
+#include "../../mcm_lib/mcm_lheader/mcm_return.h"
+#include "../../mcm_lib/mcm_lheader/mcm_debug.h"
+#include "../../mcm_lib/mcm_lheader/mcm_data_exinfo_auto.h"
+#include "../mcm_service_handle_extern.h"
+#include "../mcm_config_handle_extern.h"
+
+#define DMSG(msg_fmt, msgs...) printf("%s(%04u): " msg_fmt "\n", __FILE__, __LINE__, ##msgs)
+
+int mcm_module_web_test_01(struct mcm_service_session_t *this_session)
+{
+    srand(time(NULL));
+
+    DMSG("module-%u", rand());
+
+    return MCM_RCODE_PASS;
+}
+</pre>
+        </td>
+      </tr>
+    </table>
+    <br>
+
+  </div>
+</div>
+<br>
+
+<div class="css_div_box_frame_full">
+  <div class="css_div_box_title">指令的混合使用</div>
+  <div class="css_div_box_content">
+    <br>
+
+    在實際情況下, 指令需要混合使用來完成工作, 這邊說明如何使用以及使用的時機.
+    <br><br>
+
+    <table class="css_table_box">
+      <tr>
+        <td class="css_td_box">
+          <font class="css_font_b2">在取值 (使用 mcm_jslib_obtain_config()) 的情況</font>
+          <br><br>
+          可以混用的指令有 <font class="css_font_p1">[get] [set] [add] [del] [delall] [run]</font>
+          <br><br>
+          使用的時機 :<br>
+          要取得的資料必須先從系統中取出, 再放到資料庫中供讀取.
+          <a href="mcm_0301.html#hook_0301_case_obtain_01">[詳細]</a>
+          <br><br>
+          使用方式 :<br>
+          <table class="css_table_list1">
+            <tr>
+              <td class="css_td_list1_l">01.&nbsp;</td>
+              <td class="css_td_list1_r">
+                使用 [run] 執行內部模組, 並在內部模組中實作將資料從系統中取出放到資料庫的部分.
+              </td>
+            </tr>
+            <tr>
+              <td class="css_td_list1_l">02.&nbsp;</td>
+              <td class="css_td_list1_r">
+                使用 [get] 取出資料.
+              </td>
+            </tr>
+          </table>
+          <br>
+          範例 :<br>
+<pre class="css_pre_code">
+var self_jslib, req_cmd, rep_ret;
+
+// 執行 mcm_module_get_uptime(), 取得 device.system.loading
+req_cmd += "&run.module_get_loading" +
+           "&get.device.system";
+
+// 執行 mcm_module_get_client(), 取得 device.client.*
+req_cmd += "&run.module_get_client" +
+           "&get.device.client.*";
+
+self_jslib = new mcm_jslib_lib_t();
+self_jslib.socket_path = "@mintcm";
+self_jslib.session_permission = mcm_session_permission.rw;
+self_jslib.session_stack_size = 0;
+self_jslib.request_command = req_cmd;
+self_jslib.data_format = mcm_data_format.all_default;
+self_jslib.other_query = "";
+rep_ret = mcm_jslib_obtain_config(self_jslib);
+...
+</pre>
+<br>
+          注意事項 :<br>
+          <table class="css_table_list1">
+            <tr>
+              <td class="css_td_list1_l">01.&nbsp;</td>
+              <td class="css_td_list1_r">
+                程式會依照指令的順序執行, 如果 [get] 在 [set] [add] [del] [delall] [run] 之前, 會讀不到修改的資料.
+              </td>
+            </tr>
+            <tr>
+              <td class="css_td_list1_l">02.&nbsp;</td>
+              <td class="css_td_list1_r">
+                可以使用多個 [run] 分別處理不同種類的資料, 也可以只使用一個 [run] 處理全部的資料.
+              </td>
+            </tr>
+            <tr>
+              <td class="css_td_list1_l">03.&nbsp;</td>
+              <td class="css_td_list1_r">
+                使用多個 [run] 時, 如果其中一個內部模組返回錯誤 (小於 MCM_RCODE_PASS), 則後續的指令都不會被執行.
+              </td>
+            </tr>
+            <tr>
+              <td class="css_td_list1_l">04.&nbsp;</td>
+              <td class="css_td_list1_r">
+                其他進階的注意事項參考 <a href="mcm_0407.html#hook_0407_mcm_jslib_obtain_config_01">#04-07#</a>.
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+    <br>
+
+    <table class="css_table_box">
+      <tr>
+        <td class="css_td_box">
+          <font class="css_font_b2">在設值 (使用 mcm_jslib_submit_config()) 的情況</font>
+          <br><br>
+          可以混用的指令有, <font class="css_font_p1">[set] [add] [del] [delall] [run]</font>
+          <br><br>
+          使用的時機 :<br>
+          資料送入資料庫後, 需要用這些資料對系統做實際的設定.
+          <a href="mcm_0301.html#hook_0301_case_submit_01">[詳細]</a>
+          <br><br>
+          使用方式 :<br>
+          <table class="css_table_list1">
+            <tr>
+              <td class="css_td_list1_l">01.&nbsp;</td>
+              <td class="css_td_list1_r">
+                使用 [set] [add] [del] [delall] 修改資料.
+              </td>
+            </tr>
+            <tr>
+              <td class="css_td_list1_l">02.&nbsp;</td>
+              <td class="css_td_list1_r">
+                使用 [run] 執行內部模組, 並在內部模組中實作將修改的資料套用到系統的部分.
+              </td>
+            </tr>
+          </table>
+          <br>
+          範例程式 :<br>
+<pre class="css_pre_code">
+var self_jslib, req_cmd, rep_ret;
+
+// 設定 device.system.ip_addr
+req_cmd += "&set.s.device.system.ip_addr=" +
+           mcm_jslib_convert_submit_str("192.168.100.1");
+req_cmd += "&run.module_config_sytem";
+
+
+// 設定 device.vap.#8
+req_cmd += "&set.s.device.vap.#8.ssid=" +
+           mcm_jslib_convert_submit_str("private-networ");
+req_cmd += "&set.iui.device.vap.#8.channel=11";
+
+// 刪除 device.vap.#15
+req_cmd += "&del.device.vap.#15";
+
+// 增加 device.vap.#55
+req_cmd += "&add.device.vap.#55";
+req_cmd += "&set.s.device.vap.#55.ssid=" +
+           mcm_jslib_convert_submit_str("public-networ");
+req_cmd += "&set.iui.device.vap.#55.channel=44";
+
+// 處理 device.vap.*
+req_cmd += "&run.module_config_vap";
+
+self_jslib = new mcm_jslib_lib_t();
+self_jslib.socket_path = "@mintcm";
+self_jslib.session_permission = mcm_session_permission.rw;
+self_jslib.session_stack_size = 0;
+self_jslib.request_command = req_cmd;
+self_jslib.after_complete = mcm_after_complete.reload;
+self_jslib.other_query = "";
+rep_ret = mcm_jslib_submit_config(self_jslib);
+...
+</pre>
+<br>
+          注意事項 :<br>
+          <table class="css_table_list1">
+            <tr>
+              <td class="css_td_list1_l">01.&nbsp;</td>
+              <td class="css_td_list1_r">
+                程式會依照指令的順序執行, 如果 [run] 在 [set] [add] [del] [delall] 之前,
+                在內部模組中會讀不到修改的值.</td>
+            </tr>
+            <tr>
+              <td class="css_td_list1_l">02.&nbsp;</td>
+              <td class="css_td_list1_r">
+                可以使用多個 [run] 分別處理不同種類的資料, 也可以只使用一個 [run] 處理全部的資料.
+              </td>
+            </tr>
+            <tr>
+              <td class="css_td_list1_l">03.&nbsp;</td>
+              <td class="css_td_list1_r">
+                使用多個 [run] 時, 如果其中一個內部模組返回錯誤 (小於 MCM_RCODE_PASS), 則後續的指令都不會被執行.
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+    <br>
+
+    後續的章節會說明在模組中如何存取資料.
+    <br><br>
+
+  </div>
+</div>
+<br>
+
+<div class="css_div_box_frame_full">
+  <div class="css_div_box_title">額外的操作</div>
+  <div class="css_div_box_content">
+    <br>
+
+    如果需要使用用戶端或核心端的 save 和 shutwodn 功能, 需要使用 [run] 執行內部模組,
+    之後在內部模組中使用對映的 save 和 shutdown 函式處理 (<a href="mcm_0407.html">#04-07#</a>).
+    <br><br>
+
+  </div>
+</div>
+<br>
+
+<div class="css_div_box_frame_full">
+  <div class="css_div_box_title">注意事項</div>
+  <div class="css_div_box_content">
+    <br>
+
+    如果要透過修改設定資料檔案來做讀取測試的話, 步驟 :<br>
+    先關閉 mcm_daemon (有在執行的話), 修改設定值檔案, 重新執行 mcm_daemon.<br>
+    修改設定值檔案有二個方法 :<br>
+    <table class="css_table_list2">
+      <tr>
+        <td class="css_td_list2_l2">初始值檔案<br>mcm_store_profile_default.txt</td>
+        <td class="css_td_list2_r1">
+          因為 mcm_daemon 會先讀取現在值檔案, 不存在才讀取初始值檔,
+          所以每次改好後執行 mcm_daemon 之前要先將現在值檔案刪除.<br>
+          檔案內容格式 <a href="mcm_0202.html">[詳細]</a>
+        </td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l2">現在值檔案<br>mcm_store_profile_current.txt</td>
+        <td class="css_td_list2_r1">
+          檔案內容格式和初始值檔案相同 <a href="mcm_0202.html">[詳細]</a>
+        </td>
+      </tr>
+    </table>
+    <br>
+
+    使用 [set] [add] [del] [delall] 操作後, 只要該 group 在資料模型中的 $(save) 為 1,
+    資料就會在寫回現在值的檔案, 所以除了使用列印的方式觀察之外也可以直接看檔案內容.
+    <br><br>
+
+  </div>
+</div>
+<br>
+
+<div class="css_div_box_frame_full">
+  <div class="css_div_box_title">範例程式的使用</div>
+  <div class="css_div_box_content">
+    <br>
+
+    <table class="css_table_list1">
+      <tr>
+        <td class="css_td_list1_l">01.&nbsp;</td>
+        <td class="css_td_list1_r">
+          範例程式目錄在 <font class="css_font_b1">mint_cm/usage/example/0304</font>.
+        </td>
+      </tr>
+    </table>
+    <br><br>
+
+    <table class="css_table_list1">
+      <tr>
+        <td class="css_td_list1_l">02.&nbsp;</td>
+        <td class="css_td_list1_r">
+          下面關於 <font class="css_font_p1">make</font> 的操作沒有特別註明的話都是在
+          <font class="css_font_b1">mint_cm</font> 目錄.
+        </td>
+      </tr>
+    </table>
+    <br><br>
+
+    <table class="css_table_list1">
+      <tr>
+        <td class="css_td_list1_l">03.&nbsp;</td>
+        <td class="css_td_list1_r">
+          先修改 mini_httpd 讀取網頁的路徑.<br>
+          修改 <font class="css_font_b1">mint_cm/http_server/mini_httpd/last/mini_httpd.conf</font>,<br>
+          裡面的 <font class="css_font_g1">dir=/mint_cm/run</font> 必須改成
+          <font class="css_font_b1">mint_cm/run</font> 資料夾實際的路徑.
+        </td>
+      </tr>
+    </table>
+    <br><br>
+
+    <table class="css_table_list1">
+      <tr>
+        <td class="css_td_list1_l">04.&nbsp;</td>
+        <td class="css_td_list1_r">
+          第一次使用, 使用 <font class="css_font_p1">make example_add KEY=0304</font>
+          載入範例並編譯.
+        </td>
+      </tr>
+    </table>
+    <br><br>
+
+    <table class="css_table_list1">
+      <tr>
+        <td class="css_td_list1_l">05.&nbsp;</td>
+        <td class="css_td_list1_r">
+          <font class="css_font_b1">web_app</font> 是範例程式.<br><br>
+          範例項目 :<br>
+          <table class="css_table_list2">
+            <tr>
+              <td class="css_td_list2_l2">case-01</td>
+              <td class="css_td_list2_r1">取得最大資料筆數</font>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l2">case-02</td>
+              <td class="css_td_list2_r1">讀取資料筆數和資料內容</font>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l2">case-03</td>
+              <td class="css_td_list2_r1">設定資料(單筆資料類型)</font>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l2">case-04a</td>
+              <td class="css_td_list2_r1">增加資料(多筆資料類型)</font>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l2">case-04b</td>
+              <td class="css_td_list2_r1">設定資料(多筆資料類型)</font>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l2">case-04c</td>
+              <td class="css_td_list2_r1">刪除資料(多筆資料類型)</font>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l2">case-05a</td>
+              <td class="css_td_list2_r1">增加資料(多筆資料類型)(多層架構)</font>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l2">case-05b</td>
+              <td class="css_td_list2_r1">設定資料(多筆資料類型)(多層架構)</font>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l2">case-05c</td>
+              <td class="css_td_list2_r1">刪除資料(多筆資料類型)(多層架構)</font>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l2">case-06</td>
+              <td class="css_td_list2_r1">執行模組</font>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+    <br><br>
+
+    <table class="css_table_list1">
+      <tr>
+        <td class="css_td_list1_l">06.&nbsp;</td>
+        <td class="css_td_list1_r">
+          mini_httpd 執行方法, 進入 <font class="css_font_b1">mint_cm/run</font> 目錄,
+          指令 :<br>
+          <font class="css_font_p1">./mini_httpd -C mini_httpd.conf</font>
+        </td>
+      </tr>
+    </table>
+    <br><br>
+
+    <table class="css_table_list1">
+      <tr>
+        <td class="css_td_list1_l">07.&nbsp;</td>
+        <td class="css_td_list1_r">
+          先執行 mcm_daemon 和 mini_httpd 才可測試.
+        </td>
+      </tr>
+    </table>
+    <br><br>
+
+    <table class="css_table_list1">
+      <tr>
+        <td class="css_td_list1_l">08.&nbsp;</td>
+        <td class="css_td_list1_r">
+          瀏覽器連至 <font class="css_font_b1">http://&lt;server-address&gt;/web_app_0304_index.html</font>
+          就可以看到範例頁面.
+        </td>
+      </tr>
+    </table>
+    <br><br>
+
+    <table class="css_table_list1">
+      <tr>
+        <td class="css_td_list1_l">09.&nbsp;</td>
+        <td class="css_td_list1_r">
+          測試完畢不使用後, 使用 <font class="css_font_p1">make example_del KEY=0304</font>
+          將範例移除.
+        </td>
+      </tr>
+    </table>
+    <br><br>
+
+    <table class="css_table_list1">
+      <tr>
+        <td class="css_td_list1_l">10.&nbsp;</td>
+        <td class="css_td_list1_r">
+          範例程式目錄下的檔案在做完 <font class="css_font_p1">make example_add</font>
+          後會複製到真正使用的位置, 要修改做測試的話要改在複製後的.<br>
+          <table class="css_table_list2">
+            <tr>
+              <td class="css_td_list2_r1">
+                來源 <font class="css_font_b1">profile/mcm_data_profile_0304.xml</font><br>
+                目地 <font class="css_font_b1">mint_cm/mcm_build/mcm_data_profile.xml</font><br>
+                資料模型範例<br>
+                有修改要使用 <font class="css_font_p1">make all</font> 重新編譯
+              </td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_r1">
+                來源 <font class="css_font_b1">profile/mcm_store_profile_default_0304.txt</font><br>
+                目地 <font class="css_font_b1">mint_cm/mcm_build/mcm_store_profile_default.txt</font><br>
+                資料預設值範例<br>
+                使用 <font class="css_font_p1">make all</font> 後會再複製到 <font class="css_font_b1">mint_cm/run</font>
+              </td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_r1">
+                來源 <font class="css_font_b1">web_app</font><br>
+                目地 <font class="css_font_b1">mint_cm/run/web</font><br>
+                網頁程式範例
+              </td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_r1">
+                來源 <font class="css_font_b1">module/mcm_module_0304.c</font><br>
+                目地 <font class="css_font_b1">mint_cm/mcm_daemon/mcm_module</font><br>
+                搭配 run 使用的內部模組範例<br>
+                有修改要使用 <font class="css_font_p1">make all</font> 重新編譯
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+    <br>
+
+  </div>
+</div>
+<br>
+
+</body>
+
+</html>

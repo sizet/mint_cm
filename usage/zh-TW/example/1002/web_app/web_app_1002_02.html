@@ -1,0 +1,102 @@
+<!--
+Copyright © 2017, Che-Wei Hsu <cwxhsu@gmail.com>
+This file is part of the MintCM.
+Some rights reserved. See README.
+-->
+
+<html>
+
+<head>
+
+<meta http-equiv="cache-control" content="no-cache">
+<meta http-equiv="content-type" content="text/html; charset=utf-8">
+<script type="text/javascript" src="jquery_main.js"></script>
+<script type="text/javascript" src="jquery_form.js"></script>
+<script type="text/javascript" src="json3.js"></script>
+<script type="text/javascript" src="mcm_jslib_api.js"></script>
+<script type="text/javascript" src="mcm_jslib_data_info_auto.js"></script>
+<script type="text/javascript" src="maam_jslib_api.js"></script>
+<link rel="stylesheet" href="web_app_1002_style.css">
+
+<script type="text/javascript">
+function body_init()
+{
+    $("#custom_file").val("");
+}
+
+function upload_file()
+{
+    var self_upload_jslib, rep_ret, tmp_html;
+
+
+    if($("#input_file").val() == "")
+    {
+        alert("no select any file");
+        return;
+    }
+
+    $("#custom_file").val("");
+
+    // 上傳.
+    self_upload_jslib = new mcm_upload_jslib_t();
+    self_upload_jslib.form_id_string = "form_upload";
+    self_upload_jslib.other_query = "";
+    rep_ret = mcm_jslib_upload(self_upload_jslib);
+    if(rep_ret.rep_code < 0)
+    {
+        if((maam_return_code.internal_error >= rep_ret.rep_code) &&
+           (rep_ret.rep_code >= maam_return_code.boundary))
+        {
+            switch(rep_ret.rep_code)
+            {
+                case maam_return_code.miss_session_key:
+                case maam_return_code.invalid_session_key:
+                    tmp_html = "invalid access, please login";
+                    break;
+                case maam_return_code.idle_timeout:
+                    tmp_html = "idle timeout, please re-login";
+                    break;
+                default:
+                    tmp_html = "call mcm_jslib_upload() fail [MintAAM]" +
+                               "[" + rep_ret.rep_code + "]";
+            }
+        }
+        else
+        {
+            tmp_html = "call mcm_jslib_upload() fail [MintCM]" +
+                       "[" + rep_ret.rep_code + "]";
+        }
+        alert(tmp_html);
+        mcm_jslib_run_script(rep_ret.rep_data);
+        return;
+    }
+    mcm_jslib_run_script(rep_ret.rep_data);
+}
+</script>
+
+</head>
+
+<body onload="body_init()">
+
+  <div>[upload]</div>
+
+  <form id="form_upload">
+    <input type="hidden" name="callback" value="custom_upload_01">
+    <table class="css_table1">
+      <tr>
+        <td class="css_td1">file</td>
+        <td class="css_td1">
+          <input type="file" name="input_file" id="input_file" value="">
+        </td>
+      </tr>
+    </table>
+  </form>
+
+  <button type="button" onclick="upload_file()">upload</button>
+  <br>
+
+  <div id="show_box"></div>
+
+</body>
+
+</html>

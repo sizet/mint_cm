@@ -1,0 +1,719 @@
+<!--
+Copyright © 2017, Che-Wei Hsu <cwxhsu@gmail.com>
+This file is part of the MintCM.
+Some rights reserved. See README.
+-->
+
+<html>
+
+<head>
+<meta http-equiv="content-type" content="text/html; charset=utf-8">
+<link rel="stylesheet" href="../css/mcm_style.css">
+</head>
+
+<body class="css_body">
+
+<div class="css_div_box_frame_full">
+  <div class="css_div_box_title">chapter 09-01</div>
+  <div class="css_div_box_content">
+  </div>
+</div>
+<br>
+
+<div class="css_div_box_frame_full">
+  <div class="css_div_box_title">網頁端檔案上傳</div>
+  <div class="css_div_box_content">
+    <br>
+
+    此章節說明如何處理從網頁端上傳檔案.
+    <br><br><br>
+
+    分成 [網頁端] 和 [CGI 端] 說明.
+    <br><br>
+
+  </div>
+</div>
+<br>
+
+<div class="css_div_box_frame_full">
+  <div class="css_div_box_title">網頁端</div>
+  <div class="css_div_box_content">
+    <br>
+
+    網頁的編碼格式必須是 UTF-8, 如下的宣告 :<br>
+    <font class="css_font_p1">&lt;meta http-equiv="content-type" content="text/html; charset=utf-8"&gt;</font>
+    <br><br>
+
+    需要的 JS 檔 :<br>
+    <font class="css_font_p1">
+    jquery_main.js<br>
+    jquery_form.js<br>
+    mcm_jslib_api.js
+    </font>
+    <br><br>
+
+    需要使用 form 處理.
+    <br><br><br>
+
+    步驟-01 : 加入 form 內容.<br>
+    格式 :<br>
+    <div class="css_div_block">
+      <font class="css_font_g1">
+      &lt;form id="<font class="css_font_r1">$(form_id)</font>"&gt;<br>
+      &nbsp;&nbsp;&lt;input type="hidden" name="<font class="css_font_r1">callback</font>" value="<font class="css_font_r1">$(function_keyword)</font>"&gt;<br>
+      &nbsp;&nbsp;&lt;input type="file" name="<font class="css_font_r1">$(element_name)</font>"&gt;<br>
+      &lt;/form&gt;
+      </font>
+    </div>
+    <br>
+
+    <div class="css_div_hook" id="hook_0901_form_id_01"></div>
+    <font class="css_font_b1">$(form_id)</font><br>
+    設定 form 的 id, 上傳時需要指定要上傳的 form.
+    <br><br>
+
+    <div class="css_div_hook" id="hook_0901_callback_01"></div>
+    <font class="css_font_b1">&lt;input type="hidden" name="<font class="css_font_r1">callback</font>" value="<font class="css_font_r1">$(function_keyword)</font>"&gt;</font><br>
+    需要在 CGI 端撰寫對應的的處理函式, 需要指定使用此函式的關鍵字.<br>
+    <font class="css_font_b1">callback</font><br>
+    固定的元素名稱, 表示此元素用來指定關鍵字.<br>
+    <font class="css_font_b1">$(function_keyword)</font><br>
+    指定使用的處理函式的關鍵字.
+    <br><br>
+
+    <div class="css_div_hook" id="hook_0901_element_name_01"></div>
+    <font class="css_font_b1">$(element_name)</font><br>
+    元素的名稱, CGI 端處理函式才知道這組資料的用途.
+    <br><br>
+
+    注意事項 :<br>
+    <table class="css_table_list1">
+      <tr>
+        <td class="css_td_list1_l">01.&nbsp;</td>
+        <td class="css_td_list1_r">
+          form 內只可以有一個指定處理函式的元素.
+        </td>
+      </tr>
+      <tr>
+        <td class="css_td_list1_l">02.&nbsp;</td>
+        <td class="css_td_list1_r">
+          form 內必須至少有一個 file 類型的元素.
+        </td>
+      </tr>
+      <tr>
+        <td class="css_td_list1_l">03.&nbsp;</td>
+        <td class="css_td_list1_r">
+          form 內可以設定多個 input 元素, 不限定類型.
+        </td>
+      </tr>
+    </table>
+    <br><br>
+
+    步驟-02 : 在 JavaScript 內上傳 form.<br>
+
+    變數 :<br>
+    <div class="css_div_hook" id="hook_0901_this_upload_jslib_01"></div>
+    <font class="css_font_b1">[mcm_upload_jslib_t this_upload_jslib]</font><br>
+    用來儲存相關的的資訊.<br>
+    會用到的結構成員 :<br>
+    <table class="css_table_list2">
+      <tr>
+        <td class="css_td_list2_l1">
+          <div class="css_div_hook" id="hook_0901_form_id_string_01"></div>
+          <font class="css_font_b1">[form_id_string]</font><br>
+          要上傳的 form 的 id. (字串格式) <a href="#hook_0901_form_id_01">[詳細]</a>
+        </td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l1">
+          <div class="css_div_hook" id="hook_0901_other_query_01"></div>
+           <font class="css_font_b1">[other_query]</font><br>
+          額外的查詢參數, 不需要使用的話填入空字串.
+        </td>
+      </tr>
+    </table>
+
+    函式 :<br>
+    <div class="css_div_hook" id="hook_0901_mcm_jslib_upload_01"></div>
+    <table class="css_table_box">
+      <tr>
+        <td class="css_td_box">
+          <font class="css_font_b2">mcm_jslib_upload</font><br>
+          上傳 form 資料.<br>
+          <table class="css_table_list2">
+            <tr>
+              <td class="css_td_list2_t1">參數</td>
+              <td class="css_td_list2_t1">說明</td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l1"><font class="css_font_g1">this_upload_jslib</font></td>
+              <td class="css_td_list2_r1">
+                用來儲存相關的的資訊<br>
+                需要先設定以下的結構成員 :<br>
+                <font class="css_font_p1">form_id_string</font>
+                <a href="#hook_0901_form_id_string_01">[詳細]</a><br>
+                <font class="css_font_p1">other_query</font>
+                <a href="#hook_0901_other_query_01">[詳細]</a><br>
+              </td>
+            </tr>
+          </table>
+          <table class="css_table_list2">
+            <tr>
+              <td class="css_td_list2_t1">回傳</td>
+              <td class="css_td_list2_t1" colspan="3">說明</td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l1" rowspan="2">
+                <font class="css_font_g1">$.rep_code</font>
+              </td>
+              <td class="css_td_list2_r1" rowspan="2">處理結果</td>
+              <td class="css_td_list2_l2">&gt;= mcm_return_code.pass</td>
+              <td class="css_td_list2_r1">成功</td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l2">&nbsp;&lt; mcm_return_code.pass</td>
+              <td class="css_td_list2_r1">錯誤</td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l1">
+                <font class="css_font_g1">$.rep_data</font>
+              </td>
+              <td class="css_td_list2_r1" colspan="3">
+                CGI 端填入的自定格式回應訊息
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+    <br><br>
+
+    範例 :
+<pre class="css_pre_code">
+&lt;html&gt;
+&lt;head&gt;
+&lt;meta http-equiv="cache-control" content="no-cache"&gt;
+&lt;meta http-equiv="content-type" content="text/html; charset=utf-8"&gt;
+&lt;script language="javascript" type="text/javascript" src="jquery_main.js"&gt;&lt;/script&gt;
+&lt;script language="javascript" type="text/javascript" src="jquery_form.js"&gt;&lt;/script&gt;
+&lt;script language="javascript" type="text/javascript" src="mcm_jslib_api.js"&gt;&lt;/script&gt;
+&lt;script type="text/javascript"&gt;
+function upload_file()
+{
+    var self_upload_jslib, rep_ret;
+
+    if($("#input_file_custom").val() != "")
+    {
+        self_upload_jslib = new mcm_upload_jslib_t();
+        self_upload_jslib.form_id_string = "form_custom";
+        self_upload_jslib.other_query = "";
+        rep_ret = mcm_jslib_upload(self_upload_jslib);
+        if(rep_ret.rep_code < mcm_return_code.pass)
+        {
+            alert("call mcm_jslib_upload() fail" +
+                  "[" + rep_ret.rep_code + "]");
+            mcm_jslib_run_script(rep_ret.rep_data);
+            return;
+        }
+        mcm_jslib_run_script(rep_ret.rep_data);
+    }
+}
+&lt;/script&gt;
+&lt;/head&gt;
+&lt;body&gt;
+  &lt;form id="form_custom"&gt;
+    &lt;input type="hidden" name="callback" value="custom_upload"&gt;
+    &lt;input type="file" name="input_file_custom" id="input_file_custom"&gt;
+  &lt;/form&gt;
+  &lt;button type="button" onclick="upload_file()"&gt;upload&lt;/button&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+</pre>
+    <br>
+
+  </div>
+</div>
+<br>
+
+
+
+
+<div class="css_div_box_frame_full">
+  <div class="css_div_box_title">CGI 端</div>
+  <div class="css_div_box_content">
+    <br>
+
+    檔案上傳後, 網頁伺服器會呼叫 CGI 處理, 需要在 CGI 端加入自訂的處理函式.
+    <br><br>
+
+    處理檔案上傳的 CGI 檔案在 <font class="css_font_b1">mint_cm/mcm_cgi/mcm_cgi_upload_custom.c</font>
+    <br><br><br>
+
+    步驟-01 : 加入處函式.<br>
+    函式格式 :<br>
+    <div class="css_div_block">
+      <font class="css_font_g1">
+      void <font class="css_font_r1">$(callback_function)</font>(<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;struct part_info_t *part_list)<br>
+      {<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;return;<br>
+      }<br>
+      </font>
+    </div>
+    <br>
+
+    <div class="css_div_hook" id="hook_0901_callback_function_01"></div>
+    <font class="css_font_b1">$(callback_function)</font><br>
+    自定義的函式名稱.
+    <br><br>
+
+    參數的用途 :<br>
+    <table class="css_table_list2">
+      <tr>
+        <td class="css_td_list2_t1">參數</td>
+        <td class="css_td_list2_t1">說明</td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l1">
+          <font class="css_font_r1">struct part_info_t *</font><br>
+          <font class="css_font_g1">part_list</font>
+        </td>
+        <td class="css_td_list2_r1">
+          上傳的 form 裡面的每一個 input 元素內容, 雙向串列結構<br>
+          <font class="css_font_p1">(紀錄 callback 的元素不會加入到此表)</font>
+          <a href="#hook_0901_callback_01">[詳細]</a>
+        </td>
+      </tr>
+    </table>
+    <br>
+
+    <font class="css_font_b1">[struct part_info_t *part_list]</font><br>
+    結構成員<br>
+    <table class="css_table_list2">
+      <tr>
+        <td class="css_td_list2_l1">
+          <font class="css_font_r1">char *</font><br>
+          <font class="css_font_g1">name_tag</font>
+        </td>
+        <td class="css_td_list2_r1">
+          元素的 name <a href="#hook_0901_element_name_01">[詳細]</a>
+        </td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l1">
+          <font class="css_font_r1">char *</font><br>
+          <font class="css_font_g1">filename_tag</font>
+        </td>
+        <td class="css_td_list2_r1">
+          上傳的檔案的檔案名稱<br>
+          <font class="css_font_p1">必須是 file 類型的元素而且有選擇檔案上傳才會有值</font>
+        </td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l1">
+          <font class="css_font_r1">char *</font><br>
+          <font class="css_font_g1">data_con</font>
+        </td>
+        <td class="css_td_list2_r1">
+          元素的 value 或上傳的檔案的資料內容
+        </td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l1">
+          <font class="css_font_r1">MCM_DTYPE_USIZE_TD</font><br>
+          <font class="css_font_g1">data_len</font>
+        </td>
+        <td class="css_td_list2_r1">
+          資料的長度
+        </td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l1">
+          <font class="css_font_r1">struct part_info_t *</font><br>
+          <font class="css_font_g1">prev_part</font>
+        </td>
+        <td class="css_td_list2_r1">
+          前一個節點
+        </td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l1">
+          <font class="css_font_r1">struct part_info_t *</font><br>
+          <font class="css_font_g1">next_part</font>
+        </td>
+        <td class="css_td_list2_r1">
+          後一個節點
+        </td>
+       </tr>
+    </table>
+    <br><br>
+
+    步驟-02 : 把自定義的函式加入到檔案處理列表.<br>
+    格式 :<br>
+    <div class="css_div_block">
+      <font class="css_font_g1">
+        struct mcm_cgi_upload_callback_t mcm_upload_callback_list[] =<br>
+        {<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;{"", NULL}<br>
+        };<br>
+      </font>
+    </div>
+    <br>
+
+    <font class="css_font_b1">[char *cb_name]</font><br>
+    填入使用此函式的關鍵字, 也就是在網頁端的 $(function_keyword). <a href="#hook_0901_callback_01">[詳細]</a>
+    <br><br>
+
+    <font class="css_font_b1">[void (*cb_function)(struct part_info_t *part_list)]</font><br>
+    填入自定義的處理函式名稱. <a href="#hook_0901_callback_function_01">[詳細]</a>
+    <br><br>
+
+    注意事項 :<br>
+    <table class="css_table_list1">
+      <tr>
+        <td class="css_td_list1_l">01.&nbsp;</td>
+        <td class="css_td_list1_r">自定義函式在程式碼內的位置必須放在檔案處理列表之前.</td>
+      </tr>
+      <tr>
+        <td class="css_td_list1_l">02.&nbsp;</td>
+        <td class="css_td_list1_r">檔案處理列表的最後一組必須是 {"", NULL}.</td>
+      </tr>
+    </table>
+    <br><br>
+
+    步驟-03 : 回應處理結果給瀏覽器.<br>
+    函式 :<br>
+
+    <div class="css_div_hook" id="hook_0901_mcm_cgi_fill_response_header_01"></div>
+    <table class="css_table_box">
+      <tr>
+        <td class="css_td_box">
+          <font class="css_font_b2">mcm_cgi_fill_response_header</font><br>
+          填充回應資料的開頭部分.<br>
+          <table class="css_table_list2">
+            <tr>
+              <td class="css_td_list2_t1">參數</td>
+              <td class="css_td_list2_t1">說明</td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l1">
+                <font class="css_font_r1">MCM_DTYPE_BOOL_TD</font><br>
+                <font class="css_font_g1">fill_content_text</font>
+              </td>
+              <td class="css_td_list2_r1">
+                是否在回應資料的 HTTP header 中填入<br>
+                <font class="css_font_c1">Content-Type: text/plain</font><br>
+                <font class="css_font_p1">0 : 否</font><br>
+                <font class="css_font_p1">1 : 是</font>
+              </td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l1">
+                <font class="css_font_r1">MCM_DTYPE_BOOL_TD</font><br>
+                <font class="css_font_g1">fill_connection_close</font>
+              </td>
+              <td class="css_td_list2_r1">
+                是否在回應資料的 HTTP header 中填入<br>
+                <font class="css_font_c1">Connection: close</font><br>
+                <font class="css_font_p1">0 : 否</font><br>
+                <font class="css_font_p1">1 : 是</font>
+              </td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l1">
+                <font class="css_font_r1">int</font><br>
+                <font class="css_font_g1">ret_code</font>
+              </td>
+              <td class="css_td_list2_r1">
+                回應資料的代碼部分<br>
+                <font class="css_font_p1">(mcm_jslib_upload() 的 $.rep_code)</font>
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+    <br>
+
+    注意事項 :<br>
+    <table class="css_table_list1">
+      <tr>
+        <td class="css_td_list1_l">01.&nbsp;</td>
+        <td class="css_td_list1_r">
+          mcm_cgi_fill_response_header() 只會填充開頭部分的資料.</td>
+      </tr>
+      <tr>
+        <td class="css_td_list1_l">02.&nbsp;</td>
+        <td class="css_td_list1_r">
+          主要回應資料 (mcm_jslib_upload() 的 $.rep_data) 直接使用
+          <font class="css_font_b2">printf()</font> 填充.
+        </td>
+      </tr>
+      <tr>
+        <td class="css_td_list1_l">03.&nbsp;</td>
+        <td class="css_td_list1_r">
+          至少要用 mcm_cgi_fill_response_header() 回應處理結果, 主要回應資料可有可無.
+        </td>
+      </tr>
+    </table>
+    <br><br>
+
+    其他-01 : 在 console 顯示除錯訊息.<br>
+    在 CGI 使用 printf() 會被網頁伺服器導向輸出給瀏覽器, 訊息要寫入 /dev/tty 才能顯示.
+    <br><br>
+
+    <font class="css_font_b1">[MCM_CGIEMODE]</font><br>
+    定義, 是否要顯示錯誤訊息.<br>
+    開關的值的定義在 <font class="css_font_b1">mint_cm/mcm_lib/mcm_lheader/mcm_debug.h</font>.
+    <br><br>
+
+    <font class="css_font_b1">[MCM_CUCDMODE]</font><br>
+    定義, 是否要顯示除錯訊息.<br>
+    開關的值的定義在 <font class="css_font_b1">mint_cm/mcm_lib/mcm_lheader/mcm_debug.h</font>.
+    <br><br>
+
+    <font class="css_font_b1">[MCM_DBG_DEV_TTY]</font><br>
+    定義, console 設備的路徑.<br>
+    路徑的值定義在 <font class="css_font_b1">mint_cm/mcm_lib/mcm_lheader/mcm_debug.h</font>.
+    <br><br>
+
+    <font class="css_font_b1">[int dbg_tty_fd_c]</font><br>
+    變數, 紀錄開啟的設備的檔案編號.
+    <br><br>
+
+    <font class="css_font_b1">[char dbg_msg_buf_c[MCM_DBG_BUFFER_SIZE]]</font><br>
+    變數, 儲存訊息的緩衝.
+    緩衝大小的定義在 <font class="css_font_b1">mint_cm/mcm_lib/mcm_lheader/mcm_debug.h</font>.
+    <br><br>
+
+    <font class="css_font_b1">[open()]</font><br>
+    系統函式, 開啟 console 設備, 使用前要先開啟.<br>
+    直接使用 <font class="css_font_b1">open(MCM_DBG_DEV_TTY, O_WRONLY)</font>.
+    <br><br>
+
+    <font class="css_font_b1">[close()]</font><br>
+    系統函式, 關閉開啟的設備, 使用完要關閉.
+    <br><br>
+
+    <div class="css_div_hook" id="hook_0901_MCM_CEMSG_01"></div>
+    <font class="css_font_b1">[MCM_CEMSG(msg_fmt, msg_args...)]</font><br>
+    巨集, 顯示訊息 (錯誤類), 用法同 <font class="css_font_b1">printf()</font>.
+    <br><br>
+
+    <div class="css_div_hook" id="hook_0901_MCM_CUCDMSG_01"></div>
+    <font class="css_font_b1">[MCM_CUCDMSG(msg_fmt, msg_args...)]</font><br>
+    巨集, 顯示訊息 (除錯類), 用法同 <font class="css_font_b1">printf()</font>.
+    <br><br><br>
+
+    範例 :
+<pre class="css_pre_code">
+void custom_handle(
+    struct part_info_t *part_list)
+{
+    struct part_info_t *tmp_part;
+
+#if MCM_CGIEMODE | MCM_CUCDMODE
+    dbg_tty_fd_c = open(MCM_DBG_DEV_TTY, O_WRONLY);
+    if(dbg_tty_fd_c == -1)
+        goto FREE_01;
+#endif
+
+    mcm_cgi_fill_response_header(1, 1, MCM_RCODE_PASS);
+
+    printf("alert(");
+    for(tmp_part = part_list; tmp_part != NULL; tmp_part = tmp_part->next_part)
+    {
+        MCM_CUCDMSG("name = %s", tmp_part->name_tag);
+        MCM_CUCDMSG("filename = %s", tmp_part->filename_tag);
+        MCM_CUCDMSG("data = [" MCM_DTYPE_USIZE_PF "][%p]",
+                    tmp_part->data_len, tmp_part->data_con);
+
+        printf("\"name = %s\\n\" + ", tmp_part->name_tag);
+        printf("\"filename = %s\\n\" + ", tmp_part->filename_tag);
+        printf("\"data = [" MCM_DTYPE_USIZE_PF "][%p]\"",
+                tmp_part->data_len, tmp_part->data_con);
+        if(tmp_part->next_part != NULL)
+            printf(" + \"\\n\" + \"\\n\" + ");
+    }
+    printf(");\n");
+
+#if MCM_CGIEMODE | MCM_CUCDMODE
+    close(dbg_tty_fd_c);
+FREE_01:
+#endif
+    return;
+}
+
+struct mcm_cgi_upload_callback_t mcm_upload_callback_list[] =
+{
+    {"custom_upload", custom_handle},
+    {"", NULL}
+};
+</pre>
+    <br>
+
+  </div>
+</div>
+<br>
+
+<div class="css_div_box_frame_full">
+  <div class="css_div_box_title">範例程式的使用</div>
+  <div class="css_div_box_content">
+    <br>
+
+    <table class="css_table_list1">
+      <tr>
+        <td class="css_td_list1_l">01.&nbsp;</td>
+        <td class="css_td_list1_r">
+          範例程式目錄在 <font class="css_font_b1">mint_cm/usage/example/0901</font>.
+        </td>
+      </tr>
+    </table>
+    <br><br>
+
+    <table class="css_table_list1">
+      <tr>
+        <td class="css_td_list1_l">02.&nbsp;</td>
+        <td class="css_td_list1_r">
+          下面關於 <font class="css_font_p1">make</font> 的操作沒有特別註明的話都是在
+          <font class="css_font_b1">mint_cm</font> 目錄.
+        </td>
+      </tr>
+    </table>
+    <br><br>
+
+    <table class="css_table_list1">
+      <tr>
+        <td class="css_td_list1_l">03.&nbsp;</td>
+        <td class="css_td_list1_r">
+          第一次使用, 使用 <font class="css_font_p1">make example_add KEY=0901</font>
+          載入範例並編譯.
+        </td>
+      </tr>
+    </table>
+    <br><br>
+
+    <table class="css_table_list1">
+      <tr>
+        <td class="css_td_list1_l">04.&nbsp;</td>
+        <td class="css_td_list1_r">
+          <font class="css_font_b1">web_app</font> 是範例程式.<br><br>
+          範例項目 :<br>
+          <table class="css_table_list2">
+            <tr>
+              <td class="css_td_list2_l2">case-01</td>
+              <td class="css_td_list2_r1">測試單個 file 元素</font>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l2">case-02</td>
+              <td class="css_td_list2_r1">測試單個 file 元素加上單個其他類型的 input</font>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l2">case-03</td>
+              <td class="css_td_list2_r1">測試多個 file 元素加上多個其他類型的 input</font>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l2">case-04</td>
+              <td class="css_td_list2_r1">測試單個 file 元素同時上傳多個檔案</font>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l2">case-05</td>
+              <td class="css_td_list2_r1">測試單個 file 元素加上單個其他類型的 input, 並在 CGI 端搭配資料存取</font>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+    <br><br>
+
+    <table class="css_table_list1">
+      <tr>
+        <td class="css_td_list1_l">05.&nbsp;</td>
+        <td class="css_td_list1_r">
+          先執行 mcm_daemon 和 mini_httpd 才可測試.
+        </td>
+      </tr>
+    </table>
+    <br><br>
+
+    <table class="css_table_list1">
+      <tr>
+        <td class="css_td_list1_l">06.&nbsp;</td>
+        <td class="css_td_list1_r">
+          瀏覽器連至 <font class="css_font_b1">http://&lt;server-address&gt;/web_app_0901_index.html</font>
+          就可以看到範例頁面.
+        </td>
+      </tr>
+    </table>
+    <br><br>
+
+    <table class="css_table_list1">
+      <tr>
+        <td class="css_td_list1_l">07.&nbsp;</td>
+        <td class="css_td_list1_r">
+          測試完畢不使用後, 使用 <font class="css_font_p1">make example_del KEY=0901</font>
+          將範例移除.
+        </td>
+      </tr>
+    </table>
+    <br><br>
+
+    <table class="css_table_list1">
+      <tr>
+        <td class="css_td_list1_l">08.&nbsp;</td>
+        <td class="css_td_list1_r">
+          範例程式目錄下的檔案在做完 <font class="css_font_p1">make example_add</font>
+          後會複製到真正使用的位置, 要修改做測試的話要改在複製後的.<br>
+          <table class="css_table_list2">
+            <tr>
+              <td class="css_td_list2_r1">
+                來源 <font class="css_font_b1">profile/mcm_data_profile_0901.xml</font><br>
+                目地 <font class="css_font_b1">mint_cm/mcm_build/mcm_data_profile.xml</font><br>
+                資料模型範例<br>
+                有修改要使用 <font class="css_font_p1">make all</font> 重新編譯
+              </td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_r1">
+                來源 <font class="css_font_b1">profile/mcm_store_profile_default_0901.txt</font><br>
+                目地 <font class="css_font_b1">mint_cm/mcm_build/mcm_store_profile_default.txt</font><br>
+                資料預設值範例<br>
+                使用 <font class="css_font_p1">make all</font> 後會再複製到 <font class="css_font_b1">mint_cm/run</font>
+              </td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_r1">
+                來源 <font class="css_font_b1">web_app</font><br>
+                目地 <font class="css_font_b1">mint_cm/run/web</font><br>
+                網頁程式範例
+              </td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_r1">
+                來源 <font class="css_font_b1">module/mcm_module_0901.c</font><br>
+                目地 <font class="css_font_b1">mint_cm/mcm_daemon/mcm_module</font><br>
+                內部模組範例<br>
+                有修改要使用 <font class="css_font_p1">make all</font> 重新編譯
+              </td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_r1">
+                來源 <font class="css_font_b1">cgi/mcm_cgi_upload_custom.c</font><br>
+                目地 <font class="css_font_b1">mint_cm/mcm_cgi</font><br>
+                CGI 端處理檔案上傳範例<br>
+                有修改要使用 <font class="css_font_p1">make all</font> 重新編譯
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+    <br>
+
+  </div>
+</div>
+<br>
+
+</body>
+
+</html>

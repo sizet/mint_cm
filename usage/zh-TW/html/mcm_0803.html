@@ -1,0 +1,344 @@
+<!--
+Copyright © 2017, Che-Wei Hsu <cwxhsu@gmail.com>
+This file is part of the MintCM.
+Some rights reserved. See README.
+-->
+
+<html>
+
+<head>
+<meta http-equiv="content-type" content="text/html; charset=utf-8">
+<link rel="stylesheet" href="../css/mcm_style.css">
+</head>
+
+<body class="css_body">
+
+<div class="css_div_box_frame_full">
+  <div class="css_div_box_title">chapter 08-03</div>
+  <div class="css_div_box_content">
+  </div>
+</div>
+<br>
+
+<div class="css_div_box_frame_full">
+  <div class="css_div_box_title">使用方式 (核心端)</div>
+  <div class="css_div_box_content">
+    <br>
+
+    此章節說明如何在核心端程式使用資料檔案的錯誤檢查.
+    <br><br>
+
+  </div>
+</div>
+<br>
+
+<div class="css_div_box_frame_full">
+  <div class="css_div_box_title">可用的函式</div>
+  <div class="css_div_box_content">
+    <br>
+
+    <div class="css_div_hook" id="hook_0803_mcm_lklib_check_store_file_01"></div>
+    <table class="css_table_box">
+      <tr>
+        <td class="css_td_box">
+          <font class="css_font_b2">mcm_lklib_check_store_file</font><br>
+          檢查資料檔案是否有錯誤.<br>
+          <table class="css_table_list2">
+            <tr>
+              <td class="css_td_list2_t1">參數</td>
+              <td class="css_td_list2_t1">說明</td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l1">
+                <font class="css_font_r1">struct mcm_lklib_lib_t *</font><br>
+                <font class="css_font_g1">this_lklib</font>
+              </td>
+              <td class="css_td_list2_r1">
+                紀錄 mcm_lklib_api 所需要的資料
+              </td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l1">
+                <font class="css_font_r1">char *</font><br>
+                <font class="css_font_g1">file_path</font>
+              </td>
+              <td class="css_td_list2_r1">
+                要檢查的資料檔案的路徑<br>
+                <font class="css_font_r1">絕對路徑或是相對於 mcm_daemon 所在位置的相對路徑</font>
+              </td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l1">
+                <font class="css_font_r1">MCM_DTYPE_LIST_TD *</font><br>
+                <font class="css_font_g1">store_result_buf</font>
+              </td>
+              <td class="css_td_list2_r1">
+                紀錄資料檔案的檢查結果的緩衝<br>
+                <font class="css_font_r1">
+                &gt;= MCM_RCODE_PASS : 資料檔案正常<br>
+                &nbsp;&lt; MCM_RCODE_PASS : 資料檔案損毀<br>
+              </td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l1">
+                <font class="css_font_r1">char *</font><br>
+                <font class="css_font_g1">store_version_buf</font>
+              </td>
+              <td class="css_td_list2_r1">
+                紀錄資料檔案內的版本資訊的值的緩衝 <a href="mcm_0201.html#hook_0201_version_01">[詳細]</a>
+              </td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l1">
+                <font class="css_font_r1">MCM_DTYPE_USIZE_TD</font><br>
+                <font class="css_font_g1">store_version_size</font>
+              </td>
+              <td class="css_td_list2_r1">
+                紀錄資料檔案內的版本資訊的值的緩衝的大小
+              </td>
+            </tr>
+          </table>
+          <table class="css_table_list2">
+            <tr>
+              <td class="css_td_list2_t1">回傳</td>
+              <td class="css_td_list2_t1">說明</td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l2">&gt;= MCM_RCODE_PASS</td>
+              <td class="css_td_list2_r1">成功</td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l2">&nbsp;&lt; MCM_RCODE_PASS</td>
+              <td class="css_td_list2_r1">錯誤</td>
+            </tr>
+          </table>
+          <br>
+          注意事項 :<br>
+          <table class="css_table_list1">
+            <tr>
+              <td class="css_td_list1_l">01.&nbsp;</td>
+              <td class="css_td_list1_r">
+                資料存取模式可以是 MCM_SPERMISSION_RO 或 MCM_SPERMISSION_RW.
+              </td>
+            </tr>
+          </table>
+          <br>
+          範例 :<br>
+<pre class="css_pre_code">
+資料值檔案, 放在 mcm_daemon 所在的目錄, 檔名為 mcm_store_upload.txt
+
+$version 1.1
+device descript:Wireless%20Device serial_number:0022E5A1CC9F00000000
+device.system date:2015/06/07 ip_addr:192.168.10.254 uptime:0 loading:45.678000
+device.vap.#8 ssid:open-1 channel:10
+device.vap.#8.extra hidden:1 tx_power:9
+device.vap.#8.station.#20 mac_addr:00:11:22:33:44:55 rule:3
+device.vap.#15 ssid:radius-2 channel:44
+device.vap.#15.extra hidden:0 tx_power:10
+device.vap.#15.station.#30 mac_addr:00:aa:bb:cc:dd:ee rule:5
+device.vap.#15.station.#33 mac_addr:00:aa:bb:cc:dd:ff rule:6
+device.vap.#23 ssid:wap2-3 channel:0
+device.vap.#23.extra hidden:0 tx_power:3
+device.limit.#3 name:normal priority:10
+device.limit.#5 name:height priority:15
+device.limit.#6 name:low priority:5
+</pre>
+<pre class="css_pre_code">
+外部程式
+
+#include &lt;linux/init.h&gt;
+#include &lt;linux/slab.h&gt;
+#include &lt;linux/kernel.h&gt;
+#include &lt;linux/module.h&gt;
+#include "mcm_lheader/mcm_type.h"
+#include "mcm_lheader/mcm_size.h"
+#include "mcm_lheader/mcm_connect.h"
+#include "mcm_lheader/mcm_return.h"
+#include "mcm_lheader/mcm_data_exinfo_auto.h"
+#include "mcm_lklib/mcm_lklib_api.h"
+
+#define DMSG(msg_fmt, msgs...) \
+    printk(KERN_INFO "%s(%04u): " msg_fmt "\n", \
+           strrchr(__FILE__, '/') ? strrchr(__FILE__, '/') + 1 : __FILE__, __LINE__, ##msgs)
+
+static int __init main_init(void)
+{
+    char *path1, store_version[MCM_BASE_VERSION_BUFFER_SIZE];
+    struct mcm_lklib_lib_t self_lklib;
+    MCM_DTYPE_LIST_TD store_result;
+
+    memset(&self_lklib, 0, sizeof(struct mcm_lklib_lib_t));
+    self_lklib.socket_path = "@mintcm";
+    self_lklib.call_from = MCM_CFROM_KERNEL;
+    self_lklib.session_permission = MCM_SPERMISSION_RO;
+    self_lklib.session_stack_size = 0;
+    if(mcm_lklib_init(&self_lklib) < MCM_RCODE_PASS)
+    {
+        DMSG("call mcm_lklib_init() fail");
+        goto FREE_01;
+    }
+
+    path1 = "mcm_store_upload.txt";
+    if(mcm_lklib_check_store_file(&self_lklib, path1, &store_result,
+                                  store_version, sizeof(store_version)) < MCM_RCODE_PASS)
+    {
+        DMSG("call mcm_lklib_check_store_file(%s) fail", path1);
+        goto FREE_02;
+    }
+    DMSG("[%s][%s][%s]", path1, store_version, store_result < MCM_RCODE_PASS ? "fail" : "pass");
+
+FREE_02:
+    mcm_lklib_exit(&self_lklib);
+FREE_01:
+    return 0;
+}
+
+static void __exit main_exit(void)
+{
+    return;
+}
+
+module_init(main_init);
+module_exit(main_exit);
+
+MODULE_LICENSE("GPL");
+</pre>
+
+        </td>
+      </tr>
+    </table>
+    <br>
+
+  </div>
+</div>
+<br>
+
+<div class="css_div_box_frame_full">
+  <div class="css_div_box_title">範例程式的使用</div>
+  <div class="css_div_box_content">
+    <br>
+
+    <table class="css_table_list1">
+      <tr>
+        <td class="css_td_list1_l">01.&nbsp;</td>
+        <td class="css_td_list1_r">
+          範例程式目錄在 <font class="css_font_b1">mint_cm/usage/example/0803</font>.
+        </td>
+      </tr>
+    </table>
+    <br><br>
+
+    <table class="css_table_list1">
+      <tr>
+        <td class="css_td_list1_l">02.&nbsp;</td>
+        <td class="css_td_list1_r">
+          下面關於 <font class="css_font_p1">make</font> 的操作沒有特別註明的話都是在
+          <font class="css_font_b1">mint_cm</font> 目錄.
+        </td>
+      </tr>
+    </table>
+    <br><br>
+
+    <table class="css_table_list1">
+      <tr>
+        <td class="css_td_list1_l">03.&nbsp;</td>
+        <td class="css_td_list1_r">
+          第一次使用, 使用 <font class="css_font_p1">make example_add KEY=0803</font>
+          載入範例並編譯.
+        </td>
+      </tr>
+    </table>
+    <br><br>
+
+    <table class="css_table_list1">
+      <tr>
+        <td class="css_td_list1_l">04.&nbsp;</td>
+        <td class="css_td_list1_r">
+          <font class="css_font_b1">kernel_app/kernel_app_0803</font> 是範例程式,<br>
+          必須先在目錄內使用 <font class="css_font_p1">make all</font> 進行編譯.<br><br>
+          使用方式 :<br>
+          <table class="css_table_list2">
+            <tr>
+              <td class="css_td_list2_t2" colspan="2">
+                <font class="css_font_g1">echo &lt;test_item&gt; &gt; /proc/kernel_app_0803</font>
+              </td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_t2" colspan="2">
+                &lt;test_item&gt; 列表 :
+              </td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l2">check-store-file</td>
+              <td class="css_td_list2_r1">mcm_lklib_check_store_file() 範例</font>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+    <br><br>
+
+    <table class="css_table_list1">
+      <tr>
+        <td class="css_td_list1_l">05.&nbsp;</td>
+        <td class="css_td_list1_r">
+          先載入 mcm_lklib_api.ko, 接著執行 mcm_daemon, 再載入 kernel_app_0803 做測試.
+        </td>
+      </tr>
+    </table>
+    <br><br>
+
+    <table class="css_table_list1">
+      <tr>
+        <td class="css_td_list1_l">06.&nbsp;</td>
+        <td class="css_td_list1_r">
+          測試完畢不使用後, 使用 <font class="css_font_p1">make example_del KEY=0803</font>
+          將範例移除.
+        </td>
+      </tr>
+    </table>
+    <br><br>
+
+    <table class="css_table_list1">
+      <tr>
+        <td class="css_td_list1_l">07.&nbsp;</td>
+        <td class="css_td_list1_r">
+          範例程式目錄下的檔案在做完 <font class="css_font_p1">make example_add</font>
+          後會複製到真正使用的位置, 要修改做測試的話要改在複製後的.<br>
+          <table class="css_table_list2">
+            <tr>
+              <td class="css_td_list2_r1">
+                來源 <font class="css_font_b1">profile/mcm_data_profile_0803.xml</font><br>
+                目地 <font class="css_font_b1">mint_cm/mcm_build/mcm_data_profile.xml</font><br>
+                資料模型範例<br>
+                有修改要使用 <font class="css_font_p1">make all</font> 重新編譯
+              </td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_r1">
+                來源 <font class="css_font_b1">profile/mcm_store_profile_default_0803.txt</font><br>
+                目地 <font class="css_font_b1">mint_cm/mcm_build/mcm_store_profile_default.txt</font><br>
+                資料預設值範例<br>
+                使用 <font class="css_font_p1">make all</font> 後會再複製到 <font class="css_font_b1">mint_cm/run</font>
+              </td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_r1">
+                來源 <font class="css_font_b1">profile/mcm_store_upload_0803.txt</font><br>
+                目地 <font class="css_font_b1">mint_cm/run/mcm_store_upload.txt</font><br>
+                要檢查的資料檔案範例<br>
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+    <br>
+
+  </div>
+</div>
+<br>
+
+</body>
+
+</html>

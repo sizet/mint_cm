@@ -1,0 +1,144 @@
+<!--
+Copyright © 2017, Che-Wei Hsu <cwxhsu@gmail.com>
+This file is part of the MintCM.
+Some rights reserved. See README.
+-->
+
+<html>
+
+<head>
+
+<meta http-equiv="cache-control" content="no-cache">
+<meta http-equiv="content-type" content="text/html; charset=utf-8">
+<script type="text/javascript" src="jquery_main.js"></script>
+<script type="text/javascript" src="json3.js"></script>
+<script type="text/javascript" src="mcm_jslib_api.js"></script>
+<script type="text/javascript" src="mcm_jslib_data_info_auto.js"></script>
+<script type="text/javascript" src="web_app_0405_script.js"></script>
+<link rel="stylesheet" href="web_app_0405_style.css">
+
+<script type="text/javascript">
+var mcm_dv = null;
+
+function body_init()
+{
+    var self_jslib, req_cmd = "", rep_ret;
+
+
+    // 指定要讀出的資料.
+    req_cmd = "&get.device.vap.*";
+
+    // 送出讀出資料請求.
+    self_jslib = new mcm_jslib_lib_t();
+    self_jslib.socket_path = "@mintcm";
+    self_jslib.session_permission = mcm_session_permission.ro;
+    self_jslib.session_stack_size = 0;
+    self_jslib.request_command = req_cmd;
+    self_jslib.data_format = mcm_data_format.all_default;
+    self_jslib.other_query = "";
+    rep_ret = mcm_jslib_obtain_config(self_jslib);
+    if(rep_ret.rep_code < mcm_return_code.pass)
+    {
+        alert("call mcm_jslib_obtain_config() fail" +
+              "[" + rep_ret.rep_code + "]");
+        mcm_jslib_run_script(rep_ret.rep_data);
+        return;
+    }
+    // 處理資料格式.
+    mcm_dv = JSON.parse(rep_ret.rep_data);
+
+    for(i = 0; i < mcm_dv.device.vap.length; i++)
+    {
+        // 顯示 device.vap.{i}
+        data_array = new Array(6);
+        data_array[0] = "device.vap.@" + (i + 1);
+        data_array[1] = mcm_dv.device.vap[i].ekey;
+        data_array[2] = jsapi_make_text("ssid_text_" + i, 24,
+            mcm_jslib_convert_html_str(mcm_dv.device.vap[i].ssid));
+        data_array[3] = jsapi_make_checkbox("ssid_check_" + i, 0);
+        data_array[4] = jsapi_make_text("channel_text_" + i, 6, mcm_dv.device.vap[i].channel);
+        data_array[5] = jsapi_make_checkbox("channel_check_" + i, 0);
+        tmp_html = jsapi_make_trtd("css_td1", data_array);
+        $("#vap_list").find("tbody").append(tmp_html);
+    }
+}
+
+// 設定 device.vap.*
+function config_set()
+{
+    var self_jslib, req_cmd = "", rep_ret, tmp_path, i;
+
+
+    for(i = 0; i < mcm_dv.device.vap.length; i++)
+    {
+        if(($("#ssid_check_" + i).prop("checked") == true) ||
+           ($("#channel_check_" + i).prop("checked") == true))
+        {
+            // 填充 device.vap.{i} 路徑.
+            tmp_path = "device.vap.#" + mcm_dv.device.vap[i].ekey;
+        }
+
+        if($("#ssid_check_" + i).prop("checked") == true)
+        {
+            // 設定 device.vap.{i}.ssid
+            req_cmd += "&set.s." + tmp_path + ".ssid=" +
+                       mcm_jslib_convert_submit_str($("#ssid_text_" + i).val());
+        }
+
+        if($("#channel_check_" + i).prop("checked") == true)
+        {
+            // 設定 device.vap.{i}.channel
+            req_cmd += "&set.iui." + tmp_path + ".channel=" +
+                       $("#channel_text_" + i).val();
+        }
+    }
+
+    // 執行內部模組.
+    req_cmd += "&run.mcm_module_status_test_get_vap";
+
+    // 送出修改資料請求.
+    self_jslib = new mcm_jslib_lib_t();
+    self_jslib.socket_path = "@mintcm";
+    self_jslib.session_permission = mcm_session_permission.rw;
+    self_jslib.session_stack_size = 0;
+    self_jslib.request_command = req_cmd;
+    self_jslib.after_complete = mcm_after_complete.reload;
+    self_jslib.other_query = "";
+    rep_ret = mcm_jslib_submit_config(self_jslib);
+    if(rep_ret.rep_code < mcm_return_code.pass)
+    {
+        alert("call mcm_jslib_submit_config() fail" +
+             "[" + rep_ret.rep_code + "]");
+        mcm_jslib_run_script(rep_ret.rep_data);
+        return;
+    }
+    mcm_jslib_run_script(rep_ret.rep_data);
+}
+</script>
+
+</head>
+
+<body onload="body_init()">
+
+  <div>[set][device.vap.*]</div>
+
+  <table id="vap_list" class="css_table1">
+    <thead>
+      <tr>
+        <td class="css_td1"></td>
+        <td class="css_td1">ekey</td>
+        <td class="css_td1">ssid</td>
+        <td class="css_td1">set</td>
+        <td class="css_td1">channel</td>
+        <td class="css_td1">set</td>
+      </tr>
+    </thead>
+    <tbody>
+    </tbody>
+  </table>
+
+  <button type="button" onclick="config_set()">set</button>
+
+</body>
+
+</html>
