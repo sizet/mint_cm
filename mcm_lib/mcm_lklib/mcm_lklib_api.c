@@ -72,11 +72,10 @@ int mcm_realloc_buf_lib(
 int mcm_send_req(
     struct mcm_lklib_lib_t *this_lklib)
 {
-    int fret;
+    int fret, slen;
     struct iovec sock_iov;
     struct msghdr sock_msg;
     mm_segment_t tmp_kfs;
-    __kernel_size_t xlen;
 
 
     memset(&sock_iov, 0, sizeof(struct iovec));
@@ -97,13 +96,13 @@ int mcm_send_req(
     tmp_kfs = get_fs();
     set_fs(KERNEL_DS);
 #if LINUX_VERSION_CODE < KERNEL_VERSION(4, 1, 0)
-    xlen = sock_sendmsg(this_lklib->sock_fp, &sock_msg, sock_iov.iov_len);
+    slen = sock_sendmsg(this_lklib->sock_fp, &sock_msg, sock_iov.iov_len);
 #else
-    xlen = sock_sendmsg(this_lklib->sock_fp, &sock_msg);
+    slen = sock_sendmsg(this_lklib->sock_fp, &sock_msg);
 #endif
-    if(xlen < 0)
+    if(slen < 0)
     {
-        MCM_KEMSG("call sock_sendmsg() fail [%zd]", xlen);
+        MCM_KEMSG("call sock_sendmsg() fail [%d]", slen);
         fret = MCM_RCODE_LKLIB_SOCKET_ERROR;
     }
     set_fs(tmp_kfs);
@@ -120,10 +119,9 @@ int mcm_send_req(
 int mcm_recv_rep(
     struct mcm_lklib_lib_t *this_lklib)
 {
-    int fret;
+    int fret, rlen;
     void *bloc;
     MCM_DTYPE_USIZE_TD bsize;
-    __kernel_size_t rlen;
     MCM_DTYPE_USIZE_TD tlen, clen;
     struct iovec sock_iov;
     struct msghdr sock_msg;
@@ -166,7 +164,7 @@ int mcm_recv_rep(
         {
             if(rlen < sizeof(MCM_DTYPE_USIZE_TD))
             {
-                MCM_KEMSG("recv fail (packet too small [%zd])", rlen);
+                MCM_KEMSG("recv fail (packet too small [%d])", rlen);
                 return MCM_RCODE_LKLIB_SOCKET_ERROR;
             }
 
@@ -300,9 +298,9 @@ int mcm_parse_base_rep(
 int mcm_lklib_init(
     struct mcm_lklib_lib_t *this_lklib)
 {
-    int fret;
+    int fret, xlen;
     struct sockaddr_un *sock_addr;
-    __kernel_size_t addr_len, xlen;
+    size_t addr_len;
     struct mcm_connect_option_t connect_data;
     struct iovec sock_iov;
     struct msghdr sock_msg;
@@ -379,7 +377,7 @@ int mcm_lklib_init(
 #endif
     if(xlen < 0)
     {
-        MCM_KEMSG("call sock_sendmsg() fail [%zd]", xlen);
+        MCM_KEMSG("call sock_sendmsg() fail [%d]", xlen);
         fret = MCM_RCODE_LKLIB_SOCKET_ERROR;
     }
     set_fs(tmp_kfs);
@@ -406,7 +404,7 @@ int mcm_lklib_init(
     xlen = sock_recvmsg(this_lklib->sock_fp, &sock_msg, sock_iov.iov_len, 0);
     if(xlen < 0)
     {
-        MCM_KEMSG("call sock_recvmsg() fail [%zd]", xlen);
+        MCM_KEMSG("call sock_recvmsg() fail [%d]", xlen);
         fret = MCM_RCODE_LKLIB_SOCKET_ERROR;
     }
     set_fs(tmp_kfs);
