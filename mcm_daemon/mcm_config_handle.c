@@ -4560,7 +4560,7 @@ int mcm_save_store_process(
                     case MCM_DTYPE_B_INDEX:
                         tmp_byte = (MCM_DTYPE_B_TD *) data_loc;
                         for(didx = 0; didx < self_model_member->member_size; didx++)
-                            fprintf(file_fp, "%02X", tmp_byte[didx] & 0xFF);
+                            fprintf(file_fp, MCM_DTYPE_B_PF, tmp_byte[didx] & 0xFF);
 #if MCM_CFDMODE
                         dbg_dlen = self_model_member->member_size;
                         MCM_DBG_FORMAT_CONFIG_B_VALUE(dbg_buf, data_loc, dbg_dlen,

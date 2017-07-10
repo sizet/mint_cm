@@ -157,22 +157,23 @@
     while(0)
 
 #define MCM_DBG_FORMAT_CONFIG_B_VALUE(dbg_buf, data_buf, data_len, tmp_idx, tmp_len) \
-    do                                                                                    \
-    {                                                                                     \
-        if((data_len * 2) >= sizeof(dbg_buf))                                             \
-        {                                                                                 \
-            snprintf(dbg_buf, sizeof(dbg_buf), "<dbg_buf too small>");                    \
-        }                                                                                 \
-        else                                                                              \
-        {                                                                                 \
-            dbg_buf[0] = '\0';                                                            \
-            for(tmp_idx = tmp_len = 0; tmp_idx < data_len; tmp_idx++)                     \
-            {                                                                             \
-                tmp_len += snprintf(dbg_buf + tmp_len, sizeof(dbg_buf) - tmp_len, "%02X", \
-                                    *(((unsigned char *) (data_buf)) + tmp_idx) & 0xFF);  \
-            }                                                                             \
-        }                                                                                 \
-    }                                                                                     \
+    do                                                                                   \
+    {                                                                                    \
+        if((data_len * 2) >= sizeof(dbg_buf))                                            \
+        {                                                                                \
+            snprintf(dbg_buf, sizeof(dbg_buf), "<dbg_buf too small>");                   \
+        }                                                                                \
+        else                                                                             \
+        {                                                                                \
+            dbg_buf[0] = '\0';                                                           \
+            for(tmp_idx = tmp_len = 0; tmp_idx < data_len; tmp_idx++)                    \
+            {                                                                            \
+                tmp_len += snprintf(dbg_buf + tmp_len, sizeof(dbg_buf) - tmp_len,        \
+                                    MCM_DTYPE_B_PF,                                      \
+                                    *(((unsigned char *) (data_buf)) + tmp_idx) & 0xFF); \
+            }                                                                            \
+        }                                                                                \
+    }                                                                                    \
     while(0)
 
 #define MCM_DBG_SHOW_ALONE_PATH(tmp_model, tmp_member, tmp_store, tmp_dloc, tmp_key) \

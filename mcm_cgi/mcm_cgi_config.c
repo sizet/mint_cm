@@ -2522,7 +2522,7 @@ int mcm_output_data_json_data(
             case MCM_DTYPE_B_INDEX:
                 printf("\"");
                 for(sidx = 0; sidx < value_len; sidx++)
-                    printf("%02X", *(((MCM_DTYPE_B_TD *) value_data) + sidx) & 0xFF);
+                    printf(MCM_DTYPE_B_PF, *(((MCM_DTYPE_B_TD *) value_data) + sidx) & 0xFF);
                 printf("\"");
                 break;
 #endif
