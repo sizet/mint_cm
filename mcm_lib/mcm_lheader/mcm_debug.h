@@ -175,19 +175,6 @@
     }                                                                                     \
     while(0)
 
-#define MCM_DBG_FORMAT_PKT(dbg_buf, pkt_buf, pkt_len, tmp_idx) \
-    do                                                                      \
-    {                                                                       \
-        for(tmp_idx = 0; tmp_idx < pkt_len; tmp_idx++)                      \
-        {                                                                   \
-            dbg_buf[tmp_idx] = (0x20 <= *(((char *) pkt_buf) + tmp_idx)) && \
-                               (*(((char *) pkt_buf) + tmp_idx) <= 0x7E) ?  \
-                               *(((char *) pkt_buf) + tmp_idx) : '*';       \
-        }                                                                   \
-        dbg_buf[tmp_idx] = '\0';                                            \
-    }                                                                       \
-    while(0)
-
 #define MCM_DBG_SHOW_ALONE_PATH(tmp_model, tmp_member, tmp_store, tmp_dloc, tmp_key) \
     do                                                                        \
     {                                                                         \
