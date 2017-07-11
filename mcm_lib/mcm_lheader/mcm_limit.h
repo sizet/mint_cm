@@ -214,6 +214,29 @@ typedef long double        MCM_CLIMIT_FLD_TD;
     MCM_CHECK_FLO_RANGE(MCM_DTYPE_FLD_SB, tmp_data, tmp_tail, tmp_error, tmp_value)
 #endif
 
+#if MCM_SUPPORT_DTYPE_S || MCM_SUPPORT_DTYPE_B
+
+#define MCM_CHECK_HEX_RANGE(tmp_hex) \
+    if(('0' <= tmp_hex) && (tmp_hex <= '9')) \
+        continue;                            \
+    if(('A' <= tmp_hex) && (tmp_hex <= 'F')) \
+        continue;                            \
+    if(('a' <= tmp_hex) && (tmp_hex <= 'f')) \
+        continue
+
+#define MCM_CONVERT_HEX_TO_DEC(tmp_hex, tmp_dec) \
+    tmp_dec = 0;                             \
+    if(('0' <= tmp_hex) && (tmp_hex <= '9')) \
+        tmp_dec = tmp_hex - '0';             \
+    else                                     \
+    if(('A' <= tmp_hex) && (tmp_hex <= 'F')) \
+        tmp_dec = (tmp_hex - 'A') + 10;      \
+    else                                     \
+    if(('a' <= tmp_hex) && (tmp_hex <= 'f')) \
+        tmp_dec = (tmp_hex - 'a') + 10
+
+#endif
+
 
 
 

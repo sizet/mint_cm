@@ -1129,30 +1129,26 @@ int check_arrange_format(
     return 0;
 }
 
+#if MCM_SUPPORT_DTYPE_S
 int convert_hex_to_char(
     char *data_con,
     char *char_buf)
 {
-    MCM_DTYPE_USIZE_TD didx, tmp_hex, tmp_sum = 0;
+    MCM_DTYPE_USIZE_TD didx, tmp_dec, tmp_sum = 0;
 
 
     for(didx = 0; didx < 2; didx++)
     {
-        tmp_hex = 0;
-        if(('0' <= data_con[didx]) && (data_con[didx] <= '9'))
-            tmp_hex = data_con[didx] - '0';
-        else
-        if(('A' <= data_con[didx]) && (data_con[didx] <= 'F'))
-            tmp_hex = (data_con[didx] - 'A') + 10;
-        tmp_hex *= didx == 0 ? 16 : 1;
-
-        tmp_sum += tmp_hex;
+        MCM_CONVERT_HEX_TO_DEC(data_con[didx], tmp_dec);
+        tmp_dec *= didx == 0 ? 16 : 1;
+        tmp_sum += tmp_dec;
     }
 
     *char_buf = tmp_sum;
 
     return 0;
 }
+#endif
 
 int check_default_integer(
     struct mcm_tag_info_t *this_tag,
@@ -1390,7 +1386,7 @@ int check_default_string(
                 DMSG(MCM_PROFILE_ERROR_PREFIX_MSG
                      "invalid tag [default-string], "
                      "special character (exclude 0x%X~0x%X, '%c', '%c') "
-                     "must use %%XX (XX = character's hex value (01~FF uppercase)) [<%s>...</%s>]",
+                     "must use %%XX (XX = character's hex value (01~FF)) [<%s>...</%s>]",
                      this_tag->file_line, "INVALID_DEFAULT-STRING_01", MCM_CSTR_MIN_PRINTABLE_KEY,
                      MCM_CSTR_MAX_PRINTABLE_KEY, MCM_CSTR_RESERVE_KEY1, MCM_CSTR_RESERVE_KEY2,
                      this_tag->name_con, this_tag->name_con);
@@ -1402,12 +1398,9 @@ int check_default_string(
         {
             for(didx2 = didx1 + 1; didx2 < (didx1 + 3); didx2++)
             {
-                if(('0' <= data_con[didx2]) && (data_con[didx2] <= '9'))
-                    continue;
-                if(('A' <= data_con[didx2]) && (data_con[didx2] <= 'F'))
-                    continue;
+                MCM_CHECK_HEX_RANGE(data_con[didx2]);
                 DMSG(MCM_PROFILE_ERROR_PREFIX_MSG
-                     "invalid tag [default-string], %%XX must be hex (01~FF uppercase)) "
+                     "invalid tag [default-string], %%XX must be hex (01~FF)) "
                      "[<%s>...</%s>]",
                      this_tag->file_line, "INVALID_DEFAULT-STRING_02",
                      this_tag->name_con, this_tag->name_con);
@@ -1417,7 +1410,7 @@ int check_default_string(
             if(tmp_hex == 0)
             {
                 DMSG(MCM_PROFILE_ERROR_PREFIX_MSG
-                     "invalid tag [default-string], %%XX must be large 0 (01~FF uppercase)) "
+                     "invalid tag [default-string], %%XX must be large 0 (01~FF)) "
                      "[<%s>...</%s>]",
                      this_tag->file_line, "INVALID_DEFAULT-STRING_03",
                      this_tag->name_con, this_tag->name_con);
@@ -1496,12 +1489,9 @@ int check_default_bytes(
 
     for(didx = 0; didx < data_len; didx++)
     {
-        if(('0' <= data_con[didx]) && (data_con[didx] <= '9'))
-            continue;
-        if(('A' <= data_con[didx]) && (data_con[didx] <= 'F'))
-            continue;
+        MCM_CHECK_HEX_RANGE(data_con[didx]);
         DMSG(MCM_PROFILE_ERROR_PREFIX_MSG
-             "invalid tag [default-bytes], %%XX must be hex (00~FF uppercase)) [<%s>...</%s>]",
+             "invalid tag [default-bytes], %%XX must be hex (00~FF)) [<%s>...</%s>]",
              this_tag->file_line, "INVALID_DEFAULT-BYTES_01",
              this_tag->name_con, this_tag->name_con);
         return -1;
@@ -1512,7 +1502,7 @@ int check_default_bytes(
         if((didx % 2) != 0)
         {
             DMSG(MCM_PROFILE_ERROR_PREFIX_MSG
-                 "invalid tag [default-bytes], %%XX must be hex (00~FF uppercase)) [<%s>...</%s>]",
+                 "invalid tag [default-bytes], %%XX must be hex (00~FF)) [<%s>...</%s>]",
                  this_tag->file_line, "INVALID_DEFAULT-BYTES_02",
                  this_tag->name_con, this_tag->name_con);
             return -1;

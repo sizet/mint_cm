@@ -841,30 +841,26 @@ struct mcm_config_store_t *mcm_tree_search_store(
 //   儲存轉換後的字元.
 // return :
 //   MCM_RCODE_PASS.
+#if MCM_SUPPORT_DTYPE_S
 int mcm_hex_to_char(
     char *data_con,
     char *char_buf)
 {
-    MCM_DTYPE_USIZE_TD didx, tmp_hex, tmp_sum = 0;
+    MCM_DTYPE_USIZE_TD didx, tmp_dec, tmp_sum = 0;
 
 
     for(didx = 0; didx < 2; didx++)
     {
-        tmp_hex = 0;
-        if(('0' <= data_con[didx]) && (data_con[didx] <= '9'))
-            tmp_hex = data_con[didx] - '0';
-        else
-        if(('A' <= data_con[didx]) && (data_con[didx] <= 'F'))
-            tmp_hex = (data_con[didx] - 'A') + 10;
-        tmp_hex *= didx == 0 ? 16 : 1;
-
-        tmp_sum += tmp_hex;
+        MCM_CONVERT_HEX_TO_DEC(data_con[didx], tmp_dec);
+        tmp_dec *= didx == 0 ? 16 : 1;
+        tmp_sum += tmp_dec;
     }
 
     *char_buf = tmp_sum;
 
     return MCM_RCODE_PASS;
 }
+#endif
 
 // 將 hex 字串轉為數值.
 // data_con (I) :
@@ -873,30 +869,26 @@ int mcm_hex_to_char(
 //   儲存轉換後的數值.
 // return :
 //   MCM_RCODE_PASS.
+#if MCM_SUPPORT_DTYPE_B
 int mcm_hex_to_hex(
     char *data_con,
     unsigned char *hex_buf)
 {
-    MCM_DTYPE_USIZE_TD didx, tmp_hex, tmp_sum = 0;
+    MCM_DTYPE_USIZE_TD didx, tmp_dec, tmp_sum = 0;
 
 
     for(didx = 0; didx < 2; didx++)
     {
-        tmp_hex = 0;
-        if(('0' <= data_con[didx]) && (data_con[didx] <= '9'))
-            tmp_hex = data_con[didx] - '0';
-        else
-        if(('A' <= data_con[didx]) && (data_con[didx] <= 'F'))
-            tmp_hex = (data_con[didx] - 'A') + 10;
-        tmp_hex *= didx == 0 ? 16 : 1;
-
-        tmp_sum += tmp_hex;
+        MCM_CONVERT_HEX_TO_DEC(data_con[didx], tmp_dec);
+        tmp_dec *= didx == 0 ? 16 : 1;
+        tmp_sum += tmp_dec;
     }
 
     *hex_buf = tmp_sum;
 
     return MCM_RCODE_PASS;
 }
+#endif
 
 // 增加緩衝的大小.
 // data_buf_buf (O) :
@@ -3231,7 +3223,7 @@ int mcm_load_store_check_string(
                 MCM_EMSG(MCM_SPROFILE_ERROR_PREFIX_MSG
                          "invalid value [string], "
                          "special character (exclude 0x%X~0x%X, '%c', '%c') "
-                         "must use %%XX (XX = character's hex value (01~FF uppercase)) [%s]",
+                         "must use %%XX (XX = character's hex value (01~FF)) [%s]",
                          MCM_SSOURCE(file_source), file_line, "INVALID_VALUE-STRING_01",
                          MCM_CSTR_MIN_PRINTABLE_KEY, MCM_CSTR_MAX_PRINTABLE_KEY,
                          MCM_CSTR_RESERVE_KEY1, MCM_CSTR_RESERVE_KEY2,
@@ -3245,12 +3237,9 @@ int mcm_load_store_check_string(
             // hex 必須是 01 ~ FF.
             for(didx2 = didx1 + 1; didx2 < (didx1 + 3); didx2++)
             {
-                if(('0' <= read_con[didx2]) && (read_con[didx2] <= '9'))
-                    continue;
-                if(('A' <= read_con[didx2]) && (read_con[didx2] <= 'F'))
-                    continue;
+                MCM_CHECK_HEX_RANGE(read_con[didx2]);
                 MCM_EMSG(MCM_SPROFILE_ERROR_PREFIX_MSG
-                         "invalid value [string], %%XX must be hex (01~FF uppercase) [%s]",
+                         "invalid value [string], %%XX must be hex (01~FF) [%s]",
                          MCM_SSOURCE(file_source), file_line, "INVALID_VALUE-STRING_02",
                          this_model_member->member_name);
                 return MCM_RCODE_CONFIG_INTERNAL_ERROR;
@@ -3259,7 +3248,7 @@ int mcm_load_store_check_string(
             if(tmp_hex == 0)
             {
                 MCM_EMSG(MCM_SPROFILE_ERROR_PREFIX_MSG
-                         "invalid value [string], %%XX must be large 0 (01~FF uppercase) [%s]",
+                         "invalid value [string], %%XX must be large 0 (01~FF) [%s]",
                          MCM_SSOURCE(file_source), file_line, "INVALID_VALUE-STRING_03",
                          this_model_member->member_name);
                 return MCM_RCODE_CONFIG_INTERNAL_ERROR;
@@ -3386,12 +3375,9 @@ int mcm_load_store_check_bytes(
     // 必須是 hex 格式.
     for(didx1 = 0; didx1 < read_len; didx1++)
     {
-        if(('0' <= read_con[didx1]) && (read_con[didx1] <= '9'))
-            continue;
-        if(('A' <= read_con[didx1]) && (read_con[didx1] <= 'F'))
-            continue;
+        MCM_CHECK_HEX_RANGE(read_con[didx1]);
         MCM_EMSG(MCM_SPROFILE_ERROR_PREFIX_MSG
-                 "invalid value [bytes], %%XX must be hex (00~FF uppercase) [%s]",
+                 "invalid value [bytes], %%XX must be hex (00~FF) [%s]",
                  MCM_SSOURCE(file_source), file_line, "INVALID_VALUE-BYTES_01",
                  this_model_member->member_name);
         return MCM_RCODE_CONFIG_INTERNAL_ERROR;
@@ -3402,7 +3388,7 @@ int mcm_load_store_check_bytes(
         if((didx1 % 2) != 0)
         {
             MCM_EMSG(MCM_SPROFILE_ERROR_PREFIX_MSG
-                     "invalid value [bytes], %%XX must be hex (00~FF uppercase) [%s]",
+                     "invalid value [bytes], %%XX must be hex (00~FF) [%s]",
                      MCM_SSOURCE(file_source), file_line, "INVALID_VALUE-BYTES_02",
                      this_model_member->member_name);
             return MCM_RCODE_CONFIG_INTERNAL_ERROR;
