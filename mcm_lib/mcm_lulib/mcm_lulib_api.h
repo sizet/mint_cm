@@ -147,6 +147,11 @@ int mcm_lulib_get_list_value(
     void **data_buf_buf,
     MCM_DTYPE_USIZE_TD *data_len_buf);
 
+int mcm_lulib_set_any_type_alone(
+    struct mcm_lulib_lib_t *this_lulib,
+    char *full_path,
+    char *data_con);
+
 
 
 

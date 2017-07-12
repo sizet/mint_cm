@@ -311,77 +311,6 @@ Some rights reserved. See README.
     </table>
     <br><br>
 
-    <div class="css_div_hook" id="hook_0304_data_type_01"></div>
-    <font class="css_font_b1">資料類型 (data_type)</font><br>
-    寫入資料時目標 member 的資料型態.<br>
-    <table class="css_table_list2">
-      <tr>
-        <td class="css_td_list2_t1">$(type)</td>
-        <td class="css_td_list2_t1">對應類型</td>
-      </tr>
-      <tr>
-        <td class="css_td_list2_l2">ek</td>
-        <td class="css_td_list2_r1">唯讀</td>
-      </tr>
-      <tr>
-        <td class="css_td_list2_l2">rk</td>
-        <td class="css_td_list2_r1">rk</td>
-      </tr>
-      <tr>
-        <td class="css_td_list2_l2">isc</td>
-        <td class="css_td_list2_r1">isc</td>
-      </tr>
-      <tr>
-        <td class="css_td_list2_l2">iuc</td>
-        <td class="css_td_list2_r1">iuc</td>
-      </tr>
-      <tr>
-        <td class="css_td_list2_l2">iss</td>
-        <td class="css_td_list2_r1">iss</td>
-      </tr>
-      <tr>
-        <td class="css_td_list2_l2">ius</td>
-        <td class="css_td_list2_r1">ius</td>
-      </tr>
-      <tr>
-        <td class="css_td_list2_l2">isi</td>
-        <td class="css_td_list2_r1">isi</td>
-      </tr>
-      <tr>
-        <td class="css_td_list2_l2">iui</td>
-        <td class="css_td_list2_r1">iui</td>
-      </tr>
-      <tr>
-        <td class="css_td_list2_l2">isll</td>
-        <td class="css_td_list2_r1">isll</td>
-      </tr>
-      <tr>
-        <td class="css_td_list2_l2">iull</td>
-        <td class="css_td_list2_r1">iull</td>
-      </tr>
-      <tr>
-        <td class="css_td_list2_l2">ff</td>
-        <td class="css_td_list2_r1">ff</td>
-      </tr>
-      <tr>
-        <td class="css_td_list2_l2">fd</td>
-        <td class="css_td_list2_r1">fd</td>
-      </tr>
-      <tr>
-        <td class="css_td_list2_l2">fld</td>
-        <td class="css_td_list2_r1">fld</td>
-      </tr>
-      <tr>
-        <td class="css_td_list2_l2">s:$(size)</td>
-        <td class="css_td_list2_r1">s</td>
-      </tr>
-      <tr>
-        <td class="css_td_list2_l2">b:$(size)</td>
-        <td class="css_td_list2_r1">b</td>
-      </tr>
-    </table>
-    <br><br>
-
     網頁程式要存取資料庫時, 要將需求組合成一條條的指令送給 mcm_cgi_config 處理.
     <br><br>
 
@@ -1285,16 +1214,10 @@ function main_init()
           <br><br>
           格式 :<br>
           <div class="css_div_block">
-            <font class="css_font_g1">"&set.$(data_type).$(full_path)=$(value)"</font>
+            <font class="css_font_g1">"&set.$(full_path)=$(value)"</font>
           </div>
           <br>
           <table class="css_table_list2">
-            <tr>
-              <td class="css_td_list2_l2">$(data_type)</td>
-              <td class="css_td_list2_r1">
-                目標 member 的資料類型 <a href="#hook_0304_data_type_01">[詳細]</a>
-              </td>
-            </tr>
             <tr>
               <td class="css_td_list2_l2">$(full_path)</td>
               <td class="css_td_list2_r1">
@@ -1340,37 +1263,37 @@ var req_cmd = "", tmp_data;
 
 // 設定 device
 tmp_data = "網路設備-" + Math.floor(Math.random() * 10);
-req_cmd += "&set.s.device.descript=" +
+req_cmd += "&set.device.descript=" +
            mcm_jslib_convert_submit_str(tmp_data);
-req_cmd += "&set.b.device.serial_number=" + "0120A6B70099";
+req_cmd += "&set.device.serial_number=" + "0120A6B70099";
 
 // 設定 device.system.uptime
 tmp_data = Math.floor(Math.random() * 1000000000);
-req_cmd += "&set.iull.device.system.uptime=" + tmp_data;
+req_cmd += "&set.device.system.uptime=" + tmp_data;
 // 設定 device.system.loading
 tmp_data = Math.random() * 500;
-req_cmd += "&set.fd.device.system.loading=" + tmp_data;
+req_cmd += "&set.device.system.loading=" + tmp_data;
 
 // 設定 device.vap.#23
 tmp_data = "ssid " + Math.floor(Math.random() * 20);
-req_cmd += "&set.s.device.vap.#23.ssid=" +
+req_cmd += "&set.device.vap.#23.ssid=" +
            mcm_jslib_convert_submit_str(tmp_data);
 tmp_data = Math.floor(Math.random() * 200);
-req_cmd += "&set.iui.device.vap.#23.channel=" + tmp_data;
+req_cmd += "&set.device.vap.#23.channel=" + tmp_data;
 
 // 設定 device.vap.#8.extra.tx_power
 tmp_data = Math.floor(Math.random() * 120);
-req_cmd += "&set.s.device.vap.#8.extra.tx_power=" + tmp_data;
+req_cmd += "&set.device.vap.#8.extra.tx_power=" + tmp_data;
 
 // 設定 device.vap.#15.station.#30
 tmp_data = "00:11:aa:22:bb:" + Math.floor(Math.random() * 100);
-req_cmd += "&set.s.device.vap.#15.station.#30.mac_addr=" +
+req_cmd += "&set.device.vap.#15.station.#30.mac_addr=" +
            mcm_jslib_convert_submit_str(tmp_data);
 tmp_data = Math.floor(Math.random() * 10);
-req_cmd += "&set.s.device.vap.#15.station.#30.rule=" + tmp_data;
+req_cmd += "&set.device.vap.#15.station.#30.rule=" + tmp_data;
 
 // 設定 device.limit.#6.name
-req_cmd += "&set.s.device.limit.#6.name=" +
+req_cmd += "&set.device.limit.#6.name=" +
            mcm_jslib_convert_submit_str("")
 </pre>
 <br>
@@ -1418,59 +1341,59 @@ function main_command()
     console.clear();
 
     tmp_data = "網路設備-" + Math.floor(Math.random() * 10);
-    tmp_cmd = "&set.s.device.descript=" +
+    tmp_cmd = "&set.device.descript=" +
               mcm_jslib_convert_submit_str(tmp_data);
     req_cmd += tmp_cmd;
     console.log("[set] ", tmp_cmd);
 
     tmp_data = "120A0BF" + Math.floor(Math.random() * 10);
-    tmp_cmd = "&set.b.device.serial_number=" + tmp_data;
+    tmp_cmd = "&set.device.serial_number=" + tmp_data;
     req_cmd += tmp_cmd;
     console.log("[set] ", tmp_cmd);
 
 
     tmp_data = Math.floor(Math.random() * 1000000000);
-    tmp_cmd = "&set.iull.device.system.uptime=" + tmp_data;
+    tmp_cmd = "&set.device.system.uptime=" + tmp_data;
     req_cmd += tmp_cmd;
     console.log("[set] ", tmp_cmd);
 
     tmp_data = Math.random() * 500;
-    tmp_cmd = "&set.fd.device.system.loading=" + tmp_data;
+    tmp_cmd = "&set.device.system.loading=" + tmp_data;
     req_cmd += tmp_cmd;
     console.log("[set] ", tmp_cmd);
 
 
     tmp_data = "ssid " + Math.floor(Math.random() * 20);
-    tmp_cmd = "&set.s.device.vap.#23.ssid=" +
+    tmp_cmd = "&set.device.vap.#23.ssid=" +
               mcm_jslib_convert_submit_str(tmp_data);
     req_cmd += tmp_cmd;
     console.log("[set] ", tmp_cmd);
 
     tmp_data = Math.floor(Math.random() * 200);
-    tmp_cmd = "&set.iui.device.vap.#23.channel=" + tmp_data;
+    tmp_cmd = "&set.device.vap.#23.channel=" + tmp_data;
     req_cmd += tmp_cmd;
     console.log("[set] ", tmp_cmd);
 
 
     tmp_data = Math.floor(Math.random() * 120);
-    tmp_cmd = "&set.iss.device.vap.#8.extra.tx_power=" + tmp_data;
+    tmp_cmd = "&set.device.vap.#8.extra.tx_power=" + tmp_data;
     req_cmd += tmp_cmd;
     console.log("[set] ", tmp_cmd);
 
 
     tmp_data = "00:11:aa:22:bb:" + Math.floor(Math.random() * 100);
-    tmp_cmd = "&set.s.device.vap.#15.station.#30.mac_addr=" +
+    tmp_cmd = "&set.device.vap.#15.station.#30.mac_addr=" +
               mcm_jslib_convert_submit_str(tmp_data);
     req_cmd += tmp_cmd;
     console.log("[set] ", tmp_cmd);
 
     tmp_data = Math.floor(Math.random() * 10);
-    tmp_cmd = "&set.rk.device.vap.#15.station.#30.rule=" + tmp_data;
+    tmp_cmd = "&set.device.vap.#15.station.#30.rule=" + tmp_data;
     req_cmd += tmp_cmd;
     console.log("[set] ", tmp_cmd);
 
 
-    tmp_cmd = "&set.s.device.limit.#6.name=" +
+    tmp_cmd = "&set.device.limit.#6.name=" +
               mcm_jslib_convert_submit_str("");
     req_cmd += tmp_cmd;
     console.log("[set] ", tmp_cmd);
@@ -1528,7 +1451,7 @@ function main_command()
     console.clear();
 
     tmp_data = "網路設備-" + Math.floor(Math.random() * 10);
-    tmp_cmd = "&set.s.device.descript=" +
+    tmp_cmd = "&set.device.descript=" +
               mcm_jslib_convert_submit_str(tmp_data);
     req_cmd += tmp_cmd;
     console.log("[set] ", tmp_cmd);
@@ -1630,18 +1553,18 @@ var req_cmd = "", tmp_data;
 // 增加 device.vap.#123
 req_cmd += "&add.device.vap.#123";
 tmp_data = "public-" + Math.floor(Math.random() * 20);
-req_cmd += "&set.s.device.vap.#123.ssid=" +
+req_cmd += "&set.device.vap.#123.ssid=" +
            mcm_jslib_convert_submit_str(tmp_data);
 tmp_data = Math.floor(Math.random() * 200);
-req_cmd += "&set.iui.device.vap.#123.channel=" + tmp_data;
+req_cmd += "&set.device.vap.#123.channel=" + tmp_data;
 
 // device.vap.*.extra 是 device.vap.* 的 child-group 而且又是 gs 類型,
 // 所以增加 device.vap.#123 後, 資料庫會自動增加 device.vap.#123.extra,
 // 替 device.vap.#123.extra 加上值. (不設的話就是使用資料模型中設定的初始值)
 tmp_data = Math.floor(Math.random() * 10) % 2;
-req_cmd += "&set.isc.device.vap.#123.extra.hidden=" + tmp_data;
+req_cmd += "&set.device.vap.#123.extra.hidden=" + tmp_data;
 tmp_data = Math.floor(Math.random() * 20);
-req_cmd += "&set.iss.device.vap.#123.extra.txpower=" + tmp_data;
+req_cmd += "&set.device.vap.#123.extra.txpower=" + tmp_data;
 
 // 增加 device.vap.#234.station.#1
 // 一開始 device.vap.#234 並不存在, 所以要逐層增加.
@@ -1651,10 +1574,10 @@ req_cmd += "&add.device.vap.#234";
 // 增加 device.vap.#234.station.#1
 req_cmd += "&add.device.vap.#234.station.#1";
 tmp_data = "00:AA:22:BB:33:" + Math.floor(Math.random() * 100);
-req_cmd += "&set.s.device.vap.#234.station.#1.mac_addr=" +
+req_cmd += "&set.device.vap.#234.station.#1.mac_addr=" +
            mcm_jslib_convert_submit_str(tmp_data);
 tmp_data = Math.floor(Math.random() * 20);
-req_cmd += "&set.rk.device.vap.#234.station.#1.rule=" + tmp_data;
+req_cmd += "&set.device.vap.#234.station.#1.rule=" + tmp_data;
 
 // 增加 device.limit.#51
 // 不設值使用初始值.
@@ -1709,24 +1632,24 @@ function main_command()
     console.log("[add] ", tmp_cmd);
 
     tmp_data = "public-" + Math.floor(Math.random() * 20);
-    tmp_cmd = "&set.s.device.vap.#123.ssid=" +
+    tmp_cmd = "&set.device.vap.#123.ssid=" +
               mcm_jslib_convert_submit_str(tmp_data);
     req_cmd += tmp_cmd;
     console.log("[set] ", tmp_cmd);
 
     tmp_data = Math.floor(Math.random() * 200);
-    tmp_cmd = "&set.iui.device.vap.#123.channel=" + tmp_data;
+    tmp_cmd = "&set.device.vap.#123.channel=" + tmp_data;
     req_cmd += tmp_cmd;
     console.log("[set] ", tmp_cmd);
 
 
     tmp_data = Math.floor(Math.random() * 10) % 2;
-    tmp_cmd = "&set.isc.device.vap.#123.extra.hidden=" + tmp_data;
+    tmp_cmd = "&set.device.vap.#123.extra.hidden=" + tmp_data;
     req_cmd += tmp_cmd;
     console.log("[set] ", tmp_cmd);
 
     tmp_data = Math.floor(Math.random() * 20);
-    tmp_cmd = "&set.iss.device.vap.#123.extra.tx_power=" + tmp_data;
+    tmp_cmd = "&set.device.vap.#123.extra.tx_power=" + tmp_data;
     req_cmd += tmp_cmd;
     console.log("[set] ", tmp_cmd);
 
@@ -1740,13 +1663,13 @@ function main_command()
     console.log("[add] ", tmp_cmd);
 
     tmp_data = "00:AA:22:BB:33:" + Math.floor(Math.random() * 100);
-    tmp_cmd = "&set.s.device.vap.#234.station.#1.mac_addr=" +
+    tmp_cmd = "&set.device.vap.#234.station.#1.mac_addr=" +
               mcm_jslib_convert_submit_str(tmp_data);
     req_cmd += tmp_cmd;
     console.log("[set] ", tmp_cmd);
 
     tmp_data = Math.floor(Math.random() * 20);
-    tmp_cmd = "&set.rk.device.vap.#234.station.#1.rule=" + tmp_data;
+    tmp_cmd = "&set.device.vap.#234.station.#1.rule=" + tmp_data;
     req_cmd += tmp_cmd;
     console.log("[set] ", tmp_cmd);
 
@@ -2341,24 +2264,24 @@ rep_ret = mcm_jslib_obtain_config(self_jslib);
 var self_jslib, req_cmd, rep_ret;
 
 // 設定 device.system.ip_addr
-req_cmd += "&set.s.device.system.ip_addr=" +
+req_cmd += "&set.device.system.ip_addr=" +
            mcm_jslib_convert_submit_str("192.168.100.1");
 req_cmd += "&run.module_config_sytem";
 
 
 // 設定 device.vap.#8
-req_cmd += "&set.s.device.vap.#8.ssid=" +
+req_cmd += "&set.device.vap.#8.ssid=" +
            mcm_jslib_convert_submit_str("private-networ");
-req_cmd += "&set.iui.device.vap.#8.channel=11";
+req_cmd += "&set.device.vap.#8.channel=11";
 
 // 刪除 device.vap.#15
 req_cmd += "&del.device.vap.#15";
 
 // 增加 device.vap.#55
 req_cmd += "&add.device.vap.#55";
-req_cmd += "&set.s.device.vap.#55.ssid=" +
+req_cmd += "&set.device.vap.#55.ssid=" +
            mcm_jslib_convert_submit_str("public-networ");
-req_cmd += "&set.iui.device.vap.#55.channel=44";
+req_cmd += "&set.device.vap.#55.channel=44";
 
 // 處理 device.vap.*
 req_cmd += "&run.module_config_vap";

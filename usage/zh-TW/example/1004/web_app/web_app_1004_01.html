@@ -118,16 +118,16 @@ function modify_account()
 
             tmp_path = "device.web.account.#" + mcm_dv.device.web.account[i].ekey;
 
-            req_cmd += "&set.s." + tmp_path + ".name=" +
+            req_cmd += "&set." + tmp_path + ".name=" +
                        mcm_jslib_convert_submit_str($("#name_text_" + i).val());
 
-            req_cmd += "&set.s." + tmp_path + ".password=" +
+            req_cmd += "&set." + tmp_path + ".password=" +
                        mcm_jslib_convert_submit_str($("#password_text_" + i).val());
 
-            req_cmd += "&set.isi." + tmp_path + ".permission=" +
+            req_cmd += "&set." + tmp_path + ".permission=" +
                        $("#permission_text_" + i).val();
 
-            req_cmd += "&set.isi." + tmp_path + ".idle_timeout=" +
+            req_cmd += "&set." + tmp_path + ".idle_timeout=" +
                        $("#idle_timeout_text_" + i).val();
 
         }
@@ -140,16 +140,16 @@ function modify_account()
 
             req_cmd += "&add." + tmp_path;
 
-            req_cmd += "&set.s." + tmp_path + ".name=" +
+            req_cmd += "&set." + tmp_path + ".name=" +
                        mcm_jslib_convert_submit_str($("#name_text_" + i).val());
 
-            req_cmd += "&set.s." + tmp_path + ".password=" +
+            req_cmd += "&set." + tmp_path + ".password=" +
                        mcm_jslib_convert_submit_str($("#password_text_" + i).val());
 
-            req_cmd += "&set.isi." + tmp_path + ".permission=" +
+            req_cmd += "&set." + tmp_path + ".permission=" +
                        $("#permission_text_" + i).val();
 
-            req_cmd += "&set.isi." + tmp_path + ".idle_timeout=" +
+            req_cmd += "&set." + tmp_path + ".idle_timeout=" +
                        $("#idle_timeout_text_" + i).val();
         }
         else

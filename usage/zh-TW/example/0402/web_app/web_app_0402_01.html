@@ -63,14 +63,14 @@ function config_set()
     if($("#descript_check").prop("checked") == true)
     {
         // 設定 device.descript
-        req_cmd += "&set.s.device.descript=" +
+        req_cmd += "&set.device.descript=" +
                    mcm_jslib_convert_submit_str($("#descript_text").val());
     }
 
     if($("#serial_number_check").prop("checked") == true)
     {
         // 設定 device.serial_number
-        req_cmd += "&set.b.device.serial_number=" +
+        req_cmd += "&set.device.serial_number=" +
                    mcm_jslib_convert_submit_str($("#serial_number_text").val());
     }
 

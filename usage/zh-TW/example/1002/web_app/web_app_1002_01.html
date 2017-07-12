@@ -109,11 +109,11 @@ function modify_vap()
             tmp_path = "device.vap.#" + mcm_dv.device.vap[i].ekey;
 
             // 設定 device.vap.{i}.ssid
-            req_cmd += "&set.s." + tmp_path + ".ssid=" +
+            req_cmd += "&set." + tmp_path + ".ssid=" +
                        mcm_jslib_convert_submit_str($("#ssid_text_" + i).val());
 
             // 設定 device.vap.{i}.channel
-            req_cmd += "&set.iui." + tmp_path + ".channel=" +
+            req_cmd += "&set." + tmp_path + ".channel=" +
                        $("#channel_text_" + i).val();
         }
         else
@@ -126,11 +126,11 @@ function modify_vap()
             req_cmd += "&add." + tmp_path;
 
             // 設定 device.vap.{i}.ssid
-            req_cmd += "&set.s." + tmp_path + ".ssid=" +
+            req_cmd += "&set." + tmp_path + ".ssid=" +
                        mcm_jslib_convert_submit_str($("#ssid_text_" + i).val());
 
             // 設定 device.vap.{i}.channel
-            req_cmd += "&set.iui." + tmp_path + ".channel=" +
+            req_cmd += "&set." + tmp_path + ".channel=" +
                        $("#channel_text_" + i).val();
         }
         else

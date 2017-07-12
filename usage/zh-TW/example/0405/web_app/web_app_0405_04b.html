@@ -123,10 +123,10 @@ function config_add()
                 // 增加 device.vap.{i}.station.{j}
                 req_cmd += "&add." + tmp_path;
                 // 設定 device.vap.{i}.station.{j}.mac_addr
-                req_cmd += "&set.s." + tmp_path + ".mac_addr=" +
+                req_cmd += "&set." + tmp_path + ".mac_addr=" +
                            mcm_jslib_convert_submit_str($("#mac_addr_text_" + i + "_" + j).val());
                 // 設定 device.vap.{i}.station.{j}.rule
-                req_cmd += "&set.rk." + tmp_path + ".rule=" +
+                req_cmd += "&set." + tmp_path + ".rule=" +
                            $("#rule_text_" + i + "_" + j).val();
             }
 

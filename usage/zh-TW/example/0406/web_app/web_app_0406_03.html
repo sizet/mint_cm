@@ -69,28 +69,28 @@ function module_run()
     if($("#date_check").prop("checked") == true)
     {
         // 設定 device.system.date
-        req_cmd += "&set.s.device.system.date=" +
+        req_cmd += "&set.device.system.date=" +
                    mcm_jslib_convert_submit_str($("#date_text").val());
     }
 
     if($("#ip_addr_check").prop("checked") == true)
     {
         // 設定 device.system.ip_addr
-        req_cmd += "&set.s.device.system.ip_addr=" +
+        req_cmd += "&set.device.system.ip_addr=" +
                    mcm_jslib_convert_submit_str($("#ip_addr_text").val());
     }
 
     if($("#uptime_check").prop("checked") == true)
     {
         // 設定 device.system.uptime
-        req_cmd += "&set.iull.device.system.uptime=" +
+        req_cmd += "&set.device.system.uptime=" +
                    $("#uptime_text").val();
     }
 
     if($("#loading_check").prop("checked") == true)
     {
         // 設定 device.system.loading
-        req_cmd += "&set.fd.device.system.loading=" +
+        req_cmd += "&set.device.system.loading=" +
                    $("#loading_text").val();
     }
 

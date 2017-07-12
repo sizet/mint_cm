@@ -550,7 +550,7 @@ FREE_01:
           <br><br>
           範例 :<br>
 <pre class="css_pre_code">
-req_cmd = "&set.s.device.system.ip_addr=192.168.0.1" +
+req_cmd = "&set.device.system.ip_addr=192.168.0.1" +
           "&add.device.vap.#30" +
           "&run.module1" +
           "&get.device.system" +
@@ -559,7 +559,7 @@ req_cmd = "&set.s.device.system.ip_addr=192.168.0.1" +
           "&get.device.client.*";
 
 CGI 處理流程 :
-01. 處理 [set.s.device.system.ip_addr=192.168.0.1].
+01. 處理 [set.device.system.ip_addr=192.168.0.1].
 02. 處理 [add.device.vap.#30].
 03. 處理 [run.module1], 這時資料還沒被同步, 內部模組抓的到在 [01] [02] 的資料狀態.
 04. 處理 [get.device.system], 發現在 [01] [02] [03] 有修改資料, 先做資料同步在抓資料.

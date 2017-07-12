@@ -79,6 +79,7 @@ enum MCM_REALLOC_MEMORY_OBJECT
 
 
 
+
 // session 的預設堆疊大小.
 MCM_DTYPE_USIZE_TD mcm_session_default_stack_size = 0;
 // 是否限制同時執行的 session 數目.
@@ -176,6 +177,9 @@ int mcm_req_get_list_type(
 int mcm_req_get_list_value(
     struct mcm_service_session_t *this_session);
 
+int mcm_req_set_any_type_alone(
+    struct mcm_service_session_t *this_session);
+
 
 
 
@@ -206,7 +210,8 @@ struct mcm_req_cb_t mcm_req_cb_list[] =
     {mcm_req_get_path_max_length},
     {mcm_req_get_list_name},
     {mcm_req_get_list_type},
-    {mcm_req_get_list_value}
+    {mcm_req_get_list_value},
+    {mcm_req_set_any_type_alone}
 };
 
 
@@ -2972,6 +2977,130 @@ int mcm_req_get_list_value(
 FREE_01:
     cret = mcm_build_get_list_value(this_session, fret, NULL, this_session->cache_buf,
                                     fret < MCM_RCODE_PASS ? 0 : tmp_size);
+    return fret < MCM_RCODE_PASS ? fret : cret;
+}
+
+int mcm_parse_set_any_type_alone(
+    struct mcm_service_session_t *this_session)
+{
+    void *tmp_offset;
+    MCM_DTYPE_USIZE_TD plen;
+
+
+    // 封包格式 :
+    // | T | REQ | PL | PC | DL | DC | \0 |.
+    // T   [MCM_DTYPE_USIZE_TD].
+    //     紀錄封包的總長度, 內容 = T + REQ + PL + PC + DL + DC.
+    // REQ [MCM_DTYPE_LIST_TD].
+    //     紀錄請求類型.
+    // PL  [MCM_DTYPE_USIZE_TD].
+    //     紀錄請求的路徑長度 (包括最後的 \0).
+    // PC  [binary].
+    //     紀錄請求的路徑.
+    // DL  [MCM_DTYPE_USIZE_TD].
+    //     紀錄要傳送的資料的長度.
+    // DC  [binary].
+    //     紀錄要傳送的資料.
+
+    // PL.
+    tmp_offset = this_session->pkt_offset;
+    plen = *((MCM_DTYPE_USIZE_TD *) tmp_offset);
+    tmp_offset += sizeof(MCM_DTYPE_USIZE_TD);
+    // PC.
+    this_session->req_path = (char *) tmp_offset;
+    MCM_SVDMSG("req_path[" MCM_DTYPE_USIZE_PF "][%s]", plen, this_session->req_path);
+    tmp_offset += plen;
+    // DL.
+    this_session->req_data_len = *((MCM_DTYPE_USIZE_TD *) tmp_offset);
+    tmp_offset += sizeof(MCM_DTYPE_USIZE_TD);
+    // DC.
+    this_session->req_data_con = this_session->req_data_len > 0 ? tmp_offset : NULL;
+    MCM_SVDMSG("req_config_info[" MCM_DTYPE_USIZE_PF "][%p]",
+               this_session->req_data_len, this_session->req_data_con);
+
+    return MCM_RCODE_PASS;
+}
+
+int mcm_build_set_any_type_alone(
+    struct mcm_service_session_t *this_session,
+    MCM_DTYPE_LIST_TD rep_code,
+    char *rep_msg)
+{
+    int fret;
+    MCM_DTYPE_USIZE_TD mlen;
+
+
+    mlen = (rep_msg != NULL ? strlen(rep_msg) : 0) + 1;
+    this_session->pkt_len = sizeof(MCM_DTYPE_USIZE_TD) +
+                            sizeof(MCM_DTYPE_LIST_TD) +
+                            sizeof(MCM_DTYPE_USIZE_TD) + mlen;
+
+    if(this_session->pkt_len > this_session->pkt_size)
+    {
+        fret = mcm_realloc_buf_service(this_session, MCM_RMEMORY_PACKET, this_session->pkt_len);
+        if(fret < MCM_RCODE_PASS)
+        {
+            MCM_EMSG("call mcm_realloc_buf_service() fail");
+            mcm_build_fail_rep(this_session, MCM_RCODE_SERVICE_ALLOC_FAIL, "");
+            return fret;
+        }
+    }
+
+    // 封包格式 :
+    // | T | REP | ML | MC |.
+    // T   [MCM_DTYPE_USIZE_TD].
+    //     紀錄封包的總長度, 內容 = T + REP + ML + MC.
+    // REP [MCM_DTYPE_LIST_TD].
+    //     紀錄回應的類型.
+    // ML  [MCM_DTYPE_USIZE_TD].
+    //     紀錄回應的訊息的長度 (包含最後的 \0).
+    // MC  [binary].
+    //     紀錄回應的訊息.
+
+    // T + REP + ML + MC.
+    mcm_build_base_rep(this_session, rep_code, rep_msg, mlen);
+
+    return MCM_RCODE_PASS;
+}
+
+int mcm_req_set_any_type_alone(
+    struct mcm_service_session_t *this_session)
+{
+    int fret, cret;
+    MCM_DTYPE_LIST_TD path_limit;
+    struct mcm_config_model_group_t *self_model_group;
+    struct mcm_config_model_member_t *self_model_member;
+    struct mcm_config_store_t *self_store;
+    void *tmp_con;
+
+
+    MCM_SVDMSG("=> %s", __FUNCTION__);
+
+    mcm_parse_set_any_type_alone(this_session);
+
+    path_limit = this_session->call_from == MCM_CFROM_WEB ? MCM_PLIMIT_KEY : MCM_PLIMIT_BOTH;
+
+    fret = mcm_config_find_alone_use_full(this_session, this_session->req_path, path_limit,
+                                          &self_model_group, &self_model_member, &self_store);
+    if(fret < MCM_RCODE_PASS)
+    {
+        MCM_EMSG("call mcm_config_find_alone_use_full() fail");
+        goto FREE_01;
+    }
+
+    tmp_con = this_session->req_data_con != NULL ? this_session->req_data_con : "";
+
+    fret = mcm_config_set_any_type_alone_by_info(this_session, self_model_group, self_model_member,
+                                                 self_store, MCM_DACCESS_NEW, tmp_con,
+                                                 this_session->req_data_len);
+    if(fret < MCM_RCODE_PASS)
+    {
+        MCM_EMSG("call mcm_config_set_any_type_alone_by_info() fail");
+        goto FREE_01;
+    }
+
+FREE_01:
+    cret = mcm_build_set_any_type_alone(this_session, fret, NULL);
     return fret < MCM_RCODE_PASS ? fret : cret;
 }
 

@@ -362,6 +362,15 @@ int mcm_config_get_list_value_data(
     struct mcm_config_store_t *this_store,
     void *data_buf);
 
+int mcm_config_set_any_type_alone_by_info(
+    struct mcm_service_session_t *this_session,
+    struct mcm_config_model_group_t *this_model_group,
+    struct mcm_config_model_member_t *this_model_member,
+    struct mcm_config_store_t *this_store,
+    MCM_DTYPE_FLAG_TD data_access,
+    char *data_con,
+    MCM_DTYPE_USIZE_TD data_len);
+
 
 
 

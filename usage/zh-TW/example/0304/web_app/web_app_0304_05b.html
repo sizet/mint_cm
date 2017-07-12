@@ -116,9 +116,9 @@ function config_station_set_01(
     tmp_part = vap_index + "_" + station_index;
 
     // 設定 device.vap.{vap_key}.station.{station_key}
-    req_cmd += "&set.s." + tmp_path + ".mac_addr=" +
+    req_cmd += "&set." + tmp_path + ".mac_addr=" +
                mcm_jslib_convert_submit_str($("#mac_addr_text_" + tmp_part).val());
-    req_cmd += "&set.rk." + tmp_path + ".rule=" +
+    req_cmd += "&set." + tmp_path + ".rule=" +
                $("#rule_text_" + tmp_part).val();
 
     // 送出修改資料請求.
@@ -157,9 +157,9 @@ function config_station_set_02()
             tmp_part = i + "_" + j;
 
             // 設定 device.vap.{i}.station.{j}
-            req_cmd += "&set.s." + tmp_path + ".mac_addr=" +
+            req_cmd += "&set." + tmp_path + ".mac_addr=" +
                        mcm_jslib_convert_submit_str($("#mac_addr_text_" + tmp_part).val());
-            req_cmd += "&set.rk." + tmp_path + ".rule=" +
+            req_cmd += "&set." + tmp_path + ".rule=" +
                        $("#rule_text_" + tmp_part).val();
         }
 

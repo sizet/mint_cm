@@ -63,19 +63,19 @@ function config_set()
 
 
     // 設定 device
-    req_cmd += "&set.s.device.descript=" +
+    req_cmd += "&set.device.descript=" +
                mcm_jslib_convert_submit_str($("#descript_text").val());
-    req_cmd += "&set.b.device.serial_number=" +
+    req_cmd += "&set.device.serial_number=" +
                mcm_jslib_convert_submit_str($("#serial_number_text").val());
 
     // 設定 device.system
-    req_cmd += "&set.s.device.system.date=" +
+    req_cmd += "&set.device.system.date=" +
                mcm_jslib_convert_submit_str($("#date_text").val());
-    req_cmd += "&set.s.device.system.ip_addr=" +
+    req_cmd += "&set.device.system.ip_addr=" +
                mcm_jslib_convert_submit_str($("#ip_addr_text").val());
-    req_cmd += "&set.iull.device.system.uptime=" +
+    req_cmd += "&set.device.system.uptime=" +
                mcm_jslib_convert_submit_str($("#uptime_text").val());
-    req_cmd += "&set.fd.device.system.loading=" +
+    req_cmd += "&set.device.system.loading=" +
                mcm_jslib_convert_submit_str($("#loading_text").val());
 
     // 送出修改資料請求.

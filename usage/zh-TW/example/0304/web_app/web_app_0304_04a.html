@@ -85,9 +85,9 @@ function config_vap_add()
     // 增加 device.vap.{vap_key}
     req_cmd += "&add." + tmp_path;
     // 設定 device.vap.{vap_key}
-    req_cmd += "&set.s." + tmp_path + ".ssid=" +
+    req_cmd += "&set." + tmp_path + ".ssid=" +
                mcm_jslib_convert_submit_str($("#ssid_text").val());
-    req_cmd += "&set.iui." + tmp_path + ".channel=" +
+    req_cmd += "&set." + tmp_path + ".channel=" +
                $("#channel_text").val();
 
 
@@ -95,9 +95,9 @@ function config_vap_add()
     tmp_path = "device.vap.#" + $("#ekey_text").val() + ".extra";
 
     // 設定 device.vap.{vap_key}.extra
-    req_cmd += "&set.isc." + tmp_path + ".hidden=" +
+    req_cmd += "&set." + tmp_path + ".hidden=" +
                $("#hidden_text").val();
-    req_cmd += "&set.iss." + tmp_path + ".tx_power=" +
+    req_cmd += "&set." + tmp_path + ".tx_power=" +
                $("#tx_power_text").val();
 
     // 送出修改資料請求.

@@ -25,7 +25,7 @@ function do_test()
     // 執行多個內部模組, 只會得到最後一個被執行的內部模組的訊息,
     // mcm_module_submit_multiple_test_01() 輸出的訊息會被下一個內部模組覆蓋,
     // 只會輸出 mcm_module_submit_multiple_test_02() 的訊息.
-    req_cmd = "&set.iull.device.system.uptime=123456789" +
+    req_cmd = "&set.device.system.uptime=123456789" +
               "&run.mcm_module_submit_multiple_test_01" +
               "&run.mcm_module_submit_multiple_test_02";
 

@@ -2980,22 +2980,30 @@ int mcm_load_store_check_integer(
 
 
 #define MCM_CHECK_INT_VALUE(limit_api, limit_min, limit_max, type_def, type_fmt, tmp_value) \
-    do                                                                                \
-    {                                                                                 \
-        limit_api(read_con, tmp_tail, tmp_error, tmp_value);                          \
-        if(tmp_error != 0)                                                            \
-        {                                                                             \
-            MCM_EMSG(MCM_SPROFILE_ERROR_PREFIX_MSG                                    \
-                     "invalid value [integer], must be integer "                      \
-                     type_fmt "~" type_fmt " [%s]",                                   \
-                     MCM_SSOURCE(file_source), file_line, "INVALID_VALUE-INTEGER_02", \
-                     limit_min, limit_max, this_model_member->member_name);           \
-            return MCM_RCODE_CONFIG_INTERNAL_ERROR;                                   \
-        }                                                                             \
-        *((type_def *) value_buf) = tmp_value;                                        \
-        MCM_CFDMSG("[%s][" type_fmt "]",                                              \
-                   this_model_member->member_name, *((type_def *) value_buf));        \
-    }                                                                                 \
+    do                                                                                    \
+    {                                                                                     \
+        limit_api(read_con, tmp_tail, tmp_error, tmp_value);                              \
+        if(tmp_error != 0)                                                                \
+        {                                                                                 \
+            if(file_line > 0)                                                             \
+            {                                                                             \
+                MCM_EMSG(MCM_SPROFILE_ERROR_PREFIX_MSG                                    \
+                         "invalid value [integer], must be integer "                      \
+                         type_fmt "~" type_fmt " [%s]",                                   \
+                         MCM_SSOURCE(file_source), file_line, "INVALID_VALUE-INTEGER_02", \
+                         limit_min, limit_max, this_model_member->member_name);           \
+            }                                                                             \
+            else                                                                          \
+            {                                                                             \
+                MCM_EMSG("invalid value [integer], must be " type_fmt "~" type_fmt,       \
+                         limit_min, limit_max);                                           \
+            }                                                                             \
+            return MCM_RCODE_CONFIG_INTERNAL_ERROR;                                       \
+        }                                                                                 \
+        *((type_def *) value_buf) = tmp_value;                                            \
+        MCM_CFDMSG("[%s][" type_fmt "]",                                                  \
+                   this_model_member->member_name, *((type_def *) value_buf));            \
+    }                                                                                     \
     while(0)
 
 
@@ -3003,10 +3011,17 @@ int mcm_load_store_check_integer(
 
     if(read_len == 0)
     {
-        MCM_EMSG(MCM_SPROFILE_ERROR_PREFIX_MSG
-                 "invalid value [integer], empty value [%s]",
-                 MCM_SSOURCE(file_source), file_line, "INVALID_VALUE-INTEGER_01",
-                 this_model_member->member_name);
+        if(file_line > 0)
+        {
+            MCM_EMSG(MCM_SPROFILE_ERROR_PREFIX_MSG
+                     "invalid value [integer], empty value [%s]",
+                     MCM_SSOURCE(file_source), file_line, "INVALID_VALUE-INTEGER_01",
+                     this_model_member->member_name);
+        }
+        else
+        {
+            MCM_EMSG("invalid value [integer], empty value");
+        }
         return MCM_RCODE_CONFIG_INTERNAL_ERROR;
     }
 
@@ -3115,22 +3130,30 @@ int mcm_load_store_check_float(
 
 
 #define MCM_CHECK_FLO_VALUE(limit_api, limit_min, limit_max, type_def, type_fmt, tmp_value) \
-    do                                                                              \
-    {                                                                               \
-        limit_api(read_con, tmp_tail, tmp_error, tmp_value);                        \
-        if(tmp_error != 0)                                                          \
-        {                                                                           \
-            MCM_EMSG(MCM_SPROFILE_ERROR_PREFIX_MSG                                  \
-                     "invalid value [float], must be float "                        \
-                     type_fmt "~" type_fmt " [%s]",                                 \
-                     MCM_SSOURCE(file_source), file_line, "INVALID_VALUE-FLOAT_02", \
-                     limit_min, limit_max, this_model_member->member_name);         \
-            return MCM_RCODE_CONFIG_INTERNAL_ERROR;                                 \
-        }                                                                           \
-        *((type_def *) value_buf) = tmp_value;                                      \
-        MCM_CFDMSG("[%s][" type_fmt "]",                                            \
-                   this_model_member->member_name, *((type_def *) value_buf));      \
-    }                                                                               \
+    do                                                                                  \
+    {                                                                                   \
+        limit_api(read_con, tmp_tail, tmp_error, tmp_value);                            \
+        if(tmp_error != 0)                                                              \
+        {                                                                               \
+            if(file_line > 0)                                                           \
+            {                                                                           \
+                MCM_EMSG(MCM_SPROFILE_ERROR_PREFIX_MSG                                  \
+                         "invalid value [float], must be float "                        \
+                         type_fmt "~" type_fmt " [%s]",                                 \
+                         MCM_SSOURCE(file_source), file_line, "INVALID_VALUE-FLOAT_02", \
+                         limit_min, limit_max, this_model_member->member_name);         \
+            }                                                                           \
+            else                                                                        \
+            {                                                                           \
+                MCM_EMSG("invalid value [float], must be " type_fmt "~" type_fmt,       \
+                         limit_min, limit_max);                                         \
+            }                                                                           \
+            return MCM_RCODE_CONFIG_INTERNAL_ERROR;                                     \
+        }                                                                               \
+        *((type_def *) value_buf) = tmp_value;                                          \
+        MCM_CFDMSG("[%s][" type_fmt "]",                                                \
+                   this_model_member->member_name, *((type_def *) value_buf));          \
+    }                                                                                   \
     while(0)
 
 
@@ -3138,10 +3161,17 @@ int mcm_load_store_check_float(
 
     if(read_len == 0)
     {
-        MCM_EMSG(MCM_SPROFILE_ERROR_PREFIX_MSG
-                 "invalid value [float], empty value [%s]",
-                 MCM_SSOURCE(file_source), file_line, "INVALID_VALUE-FLOAT_01",
-                 this_model_member->member_name);
+        if(file_line > 0)
+        {
+            MCM_EMSG(MCM_SPROFILE_ERROR_PREFIX_MSG
+                     "invalid value [float], empty value [%s]",
+                     MCM_SSOURCE(file_source), file_line, "INVALID_VALUE-FLOAT_01",
+                     this_model_member->member_name);
+        }
+        else
+        {
+            MCM_EMSG("invalid value [float], empty value");
+        }
         return MCM_RCODE_CONFIG_INTERNAL_ERROR;
     }
 
@@ -3220,14 +3250,25 @@ int mcm_load_store_check_string(
                (MCM_CSTR_MAX_PRINTABLE_KEY < read_con[didx1]) ||
                (read_con[didx1] == MCM_CSTR_RESERVE_KEY1))
             {
-                MCM_EMSG(MCM_SPROFILE_ERROR_PREFIX_MSG
-                         "invalid value [string], "
-                         "special character (exclude 0x%X~0x%X, '%c', '%c') "
-                         "must use %%XX (XX = character's hex value (01~FF)) [%s]",
-                         MCM_SSOURCE(file_source), file_line, "INVALID_VALUE-STRING_01",
-                         MCM_CSTR_MIN_PRINTABLE_KEY, MCM_CSTR_MAX_PRINTABLE_KEY,
-                         MCM_CSTR_RESERVE_KEY1, MCM_CSTR_RESERVE_KEY2,
-                         this_model_member->member_name);
+                if(file_line > 0)
+                {
+                    MCM_EMSG(MCM_SPROFILE_ERROR_PREFIX_MSG
+                             "invalid value [string], "
+                             "special character (exclude 0x%X~0x%X, '%c', '%c') "
+                             "must use %%XX (XX = character's hex value (01~FF)) [%s]",
+                             MCM_SSOURCE(file_source), file_line, "INVALID_VALUE-STRING_01",
+                             MCM_CSTR_MIN_PRINTABLE_KEY, MCM_CSTR_MAX_PRINTABLE_KEY,
+                             MCM_CSTR_RESERVE_KEY1, MCM_CSTR_RESERVE_KEY2,
+                             this_model_member->member_name);
+                }
+                else
+                {
+                    MCM_EMSG("invalid value [string], "
+                             "special character (exclude 0x%X~0x%X, '%c', '%c') "
+                             "must use %%XX (XX = character's hex value (01~FF))",
+                             MCM_CSTR_MIN_PRINTABLE_KEY, MCM_CSTR_MAX_PRINTABLE_KEY,
+                             MCM_CSTR_RESERVE_KEY1, MCM_CSTR_RESERVE_KEY2);
+                }
                 return MCM_RCODE_CONFIG_INTERNAL_ERROR;
             }
             didx1++;
@@ -3238,19 +3279,33 @@ int mcm_load_store_check_string(
             for(didx2 = didx1 + 1; didx2 < (didx1 + 3); didx2++)
             {
                 MCM_CHECK_HEX_RANGE(read_con[didx2]);
-                MCM_EMSG(MCM_SPROFILE_ERROR_PREFIX_MSG
-                         "invalid value [string], %%XX must be hex (01~FF) [%s]",
-                         MCM_SSOURCE(file_source), file_line, "INVALID_VALUE-STRING_02",
-                         this_model_member->member_name);
+                if(file_line > 0)
+                {
+                    MCM_EMSG(MCM_SPROFILE_ERROR_PREFIX_MSG
+                             "invalid value [string], %%XX must be hex (01~FF) [%s]",
+                             MCM_SSOURCE(file_source), file_line, "INVALID_VALUE-STRING_02",
+                             this_model_member->member_name);
+                }
+                else
+                {
+                    MCM_EMSG("invalid value [string], %%XX must be hex (01~FF)");
+                }
                 return MCM_RCODE_CONFIG_INTERNAL_ERROR;
             }
             mcm_hex_to_char(read_con + didx1 + 1, &tmp_hex);
             if(tmp_hex == 0)
             {
-                MCM_EMSG(MCM_SPROFILE_ERROR_PREFIX_MSG
-                         "invalid value [string], %%XX must be large 0 (01~FF) [%s]",
-                         MCM_SSOURCE(file_source), file_line, "INVALID_VALUE-STRING_03",
-                         this_model_member->member_name);
+                if(file_line > 0)
+                {
+                    MCM_EMSG(MCM_SPROFILE_ERROR_PREFIX_MSG
+                             "invalid value [string], %%XX must be large 0 (01~FF) [%s]",
+                             MCM_SSOURCE(file_source), file_line, "INVALID_VALUE-STRING_03",
+                             this_model_member->member_name);
+                }
+                else
+                {
+                    MCM_EMSG("invalid value [string], %%XX must be large 0 (01~FF)");
+                }
                 return MCM_RCODE_CONFIG_INTERNAL_ERROR;
             }
             didx1 += 3;
@@ -3276,10 +3331,17 @@ int mcm_load_store_check_string(
                         break;
                 if(midx == 7)
                 {
-                    MCM_EMSG(MCM_SPROFILE_ERROR_PREFIX_MSG
-                             "invalid value [string], invalid UTF-8 encode [%s]",
-                             MCM_SSOURCE(file_source), file_line, "INVALID_VALUE-STRING_04",
-                             this_model_member->member_name);
+                    if(file_line > 0)
+                    {
+                        MCM_EMSG(MCM_SPROFILE_ERROR_PREFIX_MSG
+                                 "invalid value [string], invalid UTF-8 encode [%s]",
+                                 MCM_SSOURCE(file_source), file_line, "INVALID_VALUE-STRING_04",
+                                 this_model_member->member_name);
+                    }
+                    else
+                    {
+                        MCM_EMSG("invalid value [string], invalid UTF-8 encode");
+                    }
                     return MCM_RCODE_CONFIG_INTERNAL_ERROR;
                 }
 
@@ -3290,10 +3352,17 @@ int mcm_load_store_check_string(
                     mcm_hex_to_char(tmp_loc + 1, &tmp_hex);
                     if((tmp_hex & value_mask[1]) != check_mask[1])
                     {
-                        MCM_EMSG(MCM_SPROFILE_ERROR_PREFIX_MSG
-                                 "invalid value [string], invalid UTF-8 encode [%s]",
-                                 MCM_SSOURCE(file_source), file_line, "INVALID_VALUE-STRING_05",
-                                 this_model_member->member_name);
+                        if(file_line > 0)
+                        {
+                            MCM_EMSG(MCM_SPROFILE_ERROR_PREFIX_MSG
+                                     "invalid value [string], invalid UTF-8 encode [%s]",
+                                     MCM_SSOURCE(file_source), file_line,
+                                     "INVALID_VALUE-STRING_05", this_model_member->member_name);
+                        }
+                        else
+                        {
+                            MCM_EMSG("invalid value [string], invalid UTF-8 encode");
+                        }
                         return MCM_RCODE_CONFIG_INTERNAL_ERROR;
                     }
                 }
@@ -3304,11 +3373,20 @@ int mcm_load_store_check_string(
 
     if(dlen >= this_model_member->member_size)
     {
-        MCM_EMSG(MCM_SPROFILE_ERROR_PREFIX_MSG
-                 "invalid value [string], string length over buffer size "
-                 "(" MCM_DTYPE_USIZE_PF "/" MCM_DTYPE_USIZE_PF ") [%s]",
-                 MCM_SSOURCE(file_source), file_line, "INVALID_VALUE-STRING_06", dlen,
-                 this_model_member->member_size, this_model_member->member_name);
+        if(file_line > 0)
+        {
+            MCM_EMSG(MCM_SPROFILE_ERROR_PREFIX_MSG
+                     "invalid value [string], string length over buffer size "
+                     "(" MCM_DTYPE_USIZE_PF "/" MCM_DTYPE_USIZE_PF ") [%s]",
+                     MCM_SSOURCE(file_source), file_line, "INVALID_VALUE-STRING_06", dlen,
+                     this_model_member->member_size, this_model_member->member_name);
+        }
+        else
+        {
+            MCM_EMSG("invalid value [string], string length over buffer size "
+                     "(" MCM_DTYPE_USIZE_PF "/" MCM_DTYPE_USIZE_PF ")",
+                     dlen, this_model_member->member_size);
+        }
         return MCM_RCODE_CONFIG_INTERNAL_ERROR;
     }
 
@@ -3376,10 +3454,17 @@ int mcm_load_store_check_bytes(
     for(didx1 = 0; didx1 < read_len; didx1++)
     {
         MCM_CHECK_HEX_RANGE(read_con[didx1]);
-        MCM_EMSG(MCM_SPROFILE_ERROR_PREFIX_MSG
-                 "invalid value [bytes], %%XX must be hex (00~FF) [%s]",
-                 MCM_SSOURCE(file_source), file_line, "INVALID_VALUE-BYTES_01",
-                 this_model_member->member_name);
+        if(file_line > 0)
+        {
+            MCM_EMSG(MCM_SPROFILE_ERROR_PREFIX_MSG
+                     "invalid value [bytes], %%XX must be hex (00~FF) [%s]",
+                     MCM_SSOURCE(file_source), file_line, "INVALID_VALUE-BYTES_01",
+                     this_model_member->member_name);
+        }
+        else
+        {
+            MCM_EMSG("invalid value [bytes], %%XX must be hex (00~FF)");
+        }
         return MCM_RCODE_CONFIG_INTERNAL_ERROR;
     }
 
@@ -3387,21 +3472,37 @@ int mcm_load_store_check_bytes(
     {
         if((didx1 % 2) != 0)
         {
-            MCM_EMSG(MCM_SPROFILE_ERROR_PREFIX_MSG
-                     "invalid value [bytes], %%XX must be hex (00~FF) [%s]",
-                     MCM_SSOURCE(file_source), file_line, "INVALID_VALUE-BYTES_02",
-                     this_model_member->member_name);
+            if(file_line > 0)
+            {
+                MCM_EMSG(MCM_SPROFILE_ERROR_PREFIX_MSG
+                         "invalid value [bytes], %%XX must be hex (00~FF) [%s]",
+                         MCM_SSOURCE(file_source), file_line, "INVALID_VALUE-BYTES_02",
+                         this_model_member->member_name);
+            }
+            else
+            {
+                MCM_EMSG("invalid value [bytes], %%XX must be hex (00~FF)");
+            }
             return MCM_RCODE_CONFIG_INTERNAL_ERROR;
         }
 
         didx1 /= 2;
         if(didx1 > this_model_member->member_size)
         {
-            MCM_EMSG(MCM_SPROFILE_ERROR_PREFIX_MSG
-                     "invalid value [bytes], bytes length over buffer size "
-                     "(" MCM_DTYPE_USIZE_PF "/" MCM_DTYPE_USIZE_PF ") [%s]",
-                     MCM_SSOURCE(file_source), file_line, "INVALID_VALUE-BYTES_03", didx1,
-                     this_model_member->member_size, this_model_member->member_name);
+            if(file_line > 0)
+            {
+                MCM_EMSG(MCM_SPROFILE_ERROR_PREFIX_MSG
+                         "invalid value [bytes], bytes length over buffer size "
+                         "(" MCM_DTYPE_USIZE_PF "/" MCM_DTYPE_USIZE_PF ") [%s]",
+                         MCM_SSOURCE(file_source), file_line, "INVALID_VALUE-BYTES_03", didx1,
+                         this_model_member->member_size, this_model_member->member_name);
+            }
+            else
+            {
+                MCM_EMSG("invalid value [bytes], bytes length over buffer size "
+                         "(" MCM_DTYPE_USIZE_PF "/" MCM_DTYPE_USIZE_PF ")",
+                         didx1, this_model_member->member_size);
+            }
             return MCM_RCODE_CONFIG_INTERNAL_ERROR;
         }
 
@@ -9001,3 +9102,181 @@ int mcm_config_get_list_value_data(
 
     return MCM_RCODE_PASS;
 }
+
+// 設定 member 資料數值 (資料是沒轉換的字串格式資料) (進階模式).
+// this_session (I) :
+//   session 資料.
+// this_model_group (I) :
+//   目標 model group.
+// this_model_member (I) :
+//   目標 model member.
+// this_store (I) :
+//   目標 store.
+// data_access (I) :
+//   要將數值寫入何處.
+//     MCM_DACCESS_SYS : 到系統區.
+//     MCM_DACCESS_NEW : 到暫存區.
+// data_con (I) :
+//   要寫入的資料字串.
+// data_len (I) :
+//   資料字串的長度.
+// return :
+//   == MCM_RCODE_PASS : 成功.
+//   <  MCM_RCODE_PASS : 錯誤.
+int mcm_config_set_any_type_alone_by_info(
+    struct mcm_service_session_t *this_session,
+    struct mcm_config_model_group_t *this_model_group,
+    struct mcm_config_model_member_t *this_model_member,
+    struct mcm_config_store_t *this_store,
+    MCM_DTYPE_FLAG_TD data_access,
+    char *data_con,
+    MCM_DTYPE_USIZE_TD data_len)
+{
+    int fret;
+    void *data_loc;
+    MCM_DTYPE_DS_TD deny_status;
+#if MCM_CFDMODE
+    MCM_DTYPE_EK_TD dbg_key = 0;
+    MCM_DTYPE_USIZE_TD dbg_tidx, dbg_tlen;
+    char dbg_buf[MCM_DBG_BUFFER_SIZE];
+#endif
+
+
+    MCM_CFDMSG("=> %s", __FUNCTION__);
+
+#if MCM_CFDMODE
+    MCM_DBG_SHOW_ALONE_PATH(this_model_group, this_model_member, this_store, data_loc, dbg_key);
+#endif
+
+    if(this_session->session_permission != MCM_SPERMISSION_RW)
+    {
+        MCM_EMSG("session permission is read only");
+        return MCM_RCODE_CONFIG_PERMISSION_DENY;
+    }
+
+    if(this_model_member->member_type == MCM_DTYPE_EK_INDEX)
+    {
+        MCM_EMSG("{%s} is system reserve", this_model_member->member_name);
+        return MCM_RCODE_CONFIG_ACCESS_DENY;
+    }
+
+    // SET-SYS NONE 允許.
+    //         SET  允許.
+    //         ADD  禁止.
+    //         DEL  允許.
+    // SET-NEW NONE 允許.
+    //         SET  允許.
+    //         ADD  允許.
+    //         DEL  允許.
+
+    MCM_CFDMSG("access[%s]", data_access == MCM_DACCESS_SYS ? "SYS" : "NEW");
+
+    if(data_access == MCM_DACCESS_SYS)
+    {
+        deny_status = MCM_DSCHANGE_ADD;
+        fret = mcm_check_access(this_model_group, this_store, deny_status, 0, 0);
+        if(fret < MCM_RCODE_PASS)
+        {
+            MCM_EMSG("invalid access [SET (SYS) -> ADD]");
+            return fret;
+        }
+    }
+    else
+    {
+    }
+
+    if(data_access == MCM_DACCESS_SYS)
+    {
+        data_loc = this_store->data_value_sys;
+    }
+    else
+    {
+        fret = mcm_adjust_data(this_model_group, this_model_member, this_store,
+                               MCM_DMODIFY_SET_NEW, MCM_MOBJECT_ALONE);
+        if(fret < MCM_RCODE_PASS)
+        {
+            MCM_EMSG("call mcm_adjust_data() fail");
+            return fret;
+        }
+
+        data_loc = this_store->data_value_new;
+    }
+
+    data_loc += this_model_member->offset_in_value;
+
+    switch(this_model_member->member_type)
+    {
+        case MCM_DTYPE_EK_INDEX:
+#if MCM_SUPPORT_DTYPE_RK
+        case MCM_DTYPE_RK_INDEX:
+#endif
+#if MCM_SUPPORT_DTYPE_ISC
+        case MCM_DTYPE_ISC_INDEX:
+#endif
+#if MCM_SUPPORT_DTYPE_IUC
+        case MCM_DTYPE_IUC_INDEX:
+#endif
+#if MCM_SUPPORT_DTYPE_ISS
+        case MCM_DTYPE_ISS_INDEX:
+#endif
+#if MCM_SUPPORT_DTYPE_IUS
+        case MCM_DTYPE_IUS_INDEX:
+#endif
+#if MCM_SUPPORT_DTYPE_ISI
+        case MCM_DTYPE_ISI_INDEX:
+#endif
+#if MCM_SUPPORT_DTYPE_IUI
+        case MCM_DTYPE_IUI_INDEX:
+#endif
+#if MCM_SUPPORT_DTYPE_ISLL
+        case MCM_DTYPE_ISLL_INDEX:
+#endif
+#if MCM_SUPPORT_DTYPE_IULL
+        case MCM_DTYPE_IULL_INDEX:
+#endif
+            fret = mcm_load_store_check_integer(this_model_member, data_con, data_len,
+                                                0, 0, data_loc);
+            if(fret < MCM_RCODE_PASS)
+                return fret;
+            break;
+#if MCM_SUPPORT_DTYPE_FF
+        case MCM_DTYPE_FF_INDEX:
+#endif
+#if MCM_SUPPORT_DTYPE_FD
+        case MCM_DTYPE_FD_INDEX:
+#endif
+#if MCM_SUPPORT_DTYPE_FLD
+        case MCM_DTYPE_FLD_INDEX:
+#endif
+#if MCM_SUPPORT_DTYPE_FF || MCM_SUPPORT_DTYPE_FD || MCM_SUPPORT_DTYPE_FLD
+            fret = mcm_load_store_check_float(this_model_member, data_con, data_len,
+                                              0, 0, data_loc);
+            if(fret < MCM_RCODE_PASS)
+                return fret;
+            break;
+#endif
+#if MCM_SUPPORT_DTYPE_S
+        case MCM_DTYPE_S_INDEX:
+            fret = mcm_load_store_check_string(this_model_member, data_con, data_len,
+                                               0, 0, data_loc);
+            if(fret < MCM_RCODE_PASS)
+                return fret;
+            break;
+#endif
+#if MCM_SUPPORT_DTYPE_B
+        case MCM_DTYPE_B_INDEX:
+            fret = mcm_load_store_check_bytes(this_model_member, data_con, data_len,
+                                              0, 0, data_loc);
+            if(fret < MCM_RCODE_PASS)
+                return fret;
+            break;
+#endif
+    }
+
+    if(data_access == MCM_DACCESS_SYS)
+        if(this_model_group->group_save != 0)
+            mcm_do_save = 1;
+
+    return MCM_RCODE_PASS;
+}
+
