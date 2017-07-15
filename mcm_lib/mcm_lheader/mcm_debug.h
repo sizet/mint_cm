@@ -90,6 +90,15 @@
 // cgi debug - upload custom
 #define MCM_CUCDMODE 0
 
+// command debug
+#define MCM_CMDMODE 0
+#if MCM_CMDMODE
+    #define MCM_CMDMSG(msg_fmt, msg_args...) \
+        printf("%s(%04u): " msg_fmt "\n", __FILE__, __LINE__, ##msg_args)
+#else
+    #define MCM_CMDMSG(msg_fmt, msg_args...)
+#endif
+
 // module error
 #define MCM_MEMODE 1
 #if MCM_MEMODE

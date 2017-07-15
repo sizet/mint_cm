@@ -31,6 +31,9 @@
 **`mcm_jslib_api.js`**  
 提供介面給網頁程式做資料的存取和檔案的上傳, 資料存取部分使用 AJAX + JSON 機制, 檔案上傳部分使用 form 機制.
 
+**`mcm command`**  
+指令程式, 在 Shell Script 中可以使用此指令程式做資料存取.
+
 `Web program`  
 需要資料存取服務的網頁端程式. 
 

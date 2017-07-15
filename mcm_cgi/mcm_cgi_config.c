@@ -935,7 +935,7 @@ int mcm_find_push_command_config_path(
 
     tmp_raw = command_list_info->raw_content;
 
-    // 找到 ".", 分離路徑.
+    // 找到 "=", 分離路徑.
     for(sidx = 0; tmp_raw[sidx] != '\0'; sidx++)
         if(tmp_raw[sidx] == MCM_VALUE_SPLIT_KEY)
             break;
@@ -958,9 +958,9 @@ int mcm_find_push_command_config_path(
 
     // 紀錄路徑.
     command_list_info->push_config_path = tmp_raw;
-    // 如果指令結尾不是 "\0", 後面還有資料內容部分, 將指令的內容往後移動, 跳過路徑部分.
-    if(tmp_raw[sidx] != '\0')
-        command_list_info->raw_content += sidx + 1;
+
+    // 將指令的內容往後移動, 跳過路徑部分.
+    command_list_info->raw_content += sidx + (tmp_raw[sidx] == '\0' ? 0 : 1);
 
     tmp_raw[sidx] = '\0';
 

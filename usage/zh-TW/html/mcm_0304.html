@@ -268,7 +268,7 @@ Some rights reserved. See README.
     <table class="css_table_list1">
       <tr>
         <td class="css_td_list1_l">01.&nbsp;</td>
-        <td class="css_td_list1_r">讀出 group 的最大筆數限制. (max-count)</td>
+        <td class="css_td_list1_r">取得資料筆數上限, 也就是資料模型中的 $(max) 值.</td>
       </tr>
       <tr>
         <td class="css_td_list1_l">02.&nbsp;</td>
@@ -408,7 +408,7 @@ Some rights reserved. See README.
       <tr>
         <td class="css_td_box">
           <font class="css_font_b2">mcm_jslib_obtain_max_count</font><br>
-          要求取得 group 的最大資料筆數限制.<br>
+          要求取得最大資料筆數限制.<br>
           <table class="css_table_list2">
             <tr>
               <td class="css_td_list2_t1">參數</td>
@@ -617,7 +617,7 @@ Some rights reserved. See README.
     <table class="css_table_box">
       <tr>
         <td class="css_td_box">
-          <font class="css_font_b2">讀出 group 的最大資料筆數限制 (max-count)</font>
+          <font class="css_font_b2">取得資料筆數上限, 也就是資料模型中的 $(max) 值</font>
           <br><br>
           格式 :<br>
           <div class="css_div_block">
@@ -1210,7 +1210,7 @@ function main_init()
     <table class="css_table_box">
       <tr>
         <td class="css_td_box">
-          <font class="css_font_b2">寫入資料 (set)</font>
+          <font class="css_font_b2">寫入資料到 member (set)</font>
           <br><br>
           格式 :<br>
           <div class="css_div_block">
@@ -1500,7 +1500,7 @@ function main_submit()
     <table class="css_table_box">
       <tr>
         <td class="css_td_box">
-          <font class="css_font_b2">增加一筆資料 (add)</font>
+          <font class="css_font_b2">增加一筆 entry (add)</font>
           <br><br>
           格式 :<br>
           <div class="css_div_block">
@@ -1719,7 +1719,7 @@ function main_submit()
     <table class="css_table_box">
       <tr>
         <td class="css_td_box">
-          <font class="css_font_b2">刪除一筆資料 (del)</font>
+          <font class="css_font_b2">刪除一筆 entry (del)</font>
           <br><br>
           格式 :<br>
           <div class="css_div_block">
@@ -1850,7 +1850,7 @@ function main_submit()
     <table class="css_table_box">
       <tr>
         <td class="css_td_box">
-          <font class="css_font_b2">刪除 group 內的所有資料 (delall)</font>
+          <font class="css_font_b2">刪除所有 entry (delall)</font>
           <br><br>
           格式 :<br>
           <div class="css_div_block">

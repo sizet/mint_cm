@@ -1,0 +1,1164 @@
+<!--
+Copyright © 2017, Che-Wei Hsu <cwxhsu@gmail.com>
+This file is part of the MintCM.
+Some rights reserved. See README.
+-->
+
+<html>
+
+<head>
+<meta http-equiv="content-type" content="text/html; charset=utf-8">
+<link rel="stylesheet" href="../css/mcm_style.css">
+</head>
+
+<body class="css_body">
+
+<div class="css_div_box_frame_full">
+  <div class="css_div_box_title">chapter 03-05</div>
+  <div class="css_div_box_content">
+  </div>
+</div>
+<br>
+
+<div class="css_div_box_frame_full">
+  <div class="css_div_box_title">資料的存取 (指令部分)</div>
+  <div class="css_div_box_content">
+    <br>
+
+    此章節說明在 Shell Script 中如何使用提供的指令程式存取資料.
+    <br><br><br>
+
+    指令程式的檔案在 <font class="css_font_b1">mint_cm/mcm_command/mcm</font>.
+    <br><br>
+
+    指令程式預設是使用靜態連結的方式使用 MintCM 函式庫, 實際使用可以改用動態連結的方式.<br>
+    <table class="css_table_list2">
+      <tr>
+        <td class="css_td_list2_t3" colspan="2">
+          <font class="css_font_g1">USE_STATIC_MCM_LIB</font><br>
+          <font class="css_font_b1">(mint_cm/mcm_command/Makefile)</font>
+        </td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l2">YES</td>
+        <td class="css_td_list2_r1">使用靜態鏈結</td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l2">NO</td>
+        <td class="css_td_list2_r1">使用動態鏈結</td>
+      </tr>
+    </table>
+    <br>
+
+  </div>
+</div>
+<br>
+
+<div class="css_div_box_frame_full">
+  <div class="css_div_box_title">指令程式參數的說明</div>
+  <div class="css_div_box_content">
+    <br>
+
+
+
+    指令程式需要的參數 :
+    <table class="css_table_list2">
+      <tr>
+        <td class="css_td_list2_l1">
+          <font class="css_font_r1">&lt;-a $(socket_path)&gt;</font><br>
+          伺服器的位址路徑. <a href="mcm_0203.html#hook_0203_server_socket_path_01">[詳細]</a>
+        </td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l1">
+          <font class="css_font_r1">&lt;-p $(session_permission)&gt;</font><br>
+          表示資料存取的模式.<br>
+          <table class="css_table_list2">
+            <tr>
+              <td class="css_td_list2_l2">ro</td>
+              <td class="css_td_list2_r1">唯讀</td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l2">rw</td>
+              <td class="css_td_list2_r1">讀寫</td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l1">
+          <font class="css_font_r1">[-s $(session_stack_size)]</font><br>
+          伺服器端負責此連線的執行緒的堆疊大小. <a href="mcm_0302.html#hook_0302_session_stack_size_01">[詳細]</a><br>
+          此參數非必須, 不輸入會使用 <font class="css_font_p1">0</font>.
+        </td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l1">
+          <font class="css_font_r1">&lt;command_list ...&gt;</font><br>
+          要處理的指令串, 每個指令用空白分隔, 會依序處理這些指令, 指令格式會在後面說明.<br>
+          &lt;command1&gt; &lt;command2&gt; ... &lt;commandN&gt;
+        </td>
+      </tr>
+    </table>
+    <br>
+
+  </div>
+</div>
+<br>
+
+<div class="css_div_box_frame_full">
+  <div class="css_div_box_title">變數格式的說明</div>
+  <div class="css_div_box_content">
+    <br>
+
+    使用的資料模型範例, 參考 <a href="mcm_0202.html#hook_0202_data_profile_01">#02-02#</a>.
+    <br><br><br>
+
+    <div class="css_div_hook" id="hook_0305_mask_path_01"></div>
+    <font class="css_font_b1">mask_path</font><br>
+    <a href="mcm_0302.html#hook_0302_mask_path_01">[詳細]</a><br>
+    用途 :<br>
+    <table class="css_table_list1">
+      <tr>
+        <td class="css_td_list1_l">01.&nbsp;</td>
+        <td class="css_td_list1_r">取得資料筆數上限, 也就是資料模型中的 $(max) 值. (maxcount)</td>
+      </tr>
+    </table>
+    <br><br>
+
+    <div class="css_div_hook" id="hook_0305_mix_path_01"></div>
+    <font class="css_font_b1">mix_path</font><br>
+    <a href="mcm_0302.html#hook_0302_mix_path_01">[詳細]</a><br>
+    用途 :<br>
+    <table class="css_table_list1">
+      <tr>
+        <td class="css_td_list1_l">01.&nbsp;</td>
+        <td class="css_td_list1_r">取得目前的資料筆數. (count)</td>
+      </tr>
+      <tr>
+        <td class="css_td_list1_l">02.&nbsp;</td>
+        <td class="css_td_list1_r">刪除資料. (delall)</td>
+      </tr>
+      <tr>
+        <td class="css_td_list1_l">03.&nbsp;</td>
+        <td class="css_td_list1_r">取得可用的 key. (usablekey)</td>
+      </tr>
+    </table>
+    <br><br>
+
+    <div class="css_div_hook" id="hook_0305_full_path_01"></div>
+    <font class="css_font_b1">full_path</font><br>
+    <a href="mcm_0302.html#hook_0302_full_path_01">[詳細]</a><br>
+    用途 :<br>
+    <table class="css_table_list1">
+      <tr>
+        <td class="css_td_list1_l">01.&nbsp;</td>
+        <td class="css_td_list1_r">讀取資料. (get)</td>
+      </tr>
+      <tr>
+        <td class="css_td_list1_l">02.&nbsp;</td>
+        <td class="css_td_list1_r">寫入資料. (set)</td>
+      </tr>
+      <tr>
+        <td class="css_td_list1_l">03.&nbsp;</td>
+        <td class="css_td_list1_r">增加資料. (add)</td>
+      </tr>
+      <tr>
+        <td class="css_td_list1_l">04.&nbsp;</td>
+        <td class="css_td_list1_r">刪除資料. (del)</td>
+      </tr>
+    </table>
+    <br>
+
+  </div>
+</div>
+<br>
+
+<div class="css_div_box_frame_full">
+  <div class="css_div_box_title">指令串的格式</div>
+  <div class="css_div_box_content">
+    <br>
+
+    指令的格式為 :<br>
+    <font class="css_font_g1">$(operate_type)[.$(path)][=$(value)]</font><br>
+    <table class="css_table_list2">
+      <tr>
+        <td class="css_td_list2_l2">$(operate_type)</td>
+        <td class="css_td_list2_r1">
+          指令的操作類型
+        </td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l2">$(path)</td>
+        <td class="css_td_list2_r1">
+          要處理的資料的路徑
+        </td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l2">$(value)</td>
+        <td class="css_td_list2_r1">
+          要處理的資料
+        </td>
+      </tr>
+    </table>
+    下面說明每種操作類型的用法.
+    <br><br>
+
+    <div class="css_div_hook" id="hook_0305_maxcount_01"></div>
+    <table class="css_table_box">
+      <tr>
+        <td class="css_td_box">
+          <font class="css_font_b2">maxcount</font><br>
+          取得資料筆數上限, 也就是資料模型中的 $(max) 值.
+          <br><br>
+          格式 :<br>
+          <div class="css_div_block">
+            <font class="css_font_g1">maxcount.$(mask_path)</font>
+          </div>
+          <br>
+          <table class="css_table_list2">
+            <tr>
+              <td class="css_td_list2_l2">$(mask_path)</td>
+              <td class="css_td_list2_r1">
+                目標的路徑 <a href="#hook_0305_mask_path_01">[詳細]</a>
+              </td>
+            </tr>
+          </table>
+          <br>
+          注意事項 :<br>
+          <table class="css_table_list1">
+            <tr>
+              <td class="css_td_list1_l">01.&nbsp;</td>
+              <td class="css_td_list1_r">
+                資料存取模式可以是 ro 或 rw.
+              </td>
+            </tr>
+          </table>
+          <br>
+          範例 :<br>
+<pre class="css_pre_code">
+# 讀出 device.system 的資料筆數上限.
+./mcm -a @mintcm -p ro -s 0 maxcount.device.system
+
+# 讀出 device.vap.* 的資料筆數上限.
+./mcm -a @mintcm -p ro -s 0 maxcount.device.vap.*
+
+# 讀出 device.vap.*.station.* 的資料筆數上限.
+./mcm -a @mintcm -p ro -s 0 maxcount.device.vap.*.station.*
+</pre>
+          範例 :<br>
+<pre class="css_pre_code">
+#!/bin/sh
+
+# 讀出 device.system 的資料筆數上限.
+path="device.system"
+max_count=`./mcm -a @mintcm -p ro -s 0 maxcount.${path}`
+echo "${path} max count = ${max_count}"
+
+# 讀出 device.vap.* 的資料筆數上限.
+path="device.vap.*"
+max_count=`./mcm -a @mintcm -p ro -s 0 maxcount.${path}`
+echo "${path} max count = ${max_count}"
+
+# 讀出 device.vap.*.station.* 的資料筆數上限.
+path="device.vap.*.station.*"
+max_count=`./mcm -a @mintcm -p ro -s 0 maxcount.${path}`
+echo "${path} max count = ${max_count}"
+</pre>
+        </td>
+      </tr>
+    </table>
+    <br>
+
+    <div class="css_div_hook" id="hook_0305_count_01"></div>
+    <table class="css_table_box">
+      <tr>
+        <td class="css_td_box">
+          <font class="css_font_b2">count</font><br>
+          取得目前的資料筆數.
+          <br><br>
+          格式 :<br>
+          <div class="css_div_block">
+            <font class="css_font_g1">count.$(mix_path)</font>
+          </div>
+          <br>
+          <table class="css_table_list2">
+            <tr>
+              <td class="css_td_list2_l2">$(mix_path)</td>
+              <td class="css_td_list2_r1">
+                目標的路徑 <a href="#hook_0305_mix_path_01">[詳細]</a><br>
+                <font class="css_font_p1">[index / key 模式]</font>
+              </td>
+            </tr>
+          </table>
+          <br>
+          注意事項 :<br>
+          <table class="css_table_list1">
+            <tr>
+              <td class="css_td_list1_l">01.&nbsp;</td>
+              <td class="css_td_list1_r">
+                資料存取模式可以是 ro 或 rw.
+              </td>
+            </tr>
+          </table>
+          <br>
+          範例 :<br>
+<pre class="css_pre_code">
+# 取得 device 目前的資料筆數.
+./mcm -a @mintcm -p ro count.device
+
+# 取得 device.limit.* 目前的資料筆數.
+./mcm -a @mintcm -p ro count.device.limit.*
+
+# 取得 device.vap.@3.station.* 目前的資料筆數.
+./mcm -a @mintcm -p ro count.device.vap.@3.station.*
+
+# 取得 device.vap.#15.station.* 目前的資料筆數.
+./mcm -a @mintcm -p ro count.device.vap.#15.station.*
+</pre>
+          範例 :<br>
+<pre class="css_pre_code">
+#!/bin/sh
+
+# 取得 device 目前的資料筆數.
+path="device"
+count=`./mcm -a @mintcm -p ro count.${path}`
+echo "${path} count = ${count}"
+
+# 取得 device.limit.* 目前的資料筆數.
+path="device.limit.*"
+count=`./mcm -a @mintcm -p ro count.${path}`
+echo "${path} count = ${count}"
+
+# 取得 device.vap.* 底下所有的 station 目前的資料筆數.
+path1="device.vap.*"
+count1=`./mcm -a @mintcm -p ro count.${path1}`
+for ((index1 = 1; index1 <= count1; index1++))
+do
+    path2="device.vap.@${index1}.station.*"
+    count2=`./mcm -a @mintcm -p ro count.${path2}`
+    echo "${path2} count = ${count2}"
+done
+</pre>
+        </td>
+      </tr>
+    </table>
+    <br>
+
+    <div class="css_div_hook" id="hook_0305_get_01"></div>
+    <table class="css_table_box">
+      <tr>
+        <td class="css_td_box">
+          <font class="css_font_b2">get</font><br>
+          讀出 member 的資料.
+          <br><br>
+          格式 :<br>
+          <div class="css_div_block">
+            <font class="css_font_g1">get.$(full_path)</font>
+          </div>
+          <br>
+          <table class="css_table_list2">
+            <tr>
+              <td class="css_td_list2_l2">$(full_path)</td>
+              <td class="css_td_list2_r1">
+                目標的路徑 <a href="#hook_0305_full_path_01">[詳細]</a><br>
+                <font class="css_font_p1">[member 格式][index / key 模式]</font>
+              </td>
+            </tr>
+          </table>
+          <br>
+          注意事項 :<br>
+          <table class="css_table_list1">
+            <tr>
+              <td class="css_td_list1_l">01.&nbsp;</td>
+              <td class="css_td_list1_r">
+                資料存取模式可以是 ro 或 rw.
+              </td>
+            </tr>
+          </table>
+          <br>
+          範例 :<br>
+<pre class="css_pre_code">
+# 讀出 device.descript 的資料.
+./mcm -a @mintcm -p ro get.device.descript
+
+# 讀出 device.vap.@1.extra.tx_power 的資料.
+./mcm -a @mintcm -p ro get.device.vap.@1.extra.tx_power
+
+# 讀出 device.vap.#15.station.#33.mac_addr 的資料.
+./mcm -a @mintcm -p ro get.device.vap.#15.station.#33.mac_addr
+</pre>
+          範例 :<br>
+<pre class="css_pre_code">
+#!/bin/sh
+
+# 讀出 device.serial_number 的資料.
+path="device.serial_number"
+value=`./mcm -a @mintcm -p ro get.${path}`
+echo "${path} = ${value}"
+
+# 讀出 device.limit.*.priority 的資料.
+path1="device.limit.*"
+count1=`./mcm -a @mintcm -p ro count.${path1}`
+for ((index1 = 1; index1 <= count1; index1++))
+do
+    path2="device.limit.@${index1}.priority"
+    value2=`./mcm -a @mintcm -p ro get.${path2}`
+    echo "${path2} = ${value2}"
+done
+
+# 讀出 device.vap.*.station.*.mac_addr 的資料 (使用 key 模式).
+path1="device.vap.*"
+count1=`./mcm -a @mintcm -p ro count.${path1}`
+for ((index1 = 1; index1 <= count1; index1++))
+do
+    path2="device.vap.@${index1}.ekey"
+    key2=`./mcm -a @mintcm -p ro get.${path2}`
+
+    path2="device.vap.#${key2}.station.*"
+    count2=`./mcm -a @mintcm -p ro count.${path2}`
+    for ((index2 = 1; index2 <= count2; index2++))
+    do
+        path3="device.vap.#${key2}.station.@${index2}.mac_addr"
+        value3=`./mcm -a @mintcm -p ro get.${path3}`
+        echo "${path3} = ${value3}"
+    done
+done
+</pre>
+        </td>
+      </tr>
+    </table>
+    <br>
+
+    <div class="css_div_hook" id="hook_0305_set_01"></div>
+    <table class="css_table_box">
+      <tr>
+        <td class="css_td_box">
+          <font class="css_font_b2">set</font><br>
+          寫入資料到 member.
+          <br><br>
+          格式 :<br>
+          <div class="css_div_block">
+            <font class="css_font_g1">set.$(full_path)=$(value)</font>
+          </div>
+          <br>
+          <table class="css_table_list2">
+            <tr>
+              <td class="css_td_list2_l2">$(full_path)</td>
+              <td class="css_td_list2_r1">
+                目標的路徑 <a href="#hook_0305_full_path_01">[詳細]</a><br>
+                <font class="css_font_p1">[member 格式][index / key 模式]</font>
+              </td>
+            </tr>
+          </table>
+          <br>
+          注意事項 :<br>
+          <table class="css_table_list1">
+            <tr>
+              <td class="css_td_list1_l">01.&nbsp;</td>
+              <td class="css_td_list1_r">
+                資料存取模式必須是 rw.
+              </td>
+            </tr>
+            <tr>
+              <td class="css_td_list1_l">02.&nbsp;</td>
+              <td class="css_td_list1_r">
+                字串類型和字節流類型的資料格式必須符合規定.
+                <a href="mcm_0201.html#hook_0201_default_format_01">[詳細]</a>
+              </td>
+            </tr>
+          </table>
+          <br>
+          範例 :<br>
+<pre class="css_pre_code">
+# 對 device.serial_number 寫入資料.
+./mcm -a @mintcm -p rw set.device.serial_number=002C315f0b99cd
+
+# 對 device.system.date 寫入資料 (空字串).
+./mcm -a @mintcm -p rw set.device.system.date=
+
+# 對 device.vap.#8.ssid 寫入資料.
+./mcm -a @mintcm -p rw set.device.vap.#8.ssid=outside%20open
+
+# 對 device.vap.@2.station.@1.rule 寫入資料.
+./mcm -a @mintcm -p rw set.device.vap.@2.station.@1.rule=953
+
+# 對 device.system.loading 和 device.limit.@1.name 和 device.vap.#23.extra.hidden 寫入資料.
+./mcm -a @mintcm -p rw set.device.system.loading=-987.12345 set.device.limit.@1.name=rule-1 set.device.vap.#23.extra.hidden=1
+</pre>
+          範例 :<br>
+<pre class="css_pre_code">
+#!/bin/sh
+
+# 對 device.serial_number 寫入資料.
+path="device.serial_number"
+value="002a1b3d1eF01500Aa"
+result=`./mcm -a @mintcm -p rw set.${path}=${value}`
+
+# 對 device.descript 和 device.system.ip_addr 和 device.system.loading 寫入資料.
+path1="device.descript"
+value1="Soho%20Router%25A"
+path2="device.system.ip_addr"
+value2=""
+path3="device.system.loading"
+value3="97.65403"
+result=`./mcm -a @mintcm -p rw set.${path1}=${value1} set.${path2}=${value2} set.${path3}=${value3}`
+
+# 對 device.vap.*.extra.tx_power 寫入資料 (使用 key 模式).
+path1="device.vap.*"
+count1=`./mcm -a @mintcm -p ro count.${path1}`
+for ((index1 = 1; index1 <= count1; index1++))
+do
+    path2="device.vap.@${index1}.ekey"
+    key2=`./mcm -a @mintcm -p ro get.${path2}`
+
+    path2="device.vap.#${key2}.extra.tx_power"
+    value2=$((${index1} * 10))
+    result=`./mcm -a @mintcm -p rw set.${path2}=${value2}`
+done
+
+# 對 device.vap.*.station.*.mac_addr 和 device.vap.*.station.*.rule 寫入資料.
+list=
+path1="device.vap.*"
+count1=`./mcm -a @mintcm -p ro count.${path1}`
+for ((index1 = 1; index1 <= count1; index1++))
+do
+    path2="device.vap.@${index1}.station.*"
+    count2=`./mcm -a @mintcm -p ro count.${path2}`
+    for ((index2 = 1; index2 <= count2; index2++))
+    do
+        path3="device.vap.@${index1}.station.@${index2}.mac_addr"
+        value3="00:12:3a:4b:55:$(((${index1} * 10) + ${index2}))"
+        list="${list} set.${path3}=${value3}"
+
+        path3="device.vap.@${index1}.station.@${index2}.rule"
+        value3=$(((${index1} * 10) + ${index2}))
+        list="${list} set.${path3}=${value3}"
+    done
+done
+if [ ! -z "${list}" ]; then
+    result=`./mcm -a @mintcm -p rw ${list}`
+fi
+</pre>
+        </td>
+      </tr>
+    </table>
+    <br>
+
+
+    <div class="css_div_hook" id="hook_0305_add_01"></div>
+    <table class="css_table_box">
+      <tr>
+        <td class="css_td_box">
+          <font class="css_font_b2">add</font><br>
+          增加一筆 entry.
+          <br><br>
+          格式 :<br>
+          <div class="css_div_block">
+            <font class="css_font_g1">add.$(full_path)</font>
+          </div>
+          <br>
+          <table class="css_table_list2">
+            <tr>
+              <td class="css_td_list2_l2">$(full_path)</td>
+              <td class="css_td_list2_r1">
+                目標的路徑 <a href="#hook_0305_full_path_01">[詳細]</a><br>
+                <font class="css_font_p1">[entry 格式][index / key 模式]</font>
+              </td>
+            </tr>
+          </table>
+          <br>
+          注意事項 :<br>
+          <table class="css_table_list1">
+            <tr>
+              <td class="css_td_list1_l">01.&nbsp;</td>
+              <td class="css_td_list1_r">
+                資料存取模式必須是 rw.
+              </td>
+            </tr>
+            <tr>
+              <td class="css_td_list1_l">02.&nbsp;</td>
+              <td class="css_td_list1_r">
+                路徑可以是 [indxe / key 模式], 但是最後一段要加入的目標必須是 [key 模式].
+              </td>
+            </tr>
+            <tr>
+              <td class="css_td_list1_l">03.&nbsp;</td>
+              <td class="css_td_list1_r">
+                增加的資料的 key 值不可和存在的資料的 key 相同, 否則會操作失敗.
+              </td>
+            </tr>
+            <tr>
+              <td class="css_td_list1_l">04.&nbsp;</td>
+              <td class="css_td_list1_r">
+                增加資料後要使用 set 替資料設值, 否則會使用資料模型中設定的初始值.
+              </td>
+            </tr>
+            <tr>
+              <td class="css_td_list1_l">05.&nbsp;</td>
+              <td class="css_td_list1_r">
+                增加多層資料時, 要逐層增加.
+              </td>
+            </tr>
+          </table>
+          <br>
+          範例 :<br>
+<pre class="css_pre_code">
+# 增加 device.vap.#51
+./mcm -a @mintcm -p rw add.device.vap.#51
+
+# 增加 add.device.limit.#20 並設定資料.
+./mcm -a @mintcm -p rw add.device.limit.#20 set.device.limit.#20.name=limit-20 set.device.limit.#20.priority=12
+
+# 增加 device.vap.#76.station.#5 和 device.vap.#76.station.#7, 逐層增加.
+./mcm -a @mintcm -p rw add.device.vap.#76 add.device.vap.#76.station.#5 add.device.vap.#76.station.#7
+</pre>
+          範例 :<br>
+<pre class="css_pre_code">
+#!/bin/sh
+
+# 增加 device.limit.#70
+path="device.limit.#70"
+result=`./mcm -a @mintcm -p rw add.${path}`
+
+# 增加 device.vap.#101 並設定資料.
+list=
+path1="device.vap.#101"
+list="${list} add.${path1}"
+# 設定 ssid 資料.
+path2="${path1}.ssid"
+value2="psk-101"
+list="${list} set.${path2}=${value2}"
+# 設定 channel 資料.
+path2="${path1}.channel"
+value2="36"
+list="${list} set.${path2}=${value2}"
+# 設定 device.vap.*.extra 部分.
+path1="${path1}.extra"
+# 設定 hidden 資料.
+path2="${path1}.hidden"
+value2="1"
+list="${list} set.${path2}=${value2}"
+# 設定 tx_power 資料.
+path2="${path1}.tx_power"
+value2="123"
+list="${list} set.${path2}=${value2}"
+result=`./mcm -a @mintcm -p rw ${list}`
+
+# 先增加 device.vap.#200, 再增加 5 個 station.
+path1="device.vap.#200"
+result=`./mcm -a @mintcm -p rw add.${path1}`
+list=
+count1="5"
+for ((index1 = 1; index1 <= count1; index1++))
+do
+    # 增加 station.
+    path2="${path1}.station.#${index1}"
+    list="${list} add.${path2}"
+
+    # 設定 mac_addr 資料.
+    path3="${path2}.mac_addr"
+    value3="00:11:aa:22:bb:$((${index1} * 10))"
+    list="${list} set.${path3}=${value3}"
+
+    # 設定 rule 資料.
+    path3="${path2}.rule"
+    value3="$((${index1} * 22))"
+    list="${list} set.${path3}=${value3}"
+done
+result=`./mcm -a @mintcm -p rw ${list}`
+</pre>
+        </td>
+      </tr>
+    </table>
+    <br>
+
+    <div class="css_div_hook" id="hook_0305_del_01"></div>
+    <table class="css_table_box">
+      <tr>
+        <td class="css_td_box">
+          <font class="css_font_b2">del</font><br>
+          刪除一筆 entry.
+          <br><br>
+          格式 :<br>
+          <div class="css_div_block">
+            <font class="css_font_g1">del.$(full_path)</font>
+          </div>
+          <br>
+          <table class="css_table_list2">
+            <tr>
+              <td class="css_td_list2_l2">$(full_path)</td>
+              <td class="css_td_list2_r1">
+                目標的路徑 <a href="#hook_0305_full_path_01">[詳細]</a><br>
+                <font class="css_font_p1">[entry 格式][index / key 模式]</font>
+              </td>
+            </tr>
+          </table>
+          <br>
+          注意事項 :<br>
+          <table class="css_table_list1">
+            <tr>
+              <td class="css_td_list1_l">01.&nbsp;</td>
+              <td class="css_td_list1_r">
+                資料存取模式必須是 rw.
+              </td>
+            </tr>
+          </table>
+          <br>
+          範例 :<br>
+<pre class="css_pre_code">
+# 刪除 device.limit.@1
+./mcm -a @mintcm -p rw del.device.limit.@1
+
+# 刪除 device.vap.#15.station.@1
+./mcm -a @mintcm -p rw del.device.vap.#15.station.@1
+</pre>
+          範例 :<br>
+<pre class="css_pre_code">
+#!/bin/sh
+
+# 刪除 device.limit.#6
+./mcm -a @mintcm -p rw del.device.limit.#6
+
+# 刪除 device.vap.* 底下所有的 station.
+list=
+path1="device.vap.*"
+count1=`./mcm -a @mintcm -p ro count.${path1}`
+for ((index1 = 1; index1 <= count1; index1++))
+do
+    path2="device.vap.@${index1}.station.*"
+    count2=`./mcm -a @mintcm -p ro count.${path2}`
+    for ((index2 = 1; index2 <= count2; index2++))
+    do
+        path3="device.vap.@${index1}.station.@${index2}"
+        list="${list} del.${path3}"
+    done
+done
+if [ ! -z "${list}" ]; then
+    result=`./mcm -a @mintcm -p rw ${list}`
+fi
+</pre>
+        </td>
+      </tr>
+    </table>
+    <br>
+
+    <div class="css_div_hook" id="hook_0305_delall_01"></div>
+    <table class="css_table_box">
+      <tr>
+        <td class="css_td_box">
+          <font class="css_font_b2">delall</font><br>
+          刪除所有 entry.
+          <br><br>
+          格式 :<br>
+          <div class="css_div_block">
+            <font class="css_font_g1">delall.$(mix_path)</font>
+          </div>
+          <br>
+          <table class="css_table_list2">
+            <tr>
+              <td class="css_td_list2_l2">$(mix_path)</td>
+              <td class="css_td_list2_r1">
+                目標的路徑 <a href="#hook_0305_mix_path_01">[詳細]</a>
+              </td>
+            </tr>
+          </table>
+          <br>
+          注意事項 :<br>
+          <table class="css_table_list1">
+            <tr>
+              <td class="css_td_list1_l">01.&nbsp;</td>
+              <td class="css_td_list1_r">
+                資料存取模式必須是 rw.
+              </td>
+            </tr>
+          </table>
+          <br>
+
+          範例 :<br>
+<pre class="css_pre_code">
+# 刪除所有的 device.limit.*
+./mcm -a @mintcm -p rw delall.device.limit.*
+
+# 刪除 device.vap.#15.* 底下所有的 station.
+./mcm -a @mintcm -p rw delall.device.vap.#15.station.*
+</pre>
+          範例 :<br>
+<pre class="css_pre_code">
+#!/bin/sh
+
+# 刪除所有的 device.limit.*
+./mcm -a @mintcm -p rw delall.device.limit.*
+
+# 刪除 device.vap.* 底下所有的 station.
+list=
+path1="device.vap.*"
+count1=`./mcm -a @mintcm -p ro count.${path1}`
+for ((index1 = 1; index1 <= count1; index1++))
+do
+    path2="device.vap.@${index1}.station.*"
+    list="${list} delall.${path2}"
+done
+if [ ! -z "${list}" ]; then
+    result=`./mcm -a @mintcm -p rw ${list}`
+fi
+</pre>
+        </td>
+      </tr>
+    </table>
+    <br>
+
+    <div class="css_div_hook" id="hook_0305_usablekey_01"></div>
+    <table class="css_table_box">
+      <tr>
+        <td class="css_td_box">
+          <font class="css_font_b2">usablekey</font><br>
+          取得可用的 key.
+          <br><br>
+          格式 :<br>
+          <div class="css_div_block">
+            <font class="css_font_g1">usablekey.$(mix_path)</font>
+          </div>
+          <br>
+          <table class="css_table_list2">
+            <tr>
+              <td class="css_td_list2_l2">$(mix_path)</td>
+              <td class="css_td_list2_r1">
+                目標的路徑 <a href="#hook_0305_mix_path_01">[詳細]</a>
+              </td>
+            </tr>
+          </table>
+          <br>
+          注意事項 :<br>
+          <table class="css_table_list1">
+            <tr>
+              <td class="css_td_list1_l">01.&nbsp;</td>
+              <td class="css_td_list1_r">
+                資料存取模式可以是 ro 或 rw.
+              </td>
+            </tr>
+            <tr>
+              <td class="css_td_list1_l">02.&nbsp;</td>
+              <td class="css_td_list1_r">
+                返回的值大於 0 才表示有可用的 key.
+              </td>
+            </tr>
+          </table>
+          <br>
+          範例 :<br>
+<pre class="css_pre_code">
+# 取得 device.vap.* 內可用的 key.
+./mcm -a @mintcm -p rw usablekey.device.vap.*
+
+# 取得 device.vap.@2.station.* 內可用的 key.
+./mcm -a @mintcm -p rw usablekey.device.vap.@2.station.*
+</pre>
+          範例 :<br>
+<pre class="css_pre_code">
+#!/bin/sh
+
+# 在 device.limit.* 增加 10 筆資料.
+list=
+path1="device.limit.*"
+count1="10"
+count2="0"
+for ((index1 = 1; index1 <= count1; index1++))
+do
+    # 取得可用的 key.
+    key2=`./mcm -a @mintcm -p rw usablekey.${path1}`
+    if [ ${key2} -ne 0 ]; then
+        # 增加資料筆數.
+        path2="device.limit.#${key2}"
+        result=`./mcm -a @mintcm -p rw add.${path2}`
+        count2=$((${count2} + 1))
+    else
+        break
+    fi
+done
+echo "add ${count2} entry in ${path1}"
+</pre>
+        </td>
+      </tr>
+    </table>
+    <br>
+
+    <div class="css_div_hook" id="hook_0305_run_01"></div>
+    <table class="css_table_box">
+      <tr>
+        <td class="css_td_box">
+          <font class="css_font_b2">run</font><br>
+          執行 <font class="css_font_p1">mint_cm/mcm_daemon/mcm_module</font> 內的模組函式.
+          <br><br>
+          格式 :<br>
+          <div class="css_div_block">
+            <font class="css_font_g1">run.$(module_function)</font>
+          </div>
+          <br>
+          <table class="css_table_list2">
+            <tr>
+              <td class="css_td_list2_l2">$(module_function)</td>
+              <td class="css_td_list2_r1">
+                目標的函式名稱
+              </td>
+            </tr>
+          </table>
+          <br>
+          注意事項 :<br>
+          <table class="css_table_list1">
+            <tr>
+              <td class="css_td_list1_l">01.&nbsp;</td>
+              <td class="css_td_list1_r">
+                如果內部模組函式只需要讀取資料, 資料存取模式可以是 ro 或 rw,
+                如果內部模組函式需要修改資料, 資料存取模必須是 rw.
+              </td>
+            </tr>
+            <tr>
+              <td class="css_td_list1_l">02.&nbsp;</td>
+              <td class="css_td_list1_r">
+                因為內部模組函式的內容是客制化的, 所以需要的堆疊空間不固定 (區域變數的多寡和函式呼叫的層數都會影響需要的堆疊空間),
+                透過 session_stack_size 調整伺服器端處理此連線的執行緒的堆疊空間.
+              </td>
+            </tr>
+          </table>
+          <br>
+          範例 :<br>
+<pre class="css_pre_code">
+# 執行模組函式 mcm_module_command_test_01().
+./mcm -a @mintcm -p ro run.mcm_module_command_test_01
+
+# 執行模組函式 mcm_module_command_test_02().
+# mcm_module_command_test_02() 會回傳訊息, mcm 會顯示回傳的訊息.
+./mcm -a @mintcm -p ro -s 1048576 run.mcm_module_command_test_02
+</pre>
+<pre class="css_pre_code">
+模組部分 :
+這部分程式要放在 mint_cm/mcm_daemon/mcm_module 之下, 檔案名稱隨意 (*.c),
+之後在 mint_cm 使用 make all 重新編譯.
+
+#include <time.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include "../../mcm_lib/mcm_lheader/mcm_type.h"
+#include "../../mcm_lib/mcm_lheader/mcm_size.h"
+#include "../../mcm_lib/mcm_lheader/mcm_control.h"
+#include "../../mcm_lib/mcm_lheader/mcm_connect.h"
+#include "../../mcm_lib/mcm_lheader/mcm_return.h"
+#include "../../mcm_lib/mcm_lheader/mcm_debug.h"
+#include "../../mcm_lib/mcm_lheader/mcm_data_exinfo_auto.h"
+#include "../mcm_service_handle_extern.h"
+#include "../mcm_config_handle_extern.h"
+
+#define DMSG(msg_fmt, msgs...) printf("%s(%04u): " msg_fmt "\n", __FILE__, __LINE__, ##msgs)
+
+int mcm_module_command_test_01(struct mcm_service_session_t *this_session)
+{
+    srand(time(NULL));
+
+    DMSG("module-%u", rand());
+
+    return MCM_RCODE_PASS;
+}
+
+int mcm_module_command_test_02(struct mcm_service_session_t *this_session)
+{
+    int fret = MCM_RCODE_MODULE_INTERNAL_ERROR;
+
+    // 回傳訊息給外部程式, 這部分的用法會在 05-02 說明.
+    if(mcm_service_response_init(this_session, 256) < MCM_RCODE_PASS)
+    {
+        DMSG("call mcm_service_response_init() fail");
+        goto FREE_01;
+    }
+
+    snprintf(this_session->rep_msg_buf, this_session->rep_msg_size,
+             "command-%u", rand());
+
+    fret = MCM_RCODE_PASS;
+FREE_01:
+    return fret;
+}
+</pre>
+          範例 :<br>
+<pre class="css_pre_code">
+#!/bin/sh
+
+# 設定 device.system.ip_addr 並執行 mcm_module_command_test_01().
+list=
+path="device.system.ip_addr"
+value="192.168.111.222"
+list="${list} set.${path}=${value}"
+path="mcm_module_command_test_01"
+list="${list} run.${path}"
+result=`./mcm -a @mintcm -p rw ${list}`
+if [ ! -z ${result} ]; then
+    echo "${result}"
+fi
+
+# 設定 device.system.ip_addr 並執行 mcm_module_command_test_02().
+list=
+path="device.system.ip_addr"
+value="192.168.222.111"
+list="${list} set.${path}=${value}"
+path="mcm_module_command_test_02"
+list="${list} run.${path}"
+result=`./mcm -a @mintcm -p rw ${list}`
+if [ ! -z ${result} ]; then
+    echo "${result}"
+fi
+</pre>
+        </td>
+      </tr>
+    </table>
+    <br>
+
+    <div class="css_div_hook" id="hook_0305_update_01"></div>
+    <table class="css_table_box">
+      <tr>
+        <td class="css_td_box">
+          <font class="css_font_b2">update</font><br>
+          要求 mcm_daemon 做資料更新.
+          (需要使用的情況 <a href="mcm_0302.html#hook_0302_mcm_lulib_update_01">[詳細]</a>)
+          <br><br>
+          格式 :<br>
+          <div class="css_div_block">
+            <font class="css_font_g1">update</font>
+          </div>
+          <br>
+          注意事項 :<br>
+          <table class="css_table_list1">
+            <tr>
+              <td class="css_td_list1_l">01.&nbsp;</td>
+              <td class="css_td_list1_r">
+                資料存取模式必須是 rw.
+              </td>
+            </tr>
+          </table>
+          <br>
+          範例 :<br>
+<pre class="css_pre_code">
+# 更新 (單獨使用無實際作用, 只是說明指令用法).
+./mcm -a @mintcm -p rw update
+</pre>
+          範例 :<br>
+<pre class="css_pre_code">
+#!/bin/sh
+
+# 情況一.
+# 刪除一筆 device.limit.*, 之後取得 device.limit.* 的資料筆數,
+# 正常情況取出的資料筆數會少一筆, 但是實際上資料庫尚未更新,
+# 所以資料筆數不會減少.
+path1="device.limit.*"
+# 先取得原本的資料筆數.
+count1=`./mcm -a @mintcm -p ro count.${path1}`
+# 刪除一筆資料後直接取得資料筆數.
+path2="device.limit.@1"
+count2=`./mcm -a @mintcm -p rw del.${path2} count.${path1}`
+# 刪除前和刪除後的資料筆數會是一樣.
+echo "[no update]"
+echo "before delete, count = ${count1}"
+echo "after delete,  count = ${count2}"
+
+# 情況二.
+# 刪除一筆 device.limit.*, 接著做更新, 再取得 device.limit.* 的資料筆數,
+# 這時候取得資料筆數就會是正常的少一筆.
+path1="device.limit.*"
+# 先取得原本的資料筆數.
+count1=`./mcm -a @mintcm -p ro count.${path1}`
+# 刪除一筆資料後先更新再取得資料筆數.
+path2="device.limit.@1"
+count2=`./mcm -a @mintcm -p rw del.${path2} update count.${path1}`
+# 刪除前和刪除後的資料筆數會是不一樣.
+echo "[with update]"
+echo "before delete, count = ${count1}"
+echo "after delete,  count = ${count2}"
+</pre>
+        </td>
+      </tr>
+    </table>
+    <br>
+
+    <div class="css_div_hook" id="hook_0305_save_01"></div>
+    <table class="css_table_box">
+      <tr>
+        <td class="css_td_box">
+          <font class="css_font_b2">save</font><br>
+          要求 mcm_daemon 儲存資料到資料現在值檔案.
+          <br><br>
+          格式 :<br>
+          <div class="css_div_block">
+            <font class="css_font_g1">save=$(save_method)</font>
+          </div>
+          <br>
+          <table class="css_table_list2">
+            <tr>
+              <td class="css_td_list2_l2">$(save_method)</td>
+              <td class="css_td_list2_r1">
+                是否強制要求儲存資料<br>
+                <font class="css_font_p1">check : 否, 有需要儲存的資料被修改才儲存</font><br>
+                <font class="css_font_p1">force : 是, 不論有無修改都要儲存</font>
+              </td>
+            </tr>
+          </table>
+          <br>
+          注意事項 :<br>
+          <table class="css_table_list1">
+            <tr>
+              <td class="css_td_list1_l">01.&nbsp;</td>
+              <td class="css_td_list1_r">
+                資料存取模式必須是 rw.
+              </td>
+            </tr>
+          </table>
+          <br>
+          範例 :<br>
+<pre class="css_pre_code">
+# 有需要儲存的資料被修改才儲存.
+./mcm -a @mintcm -p rw save=check
+
+# 強制儲存.
+./mcm -a @mintcm -p rw save=force
+</pre>
+        </td>
+      </tr>
+    </table>
+    <br>
+
+    <div class="css_div_hook" id="hook_0305_shutdown_01"></div>
+    <table class="css_table_box">
+      <tr>
+        <td class="css_td_box">
+          <font class="css_font_b2">shutdown</font><br>
+          關閉 mcm_daemon.
+          <br><br>
+          格式 :<br>
+          <div class="css_div_block">
+            <font class="css_font_g1">shutdown</font>
+          </div>
+          <br>
+          注意事項 :<br>
+          <table class="css_table_list1">
+            <tr>
+              <td class="css_td_list1_l">01.&nbsp;</td>
+              <td class="css_td_list1_r">
+                資料存取模式必須是 rw.
+              </td>
+            </tr>
+          </table>
+          <br>
+          範例 :<br>
+<pre class="css_pre_code">
+# 關閉.
+./mcm -a @mintcm -p rw shutdown
+</pre>
+        </td>
+      </tr>
+    </table>
+    <br>
+
+  </div>
+</div>
+<br>
+
+</body>
+
+</html>

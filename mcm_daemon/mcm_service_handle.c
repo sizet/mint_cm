@@ -180,6 +180,9 @@ int mcm_req_get_list_value(
 int mcm_req_set_any_type_alone(
     struct mcm_service_session_t *this_session);
 
+int mcm_req_get_with_type_alone(
+    struct mcm_service_session_t *this_session);
+
 
 
 
@@ -211,7 +214,8 @@ struct mcm_req_cb_t mcm_req_cb_list[] =
     {mcm_req_get_list_name},
     {mcm_req_get_list_type},
     {mcm_req_get_list_value},
-    {mcm_req_set_any_type_alone}
+    {mcm_req_set_any_type_alone},
+    {mcm_req_get_with_type_alone}
 };
 
 
@@ -3101,6 +3105,206 @@ int mcm_req_set_any_type_alone(
 
 FREE_01:
     cret = mcm_build_set_any_type_alone(this_session, fret, NULL);
+    return fret < MCM_RCODE_PASS ? fret : cret;
+}
+
+int mcm_parse_get_with_type_alone(
+    struct mcm_service_session_t *this_session)
+{
+    void *tmp_offset;
+#if MCM_SVDMODE
+    MCM_DTYPE_USIZE_TD plen;
+#endif
+
+    // 封包格式 :
+    // | T | REQ | PL | PC |.
+    // T   [MCM_DTYPE_USIZE_TD].
+    //     紀錄封包總長度, 內容 = T + REQ + PL + PC.
+    // REQ [MCM_DTYPE_LIST_TD].
+    //     紀錄請求類型.
+    // PL  [MCM_DTYPE_USIZE_TD].
+    //     紀錄請求的路徑的長度 (包括最後的 \0).
+    // PC  [binary].
+    //     紀錄請求的路徑.
+
+    // PL.
+    tmp_offset = this_session->pkt_offset;
+#if MCM_SVDMODE
+    plen = *((MCM_DTYPE_USIZE_TD *) tmp_offset);
+#endif
+    tmp_offset += sizeof(MCM_DTYPE_USIZE_TD);
+    // PC.
+    this_session->req_path = (char *) tmp_offset;
+    MCM_SVDMSG("req_path[" MCM_DTYPE_USIZE_PF "][%s]", plen, this_session->req_path);
+
+    return MCM_RCODE_PASS;
+}
+
+int mcm_build_get_with_type_alone(
+    struct mcm_service_session_t *this_session,
+    MCM_DTYPE_LIST_TD rep_code,
+    char *rep_msg,
+    MCM_DTYPE_LIST_TD rep_data_type,
+    void *rep_data_con,
+    MCM_DTYPE_USIZE_TD rep_data_len)
+{
+    int fret;
+    MCM_DTYPE_USIZE_TD mlen;
+    void *tmp_offset;
+
+
+    mlen = (rep_msg != NULL ? strlen(rep_msg) : 0) + 1;
+    this_session->pkt_len = sizeof(MCM_DTYPE_USIZE_TD) +
+                            sizeof(MCM_DTYPE_LIST_TD) +
+                            sizeof(MCM_DTYPE_USIZE_TD) + mlen +
+                            sizeof(MCM_DTYPE_LIST_TD) +
+                            sizeof(MCM_DTYPE_USIZE_TD) +
+                            sizeof(MCM_DTYPE_USIZE_TD) + rep_data_len;
+
+    if(this_session->pkt_len > this_session->pkt_size)
+    {
+        fret = mcm_realloc_buf_service(this_session, MCM_RMEMORY_PACKET, this_session->pkt_len);
+        if(fret < MCM_RCODE_PASS)
+        {
+            MCM_EMSG("call mcm_realloc_buf_service() fail");
+            mcm_build_fail_rep(this_session, MCM_RCODE_SERVICE_ALLOC_FAIL, "");
+            return fret;
+        }
+    }
+
+    // 封包格式 :
+    // | T | REP | ML | MC | DT | DL | DC |.
+    // T   [MCM_DTYPE_USIZE_TD].
+    //     紀錄封包的總長度, 內容 = T + REP + ML + MC + DT + DL + DC.
+    // REP [MCM_DTYPE_LIST_TD].
+    //     紀錄回應的類型.
+    // ML  [MCM_DTYPE_USIZE_TD].
+    //     紀錄回應的訊息的長度 (包含最後的 \0).
+    // MC  [binary].
+    //     紀錄回應的訊息.
+    // DT  [MCM_DTYPE_LIST_TD]
+    //     紀錄回應的資料的類型.
+    // DL  [MCM_DTYPE_USIZE_TD].
+    //     紀錄回應的字串資料的長度.
+    // DC  [binary].
+    //     紀錄回應的字串資料.
+
+    // T + REP + ML + MC.
+    mcm_build_base_rep(this_session, rep_code, rep_msg, mlen);
+    tmp_offset = this_session->pkt_offset;
+    // DT.
+    *((MCM_DTYPE_LIST_TD *) tmp_offset) = rep_data_type;
+    tmp_offset += sizeof(MCM_DTYPE_LIST_TD);
+    // DL.
+    *((MCM_DTYPE_USIZE_TD *) tmp_offset) = rep_data_len;
+    tmp_offset += sizeof(MCM_DTYPE_USIZE_TD);
+    // DC.
+    memcpy(tmp_offset, rep_data_con, rep_data_len);
+    tmp_offset += rep_data_len;
+
+    return MCM_RCODE_PASS;
+}
+
+int mcm_req_get_with_type_alone(
+    struct mcm_service_session_t *this_session)
+{
+    int fret, cret;
+    struct mcm_config_model_group_t *self_model_group;
+    struct mcm_config_model_member_t *self_model_member;
+    struct mcm_config_store_t *self_store;
+    MCM_DTYPE_USIZE_TD tmp_len = 0;
+
+
+    MCM_SVDMSG("=> %s", __FUNCTION__);
+
+    mcm_parse_get_with_type_alone(this_session);
+
+    fret = mcm_config_find_alone_use_full(this_session, this_session->req_path, MCM_PLIMIT_BOTH,
+                                          &self_model_group, &self_model_member, &self_store);
+    if(fret < MCM_RCODE_PASS)
+    {
+        MCM_EMSG("call mcm_config_find_alone_use_full() fail");
+        goto FREE_01;
+    }
+
+    if(self_model_member->member_size > this_session->cache_size)
+    {
+        fret = mcm_realloc_buf_service(this_session, MCM_RMEMORY_CACHE,
+                                       self_model_member->member_size);
+        if(fret < MCM_RCODE_PASS)
+        {
+            MCM_EMSG("call mcm_realloc_buf_service() fail");
+            goto FREE_01;
+        }
+    }
+
+    fret = mcm_config_get_alone_by_info(this_session, self_model_group, self_model_member,
+                                        self_store, MCM_DACCESS_AUTO, this_session->cache_buf);
+    if(fret < MCM_RCODE_PASS)
+    {
+        MCM_EMSG("call mcm_config_get_alone_by_info() fail");
+        goto FREE_01;
+    }
+
+    switch(self_model_member->member_type)
+    {
+        case MCM_DTYPE_EK_INDEX:
+#if MCM_SUPPORT_DTYPE_RK
+        case MCM_DTYPE_RK_INDEX:
+#endif
+#if MCM_SUPPORT_DTYPE_ISC
+        case MCM_DTYPE_ISC_INDEX:
+#endif
+#if MCM_SUPPORT_DTYPE_IUC
+        case MCM_DTYPE_IUC_INDEX:
+#endif
+#if MCM_SUPPORT_DTYPE_ISS
+        case MCM_DTYPE_ISS_INDEX:
+#endif
+#if MCM_SUPPORT_DTYPE_IUS
+        case MCM_DTYPE_IUS_INDEX:
+#endif
+#if MCM_SUPPORT_DTYPE_ISI
+        case MCM_DTYPE_ISI_INDEX:
+#endif
+#if MCM_SUPPORT_DTYPE_IUI
+        case MCM_DTYPE_IUI_INDEX:
+#endif
+#if MCM_SUPPORT_DTYPE_ISLL
+        case MCM_DTYPE_ISLL_INDEX:
+#endif
+#if MCM_SUPPORT_DTYPE_IULL
+        case MCM_DTYPE_IULL_INDEX:
+#endif
+#if MCM_SUPPORT_DTYPE_FF
+        case MCM_DTYPE_FF_INDEX:
+#endif
+#if MCM_SUPPORT_DTYPE_FD
+        case MCM_DTYPE_FD_INDEX:
+#endif
+#if MCM_SUPPORT_DTYPE_FLD
+        case MCM_DTYPE_FLD_INDEX:
+#endif
+            tmp_len = self_model_member->member_size;
+            break;
+#if MCM_SUPPORT_DTYPE_S
+        case MCM_DTYPE_S_INDEX:
+            tmp_len = strlen(this_session->cache_buf) + 1;
+            break;
+#endif
+#if MCM_SUPPORT_DTYPE_B
+        case MCM_DTYPE_B_INDEX:
+            tmp_len = self_model_member->member_size;
+            break;
+#endif
+    }
+
+FREE_01:
+    cret = mcm_build_get_with_type_alone(this_session, fret, NULL,
+                                         fret < MCM_RCODE_PASS ?
+                                         0 : self_model_member->member_type,
+                                         this_session->cache_buf,
+                                         fret < MCM_RCODE_PASS ? 0 : tmp_len);
     return fret < MCM_RCODE_PASS ? fret : cret;
 }
 

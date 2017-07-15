@@ -42,13 +42,13 @@ Some rights reserved. See README.
       <tr>
         <td class="css_td_list2_l1">
           <a href="mcm_0302.html#hook_0302_mcm_lulib_get_max_count_01">mcm_lulib_get_max_count</a><br>
-          取得 group 的資料筆數上限, 也就是資料模型中的 $(max) 值
+          取得資料筆數上限, 也就是資料模型中的 $(max) 值
         </td>
       </tr>
       <tr>
         <td class="css_td_list2_l1">
           <a href="mcm_0302.html#hook_0302_mcm_lulib_get_count_01">mcm_lulib_get_count</a><br>
-          取得 group 內目前的 entry 數目
+          取得目前的資料筆數
         </td>
       </tr>
       <tr>
@@ -90,19 +90,19 @@ Some rights reserved. See README.
       <tr>
         <td class="css_td_list2_l1">
           <a href="mcm_0302.html#hook_0302_mcm_lulib_get_all_entry_01">mcm_lulib_get_all_entry</a><br>
-          讀取 group 內所有 entry 的資料
+          讀取所有 entry 的資料
         </td>
       </tr>
       <tr>
         <td class="css_td_list2_l1">
           <a href="mcm_0302.html#hook_0302_mcm_lulib_del_all_entry_01">mcm_lulib_del_all_entry</a><br>
-          刪除 group 內所有的 entry
+          刪除所有 entry
         </td>
       </tr>
       <tr>
         <td class="css_td_list2_l1">
           <a href="mcm_0302.html#hook_0302_mcm_lulib_get_usable_key_01">mcm_lulib_get_usable_key</a><br>
-          取得 group 內可用的 key
+          取得可用的 key
         </td>
       </tr>
       <tr>
@@ -126,7 +126,7 @@ Some rights reserved. See README.
       <tr>
         <td class="css_td_list2_l1">
           <a href="mcm_0302.html#hook_0302_mcm_lulib_shutdown_01">mcm_lulib_shutdown</a><br>
-          關閉 mcm_daemon, 當系統需要關機或重開機時先讓 mcm_daemon 正常關閉
+          關閉 mcm_daemon
         </td>
       </tr>
       <tr>
@@ -155,13 +155,13 @@ Some rights reserved. See README.
       <tr>
         <td class="css_td_list2_l1">
           <a href="mcm_0303.html#hook_0303_mcm_lklib_get_max_count_01">mcm_lklib_get_max_count</a><br>
-          取得 group 的資料筆數上限, 也就是資料模型中的 $(max) 值
+          取得資料筆數上限, 也就是資料模型中的 $(max) 值
         </td>
       </tr>
       <tr>
         <td class="css_td_list2_l1">
           <a href="mcm_0303.html#hook_0303_mcm_lklib_get_count_01">mcm_lklib_get_count</a><br>
-          取得 group 內目前的 entry 數目
+          取得目前的資料筆數
         </td>
       </tr>
       <tr>
@@ -203,19 +203,19 @@ Some rights reserved. See README.
       <tr>
         <td class="css_td_list2_l1">
           <a href="mcm_0303.html#hook_0303_mcm_lklib_get_all_entry_01">mcm_lklib_get_all_entry</a><br>
-          讀取 group 內所有 entry 的資料
+          讀取所有 entry 的資料
         </td>
       </tr>
       <tr>
         <td class="css_td_list2_l1">
           <a href="mcm_0303.html#hook_0303_mcm_lklib_del_all_entry_01">mcm_lklib_del_all_entry</a><br>
-          刪除 group 內所有的 entry
+          刪除所有 entry
         </td>
       </tr>
       <tr>
         <td class="css_td_list2_l1">
           <a href="mcm_0303.html#hook_0303_mcm_lklib_get_usable_key_01">mcm_lklib_get_usable_key</a><br>
-          取得 group 內可用的 key
+          取得可用的 key
         </td>
       </tr>
       <tr>
@@ -239,7 +239,7 @@ Some rights reserved. See README.
       <tr>
         <td class="css_td_list2_l1">
           <a href="mcm_0303.html#hook_0303_mcm_lklib_shutdown_01">mcm_lklib_shutdown</a><br>
-          關閉 mcm_daemon, 當系統需要關機或重開機時先讓 mcm_daemon 正常關閉
+          關閉 mcm_daemon
         </td>
       </tr>
       <tr>
@@ -274,7 +274,7 @@ Some rights reserved. See README.
       <tr>
         <td class="css_td_list2_l1">
           <a href="mcm_0304.html#hook_0304_mcm_jslib_obtain_max_count_01">mcm_jslib_obtain_max_count</a><br>
-          要求取得 group 的最大資料筆數限制
+          要求取得最大資料筆數限制
         </td>
       </tr>
       <tr>
@@ -292,7 +292,7 @@ Some rights reserved. See README.
       <tr>
         <td class="css_td_list2_l1">
           <a href="mcm_0304.html#hook_0304_get_max_01">get</a><br>
-          指令, 讀出 group 的最大資料筆數限制
+          指令, 取得資料筆數上限, 也就是資料模型中的 $(max) 值
         </td>
       </tr>
       <tr>
@@ -304,31 +304,108 @@ Some rights reserved. See README.
       <tr>
         <td class="css_td_list2_l1">
           <a href="mcm_0304.html#hook_0304_set_01">set</a><br>
-          指令, 寫入資料
+          指令, 寫入資料到 member
         </td>
       </tr>
       <tr>
         <td class="css_td_list2_l1">
           <a href="mcm_0304.html#hook_0304_add_01">add</a><br>
-          指令, 增加一筆資料
+          指令, 增加一筆 entry
         </td>
       </tr>
       <tr>
         <td class="css_td_list2_l1">
           <a href="mcm_0304.html#hook_0304_del_01">del</a><br>
-          指令, 刪除一筆資料
+          指令, 刪除一筆 entry
         </td>
       </tr>
       <tr>
         <td class="css_td_list2_l1">
           <a href="mcm_0304.html#hook_0304_delall_01">delall</a><br>
-          刪除 group 內的所有資料
+          指令, 刪除所有 entry
         </td>
       </tr>
       <tr>
         <td class="css_td_list2_l1">
           <a href="mcm_0304.html#hook_0304_run_01">run</a><br>
-          執行內部模組函式 
+          指令, 執行內部模組函式 
+        </td>
+      </tr>
+    </table>
+    <br>
+
+    <font class="css_font_p1">指令程式</font><br>
+    <table class="css_table_list2">
+      <tr>
+        <td class="css_td_list2_l1">
+          <a href="mcm_0305.html#hook_0305_maxcount_01">maxcount</a><br>
+          取得資料筆數上限, 也就是資料模型中的 $(max) 值
+        </td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l1">
+          <a href="mcm_0305.html#hook_0305_count_01">count</a><br>
+          取得目前的資料筆數
+        </td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l1">
+          <a href="mcm_0305.html#hook_0305_get_01">get</a><br>
+          讀出 member 的資料
+        </td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l1">
+          <a href="mcm_0305.html#hook_0305_set_01">set</a><br>
+          寫入資料到 member
+        </td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l1">
+          <a href="mcm_0305.html#hook_0305_add_01">add</a><br>
+          增加一筆 entry
+        </td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l1">
+          <a href="mcm_0305.html#hook_0305_del_01">del</a><br>
+          刪除一筆 entry
+        </td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l1">
+          <a href="mcm_0305.html#hook_0305_delall_01">delall</a><br>
+          刪除所有 entry
+        </td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l1">
+          <a href="mcm_0305.html#hook_0305_usablekey_01">usablekey</a><br>
+          取得可用的 key
+        </td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l1">
+          <a href="mcm_0305.html#hook_0305_run_01">run</a><br>
+          執行內部模組函式
+        </td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l1">
+          <a href="mcm_0305.html#hook_0305_update_01">update</a><br>
+          要求 mcm_daemon 做資料更新
+        </td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l1">
+          <a href="mcm_0305.html#hook_0305_save_01">save</a><br>
+          要求 mcm_daemon 儲存資料到資料現在值檔案
+        </td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l1">
+          <a href="mcm_0305.html#hook_0305_shutdown_01">shutdown</a><br>
+          關閉 mcm_daemon
         </td>
       </tr>
     </table>

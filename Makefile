@@ -31,6 +31,7 @@ MCM_CGI_PATH     = ./mcm_cgi
 MCM_LULIB_PATH   = ./mcm_lib/mcm_lulib
 MCM_LKLIB_PATH   = ./mcm_lib/mcm_lklib
 MCM_JSLIB_PATH   = ./mcm_lib/mcm_jslib
+MCM_COMMAND_PATH = ./mcm_command
 HTTP_SERVER_PATH = ./http_server/mini_httpd/last
 
 EXAMPLE_PATH = ./usage/zh-TW/example/$(KEY)
@@ -40,8 +41,8 @@ export MCM_RUN_WEB_PATH  = $(MCM_RUN_ROOT_PATH)/web
 export MCM_RUN_CGI_PATH  = $(MCM_RUN_WEB_PATH)/cgi
 
 
-all : binary_profile binary_library binary_httpd binary_daemon \
-      install_library install_httpd install_profile install_daemon
+all : binary_profile binary_library binary_httpd binary_daemon binary_command \
+      install_library install_httpd install_profile install_daemon install_command
 
 
 binary_profile :
@@ -55,6 +56,9 @@ binary_library :
 
 binary_daemon :
 	$(MAKE) -C $(MCM_DAEMON_PATH) binary
+
+binary_command :
+	$(MAKE) -C $(MCM_COMMAND_PATH) binary
 
 binary_httpd :
 	$(MAKE) -C $(HTTP_SERVER_PATH) binary
@@ -72,10 +76,14 @@ install_daemon :
 	$(MAKE) -C $(MCM_JSLIB_PATH) install_custom
 	$(MAKE) -C $(MCM_DAEMON_PATH) install
 
+install_command :
+	$(MAKE) -C $(MCM_COMMAND_PATH) install
+
 install_httpd :
 	$(MAKE) -C $(HTTP_SERVER_PATH) install
 
 clean :
+	$(MAKE) -C $(MCM_COMMAND_PATH) clean
 	$(MAKE) -C $(MCM_LULIB_PATH) clean
 	cd $(MCM_LKLIB_PATH); $(MAKE) clean
 	$(MAKE) -C $(MCM_JSLIB_PATH) clean_common

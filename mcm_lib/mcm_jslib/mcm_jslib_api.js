@@ -41,7 +41,9 @@ var mcm_return_code = new function()
 
     this.cgi_upload_internal_error = -900;
 
-    this.boundary                  = -1000;
+    this.command_internal_error    = -1000;
+
+    this.boundary                  = -1100;
 
     this.module_internal_error     = -3000;
 };
