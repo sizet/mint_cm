@@ -68,6 +68,34 @@
     }                                             \
     while(0)
 
+#define MCM_BUILD_BASE_REP_01(tmp_offset, this_session, rep_code) \
+    do                                                                \
+    {                                                                 \
+        /* T */                                                       \
+        tmp_offset = this_session->pkt_buf;                           \
+        *((MCM_DTYPE_USIZE_TD *) tmp_offset) = this_session->pkt_len; \
+        tmp_offset += sizeof(MCM_DTYPE_USIZE_TD);                     \
+        /* REP */                                                     \
+        *((MCM_DTYPE_LIST_TD *) tmp_offset) = rep_code;               \
+        tmp_offset += sizeof(MCM_DTYPE_LIST_TD);                      \
+        /* ... */                                                     \
+    }                                                                 \
+    while(0)
+
+#define MCM_BUILD_BASE_REP_02(tmp_offset, this_session, rep_code, rep_msg, rep_mlen) \
+    do                                                             \
+    {   /* T + REP */                                              \
+        MCM_BUILD_BASE_REP_01(tmp_offset, this_session, rep_code); \
+        /* ML */                                                   \
+        *((MCM_DTYPE_USIZE_TD *) tmp_offset) = rep_mlen;           \
+        tmp_offset += sizeof(MCM_DTYPE_USIZE_TD);                  \
+        /* MC */                                                   \
+        memcpy(tmp_offset, rep_msg, rep_mlen);                     \
+        tmp_offset += rep_mlen;                                    \
+        /* ... */                                                  \
+    }                                                              \
+    while(0)
+
 
 
 
@@ -391,63 +419,26 @@ int mcm_socket_recv(
     return MCM_RCODE_PASS;
 }
 
-int mcm_build_base_rep(
-    struct mcm_service_session_t *this_session,
-    MCM_DTYPE_LIST_TD rep_code,
-    char *rep_msg,
-    MCM_DTYPE_USIZE_TD rep_mlen)
-{
-    void *tmp_offset;
-
-
-    // 封包格式 :
-    // | T | REP | ML | MC | ... |.
-    // T   [MCM_DTYPE_USIZE_TD].
-    //     紀錄封包的總長度, 內容 = T + REP + ML + MC + ...
-    // REP [MCM_DTYPE_LIST_TD].
-    //     紀錄回應的類型.
-    // ML  [MCM_DTYPE_USIZE_TD].
-    //     紀錄回應的訊息的長度 (包含最後的 \0).
-    // MC  [binary].
-    //     紀錄回應的訊息.
-    // ...
-    //     剩餘的資料.
-
-    // T.
-    tmp_offset = this_session->pkt_buf;
-    *((MCM_DTYPE_USIZE_TD *) tmp_offset) = this_session->pkt_len;
-    tmp_offset += sizeof(MCM_DTYPE_USIZE_TD);
-    // REP.
-    *((MCM_DTYPE_LIST_TD *) tmp_offset) = rep_code;
-    tmp_offset += sizeof(MCM_DTYPE_LIST_TD);
-    // ML.
-    *((MCM_DTYPE_USIZE_TD *) tmp_offset) = rep_mlen;
-    tmp_offset += sizeof(MCM_DTYPE_USIZE_TD);
-    // MC.
-    if(rep_msg == NULL)
-        *((char *) tmp_offset) = '\0';
-    else
-        memcpy(tmp_offset, rep_msg, rep_mlen);
-    tmp_offset += rep_mlen;
-    // ...
-    this_session->pkt_offset = tmp_offset;
-
-    return MCM_RCODE_PASS;
-}
-
 int mcm_build_fail_rep(
     struct mcm_service_session_t *this_session,
     MCM_DTYPE_LIST_TD rep_code,
-    char *rep_msg)
+    MCM_DTYPE_BOOL_TD with_msg)
 {
     int fret;
-    MCM_DTYPE_USIZE_TD mlen;
+    void *tmp_offset;
 
 
-    mlen = (rep_msg != NULL ? strlen(rep_msg) : 0) + 1;
-    this_session->pkt_len = sizeof(MCM_DTYPE_USIZE_TD) +
-                            sizeof(MCM_DTYPE_LIST_TD) +
-                            sizeof(MCM_DTYPE_USIZE_TD) + mlen;
+    if(with_msg == 0)
+    {
+        this_session->pkt_len = sizeof(MCM_DTYPE_USIZE_TD) +
+                                sizeof(MCM_DTYPE_LIST_TD);
+    }
+    else
+    {
+        this_session->pkt_len = sizeof(MCM_DTYPE_USIZE_TD) +
+                                sizeof(MCM_DTYPE_LIST_TD) +
+                                sizeof(MCM_DTYPE_USIZE_TD) + 1;
+    }
 
     if(this_session->pkt_len > this_session->pkt_size)
     {
@@ -455,12 +446,18 @@ int mcm_build_fail_rep(
         if(fret < MCM_RCODE_PASS)
         {
             MCM_EMSG("call mcm_realloc_buf_service() fail");
-            mcm_build_fail_rep(this_session, MCM_RCODE_SERVICE_ALLOC_FAIL, "");
             return fret;
         }
     }
 
-    // 封包格式 :
+    // 封包格式 (不帶有回應訊息, with_msg == 0) :
+    // | T | REP |.
+    // T   [MCM_DTYPE_USIZE_TD].
+    //     紀錄封包的總長度, 內容 = T + REP.
+    // REP [MCM_DTYPE_LIST_TD].
+    //     紀錄回應的類型.
+
+    // 封包格式 (帶有回應訊息, with_msg != 0) :
     // | T | REP | ML | MC |.
     // T   [MCM_DTYPE_USIZE_TD].
     //     紀錄封包的總長度, 內容 = T + REP + ML + MC.
@@ -469,10 +466,16 @@ int mcm_build_fail_rep(
     // ML  [MCM_DTYPE_USIZE_TD].
     //     紀錄回應的訊息的長度 (包含最後的 \0).
     // MC  [binary].
-    //     紀錄回應的訊息.
+    //     紀錄回應的訊息 (空字串).
 
-    // T + REP + ML + MC.
-    mcm_build_base_rep(this_session, rep_code, rep_msg, mlen);
+    if(with_msg == 0)
+    {
+        MCM_BUILD_BASE_REP_01(tmp_offset, this_session, rep_code);
+    }
+    else
+    {
+        MCM_BUILD_BASE_REP_02(tmp_offset, this_session, rep_code, "", 1);
+    }
 
     return MCM_RCODE_PASS;
 }
@@ -480,31 +483,18 @@ int mcm_build_fail_rep(
 int mcm_parse_get_alone(
     struct mcm_service_session_t *this_session)
 {
-    void *tmp_offset;
-#if MCM_SVDMODE
-    MCM_DTYPE_USIZE_TD plen;
-#endif
-
     // 封包格式 :
-    // | T | REQ | PL | PC |.
+    // | T | REQ | PC |.
     // T   [MCM_DTYPE_USIZE_TD].
-    //     紀錄封包總長度, 內容 = T + REQ + PL + PC.
+    //     紀錄封包總長度, 內容 = T + REQ + PC.
     // REQ [MCM_DTYPE_LIST_TD].
     //     紀錄請求類型.
-    // PL  [MCM_DTYPE_USIZE_TD].
-    //     紀錄請求的路徑的長度 (包括最後的 \0).
     // PC  [binary].
     //     紀錄請求的路徑.
 
-    // PL.
-    tmp_offset = this_session->pkt_offset;
-#if MCM_SVDMODE
-    plen = *((MCM_DTYPE_USIZE_TD *) tmp_offset);
-#endif
-    tmp_offset += sizeof(MCM_DTYPE_USIZE_TD);
     // PC.
-    this_session->req_path = (char *) tmp_offset;
-    MCM_SVDMSG("req_path[" MCM_DTYPE_USIZE_PF "][%s]", plen, this_session->req_path);
+    this_session->req_path = (char *) this_session->pkt_offset;
+    MCM_SVDMSG("req_path[%s]", this_session->req_path);
 
     return MCM_RCODE_PASS;
 }
@@ -512,20 +502,16 @@ int mcm_parse_get_alone(
 int mcm_build_get_alone(
     struct mcm_service_session_t *this_session,
     MCM_DTYPE_LIST_TD rep_code,
-    char *rep_msg,
     void *rep_data_con,
     MCM_DTYPE_USIZE_TD rep_data_len)
 {
     int fret;
-    MCM_DTYPE_USIZE_TD mlen;
     void *tmp_offset;
 
 
-    mlen = (rep_msg != NULL ? strlen(rep_msg) : 0) + 1;
     this_session->pkt_len = sizeof(MCM_DTYPE_USIZE_TD) +
                             sizeof(MCM_DTYPE_LIST_TD) +
-                            sizeof(MCM_DTYPE_USIZE_TD) + mlen +
-                            sizeof(MCM_DTYPE_USIZE_TD) + rep_data_len + 1;
+                            sizeof(MCM_DTYPE_USIZE_TD) + rep_data_len;
 
     if(this_session->pkt_len > this_session->pkt_size)
     {
@@ -533,37 +519,30 @@ int mcm_build_get_alone(
         if(fret < MCM_RCODE_PASS)
         {
             MCM_EMSG("call mcm_realloc_buf_service() fail");
-            mcm_build_fail_rep(this_session, MCM_RCODE_SERVICE_ALLOC_FAIL, "");
+            mcm_build_fail_rep(this_session, fret, 0);
             return fret;
         }
     }
 
     // 封包格式 :
-    // | T | REP | ML | MC | DL | DC | \0 |.
+    // | T | REP | DL | DC |.
     // T   [MCM_DTYPE_USIZE_TD].
-    //     紀錄封包的總長度, 內容 = T + REP + ML + MC + DL + DC + \0.
+    //     紀錄封包的總長度, 內容 = T + REP + DL + DC.
     // REP [MCM_DTYPE_LIST_TD].
     //     紀錄回應的類型.
-    // ML  [MCM_DTYPE_USIZE_TD].
-    //     紀錄回應的訊息的長度 (包含最後的 \0).
-    // MC  [binary].
-    //     紀錄回應的訊息.
     // DL  [MCM_DTYPE_USIZE_TD].
     //     紀錄回應的資料的長度.
     // DC  [binary].
     //     紀錄回應的資料.
 
-    // T + REP + ML + MC.
-    mcm_build_base_rep(this_session, rep_code, rep_msg, mlen);
-    tmp_offset = this_session->pkt_offset;
+    // T + REP.
+    MCM_BUILD_BASE_REP_01(tmp_offset, this_session, rep_code);
     // DL.
     *((MCM_DTYPE_USIZE_TD *) tmp_offset) = rep_data_len;
     tmp_offset += sizeof(MCM_DTYPE_USIZE_TD);
     // DC.
     memcpy(tmp_offset, rep_data_con, rep_data_len);
     tmp_offset += rep_data_len;
-    // \0.
-    *((unsigned char *) tmp_offset) = 0;
 
     return MCM_RCODE_PASS;
 }
@@ -663,7 +642,7 @@ int mcm_req_get_alone(
     }
 
 FREE_01:
-    cret = mcm_build_get_alone(this_session, fret, NULL, this_session->cache_buf,
+    cret = mcm_build_get_alone(this_session, fret, this_session->cache_buf,
                                fret < MCM_RCODE_PASS ? 0 : tmp_len);
     return fret < MCM_RCODE_PASS ? fret : cret;
 }
@@ -711,17 +690,14 @@ int mcm_parse_set_alone(
 
 int mcm_build_set_alone(
     struct mcm_service_session_t *this_session,
-    MCM_DTYPE_LIST_TD rep_code,
-    char *rep_msg)
+    MCM_DTYPE_LIST_TD rep_code)
 {
     int fret;
-    MCM_DTYPE_USIZE_TD mlen;
+    void *tmp_offset;
 
 
-    mlen = (rep_msg != NULL ? strlen(rep_msg) : 0) + 1;
     this_session->pkt_len = sizeof(MCM_DTYPE_USIZE_TD) +
-                            sizeof(MCM_DTYPE_LIST_TD) +
-                            sizeof(MCM_DTYPE_USIZE_TD) + mlen;
+                            sizeof(MCM_DTYPE_LIST_TD);
 
     if(this_session->pkt_len > this_session->pkt_size)
     {
@@ -729,24 +705,20 @@ int mcm_build_set_alone(
         if(fret < MCM_RCODE_PASS)
         {
             MCM_EMSG("call mcm_realloc_buf_service() fail");
-            mcm_build_fail_rep(this_session, MCM_RCODE_SERVICE_ALLOC_FAIL, "");
+            mcm_build_fail_rep(this_session, fret, 0);
             return fret;
         }
     }
 
     // 封包格式 :
-    // | T | REP | ML | MC |.
+    // | T | REP |.
     // T   [MCM_DTYPE_USIZE_TD].
-    //     紀錄封包的總長度, 內容 = T + REP + ML + MC.
+    //     紀錄封包的總長度, 內容 = T + REP.
     // REP [MCM_DTYPE_LIST_TD].
     //     紀錄回應的類型.
-    // ML  [MCM_DTYPE_USIZE_TD].
-    //     紀錄回應的訊息的長度 (包含最後的 \0).
-    // MC  [binary].
-    //     紀錄回應的訊息.
 
-    // T + REP + ML + MC.
-    mcm_build_base_rep(this_session, rep_code, rep_msg, mlen);
+    // T + REP.
+    MCM_BUILD_BASE_REP_01(tmp_offset, this_session, rep_code);
 
     return MCM_RCODE_PASS;
 }
@@ -839,39 +811,25 @@ int mcm_req_set_alone(
     }
 
 FREE_01:
-    cret = mcm_build_set_alone(this_session, fret, NULL);
+    cret = mcm_build_set_alone(this_session, fret);
     return fret < MCM_RCODE_PASS ? fret : cret;
 }
 
 int mcm_parse_get_entry(
     struct mcm_service_session_t *this_session)
 {
-    void *tmp_offset;
-#if MCM_SVDMODE
-    MCM_DTYPE_USIZE_TD plen;
-#endif
-
-
     // 封包格式 :
-    // | T | REQ | PL | PC |.
+    // | T | REQ | PC |.
     // T   [MCM_DTYPE_USIZE_TD].
-    //     紀錄封包總長度, 內容 = T + REQ + PL + PC.
+    //     紀錄封包總長度, 內容 = T + REQ + PC.
     // REQ [MCM_DTYPE_LIST_TD].
     //     紀錄請求類型.
-    // PL  [MCM_DTYPE_USIZE_TD].
-    //     紀錄請求的路徑的長度 (包括最後的 \0).
     // PC  [binary].
     //     紀錄請求的路徑.
 
-    // PL.
-    tmp_offset = this_session->pkt_offset;
-#if MCM_SVDMODE
-    plen = *((MCM_DTYPE_USIZE_TD *) tmp_offset);
-#endif
-    tmp_offset += sizeof(MCM_DTYPE_USIZE_TD);
     // PC.
-    this_session->req_path = (char *) tmp_offset;
-    MCM_SVDMSG("req_path[" MCM_DTYPE_USIZE_PF "][%s]", plen, this_session->req_path);
+    this_session->req_path = (char *) this_session->pkt_offset;
+    MCM_SVDMSG("req_path[%s]", this_session->req_path);
 
     return MCM_RCODE_PASS;
 }
@@ -879,19 +837,15 @@ int mcm_parse_get_entry(
 int mcm_build_get_entry(
     struct mcm_service_session_t *this_session,
     MCM_DTYPE_LIST_TD rep_code,
-    char *rep_msg,
     void *rep_data_con,
     MCM_DTYPE_USIZE_TD rep_data_len)
 {
     int fret;
-    MCM_DTYPE_USIZE_TD mlen;
     void *tmp_offset;
 
 
-    mlen = (rep_msg != NULL ? strlen(rep_msg) : 0) + 1;
     this_session->pkt_len = sizeof(MCM_DTYPE_USIZE_TD) +
                             sizeof(MCM_DTYPE_LIST_TD) +
-                            sizeof(MCM_DTYPE_USIZE_TD) + mlen +
                             sizeof(MCM_DTYPE_USIZE_TD) + rep_data_len;
 
     if(this_session->pkt_len > this_session->pkt_size)
@@ -900,29 +854,24 @@ int mcm_build_get_entry(
         if(fret < MCM_RCODE_PASS)
         {
             MCM_EMSG("call mcm_realloc_buf_service() fail");
-            mcm_build_fail_rep(this_session, MCM_RCODE_SERVICE_ALLOC_FAIL, "");
+            mcm_build_fail_rep(this_session, fret, 0);
             return fret;
         }
     }
 
     // 封包格式 :
-    // | T | REP | ML | MC | DL | DC |.
+    // | T | REP | DL | DC |.
     // T   [MCM_DTYPE_USIZE_TD].
-    //     紀錄封包的總長度, 內容 = T + REP + ML + MC + DL + DC.
+    //     紀錄封包的總長度, 內容 = T + REP + DL + DC.
     // REP [MCM_DTYPE_LIST_TD].
     //     紀錄回應的類型.
-    // ML  [MCM_DTYPE_USIZE_TD].
-    //     紀錄回應的訊息的長度 (包含最後的 \0).
-    // MC  [binary].
-    //     紀錄回應的訊息.
     // DL  [MCM_DTYPE_USIZE_TD].
     //     紀錄回應的資料的長度.
     // DC  [binary].
     //     紀錄回應的資料.
 
-    // T + REP + ML + MC.
-    mcm_build_base_rep(this_session, rep_code, rep_msg, mlen);
-    tmp_offset = this_session->pkt_offset;
+    // T + REP.
+    MCM_BUILD_BASE_REP_01(tmp_offset, this_session, rep_code);
     // DL.
     *((MCM_DTYPE_USIZE_TD *) tmp_offset) = rep_data_len;
     tmp_offset += sizeof(MCM_DTYPE_USIZE_TD);
@@ -973,7 +922,7 @@ int mcm_req_get_entry(
     }
 
 FREE_01:
-    cret = mcm_build_get_entry(this_session, fret, NULL, this_session->cache_buf,
+    cret = mcm_build_get_entry(this_session, fret, this_session->cache_buf,
                                fret < MCM_RCODE_PASS ? 0 : self_model_group->data_value_size);
     return fret < MCM_RCODE_PASS ? fret : cret;
 }
@@ -986,17 +935,15 @@ int mcm_parse_set_entry(
 
 
     // 封包格式 :
-    // | T | REQ | PL | PC | DL | DC |.
+    // | T | REQ | PL | PC | DC |.
     // T   [MCM_DTYPE_USIZE_TD].
-    //     紀錄封包的總長度, 內容 = T + REQ + PL + PC + DL + DC.
+    //     紀錄封包的總長度, 內容 = T + REQ + PL + PC + DC.
     // REQ [MCM_DTYPE_LIST_TD].
     //     紀錄請求類型.
     // PL  [MCM_DTYPE_USIZE_TD].
     //     紀錄請求的路徑長度 (包括最後的 \0).
     // PC  [binary].
     //     紀錄請求的路徑.
-    // DL  [MCM_DTYPE_USIZE_TD].
-    //     紀錄要傳送的資料的長度.
     // DC  [binary].
     //     紀錄要傳送的資料.
 
@@ -1008,30 +955,23 @@ int mcm_parse_set_entry(
     this_session->req_path = (char *) tmp_offset;
     MCM_SVDMSG("req_path[" MCM_DTYPE_USIZE_PF "][%s]", plen, this_session->req_path);
     tmp_offset += plen;
-    // DL.
-    this_session->req_data_len = *((MCM_DTYPE_USIZE_TD *) tmp_offset);
-    tmp_offset += sizeof(MCM_DTYPE_USIZE_TD);
     // DC.
-    this_session->req_data_con = this_session->req_data_len > 0 ? tmp_offset : NULL;
-    MCM_SVDMSG("req_config_info[" MCM_DTYPE_USIZE_PF "][%p]",
-               this_session->req_data_len, this_session->req_data_con);
+    this_session->req_data_con = tmp_offset;
+    MCM_SVDMSG("req_config_info[%p]", this_session->req_data_con);
 
     return MCM_RCODE_PASS;
 }
 
 int mcm_build_set_entry(
     struct mcm_service_session_t *this_session,
-    MCM_DTYPE_LIST_TD rep_code,
-    char *rep_msg)
+    MCM_DTYPE_LIST_TD rep_code)
 {
     int fret;
-    MCM_DTYPE_USIZE_TD mlen;
+    void *tmp_offset;
 
 
-    mlen = (rep_msg != NULL ? strlen(rep_msg) : 0) + 1;
     this_session->pkt_len = sizeof(MCM_DTYPE_USIZE_TD) +
-                            sizeof(MCM_DTYPE_LIST_TD) +
-                            sizeof(MCM_DTYPE_USIZE_TD) + mlen;
+                            sizeof(MCM_DTYPE_LIST_TD);
 
     if(this_session->pkt_len > this_session->pkt_size)
     {
@@ -1039,24 +979,21 @@ int mcm_build_set_entry(
         if(fret < MCM_RCODE_PASS)
         {
             MCM_EMSG("call mcm_realloc_buf_service() fail");
-            mcm_build_fail_rep(this_session, MCM_RCODE_SERVICE_ALLOC_FAIL, "");
+            mcm_build_fail_rep(this_session, fret, 0);
             return fret;
         }
     }
 
     // 封包格式 :
-    // | T | REP | ML | MC |.
+    // | T | REP |.
     // T   [MCM_DTYPE_USIZE_TD].
-    //     紀錄封包的總長度, 內容 = T + REP + ML + MC.
+    //     紀錄封包的總長度, 內容 = T + REP.
     // REP [MCM_DTYPE_LIST_TD].
     //     紀錄回應的類型.
-    // ML  [MCM_DTYPE_USIZE_TD].
-    //     紀錄回應的訊息的長度 (包含最後的 \0).
-    // MC  [binary].
     //     紀錄回應的訊息.
 
-    // T + REP + ML + MC.
-    mcm_build_base_rep(this_session, rep_code, rep_msg, mlen);
+    // T + REP.
+    MCM_BUILD_BASE_REP_01(tmp_offset, this_session, rep_code);
 
     return MCM_RCODE_PASS;
 }
@@ -1094,7 +1031,7 @@ int mcm_req_set_entry(
     }
 
 FREE_01:
-    cret = mcm_build_set_entry(this_session, fret, NULL);
+    cret = mcm_build_set_entry(this_session, fret);
     return fret < MCM_RCODE_PASS ? fret : cret;
 }
 
@@ -1102,7 +1039,7 @@ int mcm_parse_add_entry(
     struct mcm_service_session_t *this_session)
 {
     void *tmp_offset;
-    MCM_DTYPE_USIZE_TD plen;
+    MCM_DTYPE_USIZE_TD xlen;
 
 
     // 封包格式 :
@@ -1122,36 +1059,32 @@ int mcm_parse_add_entry(
 
     // PL.
     tmp_offset = this_session->pkt_offset;
-    plen = *((MCM_DTYPE_USIZE_TD *) tmp_offset);
+    xlen = *((MCM_DTYPE_USIZE_TD *) tmp_offset);
     tmp_offset += sizeof(MCM_DTYPE_USIZE_TD);
     // PC.
     this_session->req_path = (char *) tmp_offset;
-    MCM_SVDMSG("req_path[" MCM_DTYPE_USIZE_PF "][%s]", plen, this_session->req_path);
-    tmp_offset += plen;
+    MCM_SVDMSG("req_path[" MCM_DTYPE_USIZE_PF "][%s]", xlen, this_session->req_path);
+    tmp_offset += xlen;
     // DL.
-    this_session->req_data_len = *((MCM_DTYPE_USIZE_TD *) tmp_offset);
+    xlen = *((MCM_DTYPE_USIZE_TD *) tmp_offset);
     tmp_offset += sizeof(MCM_DTYPE_USIZE_TD);
     // DC.
-    this_session->req_data_con = this_session->req_data_len > 0 ? tmp_offset : NULL;
-    MCM_SVDMSG("req_config_info[" MCM_DTYPE_USIZE_PF "][%p]",
-               this_session->req_data_len, this_session->req_data_con);
+    this_session->req_data_con = xlen > 0 ? tmp_offset : NULL;
+    MCM_SVDMSG("req_config_info[" MCM_DTYPE_USIZE_PF "][%p]", xlen, this_session->req_data_con);
 
     return MCM_RCODE_PASS;
 }
 
 int mcm_build_add_entry(
     struct mcm_service_session_t *this_session,
-    MCM_DTYPE_LIST_TD rep_code,
-    char *rep_msg)
+    MCM_DTYPE_LIST_TD rep_code)
 {
     int fret;
-    MCM_DTYPE_USIZE_TD mlen;
+    void *tmp_offset;
 
 
-    mlen = (rep_msg != NULL ? strlen(rep_msg) : 0) + 1;
     this_session->pkt_len = sizeof(MCM_DTYPE_USIZE_TD) +
-                            sizeof(MCM_DTYPE_LIST_TD) +
-                            sizeof(MCM_DTYPE_USIZE_TD) + mlen;
+                            sizeof(MCM_DTYPE_LIST_TD);
 
     if(this_session->pkt_len > this_session->pkt_size)
     {
@@ -1159,24 +1092,20 @@ int mcm_build_add_entry(
         if(fret < MCM_RCODE_PASS)
         {
             MCM_EMSG("call mcm_realloc_buf_service() fail");
-            mcm_build_fail_rep(this_session, MCM_RCODE_SERVICE_ALLOC_FAIL, "");
+            mcm_build_fail_rep(this_session, fret, 0);
             return fret;
         }
     }
 
     // 封包格式 :
-    // | T | REP | ML | MC |.
+    // | T | REP |.
     // T   [MCM_DTYPE_USIZE_TD].
-    //     紀錄封包的總長度, 內容 = T + REP + ML + MC.
+    //     紀錄封包的總長度, 內容 = T + REP.
     // REP [MCM_DTYPE_LIST_TD].
     //     紀錄回應的類型.
-    // ML  [MCM_DTYPE_USIZE_TD].
-    //     紀錄回應的訊息的長度 (包含最後的 \0).
-    // MC  [binary].
-    //     紀錄回應的訊息.
 
-    // T + REP + ML + MC.
-    mcm_build_base_rep(this_session, rep_code, rep_msg, mlen);
+    // T + REP.
+    MCM_BUILD_BASE_REP_01(tmp_offset, this_session, rep_code);
 
     return MCM_RCODE_PASS;
 }
@@ -1216,56 +1145,39 @@ int mcm_req_add_entry(
     }
 
 FREE_01:
-    cret = mcm_build_add_entry(this_session, fret, NULL);
+    cret = mcm_build_add_entry(this_session, fret);
     return fret < MCM_RCODE_PASS ? fret : cret;
 }
 
 int mcm_parse_del_entry(
     struct mcm_service_session_t *this_session)
 {
-    void *tmp_offset;
-#if MCM_SVDMODE
-    MCM_DTYPE_USIZE_TD plen;
-#endif
-
-
     // 封包格式 :
-    // | T | REQ | PL | PC |.
+    // | T | REQ | PC |.
     // T   [MCM_DTYPE_USIZE_TD].
-    //     紀錄封包的總長度, 內容 = T + REQ + PL + PC.
+    //     紀錄封包的總長度, 內容 = T + REQ + PC.
     // REQ [MCM_DTYPE_LIST_TD].
     //     紀錄請求類型.
-    // PL  [MCM_DTYPE_USIZE_TD].
-    //     紀錄請求的路徑長度 (包括最後的 \0).
     // PC  [binary].
     //     紀錄請求的路徑.
 
-    // PL.
-    tmp_offset = this_session->pkt_offset;
-#if MCM_SVDMODE
-    plen = *((MCM_DTYPE_USIZE_TD *) tmp_offset);
-#endif
-    tmp_offset += sizeof(MCM_DTYPE_USIZE_TD);
     // PC.
-    this_session->req_path = (char *) tmp_offset;
-    MCM_SVDMSG("req_path[" MCM_DTYPE_USIZE_PF "][%s]", plen, this_session->req_path);
+    this_session->req_path = (char *) this_session->pkt_offset;
+    MCM_SVDMSG("req_path[%s]", this_session->req_path);
 
     return MCM_RCODE_PASS;
 }
 
 int mcm_build_del_entry(
     struct mcm_service_session_t *this_session,
-    MCM_DTYPE_LIST_TD rep_code,
-    char *rep_msg)
+    MCM_DTYPE_LIST_TD rep_code)
 {
     int fret;
-    MCM_DTYPE_USIZE_TD mlen;
+    void *tmp_offset;
 
 
-    mlen = (rep_msg != NULL ? strlen(rep_msg) : 0) + 1;
     this_session->pkt_len = sizeof(MCM_DTYPE_USIZE_TD) +
-                            sizeof(MCM_DTYPE_LIST_TD) +
-                            sizeof(MCM_DTYPE_USIZE_TD) + mlen;
+                            sizeof(MCM_DTYPE_LIST_TD);
 
     if(this_session->pkt_len > this_session->pkt_size)
     {
@@ -1273,24 +1185,20 @@ int mcm_build_del_entry(
         if(fret < MCM_RCODE_PASS)
         {
             MCM_EMSG("call mcm_realloc_buf_service() fail");
-            mcm_build_fail_rep(this_session, MCM_RCODE_SERVICE_ALLOC_FAIL, "");
+            mcm_build_fail_rep(this_session, fret, 0);
             return fret;
         }
     }
 
     // 封包格式 :
-    // | T | REP | ML | MC |.
+    // | T | REP |.
     // T   [MCM_DTYPE_USIZE_TD].
-    //     紀錄封包的總長度, 內容 = T + REP + ML + MC.
+    //     紀錄封包的總長度, 內容 = T + REP.
     // REP [MCM_DTYPE_LIST_TD].
     //     紀錄回應的類型.
-    // ML  [MCM_DTYPE_USIZE_TD].
-    //     紀錄回應的訊息的長度 (包含最後的 \0).
-    // MC  [binary].
-    //     紀錄回應的訊息.
 
-    // T + REP + ML + MC.
-    mcm_build_base_rep(this_session, rep_code, rep_msg, mlen);
+    // T + REP.
+    MCM_BUILD_BASE_REP_01(tmp_offset, this_session, rep_code);
 
     return MCM_RCODE_PASS;
 }
@@ -1328,39 +1236,25 @@ int mcm_req_del_entry(
     }
 
 FREE_01:
-    cret = mcm_build_del_entry(this_session, fret, NULL);
+    cret = mcm_build_del_entry(this_session, fret);
     return fret < MCM_RCODE_PASS ? fret : cret;
 }
 
 int mcm_parse_get_all_entry(
     struct mcm_service_session_t *this_session)
 {
-    void *tmp_offset;
-#if MCM_SVDMODE
-    MCM_DTYPE_USIZE_TD plen;
-#endif
-
-
     // 封包格式 :
-    // | T | REQ | PL | PC |.
+    // | T | REQ | PC |.
     // T   [MCM_DTYPE_USIZE_TD].
-    //     紀錄封包的總長度, 內容 = T + REQ + PL + PC.
+    //     紀錄封包的總長度, 內容 = T + REQ + PC.
     // REQ [MCM_DTYPE_LIST_TD].
     //     紀錄請求類型.
-    // PL  [MCM_DTYPE_USIZE_TD].
-    //     紀錄請求的路徑長度 (包括最後的 \0).
     // PC  [binary].
     //     紀錄請求的路徑.
 
-    // PL.
-    tmp_offset = this_session->pkt_offset;
-#if MCM_SVDMODE
-    plen = *((MCM_DTYPE_USIZE_TD *) tmp_offset);
-#endif
-    tmp_offset += sizeof(MCM_DTYPE_USIZE_TD);
     // PC.
-    this_session->req_path = (char *) tmp_offset;
-    MCM_SVDMSG("req_path[" MCM_DTYPE_USIZE_PF "][%s]", plen, this_session->req_path);
+    this_session->req_path = (char *) this_session->pkt_offset;
+    MCM_SVDMSG("req_path[%s]", this_session->req_path);
 
     return MCM_RCODE_PASS;
 }
@@ -1368,20 +1262,16 @@ int mcm_parse_get_all_entry(
 int mcm_build_get_all_entry(
     struct mcm_service_session_t *this_session,
     MCM_DTYPE_LIST_TD rep_code,
-    char *rep_msg,
     MCM_DTYPE_EK_TD rep_count,
     void *rep_data_con,
     MCM_DTYPE_USIZE_TD rep_data_len)
 {
     int fret;
-    MCM_DTYPE_USIZE_TD mlen;
     void *tmp_offset;
 
 
-    mlen = (rep_msg != NULL ? strlen(rep_msg) : 0) + 1;
     this_session->pkt_len = sizeof(MCM_DTYPE_USIZE_TD) +
                             sizeof(MCM_DTYPE_LIST_TD) +
-                            sizeof(MCM_DTYPE_USIZE_TD) + mlen +
                             sizeof(MCM_DTYPE_EK_TD) +
                             sizeof(MCM_DTYPE_USIZE_TD) + rep_data_len;
 
@@ -1391,21 +1281,17 @@ int mcm_build_get_all_entry(
         if(fret < MCM_RCODE_PASS)
         {
             MCM_EMSG("call mcm_realloc_buf_service() fail");
-            mcm_build_fail_rep(this_session, MCM_RCODE_SERVICE_ALLOC_FAIL, "");
+            mcm_build_fail_rep(this_session, fret, 0);
             return fret;
         }
     }
 
     // 封包格式 :
-    // | T | REP | ML | MC | EC | DL | DC |.
+    // | T | REP | EC | DL | DC |.
     // T   [MCM_DTYPE_USIZE_TD].
-    //     紀錄封包的總長度, 內容 = T + REP + ML + MC + EC + DL + DC.
+    //     紀錄封包的總長度, 內容 = T + REP + EC + DL + DC.
     // REP [MCM_DTYPE_LIST_TD].
     //     紀錄回應的類型.
-    // ML  [MCM_DTYPE_USIZE_TD].
-    //     紀錄回應的訊息的長度 (包含最後的 \0).
-    // MC  [binary].
-    //     紀錄回應的訊息.
     // EC  [MCM_DTYPE_EK_TD].
     //     紀錄回應的資料 (資料筆數).
     // DL  [MCM_DTYPE_USIZE_TD].
@@ -1413,9 +1299,8 @@ int mcm_build_get_all_entry(
     // DC  [binary].
     //     紀錄回應的資料 (資料內容).
 
-    // T + REP + ML + MC.
-    mcm_build_base_rep(this_session, rep_code, rep_msg, mlen);
-    tmp_offset = this_session->pkt_offset;
+    // T + REP.
+    MCM_BUILD_BASE_REP_01(tmp_offset, this_session, rep_code);
     // EC.
     *((MCM_DTYPE_EK_TD *) tmp_offset) = rep_count;
     tmp_offset += sizeof(MCM_DTYPE_EK_TD);
@@ -1477,7 +1362,7 @@ int mcm_req_get_all_entry(
     }
 
 FREE_01:
-    cret = mcm_build_get_all_entry(this_session, fret, NULL,
+    cret = mcm_build_get_all_entry(this_session, fret,
                                    fret < MCM_RCODE_PASS ? 0 : self_count, this_session->cache_buf,
                                    fret < MCM_RCODE_PASS ? 0 : self_size);
     return fret < MCM_RCODE_PASS ? fret : cret;
@@ -1486,49 +1371,32 @@ FREE_01:
 int mcm_parse_del_all_entry(
     struct mcm_service_session_t *this_session)
 {
-    void *tmp_offset;
-#if MCM_SVDMODE
-    MCM_DTYPE_USIZE_TD plen;
-#endif
-
-
     // 封包格式 :
-    // | T | REQ | PL | PC |.
+    // | T | REQ | PC |.
     // T   [MCM_DTYPE_USIZE_TD].
-    //     紀錄封包的總長度, 內容 = T + REQ + PL + PC.
+    //     紀錄封包的總長度, 內容 = T + REQ + PC.
     // REQ [MCM_DTYPE_LIST_TD].
     //     紀錄請求類型.
-    // PL  [MCM_DTYPE_USIZE_TD].
-    //     紀錄請求的路徑長度 (包括最後的 \0).
     // PC  [binary].
     //     紀錄請求的路徑.
 
-    // PL.
-    tmp_offset = this_session->pkt_offset;
-#if MCM_SVDMODE
-    plen = *((MCM_DTYPE_USIZE_TD *) tmp_offset);
-#endif
-    tmp_offset += sizeof(MCM_DTYPE_USIZE_TD);
     // PC.
-    this_session->req_path = (char *) tmp_offset;
-    MCM_SVDMSG("req_path[" MCM_DTYPE_USIZE_PF "][%s]", plen, this_session->req_path);
+    this_session->req_path = (char *) this_session->pkt_offset;
+    MCM_SVDMSG("req_path[%s]", this_session->req_path);
 
     return MCM_RCODE_PASS;
 }
 
 int mcm_build_del_all_entry(
     struct mcm_service_session_t *this_session,
-    MCM_DTYPE_LIST_TD rep_code,
-    char *rep_msg)
+    MCM_DTYPE_LIST_TD rep_code)
 {
     int fret;
-    MCM_DTYPE_USIZE_TD mlen;
+    void *tmp_offset;
 
 
-    mlen = (rep_msg != NULL ? strlen(rep_msg) : 0) + 1;
     this_session->pkt_len = sizeof(MCM_DTYPE_USIZE_TD) +
-                            sizeof(MCM_DTYPE_LIST_TD) +
-                            sizeof(MCM_DTYPE_USIZE_TD) + mlen;
+                            sizeof(MCM_DTYPE_LIST_TD);
 
     if(this_session->pkt_len > this_session->pkt_size)
     {
@@ -1536,24 +1404,20 @@ int mcm_build_del_all_entry(
         if(fret < MCM_RCODE_PASS)
         {
             MCM_EMSG("call mcm_realloc_buf_service() fail");
-            mcm_build_fail_rep(this_session, MCM_RCODE_SERVICE_ALLOC_FAIL, "");
+            mcm_build_fail_rep(this_session, fret, 0);
             return fret;
         }
     }
 
     // 封包格式 :
-    // | T | REP | ML | MC |.
+    // | T | REP |.
     // T   [MCM_DTYPE_USIZE_TD].
-    //     紀錄封包的總長度, 內容 = T + REP + ML + MC.
+    //     紀錄封包的總長度, 內容 = T + REP.
     // REP [MCM_DTYPE_LIST_TD].
     //     紀錄回應的類型.
-    // ML  [MCM_DTYPE_USIZE_TD].
-    //     紀錄回應的訊息的長度 (包含最後的 \0).
-    // MC  [binary].
-    //     紀錄回應的訊息.
 
-    // T + REP + ML + MC.
-    mcm_build_base_rep(this_session, rep_code, rep_msg, mlen);
+    // T + REP.
+    MCM_BUILD_BASE_REP_01(tmp_offset, this_session, rep_code);
 
     return MCM_RCODE_PASS;
 }
@@ -1590,39 +1454,25 @@ int mcm_req_del_all_entry(
     }
 
 FREE_01:
-    cret = mcm_build_del_all_entry(this_session, fret, NULL);
+    cret = mcm_build_del_all_entry(this_session, fret);
     return fret < MCM_RCODE_PASS ? fret : cret;
 }
 
 int mcm_parse_get_max_count(
     struct mcm_service_session_t *this_session)
 {
-    void *tmp_offset;
-#if MCM_SVDMODE
-    MCM_DTYPE_USIZE_TD plen;
-#endif
-
-
     // 封包格式 :
-    // | T | REQ | PL | PC |.
+    // | T | REQ | PC |.
     // T   [MCM_DTYPE_USIZE_TD].
-    //     紀錄封包的總長度, 內容 = T + REQ + PL + PC.
+    //     紀錄封包的總長度, 內容 = T + REQ + PC.
     // REQ [MCM_DTYPE_LIST_TD].
     //     紀錄請求類型.
-    // PL  [MCM_DTYPE_USIZE_TD].
-    //     紀錄請求的路徑長度 (包括最後的 \0).
     // PC  [binary].
     //     紀錄請求的路徑.
 
-    // PL.
-    tmp_offset = this_session->pkt_offset;
-#if MCM_SVDMODE
-    plen = *((MCM_DTYPE_USIZE_TD *) tmp_offset);
-#endif
-    tmp_offset += sizeof(MCM_DTYPE_USIZE_TD);
     // PC.
-    this_session->req_path = (char *) tmp_offset;
-    MCM_SVDMSG("req_path[" MCM_DTYPE_USIZE_PF "][%s]", plen, this_session->req_path);
+    this_session->req_path = (char *) this_session->pkt_offset;
+    MCM_SVDMSG("req_path[%s]", this_session->req_path);
 
     return MCM_RCODE_PASS;
 }
@@ -1630,18 +1480,14 @@ int mcm_parse_get_max_count(
 int mcm_build_get_max_count(
     struct mcm_service_session_t *this_session,
     MCM_DTYPE_LIST_TD rep_code,
-    char *rep_msg,
     MCM_DTYPE_EK_TD rep_count)
 {
     int fret;
-    MCM_DTYPE_USIZE_TD mlen;
     void *tmp_offset;
 
 
-    mlen = (rep_msg != NULL ? strlen(rep_msg) : 0) + 1;
     this_session->pkt_len = sizeof(MCM_DTYPE_USIZE_TD) +
                             sizeof(MCM_DTYPE_LIST_TD) +
-                            sizeof(MCM_DTYPE_USIZE_TD) + mlen +
                             sizeof(MCM_DTYPE_EK_TD);
 
     if(this_session->pkt_len > this_session->pkt_size)
@@ -1650,27 +1496,22 @@ int mcm_build_get_max_count(
         if(fret < MCM_RCODE_PASS)
         {
             MCM_EMSG("call mcm_realloc_buf_service() fail");
-            mcm_build_fail_rep(this_session, MCM_RCODE_SERVICE_ALLOC_FAIL, "");
+            mcm_build_fail_rep(this_session, fret, 0);
             return fret;
         }
     }
 
     // 封包格式 :
-    // | T | REP | ML | MC | EC |.
+    // | T | REP | EC |.
     // T   [MCM_DTYPE_USIZE_TD].
-    //     紀錄封包的總長度, 內容 = T + REP + ML + MC + EC.
+    //     紀錄封包的總長度, 內容 = T + REP + EC.
     // REP [MCM_DTYPE_LIST_TD].
     //     紀錄回應的類型.
-    // ML  [MCM_DTYPE_USIZE_TD].
-    //     紀錄回應的訊息的長度 (包含最後的 \0).
-    // MC  [binary].
-    //     紀錄回應的訊息.
     // EC  [MCM_DTYPE_EK_TD].
     //     紀錄回應的資料.
 
-    // T + REP + ML + MC.
-    mcm_build_base_rep(this_session, rep_code, rep_msg, mlen);
-    tmp_offset = this_session->pkt_offset;
+    // T + REP.
+    MCM_BUILD_BASE_REP_01(tmp_offset, this_session, rep_code);
     // EC.
     *((MCM_DTYPE_EK_TD *) tmp_offset) = rep_count;
 
@@ -1696,39 +1537,25 @@ int mcm_req_get_max_count(
     }
 
 FREE_01:
-    cret = mcm_build_get_max_count(this_session, fret, NULL, self_count);
+    cret = mcm_build_get_max_count(this_session, fret, self_count);
     return fret < MCM_RCODE_PASS ? fret : cret;
 }
 
 int mcm_parse_get_count(
     struct mcm_service_session_t *this_session)
 {
-    void *tmp_offset;
-#if MCM_SVDMODE
-    MCM_DTYPE_USIZE_TD plen;
-#endif
-
-
     // 封包格式 :
-    // | T | REQ | PL | PC |.
+    // | T | REQ | PC |.
     // T   [MCM_DTYPE_USIZE_TD].
-    //     紀錄封包的總長度, 內容 = T + REQ + PL + PC.
+    //     紀錄封包的總長度, 內容 = T + REQ + PC.
     // REQ [MCM_DTYPE_LIST_TD].
     //     紀錄請求類型.
-    // PL  [MCM_DTYPE_USIZE_TD].
-    //     紀錄請求的路徑長度 (包括最後的 \0).
     // PC  [binary].
     //     紀錄請求的路徑.
 
-    // PL.
-    tmp_offset = this_session->pkt_offset;
-#if MCM_SVDMODE
-    plen = *((MCM_DTYPE_USIZE_TD *) tmp_offset);
-#endif
-    tmp_offset += sizeof(MCM_DTYPE_USIZE_TD);
     // PC.
-    this_session->req_path = (char *) tmp_offset;
-    MCM_SVDMSG("req_path[" MCM_DTYPE_USIZE_PF "][%s]", plen, this_session->req_path);
+    this_session->req_path = (char *) this_session->pkt_offset;
+    MCM_SVDMSG("req_path[%s]", this_session->req_path);
 
     return MCM_RCODE_PASS;
 }
@@ -1736,18 +1563,14 @@ int mcm_parse_get_count(
 int mcm_build_get_count(
     struct mcm_service_session_t *this_session,
     MCM_DTYPE_LIST_TD rep_code,
-    char *rep_msg,
     MCM_DTYPE_EK_TD rep_count)
 {
     int fret;
-    MCM_DTYPE_USIZE_TD mlen;
     void *tmp_offset;
 
 
-    mlen = (rep_msg != NULL ? strlen(rep_msg) : 0) + 1;
     this_session->pkt_len = sizeof(MCM_DTYPE_USIZE_TD) +
                             sizeof(MCM_DTYPE_LIST_TD) +
-                            sizeof(MCM_DTYPE_USIZE_TD) + mlen +
                             sizeof(MCM_DTYPE_EK_TD);
 
     if(this_session->pkt_len > this_session->pkt_size)
@@ -1756,27 +1579,22 @@ int mcm_build_get_count(
         if(fret < MCM_RCODE_PASS)
         {
             MCM_EMSG("call mcm_realloc_buf_service() fail");
-            mcm_build_fail_rep(this_session, MCM_RCODE_SERVICE_ALLOC_FAIL, "");
+            mcm_build_fail_rep(this_session, fret, 0);
             return fret;
         }
     }
 
     // 封包格式 :
-    // | T | REP | ML | MC | EC |.
+    // | T | REP | EC |.
     // T   [MCM_DTYPE_USIZE_TD].
-    //     紀錄封包的總長度, 內容 = T + REP + ML + MC + EC.
+    //     紀錄封包的總長度, 內容 = T + REP + EC.
     // REP [MCM_DTYPE_LIST_TD].
     //     紀錄回應的類型.
-    // ML  [MCM_DTYPE_USIZE_TD].
-    //     紀錄回應的訊息的長度 (包含最後的 \0).
-    // MC  [binary].
-    //     紀錄回應的訊息.
     // EC  [MCM_DTYPE_EK_TD].
     //     紀錄回應的資料.
 
-    // T + REP + ML + MC.
-    mcm_build_base_rep(this_session, rep_code, rep_msg, mlen);
-    tmp_offset = this_session->pkt_offset;
+    // T + REP.
+    MCM_BUILD_BASE_REP_01(tmp_offset, this_session, rep_code);
     // EC.
     *((MCM_DTYPE_EK_TD *) tmp_offset) = rep_count;
 
@@ -1802,39 +1620,25 @@ int mcm_req_get_count(
     }
 
 FREE_01:
-    cret = mcm_build_get_count(this_session, fret, NULL, self_count);
+    cret = mcm_build_get_count(this_session, fret, self_count);
     return fret < MCM_RCODE_PASS ? fret : cret;
 }
 
 int mcm_parse_get_usable_key(
     struct mcm_service_session_t *this_session)
 {
-    void *tmp_offset;
-#if MCM_SVDMODE
-    MCM_DTYPE_USIZE_TD plen;
-#endif
-
-
     // 封包格式 :
-    // | T | REQ | PL | PC |.
+    // | T | REQ | PC |.
     // T   [MCM_DTYPE_USIZE_TD].
-    //     紀錄封包的總長度, 內容 = T + REQ + PL + PC.
+    //     紀錄封包的總長度, 內容 = T + REQ + PC.
     // REQ [MCM_DTYPE_LIST_TD].
     //     紀錄請求類型.
-    // PL  [MCM_DTYPE_USIZE_TD].
-    //     紀錄請求的路徑長度 (包括最後的 \0).
     // PC  [binary].
     //     紀錄請求的路徑.
 
-    // PL.
-    tmp_offset = this_session->pkt_offset;
-#if MCM_SVDMODE
-    plen = *((MCM_DTYPE_USIZE_TD *) tmp_offset);
-#endif
-    tmp_offset += sizeof(MCM_DTYPE_USIZE_TD);
     // PC.
-    this_session->req_path = (char *) tmp_offset;
-    MCM_SVDMSG("req_path[" MCM_DTYPE_USIZE_PF "][%s]", plen, this_session->req_path);
+    this_session->req_path = (char *) this_session->pkt_offset;
+    MCM_SVDMSG("req_path[%s]", this_session->req_path);
 
     return MCM_RCODE_PASS;
 }
@@ -1842,18 +1646,14 @@ int mcm_parse_get_usable_key(
 int mcm_build_get_usable_key(
     struct mcm_service_session_t *this_session,
     MCM_DTYPE_LIST_TD rep_code,
-    char *rep_msg,
     MCM_DTYPE_EK_TD rep_usable_key)
 {
     int fret;
-    MCM_DTYPE_USIZE_TD mlen;
     void *tmp_offset;
 
 
-    mlen = (rep_msg != NULL ? strlen(rep_msg) : 0) + 1;
     this_session->pkt_len = sizeof(MCM_DTYPE_USIZE_TD) +
                             sizeof(MCM_DTYPE_LIST_TD) +
-                            sizeof(MCM_DTYPE_USIZE_TD) + mlen +
                             sizeof(MCM_DTYPE_EK_TD);
 
     if(this_session->pkt_len > this_session->pkt_size)
@@ -1862,27 +1662,22 @@ int mcm_build_get_usable_key(
         if(fret < MCM_RCODE_PASS)
         {
             MCM_EMSG("call mcm_realloc_buf_service() fail");
-            mcm_build_fail_rep(this_session, MCM_RCODE_SERVICE_ALLOC_FAIL, "");
+            mcm_build_fail_rep(this_session, fret, 0);
             return fret;
         }
     }
 
     // 封包格式 :
-    // | T | REP | ML | MC | EK |.
+    // | T | REP | EK |.
     // T   [MCM_DTYPE_USIZE_TD].
-    //     紀錄封包的總長度, 內容 = T + REP + ML + MC + EK.
+    //     紀錄封包的總長度, 內容 = T + REP + EK.
     // REP [MCM_DTYPE_LIST_TD].
     //     紀錄回應的類型.
-    // ML  [MCM_DTYPE_USIZE_TD].
-    //     紀錄回應的訊息的長度 (包含最後的 \0).
-    // MC  [binary].
-    //     紀錄回應的訊息.
     // EK  [MCM_DTYPE_EK_TD].
     //     紀錄回應的資料.
 
-    // T + REP + ML + MC.
-    mcm_build_base_rep(this_session, rep_code, rep_msg, mlen);
-    tmp_offset = this_session->pkt_offset;
+    // T + REP.
+    MCM_BUILD_BASE_REP_01(tmp_offset, this_session, rep_code);
     // EK.
     *((MCM_DTYPE_EK_TD *) tmp_offset) = rep_usable_key;
 
@@ -1908,7 +1703,7 @@ int mcm_req_get_usable_key(
     }
 
 FREE_01:
-    cret = mcm_build_get_usable_key(this_session, fret, NULL, self_key);
+    cret = mcm_build_get_usable_key(this_session, fret, self_key);
     return fret < MCM_RCODE_PASS ? fret : cret;
 }
 
@@ -1927,17 +1722,14 @@ int mcm_parse_update(
 
 int mcm_build_update(
     struct mcm_service_session_t *this_session,
-    MCM_DTYPE_LIST_TD rep_code,
-    char *rep_msg)
+    MCM_DTYPE_LIST_TD rep_code)
 {
     int fret;
-    MCM_DTYPE_USIZE_TD mlen;
+    void *tmp_offset;
 
 
-    mlen = (rep_msg != NULL ? strlen(rep_msg) : 0) + 1;
     this_session->pkt_len = sizeof(MCM_DTYPE_USIZE_TD) +
-                            sizeof(MCM_DTYPE_LIST_TD) +
-                            sizeof(MCM_DTYPE_USIZE_TD) + mlen;
+                            sizeof(MCM_DTYPE_LIST_TD);
 
     if(this_session->pkt_len > this_session->pkt_size)
     {
@@ -1945,24 +1737,20 @@ int mcm_build_update(
         if(fret < MCM_RCODE_PASS)
         {
             MCM_EMSG("call mcm_realloc_buf_service() fail");
-            mcm_build_fail_rep(this_session, MCM_RCODE_SERVICE_ALLOC_FAIL, "");
+            mcm_build_fail_rep(this_session, fret, 0);
             return fret;
         }
     }
 
     // 封包格式 :
-    // | T | REP | ML | MC |.
+    // | T | REP |.
     // T   [MCM_DTYPE_USIZE_TD].
-    //     紀錄封包的總長度, 內容 = T + REP + ML + MC.
+    //     紀錄封包的總長度, 內容 = T + REP.
     // REP [MCM_DTYPE_LIST_TD].
     //     紀錄回應的類型.
-    // ML  [MCM_DTYPE_USIZE_TD].
-    //     紀錄回應的訊息的長度 (包含最後的 \0).
-    // MC  [binary].
-    //     紀錄回應的訊息.
 
-    // T + REP + ML + MC.
-    mcm_build_base_rep(this_session, rep_code, rep_msg, mlen);
+    // T + REP.
+    MCM_BUILD_BASE_REP_01(tmp_offset, this_session, rep_code);
 
     return MCM_RCODE_PASS;
 }
@@ -1985,7 +1773,7 @@ int mcm_req_update(
     }
 
 FREE_01:
-    cret = mcm_build_update(this_session, fret, NULL);
+    cret = mcm_build_update(this_session, fret);
     return fret < MCM_RCODE_PASS ? fret : cret;
 }
 
@@ -2010,17 +1798,14 @@ int mcm_parse_save(
 
 int mcm_build_save(
     struct mcm_service_session_t *this_session,
-    MCM_DTYPE_LIST_TD rep_code,
-    char *rep_msg)
+    MCM_DTYPE_LIST_TD rep_code)
 {
     int fret;
-    MCM_DTYPE_USIZE_TD mlen;
+    void *tmp_offset;
 
 
-    mlen = (rep_msg != NULL ? strlen(rep_msg) : 0) + 1;
     this_session->pkt_len = sizeof(MCM_DTYPE_USIZE_TD) +
-                            sizeof(MCM_DTYPE_LIST_TD) +
-                            sizeof(MCM_DTYPE_USIZE_TD) + mlen;
+                            sizeof(MCM_DTYPE_LIST_TD);
 
     if(this_session->pkt_len > this_session->pkt_size)
     {
@@ -2028,24 +1813,20 @@ int mcm_build_save(
         if(fret < MCM_RCODE_PASS)
         {
             MCM_EMSG("call mcm_realloc_buf_service() fail");
-            mcm_build_fail_rep(this_session, MCM_RCODE_SERVICE_ALLOC_FAIL, "");
+            mcm_build_fail_rep(this_session, fret, 0);
             return fret;
         }
     }
 
     // 封包格式 :
-    // | T | REP | ML | MC |.
+    // | T | REP |.
     // T   [MCM_DTYPE_USIZE_TD].
-    //     紀錄封包的總長度, 內容 = T + REP + ML + MC.
+    //     紀錄封包的總長度, 內容 = T + REP.
     // REP [MCM_DTYPE_LIST_TD].
     //     紀錄回應的類型.
-    // ML  [MCM_DTYPE_USIZE_TD].
-    //     紀錄回應的訊息的長度 (包含最後的 \0).
-    // MC  [binary].
-    //     紀錄回應的訊息.
 
-    // T + REP + ML + MC.
-    mcm_build_base_rep(this_session, rep_code, rep_msg, mlen);
+    // T + REP.
+    MCM_BUILD_BASE_REP_01(tmp_offset, this_session, rep_code);
 
     return MCM_RCODE_PASS;
 }
@@ -2071,39 +1852,25 @@ int mcm_req_save(
     }
 
 FREE_01:
-    cret = mcm_build_save(this_session, fret, NULL);
+    cret = mcm_build_save(this_session, fret);
     return fret < MCM_RCODE_PASS ? fret : cret;
 }
 
 int mcm_parse_run(
     struct mcm_service_session_t *this_session)
 {
-    void *tmp_offset;
-#if MCM_SVDMODE
-    MCM_DTYPE_USIZE_TD plen;
-#endif
-
-
     // 封包格式 :
-    // | T | REQ | PL | PC |.
+    // | T | REQ | PC |.
     // T   [MCM_DTYPE_USIZE_TD].
-    //     紀錄封包的總長度, 內容 = T + REQ + PL + PC.
+    //     紀錄封包的總長度, 內容 = T + REQ + PC.
     // REQ [MCM_DTYPE_LIST_TD].
     //     紀錄請求類型.
-    // PL  [MCM_DTYPE_USIZE_TD].
-    //     紀錄請求的路徑長度 (包括最後的 \0).
     // PC  [binary].
     //     紀錄請求的路徑.
 
-    // PL.
-    tmp_offset = this_session->pkt_offset;
-#if MCM_SVDMODE
-    plen = *((MCM_DTYPE_USIZE_TD *) tmp_offset);
-#endif
-    tmp_offset += sizeof(MCM_DTYPE_USIZE_TD);
     // PC.
-    this_session->req_path = (char *) tmp_offset;
-    MCM_SVDMSG("req_path[" MCM_DTYPE_USIZE_PF "][%s]", plen, this_session->req_path);
+    this_session->req_path = (char *) this_session->pkt_offset;
+    MCM_SVDMSG("req_path[%s]", this_session->req_path);
 
     return MCM_RCODE_PASS;
 }
@@ -2115,9 +1882,18 @@ int mcm_build_run(
 {
     int fret;
     MCM_DTYPE_USIZE_TD mlen;
+    void *tmp_offset;
 
 
-    mlen = (rep_msg != NULL ? strlen(rep_msg) : 0) + 1;
+    if(rep_msg == NULL)
+    {
+        rep_msg = "";
+        mlen = 1;
+    }
+    else
+    {
+        mlen = strlen(rep_msg) + 1;
+    }
     this_session->pkt_len = sizeof(MCM_DTYPE_USIZE_TD) +
                             sizeof(MCM_DTYPE_LIST_TD) +
                             sizeof(MCM_DTYPE_USIZE_TD) + mlen;
@@ -2128,7 +1904,7 @@ int mcm_build_run(
         if(fret < MCM_RCODE_PASS)
         {
             MCM_EMSG("call mcm_realloc_buf_service() fail");
-            mcm_build_fail_rep(this_session, MCM_RCODE_SERVICE_ALLOC_FAIL, "");
+            mcm_build_fail_rep(this_session, fret, 1);
             return fret;
         }
     }
@@ -2145,7 +1921,7 @@ int mcm_build_run(
     //     紀錄回應的訊息.
 
     // T + REP + ML + MC.
-    mcm_build_base_rep(this_session, rep_code, rep_msg, mlen);
+    MCM_BUILD_BASE_REP_02(tmp_offset, this_session, rep_code, rep_msg, mlen);
 
     return MCM_RCODE_PASS;
 }
@@ -2201,17 +1977,14 @@ int mcm_parse_shutdown(
 
 int mcm_build_shutdown(
     struct mcm_service_session_t *this_session,
-    MCM_DTYPE_LIST_TD rep_code,
-    char *rep_msg)
+    MCM_DTYPE_LIST_TD rep_code)
 {
     int fret;
-    MCM_DTYPE_USIZE_TD mlen;
+    void *tmp_offset;
 
 
-    mlen = (rep_msg != NULL ? strlen(rep_msg) : 0) + 1;
     this_session->pkt_len = sizeof(MCM_DTYPE_USIZE_TD) +
-                            sizeof(MCM_DTYPE_LIST_TD) +
-                            sizeof(MCM_DTYPE_USIZE_TD) + mlen;
+                            sizeof(MCM_DTYPE_LIST_TD);
 
     if(this_session->pkt_len > this_session->pkt_size)
     {
@@ -2219,24 +1992,20 @@ int mcm_build_shutdown(
         if(fret < MCM_RCODE_PASS)
         {
             MCM_EMSG("call mcm_realloc_buf_service() fail");
-            mcm_build_fail_rep(this_session, MCM_RCODE_SERVICE_ALLOC_FAIL, "");
+            mcm_build_fail_rep(this_session, fret, 0);
             return fret;
         }
     }
 
     // 封包格式 :
-    // | T | REP | ML | MC |.
+    // | T | REP |.
     // T   [MCM_DTYPE_USIZE_TD].
-    //     紀錄封包的總長度, 內容 = T + REP + ML + MC.
+    //     紀錄封包的總長度, 內容 = T + REP.
     // REP [MCM_DTYPE_LIST_TD].
     //     紀錄回應的類型.
-    // ML  [MCM_DTYPE_USIZE_TD].
-    //     紀錄回應的訊息的長度 (包含最後的 \0).
-    // MC  [binary].
-    //     紀錄回應的訊息.
 
-    // T + REP + ML + MC.
-    mcm_build_base_rep(this_session, rep_code, rep_msg, mlen);
+    // T + REP.
+    MCM_BUILD_BASE_REP_01(tmp_offset, this_session, rep_code);
 
     return MCM_RCODE_PASS;
 }
@@ -2259,39 +2028,25 @@ int mcm_req_shutdown(
     }
 
 FREE_01:
-    cret = mcm_build_shutdown(this_session, fret, NULL);
+    cret = mcm_build_shutdown(this_session, fret);
     return fret < MCM_RCODE_PASS ? fret : cret;
 }
 
 int mcm_parse_check_store_file(
     struct mcm_service_session_t *this_session)
 {
-    void *tmp_offset;
-#if MCM_SVDMODE
-    MCM_DTYPE_USIZE_TD plen;
-#endif
-
-
     // 封包格式 :
-    // | T | REQ | PL | PC |.
+    // | T | REQ | PC |.
     // T   [MCM_DTYPE_USIZE_TD].
-    //     紀錄封包總長度, 內容 = T + REQ + PL + PC.
+    //     紀錄封包總長度, 內容 = T + REQ + PC.
     // REQ [MCM_DTYPE_LIST_TD].
     //     紀錄請求類型.
-    // PL  [MCM_DTYPE_USIZE_TD].
-    //     紀錄檢查的檔案的路徑長度 (包括最後的 \0).
     // PC  [binary].
     //     紀錄檢查的檔案的路徑.
 
-    // PL.
-    tmp_offset = this_session->pkt_offset;
-#if MCM_SVDMODE
-    plen = *((MCM_DTYPE_USIZE_TD *) tmp_offset);
-#endif
-    tmp_offset += sizeof(MCM_DTYPE_USIZE_TD);
     // PC.
-    this_session->req_path = (char *) tmp_offset;
-    MCM_SVDMSG("req_path[" MCM_DTYPE_USIZE_PF "][%s]", plen, this_session->req_path);
+    this_session->req_path = (char *) this_session->pkt_offset;
+    MCM_SVDMSG("req_path[%s]", this_session->req_path);
 
     return MCM_RCODE_PASS;
 }
@@ -2299,20 +2054,16 @@ int mcm_parse_check_store_file(
 int mcm_build_check_store_file(
     struct mcm_service_session_t *this_session,
     MCM_DTYPE_LIST_TD rep_code,
-    char *rep_msg,
     MCM_DTYPE_LIST_TD store_result,
     char *version_con,
     MCM_DTYPE_USIZE_TD version_len)
 {
     int fret;
-    MCM_DTYPE_USIZE_TD mlen;
     void *tmp_offset;
 
 
-    mlen = (rep_msg != NULL ? strlen(rep_msg) : 0) + 1;
     this_session->pkt_len = sizeof(MCM_DTYPE_USIZE_TD) +
                             sizeof(MCM_DTYPE_LIST_TD) +
-                            sizeof(MCM_DTYPE_USIZE_TD) + mlen +
                             sizeof(MCM_DTYPE_LIST_TD) +
                             sizeof(MCM_DTYPE_USIZE_TD) + version_len;
 
@@ -2322,21 +2073,17 @@ int mcm_build_check_store_file(
         if(fret < MCM_RCODE_PASS)
         {
             MCM_EMSG("call mcm_realloc_buf_service() fail");
-            mcm_build_fail_rep(this_session, MCM_RCODE_SERVICE_ALLOC_FAIL, "");
+            mcm_build_fail_rep(this_session, fret, 0);
             return fret;
         }
     }
 
     // 封包格式 :
-    // | T | REP | ML | MC | SR | VL | VC |.
+    // | T | REP | SR | VL | VC |.
     // T   [MCM_DTYPE_USIZE_TD].
-    //     紀錄封包的總長度, 內容 = T + REP + ML + MC.
+    //     紀錄封包的總長度, 內容 = T + REP.
     // REP [MCM_DTYPE_LIST_TD].
     //     紀錄回應的類型.
-    // ML  [MCM_DTYPE_USIZE_TD].
-    //     紀錄回應的訊息的長度 (包含最後的 \0).
-    // MC  [binary].
-    //     紀錄回應的訊息.
     // SR  [MCM_DTYPE_LIST_TD].
     //     紀錄檔案的檢查結果.
     // VL  [MCM_DTYPE_USIZE_TD].
@@ -2344,9 +2091,8 @@ int mcm_build_check_store_file(
     // VC  [binary].
     //     紀錄檔案的版本資訊.
 
-    // T + REP + ML + MC.
-    mcm_build_base_rep(this_session, rep_code, rep_msg, mlen);
-    tmp_offset = this_session->pkt_offset;
+    // T + REP.
+    MCM_BUILD_BASE_REP_01(tmp_offset, this_session, rep_code);
     // SR.
     *((MCM_DTYPE_LIST_TD *) tmp_offset) = store_result;
     tmp_offset += sizeof(MCM_DTYPE_LIST_TD);
@@ -2382,56 +2128,39 @@ int mcm_req_check_store_file(
     }
 
 FREE_01:
-    cret = mcm_build_check_store_file(this_session, fret, NULL, store_result, store_version, vlen);
+    cret = mcm_build_check_store_file(this_session, fret, store_result, store_version, vlen);
     return fret < MCM_RCODE_PASS ? fret : cret;
 }
 
 int mcm_parse_check_mask_path(
     struct mcm_service_session_t *this_session)
 {
-    void *tmp_offset;
-#if MCM_SVDMODE
-    MCM_DTYPE_USIZE_TD plen;
-#endif
-
-
     // 封包格式 :
-    // | T | REQ | PL | PC |.
+    // | T | REQ | PC |.
     // T   [MCM_DTYPE_USIZE_TD].
-    //     紀錄封包總長度, 內容 = T + REQ + PL + PC.
+    //     紀錄封包總長度, 內容 = T + REQ + PC.
     // REQ [MCM_DTYPE_LIST_TD].
     //     紀錄請求類型.
-    // PL  [MCM_DTYPE_USIZE_TD].
-    //     紀錄請求的路徑的長度 (包括最後的 \0).
     // PC  [binary].
     //     紀錄請求的路徑.
 
-    // PL.
-    tmp_offset = this_session->pkt_offset;
-#if MCM_SVDMODE
-    plen = *((MCM_DTYPE_USIZE_TD *) tmp_offset);
-#endif
-    tmp_offset += sizeof(MCM_DTYPE_USIZE_TD);
     // PC.
-    this_session->req_path = (char *) tmp_offset;
-    MCM_SVDMSG("req_path[" MCM_DTYPE_USIZE_PF "][%s]", plen, this_session->req_path);
+    this_session->req_path = (char *) this_session->pkt_offset;
+    MCM_SVDMSG("req_path[%s]", this_session->req_path);
 
     return MCM_RCODE_PASS;
 }
 
 int mcm_build_check_mask_path(
     struct mcm_service_session_t *this_session,
-    MCM_DTYPE_LIST_TD rep_code,
-    char *rep_msg)
+    MCM_DTYPE_LIST_TD rep_code)
 {
     int fret;
-    MCM_DTYPE_USIZE_TD mlen;
+    void *tmp_offset;
 
 
-    mlen = (rep_msg != NULL ? strlen(rep_msg) : 0) + 1;
     this_session->pkt_len = sizeof(MCM_DTYPE_USIZE_TD) +
-                            sizeof(MCM_DTYPE_LIST_TD) +
-                            sizeof(MCM_DTYPE_USIZE_TD) + mlen;
+                            sizeof(MCM_DTYPE_LIST_TD);
 
     if(this_session->pkt_len > this_session->pkt_size)
     {
@@ -2439,24 +2168,20 @@ int mcm_build_check_mask_path(
         if(fret < MCM_RCODE_PASS)
         {
             MCM_EMSG("call mcm_realloc_buf_service() fail");
-            mcm_build_fail_rep(this_session, MCM_RCODE_SERVICE_ALLOC_FAIL, "");
+            mcm_build_fail_rep(this_session, fret, 0);
             return fret;
         }
     }
 
     // 封包格式 :
-    // | T | REP | ML | MC |.
+    // | T | REP |.
     // T   [MCM_DTYPE_USIZE_TD].
-    //     紀錄封包的總長度, 內容 = T + REP + ML + MC.
+    //     紀錄封包的總長度, 內容 = T + REP.
     // REP [MCM_DTYPE_LIST_TD].
     //     紀錄回應的類型.
-    // ML  [MCM_DTYPE_USIZE_TD].
-    //     紀錄回應的訊息的長度 (包含最後的 \0).
-    // MC  [binary].
-    //     紀錄回應的訊息.
 
-    // T + REP + ML + MC.
-    mcm_build_base_rep(this_session, rep_code, rep_msg, mlen);
+    // T + REP.
+    MCM_BUILD_BASE_REP_01(tmp_offset, this_session, rep_code);
 
     return MCM_RCODE_PASS;
 }
@@ -2479,7 +2204,7 @@ int mcm_req_check_mask_path(
     }
 
 FREE_01:
-    cret = mcm_build_check_mask_path(this_session, fret, NULL);
+    cret = mcm_build_check_mask_path(this_session, fret);
     return fret < MCM_RCODE_PASS ? fret : cret;
 }
 
@@ -2499,18 +2224,14 @@ int mcm_parse_get_path_max_length(
 int mcm_build_get_path_max_length(
     struct mcm_service_session_t *this_session,
     MCM_DTYPE_LIST_TD rep_code,
-    char *rep_msg,
     MCM_DTYPE_USIZE_TD rep_max_length)
 {
     int fret;
-    MCM_DTYPE_USIZE_TD mlen;
     void *tmp_offset;
 
 
-    mlen = (rep_msg != NULL ? strlen(rep_msg) : 0) + 1;
     this_session->pkt_len = sizeof(MCM_DTYPE_USIZE_TD) +
                             sizeof(MCM_DTYPE_LIST_TD) +
-                            sizeof(MCM_DTYPE_USIZE_TD) + mlen +
                             sizeof(MCM_DTYPE_EK_TD);
 
     if(this_session->pkt_len > this_session->pkt_size)
@@ -2519,27 +2240,22 @@ int mcm_build_get_path_max_length(
         if(fret < MCM_RCODE_PASS)
         {
             MCM_EMSG("call mcm_realloc_buf_service() fail");
-            mcm_build_fail_rep(this_session, MCM_RCODE_SERVICE_ALLOC_FAIL, "");
+            mcm_build_fail_rep(this_session, fret, 0);
             return fret;
         }
     }
 
     // 封包格式 :
-    // | T | REP | ML | MC | PML |.
+    // | T | REP | PML |.
     // T   [MCM_DTYPE_USIZE_TD].
-    //     紀錄封包的總長度, 內容 = T + REP + ML + MC + PML.
+    //     紀錄封包的總長度, 內容 = T + REP + PML.
     // REP [MCM_DTYPE_LIST_TD].
     //     紀錄回應的類型.
-    // ML  [MCM_DTYPE_USIZE_TD].
-    //     紀錄回應的訊息的長度 (包含最後的 \0).
-    // MC  [binary].
-    //     紀錄回應的訊息.
     // PML [MCM_DTYPE_USIZE_TD].
     //     紀錄回應的資料.
 
-    // T + REP + ML + MC.
-    mcm_build_base_rep(this_session, rep_code, rep_msg, mlen);
-    tmp_offset = this_session->pkt_offset;
+    // T + REP.
+    MCM_BUILD_BASE_REP_01(tmp_offset, this_session, rep_code);
     // PML.
     *((MCM_DTYPE_USIZE_TD *) tmp_offset) = rep_max_length;
 
@@ -2565,60 +2281,63 @@ int mcm_req_get_path_max_length(
     }
 
 FREE_01:
-    cret = mcm_build_get_path_max_length(this_session, fret, NULL, max_len);
+    cret = mcm_build_get_path_max_length(this_session, fret, max_len);
     return fret < MCM_RCODE_PASS ? fret : cret;
 }
 
 int mcm_parse_get_list_name(
     struct mcm_service_session_t *this_session)
 {
-    void *tmp_offset;
-#if MCM_SVDMODE
-    MCM_DTYPE_USIZE_TD plen;
-#endif
-
-
     // 封包格式 :
-    // | T | REQ | PL | PC |.
+    // | T | REQ | PC |.
     // T   [MCM_DTYPE_USIZE_TD].
-    //     紀錄封包總長度, 內容 = T + REQ + PL + PC.
+    //     紀錄封包總長度, 內容 = T + REQ + PC.
     // REQ [MCM_DTYPE_LIST_TD].
     //     紀錄請求類型.
-    // PL  [MCM_DTYPE_USIZE_TD].
-    //     紀錄請求的路徑的長度 (包括最後的 \0).
     // PC  [binary].
     //     紀錄請求的路徑.
 
-    // PL.
-    tmp_offset = this_session->pkt_offset;
-#if MCM_SVDMODE
-    plen = *((MCM_DTYPE_USIZE_TD *) tmp_offset);
-#endif
-    tmp_offset += sizeof(MCM_DTYPE_USIZE_TD);
     // PC.
-    this_session->req_path = (char *) tmp_offset;
-    MCM_SVDMSG("req_path[" MCM_DTYPE_USIZE_PF "][%s]", plen, this_session->req_path);
+    this_session->req_path = (char *) this_session->pkt_offset;
+    MCM_SVDMSG("req_path[%s]", this_session->req_path);
 
     return MCM_RCODE_PASS;
 }
 
-int mcm_build_get_list_name(
+int mcm_layout_get_list_name(
     struct mcm_service_session_t *this_session,
-    MCM_DTYPE_LIST_TD rep_code,
-    char *rep_msg,
-    void *rep_data_con,
-    MCM_DTYPE_USIZE_TD rep_data_len)
+    MCM_DTYPE_USIZE_TD rep_data_len,
+    void **rep_data_buf)
 {
     int fret;
-    MCM_DTYPE_USIZE_TD mlen;
-    void *tmp_offset;
+    MCM_DTYPE_USIZE_TD len_offset, buf_offset;
 
 
-    mlen = (rep_msg != NULL ? strlen(rep_msg) : 0) + 1;
+    // 預先將資料放置位置設定到 this_session->pkt_buf 內,
+    // 避免從 this_session->cache_buf 拷貝資料的動作.
+
+    // 封包格式 :
+    // | T | REP | DL | DC |.
+    // T   [MCM_DTYPE_USIZE_TD].
+    //     紀錄封包的總長度, 內容 = T + REP + DL + DC.
+    // REP [MCM_DTYPE_LIST_TD].
+    //     紀錄回應的類型.
+    // DL  [MCM_DTYPE_USIZE_TD].
+    //     紀錄回應的資料的長度.
+    // DC  [binary].
+    //     紀錄回應的資料.
+
+    // T + REP.
     this_session->pkt_len = sizeof(MCM_DTYPE_USIZE_TD) +
-                            sizeof(MCM_DTYPE_LIST_TD) +
-                            sizeof(MCM_DTYPE_USIZE_TD) + mlen +
-                            sizeof(MCM_DTYPE_LIST_TD) + sizeof(MCM_DTYPE_USIZE_TD) + rep_data_len;
+                            sizeof(MCM_DTYPE_LIST_TD);
+    // 紀錄資料長度要放到封包的位置.
+    len_offset = this_session->pkt_len;
+    // DL.
+    this_session->pkt_len += sizeof(MCM_DTYPE_USIZE_TD);
+    // 紀錄資料內容要放到封包的位置.
+    buf_offset = this_session->pkt_len;
+    // DC.
+    this_session->pkt_len += rep_data_len;
 
     if(this_session->pkt_len > this_session->pkt_size)
     {
@@ -2626,34 +2345,30 @@ int mcm_build_get_list_name(
         if(fret < MCM_RCODE_PASS)
         {
             MCM_EMSG("call mcm_realloc_buf_service() fail");
-            mcm_build_fail_rep(this_session, MCM_RCODE_SERVICE_ALLOC_FAIL, "");
             return fret;
         }
     }
 
-    // 封包格式 :
-    // | T | REP | ML | MC | DL | DC |.
-    // T   [MCM_DTYPE_USIZE_TD].
-    //     紀錄封包的總長度, 內容 = T + REP + ML + MC + DL + DC.
-    // REP [MCM_DTYPE_LIST_TD].
-    //     紀錄回應的類型.
-    // ML  [MCM_DTYPE_USIZE_TD].
-    //     紀錄回應的訊息的長度 (包含最後的 \0).
-    // MC  [binary].
-    //     紀錄回應的訊息.
-    // DL  [MCM_DTYPE_USIZE_TD].
-    //     紀錄回應的資料的長度.
-    // DC  [binary].
-    //     紀錄回應的資料.
+    // 預先設定 DL.
+    *((MCM_DTYPE_USIZE_TD *) (this_session->pkt_buf + len_offset)) = rep_data_len;
+    // 回傳 DC 位置.
+    *rep_data_buf = this_session->pkt_buf + buf_offset;
 
-    // T + REP + ML + MC.
-    mcm_build_base_rep(this_session, rep_code, rep_msg, mlen);
-    tmp_offset = this_session->pkt_offset;
-    // DL.
-    *((MCM_DTYPE_USIZE_TD *) tmp_offset) = rep_data_len;
-    tmp_offset += sizeof(MCM_DTYPE_USIZE_TD);
-    // DC.
-    memcpy(tmp_offset, rep_data_con, rep_data_len);
+    return MCM_RCODE_PASS;
+}
+
+int mcm_build_get_list_name(
+    struct mcm_service_session_t *this_session,
+    MCM_DTYPE_LIST_TD rep_code)
+{
+    void *tmp_offset;
+
+
+    // 封包格式在 mcm_layout_get_list_name().
+
+    // T + REP.
+    MCM_BUILD_BASE_REP_01(tmp_offset, this_session, rep_code);
+    // DL + DC 部分已經放入封包.
 
     return MCM_RCODE_PASS;
 }
@@ -2663,7 +2378,8 @@ int mcm_req_get_list_name(
 {
     int fret, cret;
     struct mcm_config_model_group_t *self_model_group;
-    MCM_DTYPE_USIZE_TD tmp_size = 0;
+    MCM_DTYPE_USIZE_TD tmp_size;
+    void *tmp_buf;
 
 
     MCM_SVDMSG("=> %s", __FUNCTION__);
@@ -2683,17 +2399,15 @@ int mcm_req_get_list_name(
         MCM_EMSG("call mcm_config_get_list_name_size() fail");
         goto FREE_01;
     }
-    if(tmp_size > this_session->cache_size)
+
+    fret = mcm_layout_get_list_name(this_session, tmp_size, &tmp_buf);
+    if(fret < MCM_RCODE_PASS)
     {
-        fret = mcm_realloc_buf_service(this_session, MCM_RMEMORY_CACHE, tmp_size);
-        if(fret < MCM_RCODE_PASS)
-        {
-            MCM_EMSG("call mcm_realloc_buf_service() fail");
-            goto FREE_01;
-        }
+        MCM_EMSG("call mcm_layout_get_list_name() fail");
+        goto FREE_01;
     }
 
-    fret = mcm_config_get_list_name_data(this_session, self_model_group, this_session->cache_buf);
+    fret = mcm_config_get_list_name_data(this_session, self_model_group, tmp_buf);
     if(fret < MCM_RCODE_PASS)
     {
         MCM_EMSG("call mcm_config_get_list_name_data() fail");
@@ -2701,61 +2415,63 @@ int mcm_req_get_list_name(
     }
 
 FREE_01:
-    cret = mcm_build_get_list_name(this_session, fret, NULL, this_session->cache_buf,
-                                   fret < MCM_RCODE_PASS ? 0 : tmp_size);
+    cret = mcm_build_get_list_name(this_session, fret);
     return fret < MCM_RCODE_PASS ? fret : cret;
 }
 
 int mcm_parse_get_list_type(
     struct mcm_service_session_t *this_session)
 {
-    void *tmp_offset;
-#if MCM_SVDMODE
-    MCM_DTYPE_USIZE_TD plen;
-#endif
-
-
     // 封包格式 :
-    // | T | REQ | PL | PC |.
+    // | T | REQ | PC |.
     // T   [MCM_DTYPE_USIZE_TD].
-    //     紀錄封包總長度, 內容 = T + REQ + PL + PC.
+    //     紀錄封包總長度, 內容 = T + REQ + PC.
     // REQ [MCM_DTYPE_LIST_TD].
     //     紀錄請求類型.
-    // PL  [MCM_DTYPE_USIZE_TD].
-    //     紀錄請求的路徑的長度 (包括最後的 \0).
     // PC  [binary].
     //     紀錄請求的路徑.
 
-    // PL.
-    tmp_offset = this_session->pkt_offset;
-#if MCM_SVDMODE
-    plen = *((MCM_DTYPE_USIZE_TD *) tmp_offset);
-#endif
-    tmp_offset += sizeof(MCM_DTYPE_USIZE_TD);
     // PC.
-    this_session->req_path = (char *) tmp_offset;
-    MCM_SVDMSG("req_path[" MCM_DTYPE_USIZE_PF "][%s]", plen, this_session->req_path);
+    this_session->req_path = (char *) this_session->pkt_offset;
+    MCM_SVDMSG("req_path[%s]", this_session->req_path);
 
     return MCM_RCODE_PASS;
 }
 
-int mcm_build_get_list_type(
+int mcm_layout_get_list_type(
     struct mcm_service_session_t *this_session,
-    MCM_DTYPE_LIST_TD rep_code,
-    char *rep_msg,
-    void *rep_data_con,
-    MCM_DTYPE_USIZE_TD rep_data_len)
+    MCM_DTYPE_USIZE_TD rep_data_len,
+    void **rep_data_buf)
 {
     int fret;
-    MCM_DTYPE_USIZE_TD mlen;
-    void *tmp_offset;
+    MCM_DTYPE_USIZE_TD len_offset, buf_offset;
 
 
-    mlen = (rep_msg != NULL ? strlen(rep_msg) : 0) + 1;
+    // 預先將資料放置位置設定到 this_session->pkt_buf 內,
+    // 避免從 this_session->cache_buf 拷貝資料的動作.
+
+    // 封包格式 :
+    // | T | REP | DL | DC |.
+    // T   [MCM_DTYPE_USIZE_TD].
+    //     紀錄封包的總長度, 內容 = T + REP + DL + DC.
+    // REP [MCM_DTYPE_LIST_TD].
+    //     紀錄回應的類型.
+    // DL  [MCM_DTYPE_USIZE_TD].
+    //     紀錄回應的資料的長度.
+    // DC  [binary].
+    //     紀錄回應的資料.
+
+    // T + REP.
     this_session->pkt_len = sizeof(MCM_DTYPE_USIZE_TD) +
-                            sizeof(MCM_DTYPE_LIST_TD) +
-                            sizeof(MCM_DTYPE_USIZE_TD) + mlen +
-                            sizeof(MCM_DTYPE_LIST_TD) + sizeof(MCM_DTYPE_USIZE_TD) + rep_data_len;
+                            sizeof(MCM_DTYPE_LIST_TD);
+    // 紀錄資料長度要放到封包的位置.
+    len_offset = this_session->pkt_len;
+    // DL.
+    this_session->pkt_len += sizeof(MCM_DTYPE_USIZE_TD);
+    // 紀錄資料內容要放到封包的位置.
+    buf_offset = this_session->pkt_len;
+    // DC.
+    this_session->pkt_len += rep_data_len;
 
     if(this_session->pkt_len > this_session->pkt_size)
     {
@@ -2763,34 +2479,30 @@ int mcm_build_get_list_type(
         if(fret < MCM_RCODE_PASS)
         {
             MCM_EMSG("call mcm_realloc_buf_service() fail");
-            mcm_build_fail_rep(this_session, MCM_RCODE_SERVICE_ALLOC_FAIL, "");
             return fret;
         }
     }
 
-    // 封包格式 :
-    // | T | REP | ML | MC | DL | DC |.
-    // T   [MCM_DTYPE_USIZE_TD].
-    //     紀錄封包的總長度, 內容 = T + REP + ML + MC + DL + DC.
-    // REP [MCM_DTYPE_LIST_TD].
-    //     紀錄回應的類型.
-    // ML  [MCM_DTYPE_USIZE_TD].
-    //     紀錄回應的訊息的長度 (包含最後的 \0).
-    // MC  [binary].
-    //     紀錄回應的訊息.
-    // DL  [MCM_DTYPE_USIZE_TD].
-    //     紀錄回應的資料的長度.
-    // DC  [binary].
-    //     紀錄回應的資料.
+    // 預先設定 DL.
+    *((MCM_DTYPE_USIZE_TD *) (this_session->pkt_buf + len_offset)) = rep_data_len;
+    // 回傳 DC 位置.
+    *rep_data_buf = this_session->pkt_buf + buf_offset;
 
-    // T + REP + ML + MC.
-    mcm_build_base_rep(this_session, rep_code, rep_msg, mlen);
-    tmp_offset = this_session->pkt_offset;
-    // DL.
-    *((MCM_DTYPE_USIZE_TD *) tmp_offset) = rep_data_len;
-    tmp_offset += sizeof(MCM_DTYPE_USIZE_TD);
-    // DC.
-    memcpy(tmp_offset, rep_data_con, rep_data_len);
+    return MCM_RCODE_PASS;
+}
+
+int mcm_build_get_list_type(
+    struct mcm_service_session_t *this_session,
+    MCM_DTYPE_LIST_TD rep_code)
+{
+    void *tmp_offset;
+
+
+    // 封包格式在 mcm_layout_get_list_type().
+
+    // T + REP.
+    MCM_BUILD_BASE_REP_01(tmp_offset, this_session, rep_code);
+    // DL + DC 部分已經放入封包.
 
     return MCM_RCODE_PASS;
 }
@@ -2800,7 +2512,8 @@ int mcm_req_get_list_type(
 {
     int fret, cret;
     struct mcm_config_model_group_t *self_model_group;
-    MCM_DTYPE_USIZE_TD tmp_size = 0;
+    MCM_DTYPE_USIZE_TD tmp_size;
+    void *tmp_buf;
 
 
     MCM_SVDMSG("=> %s", __FUNCTION__);
@@ -2820,17 +2533,15 @@ int mcm_req_get_list_type(
         MCM_EMSG("call mcm_config_get_list_type_size() fail");
         goto FREE_01;
     }
-    if(tmp_size > this_session->cache_size)
+
+    fret = mcm_layout_get_list_type(this_session, tmp_size, &tmp_buf);
+    if(fret < MCM_RCODE_PASS)
     {
-        fret = mcm_realloc_buf_service(this_session, MCM_RMEMORY_CACHE, tmp_size);
-        if(fret < MCM_RCODE_PASS)
-        {
-            MCM_EMSG("call mcm_realloc_buf_service() fail");
-            goto FREE_01;
-        }
+        MCM_EMSG("call mcm_layout_get_list_type() fail");
+        goto FREE_01;
     }
 
-    fret = mcm_config_get_list_type_data(this_session, self_model_group, this_session->cache_buf);
+    fret = mcm_config_get_list_type_data(this_session, self_model_group, tmp_buf);
     if(fret < MCM_RCODE_PASS)
     {
         MCM_EMSG("call mcm_config_get_list_type_data() fail");
@@ -2838,61 +2549,63 @@ int mcm_req_get_list_type(
     }
 
 FREE_01:
-    cret = mcm_build_get_list_type(this_session, fret, NULL, this_session->cache_buf,
-                                   fret < MCM_RCODE_PASS ? 0 : tmp_size);
+    cret = mcm_build_get_list_type(this_session, fret);
     return fret < MCM_RCODE_PASS ? fret : cret;
 }
 
 int mcm_parse_get_list_value(
     struct mcm_service_session_t *this_session)
 {
-    void *tmp_offset;
-#if MCM_SVDMODE
-    MCM_DTYPE_USIZE_TD plen;
-#endif
-
-
     // 封包格式 :
-    // | T | REQ | PL | PC |.
+    // | T | REQ | PC |.
     // T   [MCM_DTYPE_USIZE_TD].
-    //     紀錄封包總長度, 內容 = T + REQ + PL + PC.
+    //     紀錄封包總長度, 內容 = T + REQ + PC.
     // REQ [MCM_DTYPE_LIST_TD].
     //     紀錄請求類型.
-    // PL  [MCM_DTYPE_USIZE_TD].
-    //     紀錄請求的路徑的長度 (包括最後的 \0).
     // PC  [binary].
     //     紀錄請求的路徑.
 
-    // PL.
-    tmp_offset = this_session->pkt_offset;
-#if MCM_SVDMODE
-    plen = *((MCM_DTYPE_USIZE_TD *) tmp_offset);
-#endif
-    tmp_offset += sizeof(MCM_DTYPE_USIZE_TD);
     // PC.
-    this_session->req_path = (char *) tmp_offset;
-    MCM_SVDMSG("req_path[" MCM_DTYPE_USIZE_PF "][%s]", plen, this_session->req_path);
+    this_session->req_path = (char *) this_session->pkt_offset;
+    MCM_SVDMSG("req_path[%s]", this_session->req_path);
 
     return MCM_RCODE_PASS;
 }
 
-int mcm_build_get_list_value(
+int mcm_layout_get_list_value(
     struct mcm_service_session_t *this_session,
-    MCM_DTYPE_LIST_TD rep_code,
-    char *rep_msg,
-    void *rep_data_con,
-    MCM_DTYPE_USIZE_TD rep_data_len)
+    MCM_DTYPE_USIZE_TD rep_data_len,
+    void **rep_data_buf)
 {
     int fret;
-    MCM_DTYPE_USIZE_TD mlen;
-    void *tmp_offset;
+    MCM_DTYPE_USIZE_TD len_offset, buf_offset;
 
 
-    mlen = (rep_msg != NULL ? strlen(rep_msg) : 0) + 1;
+    // 預先將資料放置位置設定到 this_session->pkt_buf 內,
+    // 避免從 this_session->cache_buf 拷貝資料的動作.
+
+    // 封包格式 :
+    // | T | REP | DL | DC |.
+    // T   [MCM_DTYPE_USIZE_TD].
+    //     紀錄封包的總長度, 內容 = T + REP + DL + DC.
+    // REP [MCM_DTYPE_LIST_TD].
+    //     紀錄回應的類型.
+    // DL  [MCM_DTYPE_USIZE_TD].
+    //     紀錄回應的資料的長度.
+    // DC  [binary].
+    //     紀錄回應的資料.
+
+    // T + REP.
     this_session->pkt_len = sizeof(MCM_DTYPE_USIZE_TD) +
-                            sizeof(MCM_DTYPE_LIST_TD) +
-                            sizeof(MCM_DTYPE_USIZE_TD) + mlen +
-                            sizeof(MCM_DTYPE_LIST_TD) + sizeof(MCM_DTYPE_USIZE_TD) + rep_data_len;
+                            sizeof(MCM_DTYPE_LIST_TD);
+    // 紀錄資料長度要放到封包的位置.
+    len_offset = this_session->pkt_len;
+    // DL.
+    this_session->pkt_len += sizeof(MCM_DTYPE_USIZE_TD);
+    // 紀錄資料內容要放到封包的位置.
+    buf_offset = this_session->pkt_len;
+    // DC.
+    this_session->pkt_len += rep_data_len;
 
     if(this_session->pkt_len > this_session->pkt_size)
     {
@@ -2900,34 +2613,30 @@ int mcm_build_get_list_value(
         if(fret < MCM_RCODE_PASS)
         {
             MCM_EMSG("call mcm_realloc_buf_service() fail");
-            mcm_build_fail_rep(this_session, MCM_RCODE_SERVICE_ALLOC_FAIL, "");
             return fret;
         }
     }
 
-    // 封包格式 :
-    // | T | REP | ML | MC | DL | DC |.
-    // T   [MCM_DTYPE_USIZE_TD].
-    //     紀錄封包的總長度, 內容 = T + REP + ML + MC + DL + DC.
-    // REP [MCM_DTYPE_LIST_TD].
-    //     紀錄回應的類型.
-    // ML  [MCM_DTYPE_USIZE_TD].
-    //     紀錄回應的訊息的長度 (包含最後的 \0).
-    // MC  [binary].
-    //     紀錄回應的訊息.
-    // DL  [MCM_DTYPE_USIZE_TD].
-    //     紀錄回應的資料的長度.
-    // DC  [binary].
-    //     紀錄回應的資料.
+    // 預先設定 DL.
+    *((MCM_DTYPE_USIZE_TD *) (this_session->pkt_buf + len_offset)) = rep_data_len;
+    // 回傳 DC 位置.
+    *rep_data_buf = this_session->pkt_buf + buf_offset;
 
-    // T + REP + ML + MC.
-    mcm_build_base_rep(this_session, rep_code, rep_msg, mlen);
-    tmp_offset = this_session->pkt_offset;
-    // DL.
-    *((MCM_DTYPE_USIZE_TD *) tmp_offset) = rep_data_len;
-    tmp_offset += sizeof(MCM_DTYPE_USIZE_TD);
-    // DC.
-    memcpy(tmp_offset, rep_data_con, rep_data_len);
+    return MCM_RCODE_PASS;
+}
+
+int mcm_build_get_list_value(
+    struct mcm_service_session_t *this_session,
+    MCM_DTYPE_LIST_TD rep_code)
+{
+    void *tmp_offset;
+
+
+    // 封包格式在 mcm_layout_get_list_value().
+
+    // T + REP.
+    MCM_BUILD_BASE_REP_01(tmp_offset, this_session, rep_code);
+    // DL + DC 部分已經放入封包.
 
     return MCM_RCODE_PASS;
 }
@@ -2938,7 +2647,8 @@ int mcm_req_get_list_value(
     int fret, cret;
     struct mcm_config_model_group_t *self_model_group;
     struct mcm_config_store_t *self_store;
-    MCM_DTYPE_USIZE_TD tmp_size = 0;
+    MCM_DTYPE_USIZE_TD tmp_size;
+    void *tmp_buf;
 
 
     MCM_SVDMSG("=> %s", __FUNCTION__);
@@ -2960,18 +2670,15 @@ int mcm_req_get_list_value(
         MCM_EMSG("call mcm_config_get_list_value_size() fail");
         goto FREE_01;
     }
-    if(tmp_size > this_session->cache_size)
+
+    fret = mcm_layout_get_list_value(this_session, tmp_size, &tmp_buf);
+    if(fret < MCM_RCODE_PASS)
     {
-        fret = mcm_realloc_buf_service(this_session, MCM_RMEMORY_CACHE, tmp_size);
-        if(fret < MCM_RCODE_PASS)
-        {
-            MCM_EMSG("call mcm_realloc_buf_service() fail");
-            goto FREE_01;
-        }
+        MCM_EMSG("call mcm_layout_get_list_value() fail");
+        goto FREE_01;
     }
 
-    fret = mcm_config_get_list_value_data(this_session, self_model_group, self_store,
-                                          this_session->cache_buf);
+    fret = mcm_config_get_list_value_data(this_session, self_model_group, self_store, tmp_buf);
     if(fret < MCM_RCODE_PASS)
     {
         MCM_EMSG("call mcm_config_get_list_value_data() fail");
@@ -2979,8 +2686,7 @@ int mcm_req_get_list_value(
     }
 
 FREE_01:
-    cret = mcm_build_get_list_value(this_session, fret, NULL, this_session->cache_buf,
-                                    fret < MCM_RCODE_PASS ? 0 : tmp_size);
+    cret = mcm_build_get_list_value(this_session, fret);
     return fret < MCM_RCODE_PASS ? fret : cret;
 }
 
@@ -3027,17 +2733,14 @@ int mcm_parse_set_any_type_alone(
 
 int mcm_build_set_any_type_alone(
     struct mcm_service_session_t *this_session,
-    MCM_DTYPE_LIST_TD rep_code,
-    char *rep_msg)
+    MCM_DTYPE_LIST_TD rep_code)
 {
     int fret;
-    MCM_DTYPE_USIZE_TD mlen;
+    void *tmp_offset;
 
 
-    mlen = (rep_msg != NULL ? strlen(rep_msg) : 0) + 1;
     this_session->pkt_len = sizeof(MCM_DTYPE_USIZE_TD) +
-                            sizeof(MCM_DTYPE_LIST_TD) +
-                            sizeof(MCM_DTYPE_USIZE_TD) + mlen;
+                            sizeof(MCM_DTYPE_LIST_TD);
 
     if(this_session->pkt_len > this_session->pkt_size)
     {
@@ -3045,24 +2748,20 @@ int mcm_build_set_any_type_alone(
         if(fret < MCM_RCODE_PASS)
         {
             MCM_EMSG("call mcm_realloc_buf_service() fail");
-            mcm_build_fail_rep(this_session, MCM_RCODE_SERVICE_ALLOC_FAIL, "");
+            mcm_build_fail_rep(this_session, fret, 0);
             return fret;
         }
     }
 
     // 封包格式 :
-    // | T | REP | ML | MC |.
+    // | T | REP |.
     // T   [MCM_DTYPE_USIZE_TD].
-    //     紀錄封包的總長度, 內容 = T + REP + ML + MC.
+    //     紀錄封包的總長度, 內容 = T + REP.
     // REP [MCM_DTYPE_LIST_TD].
     //     紀錄回應的類型.
-    // ML  [MCM_DTYPE_USIZE_TD].
-    //     紀錄回應的訊息的長度 (包含最後的 \0).
-    // MC  [binary].
-    //     紀錄回應的訊息.
 
-    // T + REP + ML + MC.
-    mcm_build_base_rep(this_session, rep_code, rep_msg, mlen);
+    // T + REP.
+    MCM_BUILD_BASE_REP_01(tmp_offset, this_session, rep_code);
 
     return MCM_RCODE_PASS;
 }
@@ -3104,38 +2803,25 @@ int mcm_req_set_any_type_alone(
     }
 
 FREE_01:
-    cret = mcm_build_set_any_type_alone(this_session, fret, NULL);
+    cret = mcm_build_set_any_type_alone(this_session, fret);
     return fret < MCM_RCODE_PASS ? fret : cret;
 }
 
 int mcm_parse_get_with_type_alone(
     struct mcm_service_session_t *this_session)
 {
-    void *tmp_offset;
-#if MCM_SVDMODE
-    MCM_DTYPE_USIZE_TD plen;
-#endif
-
     // 封包格式 :
-    // | T | REQ | PL | PC |.
+    // | T | REQ | PC |.
     // T   [MCM_DTYPE_USIZE_TD].
-    //     紀錄封包總長度, 內容 = T + REQ + PL + PC.
+    //     紀錄封包總長度, 內容 = T + REQ + PC.
     // REQ [MCM_DTYPE_LIST_TD].
     //     紀錄請求類型.
-    // PL  [MCM_DTYPE_USIZE_TD].
-    //     紀錄請求的路徑的長度 (包括最後的 \0).
     // PC  [binary].
     //     紀錄請求的路徑.
 
-    // PL.
-    tmp_offset = this_session->pkt_offset;
-#if MCM_SVDMODE
-    plen = *((MCM_DTYPE_USIZE_TD *) tmp_offset);
-#endif
-    tmp_offset += sizeof(MCM_DTYPE_USIZE_TD);
     // PC.
-    this_session->req_path = (char *) tmp_offset;
-    MCM_SVDMSG("req_path[" MCM_DTYPE_USIZE_PF "][%s]", plen, this_session->req_path);
+    this_session->req_path = (char *) this_session->pkt_offset;
+    MCM_SVDMSG("req_path[%s]", this_session->req_path);
 
     return MCM_RCODE_PASS;
 }
@@ -3143,22 +2829,17 @@ int mcm_parse_get_with_type_alone(
 int mcm_build_get_with_type_alone(
     struct mcm_service_session_t *this_session,
     MCM_DTYPE_LIST_TD rep_code,
-    char *rep_msg,
     MCM_DTYPE_LIST_TD rep_data_type,
     void *rep_data_con,
     MCM_DTYPE_USIZE_TD rep_data_len)
 {
     int fret;
-    MCM_DTYPE_USIZE_TD mlen;
     void *tmp_offset;
 
 
-    mlen = (rep_msg != NULL ? strlen(rep_msg) : 0) + 1;
     this_session->pkt_len = sizeof(MCM_DTYPE_USIZE_TD) +
                             sizeof(MCM_DTYPE_LIST_TD) +
-                            sizeof(MCM_DTYPE_USIZE_TD) + mlen +
                             sizeof(MCM_DTYPE_LIST_TD) +
-                            sizeof(MCM_DTYPE_USIZE_TD) +
                             sizeof(MCM_DTYPE_USIZE_TD) + rep_data_len;
 
     if(this_session->pkt_len > this_session->pkt_size)
@@ -3167,21 +2848,17 @@ int mcm_build_get_with_type_alone(
         if(fret < MCM_RCODE_PASS)
         {
             MCM_EMSG("call mcm_realloc_buf_service() fail");
-            mcm_build_fail_rep(this_session, MCM_RCODE_SERVICE_ALLOC_FAIL, "");
+            mcm_build_fail_rep(this_session, fret, 0);
             return fret;
         }
     }
 
     // 封包格式 :
-    // | T | REP | ML | MC | DT | DL | DC |.
+    // | T | REP | DT | DL | DC |.
     // T   [MCM_DTYPE_USIZE_TD].
-    //     紀錄封包的總長度, 內容 = T + REP + ML + MC + DT + DL + DC.
+    //     紀錄封包的總長度, 內容 = T + REP + DT + DL + DC.
     // REP [MCM_DTYPE_LIST_TD].
     //     紀錄回應的類型.
-    // ML  [MCM_DTYPE_USIZE_TD].
-    //     紀錄回應的訊息的長度 (包含最後的 \0).
-    // MC  [binary].
-    //     紀錄回應的訊息.
     // DT  [MCM_DTYPE_LIST_TD]
     //     紀錄回應的資料的類型.
     // DL  [MCM_DTYPE_USIZE_TD].
@@ -3189,9 +2866,8 @@ int mcm_build_get_with_type_alone(
     // DC  [binary].
     //     紀錄回應的字串資料.
 
-    // T + REP + ML + MC.
-    mcm_build_base_rep(this_session, rep_code, rep_msg, mlen);
-    tmp_offset = this_session->pkt_offset;
+    // T + REP.
+    MCM_BUILD_BASE_REP_01(tmp_offset, this_session, rep_code);
     // DT.
     *((MCM_DTYPE_LIST_TD *) tmp_offset) = rep_data_type;
     tmp_offset += sizeof(MCM_DTYPE_LIST_TD);
@@ -3300,7 +2976,7 @@ int mcm_req_get_with_type_alone(
     }
 
 FREE_01:
-    cret = mcm_build_get_with_type_alone(this_session, fret, NULL,
+    cret = mcm_build_get_with_type_alone(this_session, fret,
                                          fret < MCM_RCODE_PASS ?
                                          0 : self_model_member->member_type,
                                          this_session->cache_buf,
@@ -3346,7 +3022,7 @@ int mcm_req_handle(
     else
     {
         MCM_EMSG("unknown request type [" MCM_DTYPE_USIZE_PF "]", this_session->req_type);
-        mcm_build_fail_rep(this_session, MCM_RCODE_SERVICE_INVALID_REQ, "");
+        mcm_build_fail_rep(this_session, MCM_RCODE_SERVICE_INVALID_REQ, 0);
     }
 
     return fret;

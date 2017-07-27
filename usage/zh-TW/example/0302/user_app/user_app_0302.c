@@ -1014,7 +1014,7 @@ int case_get_all_entry(
         DMSG("[count] %s = " MCM_DTYPE_EK_PF, path2, station_count);
         for(j = 0; j < station_count; j++)
         {
-            DMSG("[count] %s = " MCM_DTYPE_EK_PF, path2, station_count);
+            snprintf(path2, sizeof(path2), "device.vap.@%u.station.@%u", i + 1, j + 1);
             DMSG("[get-all-entry] %s.mac_addr = " MCM_DTYPE_S_PF, path2, station_v[j].mac_addr);
             DMSG("[get-all-entry] %s.rule = " MCM_DTYPE_RK_PF, path2, station_v[j].rule);
         }

@@ -30,6 +30,50 @@
 
 
 
+#define MCM_BUILD_BASE_REP_01(tmp_offset, this_lulib, req_code) \
+    do                                                              \
+    {                                                               \
+        /* T */                                                     \
+        tmp_offset = this_lulib->pkt_buf;                           \
+        *((MCM_DTYPE_USIZE_TD *) tmp_offset) = this_lulib->pkt_len; \
+        tmp_offset += sizeof(MCM_DTYPE_USIZE_TD);                   \
+        /* REQ */                                                   \
+        *((MCM_DTYPE_LIST_TD *) tmp_offset) = req_code;             \
+        tmp_offset += sizeof(MCM_DTYPE_LIST_TD);                    \
+        /* ... */                                                   \
+    }                                                               \
+    while(0)
+
+#define MCM_BUILD_BASE_REP_02(tmp_offset, this_lulib, req_code, req_path, req_plen) \
+    do                                                           \
+    {                                                            \
+        /* T + REQ */                                            \
+        MCM_BUILD_BASE_REP_01(tmp_offset, this_lulib, req_code); \
+        /* PC */                                                 \
+        memcpy(tmp_offset, req_path, req_plen);                  \
+        tmp_offset += req_plen;                                  \
+        /* ... */                                                \
+    }                                                            \
+    while(0)
+
+#define MCM_BUILD_BASE_REP_03(tmp_offset, this_lulib, req_code, req_path, req_plen) \
+    do                                                           \
+    {                                                            \
+        /* T + REQ */                                            \
+        MCM_BUILD_BASE_REP_01(tmp_offset, this_lulib, req_code); \
+        /* PL */                                                 \
+        *((MCM_DTYPE_USIZE_TD *) tmp_offset) = req_plen;         \
+        tmp_offset += sizeof(MCM_DTYPE_USIZE_TD);                \
+        /* PC */                                                 \
+        memcpy(tmp_offset, req_path, req_plen);                  \
+        tmp_offset += req_plen;                                  \
+        /* ... */                                                \
+    }                                                            \
+    while(0)
+
+
+
+
 // 是否使用 printf 顯示訊息 (MCM_EMSG, MCM_LUDMSG).
 // 1 : 是.
 // 0 : 否.
@@ -98,7 +142,7 @@ int mcm_send_req(
     return MCM_RCODE_PASS;
 }
 
-// 接收回傳的封包.
+// 接收封包.
 // this_lulib (I) :
 //   連線資訊.
 // return :
@@ -177,59 +221,23 @@ int mcm_recv_rep(
     return MCM_RCODE_PASS;
 }
 
-int mcm_build_base_req(
+int mcm_parse_base_rep(
     struct mcm_lulib_lib_t *this_lulib,
-    MCM_DTYPE_LIST_TD req_code,
-    MCM_DTYPE_BOOL_TD add_path,
-    char *req_path,
-    MCM_DTYPE_USIZE_TD req_plen)
+    MCM_DTYPE_BOOL_TD with_msg)
 {
     void *tmp_offset;
 
-    // 封包格式 :
-    // | T | REQ | PL | PC | ... |.
+
+    // 封包格式 (不帶有回應訊息, with_msg == 0) :
+    // | T | REP | ... |.
     // T   [MCM_DTYPE_USIZE_TD].
-    //     紀錄封包的總長度, 內容 = T + REQ + PL + PC + ...
-    // REQ [MCM_DTYPE_LIST_TD].
-    //     紀錄請求類型.
-    // PL  [MCM_DTYPE_USIZE_TD].
-    //     紀錄請求的路徑長度 (包括最後的 \0).
-    // PC  [binary].
-    //     紀錄請求的路徑.
+    //     紀錄封包的總長度, 內容 = T + REP + ML + MC + ...
+    // REP [MCM_DTYPE_LIST_TD].
+    //     紀錄回應的類型.
     // ...
     //     剩餘的資料.
 
-    // T.
-    tmp_offset = this_lulib->pkt_buf;
-    *((MCM_DTYPE_USIZE_TD *) tmp_offset) = this_lulib->pkt_len;
-    tmp_offset += sizeof(MCM_DTYPE_USIZE_TD);
-    // REQ.
-    *((MCM_DTYPE_LIST_TD *) tmp_offset) = req_code;
-    tmp_offset += sizeof(MCM_DTYPE_LIST_TD);
-    // PC + PC.
-    if(add_path != 0)
-    {
-        // PL.
-        *((MCM_DTYPE_USIZE_TD *) tmp_offset) = req_plen;
-        tmp_offset += sizeof(MCM_DTYPE_USIZE_TD);
-        // PC.
-        memcpy(tmp_offset, req_path, req_plen);
-        tmp_offset += req_plen;
-    }
-    // ...
-
-    this_lulib->pkt_offset = tmp_offset;
-
-    return 0;
-}
-
-int mcm_parse_base_rep(
-    struct mcm_lulib_lib_t *this_lulib)
-{
-    void *tmp_offset;
-
-
-    // 封包格式 :
+    // 封包格式 (帶有回應訊息, with_msg == 1) :
     // | T | REP | ML | MC | ... |.
     // T   [MCM_DTYPE_USIZE_TD].
     //     紀錄封包的總長度, 內容 = T + REP + ML + MC + ...
@@ -254,28 +262,24 @@ int mcm_parse_base_rep(
     }
 #endif
     tmp_offset += sizeof(MCM_DTYPE_LIST_TD);
-    // ML.
-    this_lulib->rep_msg_len = *((MCM_DTYPE_USIZE_TD *) tmp_offset);
-    tmp_offset += sizeof(MCM_DTYPE_USIZE_TD);
-    // MC.
-    this_lulib->rep_msg_con = tmp_offset;
-#if MCM_LUDMODE
-    if(mcm_lulib_show_msg != 0)
+    if(with_msg != 0)
     {
-        MCM_LUDMSG("rep_msg[" MCM_DTYPE_USIZE_PF "][%s]",
-                   this_lulib->rep_msg_len, this_lulib->rep_msg_con);
-    }
-#endif
-    tmp_offset += this_lulib->rep_msg_len;
-    // ...
-    this_lulib->pkt_offset = tmp_offset;
-
-    if(this_lulib->rep_code < MCM_RCODE_PASS)
+        // ML.
+        this_lulib->rep_msg_len = *((MCM_DTYPE_USIZE_TD *) tmp_offset);
+        tmp_offset += sizeof(MCM_DTYPE_USIZE_TD);
+        // MC.
+        this_lulib->rep_msg_con = tmp_offset;
+#if MCM_LUDMODE
         if(mcm_lulib_show_msg != 0)
         {
-            MCM_EMSG("report fail [" MCM_DTYPE_LIST_PF "][%s]",
-                     this_lulib->rep_code, this_lulib->rep_msg_con);
+            MCM_LUDMSG("rep_msg[" MCM_DTYPE_USIZE_PF "][%s]",
+                       this_lulib->rep_msg_len, this_lulib->rep_msg_con);
         }
+#endif
+        tmp_offset += this_lulib->rep_msg_len;
+    }
+    // ...
+    this_lulib->pkt_offset = tmp_offset;
 
     return this_lulib->rep_code;
 }
@@ -419,7 +423,7 @@ int mcm_lulib_get_alone(
     xlen = strlen(full_path) + 1;
     this_lulib->pkt_len = sizeof(MCM_DTYPE_USIZE_TD) +
                           sizeof(MCM_DTYPE_LIST_TD) +
-                          sizeof(MCM_DTYPE_USIZE_TD) + xlen;
+                          xlen;
 
     if(this_lulib->pkt_len > this_lulib->pkt_size)
     {
@@ -435,18 +439,16 @@ int mcm_lulib_get_alone(
     }
 
     // 封包格式 :
-    // | T | REQ | PL | PC |.
+    // | T | REQ | PC |.
     // T   [MCM_DTYPE_USIZE_TD].
-    //     紀錄封包總長度, 內容 = T + REQ + PL + PC.
+    //     紀錄封包總長度, 內容 = T + REQ + PC.
     // REQ [MCM_DTYPE_LIST_TD].
     //     紀錄請求類型.
-    // PL  [MCM_DTYPE_USIZE_TD].
-    //     紀錄請求的路徑的長度 (包括最後的 \0).
     // PC  [binary].
     //     紀錄請求的路徑.
 
-    // T + REQ + PL + PC.
-    mcm_build_base_req(this_lulib, MCM_SREQUEST_GET_ALONE, 1, full_path, xlen);
+    // T + REQ + PC.
+    MCM_BUILD_BASE_REP_02(tmp_offset, this_lulib, MCM_SREQUEST_GET_ALONE, full_path, xlen);
 
     fret = mcm_send_req(this_lulib);
     if(fret < MCM_RCODE_PASS)
@@ -469,22 +471,18 @@ int mcm_lulib_get_alone(
     }
 
     // 封包格式 :
-    // | T | REP | ML | MC | DL | DC | \0 |.
+    // | T | REP | DL | DC |.
     // T   [MCM_DTYPE_USIZE_TD].
-    //     紀錄封包的總長度, 內容 = T + REP + ML + MC + DL + DC + \0.
+    //     紀錄封包的總長度, 內容 = T + REP + DL + DC.
     // REP [MCM_DTYPE_LIST_TD].
     //     紀錄回應的類型.
-    // ML  [MCM_DTYPE_USIZE_TD].
-    //     紀錄回應的訊息的長度 (包含最後的 \0).
-    // MC  [binary].
-    //     紀錄回應的訊息.
     // DL  [MCM_DTYPE_USIZE_TD].
     //     紀錄回應的資料的長度.
     // DC  [binary].
     //     紀錄回應的資料.
 
-    // T + REP + ML + MC.
-    fret = mcm_parse_base_rep(this_lulib);
+    // T + REP.
+    fret = mcm_parse_base_rep(this_lulib, 0);
     if(fret < MCM_RCODE_PASS)
     {
         if(mcm_lulib_show_msg != 0)
@@ -561,8 +559,7 @@ int mcm_lulib_set_alone(
     //     紀錄要傳送的資料.
 
     // T + REQ + PL + PC.
-    mcm_build_base_req(this_lulib, MCM_SREQUEST_SET_ALONE, 1, full_path, xlen);
-    tmp_offset = this_lulib->pkt_offset;
+    MCM_BUILD_BASE_REP_03(tmp_offset, this_lulib, MCM_SREQUEST_SET_ALONE, full_path, xlen);
     // DL.
     *((MCM_DTYPE_USIZE_TD *) tmp_offset) = data_len;
     tmp_offset += sizeof(MCM_DTYPE_USIZE_TD);
@@ -593,18 +590,14 @@ int mcm_lulib_set_alone(
     }
 
     // 封包格式 :
-    // | T | REP | ML | MC |.
+    // | T | REP |.
     // T   [MCM_DTYPE_USIZE_TD].
-    //     紀錄封包的總長度, 內容 = T + REP + ML + MC.
+    //     紀錄封包的總長度, 內容 = T + REP.
     // REP [MCM_DTYPE_LIST_TD].
     //     紀錄回應的類型.
-    // ML  [MCM_DTYPE_USIZE_TD].
-    //     紀錄回應的訊息的長度 (包含最後的 \0).
-    // MC  [binary].
-    //     紀錄回應的訊息.
 
-    // T + REP + ML + MC.
-    fret = mcm_parse_base_rep(this_lulib);
+    // T + REP.
+    fret = mcm_parse_base_rep(this_lulib, 0);
     if(fret < MCM_RCODE_PASS)
     {
         if(mcm_lulib_show_msg != 0)
@@ -635,7 +628,7 @@ int mcm_lulib_get_entry(
     xlen = strlen(full_path) + 1;
     this_lulib->pkt_len = sizeof(MCM_DTYPE_USIZE_TD) +
                           sizeof(MCM_DTYPE_LIST_TD) +
-                          sizeof(MCM_DTYPE_USIZE_TD) + xlen;
+                          xlen;
 
     if(this_lulib->pkt_len > this_lulib->pkt_size)
     {
@@ -651,18 +644,16 @@ int mcm_lulib_get_entry(
     }
 
     // 封包格式 :
-    // | T | REQ | PL | PC |.
+    // | T | REQ | PC |.
     // T   [MCM_DTYPE_USIZE_TD].
-    //     紀錄封包總長度, 內容 = T + REQ + PL + PC + DS.
+    //     紀錄封包總長度, 內容 = T + REQ + PC.
     // REQ [MCM_DTYPE_LIST_TD].
     //     紀錄請求類型.
-    // PL  [MCM_DTYPE_USIZE_TD].
-    //     紀錄請求的路徑的長度 (包括最後的 \0).
     // PC  [binary].
     //     紀錄請求的路徑.
 
-    // T + REQ + PL + PC.
-    mcm_build_base_req(this_lulib, MCM_SREQUEST_GET_ENTRY, 1, full_path, xlen);
+    // T + REQ + PC.
+    MCM_BUILD_BASE_REP_02(tmp_offset, this_lulib, MCM_SREQUEST_GET_ENTRY, full_path, xlen);
 
     fret = mcm_send_req(this_lulib);
     if(fret < MCM_RCODE_PASS)
@@ -685,22 +676,18 @@ int mcm_lulib_get_entry(
     }
 
     // 封包格式 :
-    // | T | REP | ML | MC | DL | DC |.
+    // | T | REP | DL | DC |.
     // T   [MCM_DTYPE_USIZE_TD].
-    //     紀錄封包的總長度, 內容 = T + REP + ML + MC + DL + DC.
+    //     紀錄封包的總長度, 內容 = T + REP + DL + DC.
     // REP [MCM_DTYPE_LIST_TD].
     //     紀錄回應的類型.
-    // ML  [MCM_DTYPE_USIZE_TD].
-    //     紀錄回應的訊息的長度 (包含最後的 \0).
-    // MC  [binary].
-    //     紀錄回應的訊息.
     // DL  [MCM_DTYPE_USIZE_TD].
     //     紀錄回應的資料的長度.
     // DC  [binary].
     //     紀錄回應的資料.
 
-    // T + REP + ML + MC.
-    fret = mcm_parse_base_rep(this_lulib);
+    // T + REP.
+    fret = mcm_parse_base_rep(this_lulib, 0);
     if(fret < MCM_RCODE_PASS)
     {
         if(mcm_lulib_show_msg != 0)
@@ -746,7 +733,7 @@ int mcm_lulib_set_entry(
     this_lulib->pkt_len = sizeof(MCM_DTYPE_USIZE_TD) +
                           sizeof(MCM_DTYPE_LIST_TD) +
                           sizeof(MCM_DTYPE_USIZE_TD) + xlen +
-                          sizeof(MCM_DTYPE_USIZE_TD) + data_len;
+                          data_len;
 
     if(this_lulib->pkt_len > this_lulib->pkt_size)
     {
@@ -762,26 +749,20 @@ int mcm_lulib_set_entry(
     }
 
     // 封包格式 :
-    // | T | REQ | PL | PC | DL | DC |.
+    // | T | REQ | PL | PC | DC |.
     // T   [MCM_DTYPE_USIZE_TD].
-    //     紀錄封包的總長度, 內容 = T + REQ + PL + PC + DL + DC.
+    //     紀錄封包的總長度, 內容 = T + REQ + PL + PC + DC.
     // REQ [MCM_DTYPE_LIST_TD].
     //     紀錄請求類型.
     // PL  [MCM_DTYPE_USIZE_TD].
     //     紀錄請求的路徑長度 (包括最後的 \0).
     // PC  [binary].
     //     紀錄請求的路徑.
-    // DL  [MCM_DTYPE_USIZE_TD].
-    //     紀錄要傳送的資料的長度.
     // DC  [binary].
     //     紀錄要傳送的資料.
 
     // T + REQ + PL + PC.
-    mcm_build_base_req(this_lulib, MCM_SREQUEST_SET_ENTRY, 1, full_path, xlen);
-    tmp_offset = this_lulib->pkt_offset;
-    // DL.
-    *((MCM_DTYPE_USIZE_TD *) tmp_offset) = data_len;
-    tmp_offset += sizeof(MCM_DTYPE_USIZE_TD);
+    MCM_BUILD_BASE_REP_03(tmp_offset, this_lulib, MCM_SREQUEST_SET_ENTRY, full_path, xlen);
     // DC.
     memcpy(tmp_offset, data_con, data_len);
 
@@ -806,18 +787,14 @@ int mcm_lulib_set_entry(
     }
 
     // 封包格式 :
-    // | T | REP | ML | MC |.
+    // | T | REP |.
     // T   [MCM_DTYPE_USIZE_TD].
-    //     紀錄封包的總長度, 內容 = T + REP + ML + MC.
+    //     紀錄封包的總長度, 內容 = T + REP.
     // REP [MCM_DTYPE_LIST_TD].
     //     紀錄回應的類型.
-    // ML  [MCM_DTYPE_USIZE_TD].
-    //     紀錄回應的訊息的長度 (包含最後的 \0).
-    // MC  [binary].
-    //     紀錄回應的訊息.
 
-    // T + REP + ML + MC.
-    fret = mcm_parse_base_rep(this_lulib);
+    // T + REP.
+    fret = mcm_parse_base_rep(this_lulib, 0);
     if(fret < MCM_RCODE_PASS)
     {
         if(mcm_lulib_show_msg != 0)
@@ -881,8 +858,7 @@ int mcm_lulib_add_entry(
     //     紀錄要傳送的資料.
 
     // T + REQ + PL + PC.
-    mcm_build_base_req(this_lulib, MCM_SREQUEST_ADD_ENTRY, 1, full_path, xlen);
-    tmp_offset = this_lulib->pkt_offset;
+    MCM_BUILD_BASE_REP_03(tmp_offset, this_lulib, MCM_SREQUEST_ADD_ENTRY, full_path, xlen);
     // DL.
     *((MCM_DTYPE_USIZE_TD *) tmp_offset) = data_len;
     tmp_offset += sizeof(MCM_DTYPE_USIZE_TD);
@@ -911,18 +887,14 @@ int mcm_lulib_add_entry(
     }
 
     // 封包格式 :
-    // | T | REP | ML | MC |.
+    // | T | REP |.
     // T   [MCM_DTYPE_USIZE_TD].
-    //     紀錄封包的總長度, 內容 = T + REP + ML + MC.
+    //     紀錄封包的總長度, 內容 = T + REP.
     // REP [MCM_DTYPE_LIST_TD].
     //     紀錄回應的類型.
-    // ML  [MCM_DTYPE_USIZE_TD].
-    //     紀錄回應的訊息的長度 (包含最後的 \0).
-    // MC  [binary].
-    //     紀錄回應的訊息.
 
-    // T + REP + ML + MC.
-    fret = mcm_parse_base_rep(this_lulib);
+    // T + REP.
+    fret = mcm_parse_base_rep(this_lulib, 0);
     if(fret < MCM_RCODE_PASS)
     {
         if(mcm_lulib_show_msg != 0)
@@ -943,6 +915,7 @@ int mcm_lulib_del_entry(
 {
     int fret;
     MCM_DTYPE_USIZE_TD xlen;
+    void *tmp_offset;
 
 
     this_lulib->rep_msg_con = NULL;
@@ -951,7 +924,7 @@ int mcm_lulib_del_entry(
     xlen = strlen(full_path) + 1;
     this_lulib->pkt_len = sizeof(MCM_DTYPE_USIZE_TD) +
                           sizeof(MCM_DTYPE_LIST_TD) +
-                          sizeof(MCM_DTYPE_USIZE_TD) + xlen;
+                          xlen;
 
     if(this_lulib->pkt_len > this_lulib->pkt_size)
     {
@@ -967,18 +940,16 @@ int mcm_lulib_del_entry(
     }
 
     // 封包格式 :
-    // | T | REQ | PL | PC |.
+    // | T | REQ | PC |.
     // T   [MCM_DTYPE_USIZE_TD].
-    //     紀錄封包的總長度, 內容 = T + REQ + PL + PC.
+    //     紀錄封包的總長度, 內容 = T + REQ + PC.
     // REQ [MCM_DTYPE_LIST_TD].
     //     紀錄請求類型.
-    // PL  [MCM_DTYPE_USIZE_TD].
-    //     紀錄請求的路徑長度 (包括最後的 \0).
     // PC  [binary].
     //     紀錄請求的路徑.
 
-    // T + REQ + PL + PC.
-    mcm_build_base_req(this_lulib, MCM_SREQUEST_DEL_ENTRY, 1, full_path, xlen);
+    // T + REQ + PC.
+    MCM_BUILD_BASE_REP_02(tmp_offset, this_lulib, MCM_SREQUEST_DEL_ENTRY, full_path, xlen);
 
     fret = mcm_send_req(this_lulib);
     if(fret < MCM_RCODE_PASS)
@@ -1001,18 +972,14 @@ int mcm_lulib_del_entry(
     }
 
     // 封包格式 :
-    // | T | REP | ML | MC |.
+    // | T | REP |.
     // T   [MCM_DTYPE_USIZE_TD].
-    //     紀錄封包的總長度, 內容 = T + REP + ML + MC.
+    //     紀錄封包的總長度, 內容 = T + REP.
     // REP [MCM_DTYPE_LIST_TD].
     //     紀錄回應的類型.
-    // ML  [MCM_DTYPE_USIZE_TD].
-    //     紀錄回應的訊息的長度 (包含最後的 \0).
-    // MC  [binary].
-    //     紀錄回應的訊息.
 
-    // T + REP + ML + MC.
-    fret = mcm_parse_base_rep(this_lulib);
+    // T + REP.
+    fret = mcm_parse_base_rep(this_lulib, 0);
     if(fret < MCM_RCODE_PASS)
     {
         if(mcm_lulib_show_msg != 0)
@@ -1047,7 +1014,7 @@ int mcm_lulib_get_all_entry(
     xlen = strlen(mix_path) + 1;
     this_lulib->pkt_len = sizeof(MCM_DTYPE_USIZE_TD) +
                           sizeof(MCM_DTYPE_LIST_TD) +
-                          sizeof(MCM_DTYPE_USIZE_TD) + xlen;
+                          xlen;
 
     if(this_lulib->pkt_len > this_lulib->pkt_size)
     {
@@ -1063,18 +1030,16 @@ int mcm_lulib_get_all_entry(
     }
 
     // 封包格式 :
-    // | T | REQ | PL | PC |.
+    // | T | REQ | PC |.
     // T   [MCM_DTYPE_USIZE_TD].
-    //     紀錄封包的總長度, 內容 = T + REQ + PL + PC.
+    //     紀錄封包的總長度, 內容 = T + REQ + PC.
     // REQ [MCM_DTYPE_LIST_TD].
     //     紀錄請求類型.
-    // PL  [MCM_DTYPE_USIZE_TD].
-    //     紀錄請求的路徑長度 (包括最後的 \0).
     // PC  [binary].
     //     紀錄請求的路徑.
 
-    // T + REQ + PL + PC.
-    mcm_build_base_req(this_lulib, MCM_SREQUEST_GET_ALL_ENTRY, 1, mix_path, xlen);
+    // T + REQ + PC.
+    MCM_BUILD_BASE_REP_02(tmp_offset, this_lulib, MCM_SREQUEST_GET_ALL_ENTRY, mix_path, xlen);
 
     fret = mcm_send_req(this_lulib);
     if(fret < MCM_RCODE_PASS)
@@ -1097,15 +1062,11 @@ int mcm_lulib_get_all_entry(
     }
 
     // 封包格式 :
-    // | T | REP | ML | MC | EC | DL | DC |.
+    // | T | REP | EC | DL | DC |.
     // T   [MCM_DTYPE_USIZE_TD].
-    //     紀錄封包的總長度, 內容 = T + REP + ML + MC + EC + DL + DC.
+    //     紀錄封包的總長度, 內容 = T + REP + EC + DL + DC.
     // REP [MCM_DTYPE_LIST_TD].
     //     紀錄回應的類型.
-    // ML  [MCM_DTYPE_USIZE_TD].
-    //     紀錄回應的訊息的長度 (包含最後的 \0).
-    // MC  [binary].
-    //     紀錄回應的訊息.
     // EC  [MCM_DTYPE_EK_TD].
     //     紀錄回應的資料 (資料筆數).
     // DL  [MCM_DTYPE_USIZE_TD].
@@ -1113,8 +1074,8 @@ int mcm_lulib_get_all_entry(
     // DC  [binary].
     //     紀錄回應的資料 (資料內容).
 
-    // T + REP + ML + MC.
-    fret = mcm_parse_base_rep(this_lulib);
+    // T + REP.
+    fret = mcm_parse_base_rep(this_lulib, 0);
     if(fret < MCM_RCODE_PASS)
     {
         if(mcm_lulib_show_msg != 0)
@@ -1172,6 +1133,7 @@ int mcm_lulib_del_all_entry(
 {
     int fret;
     MCM_DTYPE_USIZE_TD xlen;
+    void *tmp_offset;
 
 
     this_lulib->rep_msg_con = NULL;
@@ -1180,7 +1142,7 @@ int mcm_lulib_del_all_entry(
     xlen = strlen(mix_path) + 1;
     this_lulib->pkt_len = sizeof(MCM_DTYPE_USIZE_TD) +
                           sizeof(MCM_DTYPE_LIST_TD) +
-                          sizeof(MCM_DTYPE_USIZE_TD) + xlen;
+                          xlen;
 
     if(this_lulib->pkt_len > this_lulib->pkt_size)
     {
@@ -1196,18 +1158,16 @@ int mcm_lulib_del_all_entry(
     }
 
     // 封包格式 :
-    // | T | REQ | PL | PC |.
+    // | T | REQ | PC |.
     // T   [MCM_DTYPE_USIZE_TD].
-    //     紀錄封包的總長度, 內容 = T + REQ + PL + PC.
+    //     紀錄封包的總長度, 內容 = T + REQ + PC.
     // REQ [MCM_DTYPE_LIST_TD].
     //     紀錄請求類型.
-    // PL  [MCM_DTYPE_USIZE_TD].
-    //     紀錄請求的路徑長度 (包括最後的 \0).
     // PC  [binary].
     //     紀錄請求的路徑.
 
-    // T + REQ + PL + PC.
-    mcm_build_base_req(this_lulib, MCM_SREQUEST_DEL_ALL_ENTRY, 1, mix_path, xlen);
+    // T + REQ + PC.
+    MCM_BUILD_BASE_REP_02(tmp_offset, this_lulib, MCM_SREQUEST_DEL_ALL_ENTRY, mix_path, xlen);
 
     fret = mcm_send_req(this_lulib);
     if(fret < MCM_RCODE_PASS)
@@ -1230,18 +1190,14 @@ int mcm_lulib_del_all_entry(
     }
 
     // 封包格式 :
-    // | T | REP | ML | MC |.
+    // | T | REP |.
     // T   [MCM_DTYPE_USIZE_TD].
-    //     紀錄封包的總長度, 內容 = T + REP + ML + MC.
+    //     紀錄封包的總長度, 內容 = T + REP.
     // REP [MCM_DTYPE_LIST_TD].
     //     紀錄回應的類型.
-    // ML  [MCM_DTYPE_USIZE_TD].
-    //     紀錄回應的訊息的長度 (包含最後的 \0).
-    // MC  [binary].
-    //     紀錄回應的訊息.
 
-    // T + REP + ML + MC.
-    fret = mcm_parse_base_rep(this_lulib);
+    // T + REP.
+    fret = mcm_parse_base_rep(this_lulib, 0);
     if(fret < MCM_RCODE_PASS)
     {
         if(mcm_lulib_show_msg != 0)
@@ -1272,7 +1228,7 @@ int mcm_lulib_get_max_count(
     xlen = strlen(mask_path) + 1;
     this_lulib->pkt_len = sizeof(MCM_DTYPE_USIZE_TD) +
                           sizeof(MCM_DTYPE_LIST_TD) +
-                          sizeof(MCM_DTYPE_USIZE_TD) + xlen;
+                          xlen;
 
     if(this_lulib->pkt_len > this_lulib->pkt_size)
     {
@@ -1288,18 +1244,16 @@ int mcm_lulib_get_max_count(
     }
 
     // 封包格式 :
-    // | T | REQ | PL | PC |.
+    // | T | REQ | PC |.
     // T   [MCM_DTYPE_USIZE_TD].
-    //     紀錄封包的總長度, 內容 = T + REQ + PL + PC.
+    //     紀錄封包的總長度, 內容 = T + REQ + PC.
     // REQ [MCM_DTYPE_LIST_TD].
     //     紀錄請求類型.
-    // PL  [MCM_DTYPE_USIZE_TD].
-    //     紀錄請求的路徑長度 (包括最後的 \0).
     // PC  [binary].
     //     紀錄請求的路徑.
 
-    // T + REQ + PL + PC.
-    mcm_build_base_req(this_lulib, MCM_SREQUEST_GET_MAX_COUNT, 1, mask_path, xlen);
+    // T + REQ + PC.
+    MCM_BUILD_BASE_REP_02(tmp_offset, this_lulib, MCM_SREQUEST_GET_MAX_COUNT, mask_path, xlen);
 
     fret = mcm_send_req(this_lulib);
     if(fret < MCM_RCODE_PASS)
@@ -1322,20 +1276,16 @@ int mcm_lulib_get_max_count(
     }
 
     // 封包格式 :
-    // | T | REP | ML | MC | EC |.
+    // | T | REP | EC |.
     // T   [MCM_DTYPE_USIZE_TD].
-    //     紀錄封包的總長度, 內容 = T + REP + ML + MC + EC.
+    //     紀錄封包的總長度, 內容 = T + REP + EC.
     // REP [MCM_DTYPE_LIST_TD].
     //     紀錄回應的類型.
-    // ML  [MCM_DTYPE_USIZE_TD].
-    //     紀錄回應的訊息的長度 (包含最後的 \0).
-    // MC  [binary].
-    //     紀錄回應的訊息.
     // EC  [MCM_DTYPE_EK_TD].
     //     紀錄回應的資料.
 
-    // T + REP + ML + MC.
-    fret = mcm_parse_base_rep(this_lulib);
+    // T + REP.
+    fret = mcm_parse_base_rep(this_lulib, 0);
     if(fret < MCM_RCODE_PASS)
     {
         if(mcm_lulib_show_msg != 0)
@@ -1375,7 +1325,7 @@ int mcm_lulib_get_count(
     xlen = strlen(mix_path) + 1;
     this_lulib->pkt_len = sizeof(MCM_DTYPE_USIZE_TD) +
                           sizeof(MCM_DTYPE_LIST_TD) +
-                          sizeof(MCM_DTYPE_USIZE_TD) + xlen;
+                          xlen;
 
     if(this_lulib->pkt_len > this_lulib->pkt_size)
     {
@@ -1391,18 +1341,16 @@ int mcm_lulib_get_count(
     }
 
     // 封包格式 :
-    // | T | REQ | PL | PC |.
+    // | T | REQ | PC |.
     // T   [MCM_DTYPE_USIZE_TD].
-    //     紀錄封包的總長度, 內容 = T + REQ + PL + PC.
+    //     紀錄封包的總長度, 內容 = T + REQ + PC.
     // REQ [MCM_DTYPE_LIST_TD].
     //     紀錄請求類型.
-    // PL  [MCM_DTYPE_USIZE_TD].
-    //     紀錄請求的路徑長度 (包括最後的 \0).
     // PC  [binary].
     //     紀錄請求的路徑.
 
-    // T + REQ + PL + PC.
-    mcm_build_base_req(this_lulib, MCM_SREQUEST_GET_COUNT, 1, mix_path, xlen);
+    // T + REQ + PC.
+    MCM_BUILD_BASE_REP_02(tmp_offset, this_lulib, MCM_SREQUEST_GET_COUNT, mix_path, xlen);
 
     fret = mcm_send_req(this_lulib);
     if(fret < MCM_RCODE_PASS)
@@ -1425,20 +1373,16 @@ int mcm_lulib_get_count(
     }
 
     // 封包格式 :
-    // | T | REP | ML | MC | EC |.
+    // | T | REP | EC |.
     // T   [MCM_DTYPE_USIZE_TD].
-    //     紀錄封包的總長度, 內容 = T + REP + ML + MC + EC.
+    //     紀錄封包的總長度, 內容 = T + REP + EC.
     // REP [MCM_DTYPE_LIST_TD].
     //     紀錄回應的類型.
-    // ML  [MCM_DTYPE_USIZE_TD].
-    //     紀錄回應的訊息的長度 (包含最後的 \0).
-    // MC  [binary].
-    //     紀錄回應的訊息.
     // EC  [MCM_DTYPE_EK_TD].
     //     紀錄回應的資料.
 
-    // T + REP + ML + MC.
-    fret = mcm_parse_base_rep(this_lulib);
+    // T + REP.
+    fret = mcm_parse_base_rep(this_lulib, 0);
     if(fret < MCM_RCODE_PASS)
     {
         if(mcm_lulib_show_msg != 0)
@@ -1478,7 +1422,7 @@ int mcm_lulib_get_usable_key(
     xlen = strlen(mix_path) + 1;
     this_lulib->pkt_len = sizeof(MCM_DTYPE_USIZE_TD) +
                           sizeof(MCM_DTYPE_LIST_TD) +
-                          sizeof(MCM_DTYPE_USIZE_TD) + xlen;
+                          xlen;
 
     if(this_lulib->pkt_len > this_lulib->pkt_size)
     {
@@ -1494,18 +1438,16 @@ int mcm_lulib_get_usable_key(
     }
 
     // 封包格式 :
-    // | T | REQ | PL | PC |.
+    // | T | REQ | PC |.
     // T   [MCM_DTYPE_USIZE_TD].
-    //     紀錄封包的總長度, 內容 = T + REQ + PL + PC.
+    //     紀錄封包的總長度, 內容 = T + REQ + PC.
     // REQ [MCM_DTYPE_LIST_TD].
     //     紀錄請求類型.
-    // PL  [MCM_DTYPE_USIZE_TD].
-    //     紀錄請求的路徑長度 (包括最後的 \0).
     // PC  [binary].
     //     紀錄請求的路徑.
 
-    // T + REQ + PL + PC.
-    mcm_build_base_req(this_lulib, MCM_SREQUEST_GET_USABLE_KEY, 1, mix_path, xlen);
+    // T + REQ + PC.
+    MCM_BUILD_BASE_REP_02(tmp_offset, this_lulib, MCM_SREQUEST_GET_USABLE_KEY, mix_path, xlen);
 
     fret = mcm_send_req(this_lulib);
     if(fret < MCM_RCODE_PASS)
@@ -1528,20 +1470,16 @@ int mcm_lulib_get_usable_key(
     }
 
     // 封包格式 :
-    // | T | REP | ML | MC | EK |.
+    // | T | REP | EK |.
     // T   [MCM_DTYPE_USIZE_TD].
-    //     紀錄封包的總長度, 內容 = T + REP + ML + MC + EK.
+    //     紀錄封包的總長度, 內容 = T + REP + EK.
     // REP [MCM_DTYPE_LIST_TD].
     //     紀錄回應的類型.
-    // ML  [MCM_DTYPE_USIZE_TD].
-    //     紀錄回應的訊息的長度 (包含最後的 \0).
-    // MC  [binary].
-    //     紀錄回應的訊息.
     // EK  [MCM_DTYPE_EK_TD].
     //     紀錄回應的資料.
 
-    // T + REP + ML + MC.
-    fret = mcm_parse_base_rep(this_lulib);
+    // T + REP.
+    fret = mcm_parse_base_rep(this_lulib, 0);
     if(fret < MCM_RCODE_PASS)
     {
         if(mcm_lulib_show_msg != 0)
@@ -1569,6 +1507,7 @@ int mcm_lulib_update(
     struct mcm_lulib_lib_t *this_lulib)
 {
     int fret;
+    void *tmp_offset;
 
 
     this_lulib->rep_msg_con = NULL;
@@ -1598,7 +1537,7 @@ int mcm_lulib_update(
     //     紀錄請求類型.
 
     // T + REQ.
-    mcm_build_base_req(this_lulib, MCM_SREQUEST_UPDATE, 0, NULL, 0);
+    MCM_BUILD_BASE_REP_01(tmp_offset, this_lulib, MCM_SREQUEST_UPDATE);
 
     fret = mcm_send_req(this_lulib);
     if(fret < MCM_RCODE_PASS)
@@ -1621,18 +1560,14 @@ int mcm_lulib_update(
     }
 
     // 封包格式 :
-    // | T | REP | ML | MC |.
+    // | T | REP |.
     // T   [MCM_DTYPE_USIZE_TD].
-    //     紀錄封包的總長度, 內容 = T + REP + ML + MC.
+    //     紀錄封包的總長度, 內容 = T + REP.
     // REP [MCM_DTYPE_LIST_TD].
     //     紀錄回應的類型.
-    // ML  [MCM_DTYPE_USIZE_TD].
-    //     紀錄回應的訊息的長度 (包含最後的 \0).
-    // MC  [binary].
-    //     紀錄回應的訊息.
 
-    // T + REP + ML + MC.
-    fret = mcm_parse_base_rep(this_lulib);
+    // T + REP.
+    fret = mcm_parse_base_rep(this_lulib, 0);
     if(fret < MCM_RCODE_PASS)
     {
         if(mcm_lulib_show_msg != 0)
@@ -1685,8 +1620,7 @@ int mcm_lulib_save(
     //     紀錄要傳送的資料.
 
     // T + REQ.
-    mcm_build_base_req(this_lulib, MCM_SREQUEST_SAVE, 0, NULL, 0);
-    tmp_offset = this_lulib->pkt_offset;
+    MCM_BUILD_BASE_REP_01(tmp_offset, this_lulib, MCM_SREQUEST_SAVE);
     // DC.
     memcpy(tmp_offset, &force_save, sizeof(MCM_DTYPE_BOOL_TD));
 
@@ -1711,18 +1645,14 @@ int mcm_lulib_save(
     }
 
     // 封包格式 :
-    // | T | REP | ML | MC |.
+    // | T | REP |.
     // T   [MCM_DTYPE_USIZE_TD].
-    //     紀錄封包的總長度, 內容 = T + REP + ML + MC.
+    //     紀錄封包的總長度, 內容 = T + REP.
     // REP [MCM_DTYPE_LIST_TD].
     //     紀錄回應的類型.
-    // ML  [MCM_DTYPE_USIZE_TD].
-    //     紀錄回應的訊息的長度 (包含最後的 \0).
-    // MC  [binary].
-    //     紀錄回應的訊息.
 
-    // T + REP + ML + MC.
-    fret = mcm_parse_base_rep(this_lulib);
+    // T + REP.
+    fret = mcm_parse_base_rep(this_lulib, 0);
     if(fret < MCM_RCODE_PASS)
     {
         if(mcm_lulib_show_msg != 0)
@@ -1743,6 +1673,7 @@ int mcm_lulib_run(
 {
     int fret;
     MCM_DTYPE_USIZE_TD xlen;
+    void *tmp_offset;
 
 
     this_lulib->rep_msg_con = NULL;
@@ -1751,7 +1682,7 @@ int mcm_lulib_run(
     xlen = strlen(module_function) + 1;
     this_lulib->pkt_len = sizeof(MCM_DTYPE_USIZE_TD) +
                           sizeof(MCM_DTYPE_LIST_TD) +
-                          sizeof(MCM_DTYPE_USIZE_TD) + xlen;
+                          xlen;
 
     if(this_lulib->pkt_len > this_lulib->pkt_size)
     {
@@ -1767,18 +1698,16 @@ int mcm_lulib_run(
     }
 
     // 封包格式 :
-    // | T | REQ | PL | PC |.
+    // | T | REQ | PC |.
     // T   [MCM_DTYPE_USIZE_TD].
-    //     紀錄封包的總長度, 內容 = T + REQ + PL + PC.
+    //     紀錄封包的總長度, 內容 = T + REQ + PC.
     // REQ [MCM_DTYPE_LIST_TD].
     //     紀錄請求類型.
-    // PL  [MCM_DTYPE_USIZE_TD].
-    //     紀錄請求的路徑長度 (包括最後的 \0).
     // PC  [binary].
     //     紀錄請求的路徑.
 
-    // T + REQ + PL + PC.
-    mcm_build_base_req(this_lulib, MCM_SREQUEST_RUN, 1, module_function, xlen);
+    // T + REQ + PC.
+    MCM_BUILD_BASE_REP_02(tmp_offset, this_lulib, MCM_SREQUEST_RUN, module_function, xlen);
 
     fret = mcm_send_req(this_lulib);
     if(fret < MCM_RCODE_PASS)
@@ -1812,7 +1741,7 @@ int mcm_lulib_run(
     //     紀錄回應的訊息.
 
     // T + REP + ML + MC.
-    fret = mcm_parse_base_rep(this_lulib);
+    fret = mcm_parse_base_rep(this_lulib, 1);
     if(fret < MCM_RCODE_PASS)
     {
         if(mcm_lulib_show_msg != 0)
@@ -1831,6 +1760,7 @@ int mcm_lulib_shutdown(
     struct mcm_lulib_lib_t *this_lulib)
 {
     int fret;
+    void *tmp_offset;
 
 
     this_lulib->rep_msg_con = NULL;
@@ -1860,7 +1790,7 @@ int mcm_lulib_shutdown(
     //     紀錄請求類型.
 
     // T + REQ.
-    mcm_build_base_req(this_lulib, MCM_SREQUEST_SHUTDOWN, 0, NULL, 0);
+    MCM_BUILD_BASE_REP_01(tmp_offset, this_lulib, MCM_SREQUEST_SHUTDOWN);
 
     fret = mcm_send_req(this_lulib);
     if(fret < MCM_RCODE_PASS)
@@ -1883,18 +1813,14 @@ int mcm_lulib_shutdown(
     }
 
     // 封包格式 :
-    // | T | REP | ML | MC |.
+    // | T | REP |.
     // T   [MCM_DTYPE_USIZE_TD].
-    //     紀錄封包的總長度, 內容 = T + REP + ML + MC.
+    //     紀錄封包的總長度, 內容 = T + REP.
     // REP [MCM_DTYPE_LIST_TD].
     //     紀錄回應的類型.
-    // ML  [MCM_DTYPE_USIZE_TD].
-    //     紀錄回應的訊息的長度 (包含最後的 \0).
-    // MC  [binary].
-    //     紀錄回應的訊息.
 
-    // T + REP + ML + MC.
-    fret = mcm_parse_base_rep(this_lulib);
+    // T + REP.
+    fret = mcm_parse_base_rep(this_lulib, 0);
     if(fret < MCM_RCODE_PASS)
     {
         if(mcm_lulib_show_msg != 0)
@@ -1927,7 +1853,7 @@ int mcm_lulib_check_store_file(
     xlen = strlen(file_path) + 1;
     this_lulib->pkt_len = sizeof(MCM_DTYPE_USIZE_TD) +
                           sizeof(MCM_DTYPE_LIST_TD) +
-                          sizeof(MCM_DTYPE_USIZE_TD) + xlen;
+                          xlen;
 
     if(this_lulib->pkt_len > this_lulib->pkt_size)
     {
@@ -1943,18 +1869,16 @@ int mcm_lulib_check_store_file(
     }
 
     // 封包格式 :
-    // | T | REQ | PL | PC |.
+    // | T | REQ | PC |.
     // T   [MCM_DTYPE_USIZE_TD].
-    //     紀錄封包總長度, 內容 = T + REQ + PL + PC.
+    //     紀錄封包總長度, 內容 = T + REQ + PC.
     // REQ [MCM_DTYPE_LIST_TD].
     //     紀錄請求類型.
-    // PL  [MCM_DTYPE_USIZE_TD].
-    //     紀錄檢查的檔案的路徑長度 (包括最後的 \0).
     // PC  [binary].
     //     紀錄檢查的檔案的路徑.
 
-    // T + REQ + PL + PC.
-    mcm_build_base_req(this_lulib, MCM_SREQUEST_CHECK_STORE_FILE, 1, file_path, xlen);
+    // T + REQ + PC.
+    MCM_BUILD_BASE_REP_02(tmp_offset, this_lulib, MCM_SREQUEST_CHECK_STORE_FILE, file_path, xlen);
 
     fret = mcm_send_req(this_lulib);
     if(fret < MCM_RCODE_PASS)
@@ -1977,15 +1901,11 @@ int mcm_lulib_check_store_file(
     }
 
     // 封包格式 :
-    // | T | REP | ML | MC | SR | VL | VC |.
+    // | T | REP | SR | VL | VC |.
     // T   [MCM_DTYPE_USIZE_TD].
-    //     紀錄封包的總長度, 內容 = T + REP + ML + MC.
+    //     紀錄封包的總長度, 內容 = T + REP + + SR + VL + VC.
     // REP [MCM_DTYPE_LIST_TD].
     //     紀錄回應的類型.
-    // ML  [MCM_DTYPE_USIZE_TD].
-    //     紀錄回應的訊息的長度 (包含最後的 \0).
-    // MC  [binary].
-    //     紀錄回應的訊息.
     // SR  [MCM_DTYPE_LIST_TD].
     //     紀錄檔案的檢查結果.
     // VL  [MCM_DTYPE_USIZE_TD].
@@ -1993,8 +1913,8 @@ int mcm_lulib_check_store_file(
     // VC  [binary].
     //     紀錄檔案的版本資訊.
 
-    // T + REP + ML + MC.
-    fret = mcm_parse_base_rep(this_lulib);
+    // T + REP.
+    fret = mcm_parse_base_rep(this_lulib, 0);
     if(fret < MCM_RCODE_PASS)
     {
         if(mcm_lulib_show_msg != 0)
@@ -2048,6 +1968,7 @@ int mcm_lulib_check_mask_path(
 {
     int fret;
     MCM_DTYPE_USIZE_TD xlen;
+    void *tmp_offset;
 
 
     this_lulib->rep_msg_con = NULL;
@@ -2056,7 +1977,7 @@ int mcm_lulib_check_mask_path(
     xlen = strlen(mask_path) + 1;
     this_lulib->pkt_len = sizeof(MCM_DTYPE_USIZE_TD) +
                           sizeof(MCM_DTYPE_LIST_TD) +
-                          sizeof(MCM_DTYPE_USIZE_TD) + xlen;
+                          xlen;
 
     if(this_lulib->pkt_len > this_lulib->pkt_size)
     {
@@ -2072,18 +1993,16 @@ int mcm_lulib_check_mask_path(
     }
 
     // 封包格式 :
-    // | T | REQ | PL | PC |.
+    // | T | REQ | PC |.
     // T   [MCM_DTYPE_USIZE_TD].
-    //     紀錄封包總長度, 內容 = T + REQ + PL + PC.
+    //     紀錄封包總長度, 內容 = T + REQ + PC.
     // REQ [MCM_DTYPE_LIST_TD].
     //     紀錄請求類型.
-    // PL  [MCM_DTYPE_USIZE_TD].
-    //     紀錄請求的路徑的長度 (包括最後的 \0).
     // PC  [binary].
     //     紀錄請求的路徑.
 
-    // T + REQ + PL + PC.
-    mcm_build_base_req(this_lulib, MCM_SREQUEST_CHECK_MASK_PATH, 1, mask_path, xlen);
+    // T + REQ + PC.
+    MCM_BUILD_BASE_REP_02(tmp_offset, this_lulib, MCM_SREQUEST_CHECK_MASK_PATH, mask_path, xlen);
 
     fret = mcm_send_req(this_lulib);
     if(fret < MCM_RCODE_PASS)
@@ -2106,18 +2025,14 @@ int mcm_lulib_check_mask_path(
     }
 
     // 封包格式 :
-    // | T | REP | ML | MC |.
+    // | T | REP |.
     // T   [MCM_DTYPE_USIZE_TD].
-    //     紀錄封包的總長度, 內容 = T + REP + ML + MC.
+    //     紀錄封包的總長度, 內容 = T + REP.
     // REP [MCM_DTYPE_LIST_TD].
     //     紀錄回應的類型.
-    // ML  [MCM_DTYPE_USIZE_TD].
-    //     紀錄回應的訊息的長度 (包含最後的 \0).
-    // MC  [binary].
-    //     紀錄回應的訊息.
 
-    // T + REP + ML + MC.
-    fret = mcm_parse_base_rep(this_lulib);
+    // T + REP.
+    fret = mcm_parse_base_rep(this_lulib, 0);
     if(fret < MCM_RCODE_PASS)
     {
         if(mcm_lulib_show_msg != 0)
@@ -2167,7 +2082,7 @@ int mcm_lulib_get_path_max_length(
     //     紀錄請求類型.
 
     // T + REQ.
-    mcm_build_base_req(this_lulib, MCM_SREQUEST_GET_PATH_MAX_LENGTH, 0, NULL, 0);
+    MCM_BUILD_BASE_REP_01(tmp_offset, this_lulib, MCM_SREQUEST_GET_PATH_MAX_LENGTH);
 
     fret = mcm_send_req(this_lulib);
     if(fret < MCM_RCODE_PASS)
@@ -2190,20 +2105,16 @@ int mcm_lulib_get_path_max_length(
     }
 
     // 封包格式 :
-    // | T | REP | ML | MC | PML |.
+    // | T | REP | PML |.
     // T   [MCM_DTYPE_USIZE_TD].
-    //     紀錄封包的總長度, 內容 = T + REP + ML + MC + PML.
+    //     紀錄封包的總長度, 內容 = T + REP + PML.
     // REP [MCM_DTYPE_LIST_TD].
     //     紀錄回應的類型.
-    // ML  [MCM_DTYPE_USIZE_TD].
-    //     紀錄回應的訊息的長度 (包含最後的 \0).
-    // MC  [binary].
-    //     紀錄回應的訊息.
     // PML [MCM_DTYPE_USIZE_TD].
     //     紀錄回應的資料.
 
-    // T + REP + ML + MC.
-    fret = mcm_parse_base_rep(this_lulib);
+    // T + REP.
+    fret = mcm_parse_base_rep(this_lulib, 0);
     if(fret < MCM_RCODE_PASS)
     {
         if(mcm_lulib_show_msg != 0)
@@ -2244,7 +2155,7 @@ int mcm_lulib_get_list_name(
     xlen = strlen(mask_path) + 1;
     this_lulib->pkt_len = sizeof(MCM_DTYPE_USIZE_TD) +
                           sizeof(MCM_DTYPE_LIST_TD) +
-                          sizeof(MCM_DTYPE_USIZE_TD) + xlen;
+                          xlen;
 
     if(this_lulib->pkt_len > this_lulib->pkt_size)
     {
@@ -2260,18 +2171,16 @@ int mcm_lulib_get_list_name(
     }
 
     // 封包格式 :
-    // | T | REQ | PL | PC |.
+    // | T | REQ | PC |.
     // T   [MCM_DTYPE_USIZE_TD].
-    //     紀錄封包總長度, 內容 = T + REQ + PL + PC.
+    //     紀錄封包總長度, 內容 = T + REQ + PC.
     // REQ [MCM_DTYPE_LIST_TD].
     //     紀錄請求類型.
-    // PL  [MCM_DTYPE_USIZE_TD].
-    //     紀錄請求的路徑的長度 (包括最後的 \0).
     // PC  [binary].
     //     紀錄請求的路徑.
 
-    // T + REQ + PL + PC.
-    mcm_build_base_req(this_lulib, MCM_SREQUEST_GET_LIST_NAME, 1, mask_path, xlen);
+    // T + REQ + PC.
+    MCM_BUILD_BASE_REP_02(tmp_offset, this_lulib, MCM_SREQUEST_GET_LIST_NAME, mask_path, xlen);
 
     fret = mcm_send_req(this_lulib);
     if(fret < MCM_RCODE_PASS)
@@ -2294,22 +2203,18 @@ int mcm_lulib_get_list_name(
     }
 
     // 封包格式 :
-    // | T | REP | ML | MC | DL | DC |.
+    // | T | REP | DL | DC |.
     // T   [MCM_DTYPE_USIZE_TD].
-    //     紀錄封包的總長度, 內容 = T + REP + ML + MC + DL + DC.
+    //     紀錄封包的總長度, 內容 = T + REP + DL + DC.
     // REP [MCM_DTYPE_LIST_TD].
     //     紀錄回應的類型.
-    // ML  [MCM_DTYPE_USIZE_TD].
-    //     紀錄回應的訊息的長度 (包含最後的 \0).
-    // MC  [binary].
-    //     紀錄回應的訊息.
     // DL  [MCM_DTYPE_USIZE_TD].
     //     紀錄回應的資料的長度.
     // DC  [binary].
     //     紀錄回應的資料.
 
-    // T + REP + ML + MC.
-    fret = mcm_parse_base_rep(this_lulib);
+    // T + REP.
+    fret = mcm_parse_base_rep(this_lulib, 0);
     if(fret < MCM_RCODE_PASS)
     {
         if(mcm_lulib_show_msg != 0)
@@ -2368,7 +2273,7 @@ int mcm_lulib_get_list_type(
     xlen = strlen(mask_path) + 1;
     this_lulib->pkt_len = sizeof(MCM_DTYPE_USIZE_TD) +
                           sizeof(MCM_DTYPE_LIST_TD) +
-                          sizeof(MCM_DTYPE_USIZE_TD) + xlen;
+                          xlen;
 
     if(this_lulib->pkt_len > this_lulib->pkt_size)
     {
@@ -2384,18 +2289,16 @@ int mcm_lulib_get_list_type(
     }
 
     // 封包格式 :
-    // | T | REQ | PL | PC |.
+    // | T | REQ | PC |.
     // T   [MCM_DTYPE_USIZE_TD].
-    //     紀錄封包總長度, 內容 = T + REQ + PL + PC.
+    //     紀錄封包總長度, 內容 = T + REQ + PC.
     // REQ [MCM_DTYPE_LIST_TD].
     //     紀錄請求類型.
-    // PL  [MCM_DTYPE_USIZE_TD].
-    //     紀錄請求的路徑的長度 (包括最後的 \0).
     // PC  [binary].
     //     紀錄請求的路徑.
 
-    // T + REQ + PL + PC.
-    mcm_build_base_req(this_lulib, MCM_SREQUEST_GET_LIST_TYPE, 1, mask_path, xlen);
+    // T + REQ + PC.
+    MCM_BUILD_BASE_REP_02(tmp_offset, this_lulib, MCM_SREQUEST_GET_LIST_TYPE, mask_path, xlen);
 
     fret = mcm_send_req(this_lulib);
     if(fret < MCM_RCODE_PASS)
@@ -2418,22 +2321,18 @@ int mcm_lulib_get_list_type(
     }
 
     // 封包格式 :
-    // | T | REP | ML | MC | DL | DC |.
+    // | T | REP | DL | DC |.
     // T   [MCM_DTYPE_USIZE_TD].
-    //     紀錄封包的總長度, 內容 = T + REP + ML + MC + DL + DC.
+    //     紀錄封包的總長度, 內容 = T + REP + DL + DC.
     // REP [MCM_DTYPE_LIST_TD].
     //     紀錄回應的類型.
-    // ML  [MCM_DTYPE_USIZE_TD].
-    //     紀錄回應的訊息的長度 (包含最後的 \0).
-    // MC  [binary].
-    //     紀錄回應的訊息.
     // DL  [MCM_DTYPE_USIZE_TD].
     //     紀錄回應的資料的長度.
     // DC  [binary].
     //     紀錄回應的資料.
 
-    // T + REP + ML + MC.
-    fret = mcm_parse_base_rep(this_lulib);
+    // T + REP.
+    fret = mcm_parse_base_rep(this_lulib, 0);
     if(fret < MCM_RCODE_PASS)
     {
         if(mcm_lulib_show_msg != 0)
@@ -2492,7 +2391,7 @@ int mcm_lulib_get_list_value(
     xlen = strlen(full_path) + 1;
     this_lulib->pkt_len = sizeof(MCM_DTYPE_USIZE_TD) +
                           sizeof(MCM_DTYPE_LIST_TD) +
-                          sizeof(MCM_DTYPE_USIZE_TD) + xlen;
+                          xlen;
 
     if(this_lulib->pkt_len > this_lulib->pkt_size)
     {
@@ -2508,18 +2407,16 @@ int mcm_lulib_get_list_value(
     }
 
     // 封包格式 :
-    // | T | REQ | PL | PC |.
+    // | T | REQ | PC |.
     // T   [MCM_DTYPE_USIZE_TD].
-    //     紀錄封包總長度, 內容 = T + REQ + PL + PC.
+    //     紀錄封包總長度, 內容 = T + REQ + PC.
     // REQ [MCM_DTYPE_LIST_TD].
     //     紀錄請求類型.
-    // PL  [MCM_DTYPE_USIZE_TD].
-    //     紀錄請求的路徑的長度 (包括最後的 \0).
     // PC  [binary].
     //     紀錄請求的路徑.
 
-    // T + REQ + PL + PC.
-    mcm_build_base_req(this_lulib, MCM_SREQUEST_GET_LIST_VALUE, 1, full_path, xlen);
+    // T + REQ + PC.
+    MCM_BUILD_BASE_REP_02(tmp_offset, this_lulib, MCM_SREQUEST_GET_LIST_VALUE, full_path, xlen);
 
     fret = mcm_send_req(this_lulib);
     if(fret < MCM_RCODE_PASS)
@@ -2542,22 +2439,18 @@ int mcm_lulib_get_list_value(
     }
 
     // 封包格式 :
-    // | T | REP | ML | MC | DL | DC |.
+    // | T | REP | DL | DC |.
     // T   [MCM_DTYPE_USIZE_TD].
-    //     紀錄封包的總長度, 內容 = T + REP + ML + MC + DL + DC.
+    //     紀錄封包的總長度, 內容 = T + REP + DL + DC.
     // REP [MCM_DTYPE_LIST_TD].
     //     紀錄回應的類型.
-    // ML  [MCM_DTYPE_USIZE_TD].
-    //     紀錄回應的訊息的長度 (包含最後的 \0).
-    // MC  [binary].
-    //     紀錄回應的訊息.
     // DL  [MCM_DTYPE_USIZE_TD].
     //     紀錄回應的資料的長度.
     // DC  [binary].
     //     紀錄回應的資料.
 
-    // T + REP + ML + MC.
-    fret = mcm_parse_base_rep(this_lulib);
+    // T + REP.
+    fret = mcm_parse_base_rep(this_lulib, 0);
     if(fret < MCM_RCODE_PASS)
     {
         if(mcm_lulib_show_msg != 0)
@@ -2648,8 +2541,8 @@ int mcm_lulib_set_any_type_alone(
     //     紀錄要傳送的資料.
 
     // T + REQ + PL + PC.
-    mcm_build_base_req(this_lulib, MCM_SREQUEST_SET_ANY_TYPE_ALONE, 1, full_path, xlen);
-    tmp_offset = this_lulib->pkt_offset;
+    MCM_BUILD_BASE_REP_03(tmp_offset, this_lulib, MCM_SREQUEST_SET_ANY_TYPE_ALONE,
+                          full_path, xlen);
     // DL.
     *((MCM_DTYPE_USIZE_TD *) tmp_offset) = dlen;
     tmp_offset += sizeof(MCM_DTYPE_USIZE_TD);
@@ -2680,18 +2573,14 @@ int mcm_lulib_set_any_type_alone(
     }
 
     // 封包格式 :
-    // | T | REP | ML | MC |.
+    // | T | REP |.
     // T   [MCM_DTYPE_USIZE_TD].
-    //     紀錄封包的總長度, 內容 = T + REP + ML + MC.
+    //     紀錄封包的總長度, 內容 = T + REP.
     // REP [MCM_DTYPE_LIST_TD].
     //     紀錄回應的類型.
-    // ML  [MCM_DTYPE_USIZE_TD].
-    //     紀錄回應的訊息的長度 (包含最後的 \0).
-    // MC  [binary].
-    //     紀錄回應的訊息.
 
-    // T + REP + ML + MC.
-    fret = mcm_parse_base_rep(this_lulib);
+    // T + REP.
+    fret = mcm_parse_base_rep(this_lulib, 0);
     if(fret < MCM_RCODE_PASS)
     {
         if(mcm_lulib_show_msg != 0)
@@ -2727,7 +2616,7 @@ int mcm_lulib_get_with_type_alone(
     xlen = strlen(full_path) + 1;
     this_lulib->pkt_len = sizeof(MCM_DTYPE_USIZE_TD) +
                           sizeof(MCM_DTYPE_LIST_TD) +
-                          sizeof(MCM_DTYPE_USIZE_TD) + xlen;
+                          xlen;
 
     if(this_lulib->pkt_len > this_lulib->pkt_size)
     {
@@ -2743,18 +2632,17 @@ int mcm_lulib_get_with_type_alone(
     }
 
     // 封包格式 :
-    // | T | REQ | PL | PC |.
+    // | T | REQ | PC |.
     // T   [MCM_DTYPE_USIZE_TD].
-    //     紀錄封包總長度, 內容 = T + REQ + PL + PC.
+    //     紀錄封包總長度, 內容 = T + REQ + PC.
     // REQ [MCM_DTYPE_LIST_TD].
     //     紀錄請求類型.
-    // PL  [MCM_DTYPE_USIZE_TD].
-    //     紀錄請求的路徑的長度 (包括最後的 \0).
     // PC  [binary].
     //     紀錄請求的路徑.
 
-    // T + REQ + PL + PC.
-    mcm_build_base_req(this_lulib, MCM_SREQUEST_GET_WITH_TYPE_ALONE, 1, full_path, xlen);
+    // T + REQ + PC.
+    MCM_BUILD_BASE_REP_02(tmp_offset, this_lulib, MCM_SREQUEST_GET_WITH_TYPE_ALONE,
+                          full_path, xlen);
 
     fret = mcm_send_req(this_lulib);
     if(fret < MCM_RCODE_PASS)
@@ -2777,15 +2665,11 @@ int mcm_lulib_get_with_type_alone(
     }
 
     // 封包格式 :
-    // | T | REP | ML | MC | DT | DL | DC |.
+    // | T | REP | DT | DL | DC |.
     // T   [MCM_DTYPE_USIZE_TD].
-    //     紀錄封包的總長度, 內容 = T + REP + ML + MC + DT + DL + DC.
+    //     紀錄封包的總長度, 內容 = T + REP + DT + DL + DC.
     // REP [MCM_DTYPE_LIST_TD].
     //     紀錄回應的類型.
-    // ML  [MCM_DTYPE_USIZE_TD].
-    //     紀錄回應的訊息的長度 (包含最後的 \0).
-    // MC  [binary].
-    //     紀錄回應的訊息.
     // DT  [MCM_DTYPE_LIST_TD]
     //     紀錄回應的資料的類型.
     // DL  [MCM_DTYPE_USIZE_TD].
@@ -2793,8 +2677,8 @@ int mcm_lulib_get_with_type_alone(
     // DC  [binary].
     //     紀錄回應的字串資料.
 
-    // T + REP + ML + MC.
-    fret = mcm_parse_base_rep(this_lulib);
+    // T + REP.
+    fret = mcm_parse_base_rep(this_lulib, 0);
     if(fret < MCM_RCODE_PASS)
     {
         if(mcm_lulib_show_msg != 0)
