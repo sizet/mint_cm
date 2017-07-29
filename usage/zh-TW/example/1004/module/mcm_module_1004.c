@@ -213,8 +213,8 @@ int mcm_module_kick_session(
         // 刪除 session.
         if(tmp_status == MCM_DSCHANGE_DEL)
         {
-            // 取得資料 (NEW 模式).
-            if(mcm_config_get_entry_by_info(this_session, tmp_group, tmp_store, MCM_DACCESS_NEW,
+            // 取得資料 (SYS 模式).
+            if(mcm_config_get_entry_by_info(this_session, tmp_group, tmp_store, MCM_DACCESS_SYS,
                                             &session_v) < MCM_RCODE_PASS)
             {
                 DMSG("call mcm_config_get_entry_by_info(%s) fail", path2);

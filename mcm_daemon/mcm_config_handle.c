@@ -2008,6 +2008,9 @@ int mcm_destory_store(
         self_store = this_store;
         this_store = this_store->next_store;
 
+        // 從 update_store 列表中移除.
+        // 此部分不能移到 mcm_unlink_store() 集中處理, 刪除 store 會從子層往上層處理,
+        // 刪除子層 store 時並不會先呼叫 mcm_unlink_store() 處理.
         if(self_store->need_update != 0)
             mcm_del_update_store(self_store);
 
@@ -2374,6 +2377,7 @@ int mcm_unlink_store(
     MCM_DBG_SHOW_ENTRY_PATH(this_model_group, this_store, dbg_dloc, dbg_key);
 #endif
 
+    // 移除前後 store 和自己的鏈結.
     MCM_CFDMSG("neighbor[<-%p][->%p]", this_store->prev_store, this_store->next_store);
     if(this_store->prev_store != NULL)
     {
@@ -2390,6 +2394,7 @@ int mcm_unlink_store(
         this_store->next_store->prev_store = this_store->prev_store;
     }
 
+    // 移除 parent-store 和自己的鏈結 (link-list 的 head 部分).
     store_head_in_parent = this_store->parent_store->child_store_list_head_array +
                            this_model_group->store_index_in_parent;
     if(*store_head_in_parent == this_store)
@@ -2399,6 +2404,7 @@ int mcm_unlink_store(
         *store_head_in_parent = this_store->next_store;
     }
 
+    // 移除 parent-store 和自己的鏈結 (link-list 的 tail 部分).
     store_tail_in_parent = this_store->parent_store->child_store_list_tail_array +
                            this_model_group->store_index_in_parent;
     if(*store_tail_in_parent == this_store)
@@ -2408,6 +2414,7 @@ int mcm_unlink_store(
         *store_tail_in_parent = this_store->prev_store;
     }
 
+    // 移除 parent-store 和自己的鏈結 (rb-tree 部分).
     store_tree_in_parent = this_store->parent_store->child_store_tree_array +
                            this_model_group->store_index_in_parent;
 #if MCM_CFDMODE
@@ -2438,6 +2445,7 @@ int mcm_unlink_store(
     }
 #endif
 
+    // 調整資料筆數.
     store_count_in_parent = this_store->parent_store->child_store_count_array +
                             this_model_group->store_index_in_parent;
     MCM_CFDMSG("adjust store_count_in_parent[" MCM_DTYPE_EK_PF ">>" MCM_DTYPE_EK_PF "]",
@@ -5022,14 +5030,14 @@ int mcm_adjust_data(
 
     // 操作     目前狀態     資料調整         狀態調整.
     // SET-NEW  NONE         複製 SYS 到 NEW  改為 SET.
-    //          SET          不需調整         不需調整.
+    //          SET          不需調整         改為 SET.
     //          ADD          不需調整         不需調整.
-    //          DEL          不需調整         不需調整.
+    //          DEL          禁止             .
     // ADD-NEW  parent-NONE  移動 SYS 到 NEW  改為 ADD.
     //          parent-SET   移動 SYS 到 NEW  改為 ADD.
     //          parent-ADD   移動 SYS 到 NEW  改為 ADD.
     //          parent-DEL   禁止             .
-    // DEL-NEW  NONE         複製 SYS 到 NEW  改為 DEL.
+    // DEL-NEW  NONE         不需調整         改為 DEL.
     //          SET          不需調整         改為 DEL.
     //          ADD          禁止             .
     //          DEL          不需調整         不需調整.
@@ -5059,8 +5067,8 @@ int mcm_adjust_data(
             }
             else
             {
-               mcm_config_set_entry_all_status(NULL, this_model_group, this_store,
-                                               MCM_DSASSIGN_SET, MCM_DSCHANGE_SET, 0);
+                mcm_config_set_entry_all_status(NULL, this_model_group, this_store,
+                                                MCM_DSASSIGN_SET, MCM_DSCHANGE_SET, 0);
             }
         }
         else
@@ -5071,6 +5079,11 @@ int mcm_adjust_data(
             {
                 mcm_config_set_alone_status(NULL, this_model_group, this_model_member, this_store,
                                             MCM_DSASSIGN_SET, MCM_DSCHANGE_SET);
+            }
+            else
+            {
+                mcm_config_set_entry_all_status(NULL, this_model_group, this_store,
+                                                MCM_DSASSIGN_SET, MCM_DSCHANGE_SET, 0);
             }
         }
     }
@@ -5090,17 +5103,6 @@ int mcm_adjust_data(
         if(tmp_status == MCM_DSCHANGE_NONE)
         {
             MCM_CFDMSG("adjust[DEL to NONE]");
-            this_store->data_value_new = malloc(this_model_group->data_value_size);
-            if(this_store->data_value_new == NULL)
-            {
-                MCM_EMSG("call malloc() fail [%s]", strerror(errno));
-                return MCM_RCODE_CONFIG_ALLOC_FAIL;
-            }
-            MCM_CFDMSG("alloc data_value_new[" MCM_DTYPE_USIZE_PF "][%p]",
-                       this_model_group->data_value_size, this_store->data_value_new);
-            memcpy(this_store->data_value_new, this_store->data_value_sys,
-                   this_model_group->data_value_size);
-
             mcm_config_set_entry_all_status(NULL, this_model_group, this_store,
                                             MCM_DSASSIGN_SET, MCM_DSCHANGE_DEL, 0);
         }
@@ -5273,8 +5275,8 @@ int mcm_config_update(
         {
             if(tmp_status == MCM_DSCHANGE_ADD)
             {
-                // 對於 增加 操作, 資料給 SYS.
-                MCM_CFDMSG("[sync add]");
+                // 對於 ADD 操作, 資料給 SYS.
+                MCM_CFDMSG("[sync ADD]");
                 memset(self_store->data_status, 0, self_model_group->data_status_size);
                 self_store->data_value_sys = self_store->data_value_new;
                 self_store->data_value_new = NULL;
@@ -5283,15 +5285,15 @@ int mcm_config_update(
             else
             if(tmp_status == MCM_DSCHANGE_DEL)
             {
-                // 對於 刪除 操作, 將資料刪除.
-                MCM_CFDMSG("[sync del]");
+                // 對於 DEL 操作, 將資料刪除.
+                MCM_CFDMSG("[sync DEL]");
                 mcm_unlink_store(self_model_group, self_store);
                 mcm_destory_store(self_store);
             }
             else
             {
-                // 對於 設定 操作, 資料寫回 SYS.
-                MCM_CFDMSG("[sync set]");
+                // 對於 SET 操作, 資料寫回 SYS.
+                MCM_CFDMSG("[sync SET]");
                 memset(self_store->data_status, 0, self_model_group->data_status_size);
                 free(self_store->data_value_sys);
                 self_store->data_value_sys = self_store->data_value_new;
@@ -5307,25 +5309,23 @@ int mcm_config_update(
         {
             if(tmp_status == MCM_DSCHANGE_ADD)
             {
-                // 對於 增加 操作, 放棄資料.
-                MCM_CFDMSG("[drop add]");
+                // 對於 ADD 操作, 放棄資料.
+                MCM_CFDMSG("[drop ADD]");
                 mcm_unlink_store(self_model_group, self_store);
                 mcm_destory_store(self_store);
             }
             else
             if(tmp_status == MCM_DSCHANGE_DEL)
             {
-                // 對於 刪除 操作, 回復資料.
-                MCM_CFDMSG("[drop del]");
+                // 對於 DEL 操作, 不用處理.
+                MCM_CFDMSG("[drop DEL]");
                 memset(self_store->data_status, 0, self_model_group->data_status_size);
-                free(self_store->data_value_new);
-                self_store->data_value_new = NULL;
                 mcm_del_update_store(self_store);
             }
             else
             {
-                // 對於 設定 操作, 放棄修改的資料.
-                MCM_CFDMSG("[drop set]");
+                // 對於 SET 操作, 放棄修改的資料.
+                MCM_CFDMSG("[drop SET]");
                 memset(self_store->data_status, 0, self_model_group->data_status_size);
                 free(self_store->data_value_new);
                 self_store->data_value_new = NULL;
@@ -6593,22 +6593,19 @@ int mcm_config_set_alone_by_info(
     // SET-NEW NONE 允許.
     //         SET  允許.
     //         ADD  允許.
-    //         DEL  允許.
+    //         DEL  禁止.
 
     MCM_CFDMSG("access[%s]", data_access == MCM_DACCESS_SYS ? "SYS" : "NEW");
 
-    if(data_access == MCM_DACCESS_SYS)
+    deny_status = data_access == MCM_DACCESS_SYS ? MCM_DSCHANGE_ADD : MCM_DSCHANGE_DEL;
+
+    fret = mcm_check_access(this_model_group, this_store, deny_status, 0, 0);
+    if(fret < MCM_RCODE_PASS)
     {
-        deny_status = MCM_DSCHANGE_ADD;
-        fret = mcm_check_access(this_model_group, this_store, deny_status, 0, 0);
-        if(fret < MCM_RCODE_PASS)
-        {
-            MCM_EMSG("invalid access [SET (SYS) -> ADD]");
-            return fret;
-        }
-    }
-    else
-    {
+        MCM_EMSG("invalid access [SET (%s) -> %s]",
+                 data_access == MCM_DACCESS_SYS ? "SYS" : "NEW",
+                 data_access == MCM_DACCESS_SYS ? "ADD" : "DEL");
+        return fret;
     }
 
     if(data_access == MCM_DACCESS_SYS)
@@ -6952,22 +6949,19 @@ int mcm_config_set_entry_by_info(
     // SET-NEW NONE 允許.
     //         SET  允許.
     //         ADD  允許.
-    //         DEL  允許.
+    //         DEL  禁止.
 
     MCM_CFDMSG("access[%s]", data_access == MCM_DACCESS_SYS ? "SYS" : "NEW");
 
-    if(data_access == MCM_DACCESS_SYS)
+    deny_status = data_access == MCM_DACCESS_SYS ? MCM_DSCHANGE_ADD : MCM_DSCHANGE_DEL;
+
+    fret = mcm_check_access(this_model_group, this_store, deny_status, 0, 0);
+    if(fret < MCM_RCODE_PASS)
     {
-        deny_status = MCM_DSCHANGE_ADD;
-        fret = mcm_check_access(this_model_group, this_store, deny_status, 0, 0);
-        if(fret < MCM_RCODE_PASS)
-        {
-            MCM_EMSG("invalid access [SET (SYS) -> ADD]");
-            return fret;
-        }
-    }
-    else
-    {
+        MCM_EMSG("invalid access [SET (%s) -> %s]",
+                 data_access == MCM_DACCESS_SYS ? "SYS" : "NEW",
+                 data_access == MCM_DACCESS_SYS ? "ADD" : "DEL");
+        return fret;
     }
 
     if(data_access == MCM_DACCESS_SYS)
@@ -7327,7 +7321,7 @@ int mcm_config_del_entry_by_info(
         mcm_unlink_store(this_model_group, this_store);
 
         // this_store->data_value_sys == NULL 表示是 ADD 狀態,
-        // this_store->data_value_sys 沒有資料所以不設定需要儲存.
+        // ADD 之後又馬上 DEL 的話資料並沒有變更, 不需要設定需要儲存.
         if(this_model_group->group_save != 0)
             if(this_store->data_value_sys != NULL)
                 mcm_do_save = 1;
@@ -7702,7 +7696,7 @@ int mcm_config_del_all_entry_by_info(
             *store_count_in_parent = 0;
 
             // list_store->data_value_sys == NULL 表示是 ADD 狀態,
-            // list_store->data_value_sys 沒有資料所以不設定需要儲存.
+            // ADD 之後又馬上 DEL 的話資料並沒有變更, 不需要設定需要儲存.
             if(this_model_group->group_save != 0)
                 if(list_store->data_value_sys != NULL)
                     mcm_do_save = 1;

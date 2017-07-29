@@ -148,8 +148,8 @@ int mcm_module_boot_config_vap(
             goto FREE_01;
         }
         DMSG("[get-entry] %s.ekey = " MCM_DTYPE_EK_PF, path2, vap_v.ekey);
-        DMSG("[get-entry] %s.date = " MCM_DTYPE_S_PF, path2, vap_v.ssid);
-        DMSG("[get-entry] %s.date = " MCM_DTYPE_IUI_PF, path2, vap_v.channel);
+        DMSG("[get-entry] %s.ssid = " MCM_DTYPE_S_PF, path2, vap_v.ssid);
+        DMSG("[get-entry] %s.channel = " MCM_DTYPE_IUI_PF, path2, vap_v.channel);
     }
 
     fret = MCM_RCODE_PASS;

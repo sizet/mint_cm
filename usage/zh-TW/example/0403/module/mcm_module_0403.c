@@ -241,7 +241,7 @@ FREE_01:
 int mcm_module_get_alone(
     struct mcm_service_session_t *this_session)
 {
-    int fret;
+    int fret = MCM_RCODE_MODULE_INTERNAL_ERROR;
     char *path1;
     MCM_DTYPE_DS_TD tmp_status;
     MCM_DTYPE_S_TD date[MCM_BSIZE_DEVICE_SYSTEM_DATE];
@@ -378,7 +378,7 @@ FREE_01:
 int mcm_module_get_entry(
     struct mcm_service_session_t *this_session)
 {
-    int fret;
+    int fret = MCM_RCODE_MODULE_INTERNAL_ERROR;
     char *path1, path2[MCM_PATH_MAX_LENGTH];
     MCM_DTYPE_EK_TD count, i;
     MCM_DTYPE_DS_TD tmp_status;
@@ -422,8 +422,8 @@ int mcm_module_get_entry(
                 goto FREE_01;
             }
             DMSG("[get-entry][SYS] %s.ekey = " MCM_DTYPE_EK_PF, path2, vap_v.ekey);
-            DMSG("[get-entry][SYS] %s.date = " MCM_DTYPE_S_PF, path2, vap_v.ssid);
-            DMSG("[get-entry][SYS] %s.date = " MCM_DTYPE_IUI_PF, path2, vap_v.channel);
+            DMSG("[get-entry][SYS] %s.ssid = " MCM_DTYPE_S_PF, path2, vap_v.ssid);
+            DMSG("[get-entry][SYS] %s.channel = " MCM_DTYPE_IUI_PF, path2, vap_v.channel);
         }
         else
         // 做設定.
@@ -437,8 +437,8 @@ int mcm_module_get_entry(
                 goto FREE_01;
             }
             DMSG("[get-entry][SYS] %s.ekey = " MCM_DTYPE_EK_PF, path2, vap_v.ekey);
-            DMSG("[get-entry][SYS] %s.date = " MCM_DTYPE_S_PF, path2, vap_v.ssid);
-            DMSG("[get-entry][SYS] %s.date = " MCM_DTYPE_IUI_PF, path2, vap_v.channel);
+            DMSG("[get-entry][SYS] %s.ssid = " MCM_DTYPE_S_PF, path2, vap_v.ssid);
+            DMSG("[get-entry][SYS] %s.channel = " MCM_DTYPE_IUI_PF, path2, vap_v.channel);
             // 取得資料 (NEW 模式).
             if(mcm_config_get_entry_by_path(this_session, path2, MCM_DACCESS_NEW, &vap_v)
                                             < MCM_RCODE_PASS)
@@ -447,8 +447,8 @@ int mcm_module_get_entry(
                 goto FREE_01;
             }
             DMSG("[get-entry][NEW] %s.ekey = " MCM_DTYPE_EK_PF, path2, vap_v.ekey);
-            DMSG("[get-entry][NEW] %s.date = " MCM_DTYPE_S_PF, path2, vap_v.ssid);
-            DMSG("[get-entry][NEW] %s.date = " MCM_DTYPE_IUI_PF, path2, vap_v.channel);
+            DMSG("[get-entry][NEW] %s.ssid = " MCM_DTYPE_S_PF, path2, vap_v.ssid);
+            DMSG("[get-entry][NEW] %s.channel = " MCM_DTYPE_IUI_PF, path2, vap_v.channel);
         }
         else
         // 做增加.
@@ -462,23 +462,23 @@ int mcm_module_get_entry(
                 goto FREE_01;
             }
             DMSG("[get-entry][NEW] %s.ekey = " MCM_DTYPE_EK_PF, path2, vap_v.ekey);
-            DMSG("[get-entry][NEW] %s.date = " MCM_DTYPE_S_PF, path2, vap_v.ssid);
-            DMSG("[get-entry][NEW] %s.date = " MCM_DTYPE_IUI_PF, path2, vap_v.channel);
+            DMSG("[get-entry][NEW] %s.ssid = " MCM_DTYPE_S_PF, path2, vap_v.ssid);
+            DMSG("[get-entry][NEW] %s.channel = " MCM_DTYPE_IUI_PF, path2, vap_v.channel);
         }
         else
         // 做刪除.
         if(tmp_status == MCM_DSCHANGE_DEL)
         {
-            // 取得資料 (NEW 模式).
-            if(mcm_config_get_entry_by_path(this_session, path2, MCM_DACCESS_NEW, &vap_v)
+            // 取得資料 (SYS 模式).
+            if(mcm_config_get_entry_by_path(this_session, path2, MCM_DACCESS_SYS, &vap_v)
                                             < MCM_RCODE_PASS)
             {
                 DMSG("call mcm_config_get_entry_by_path(%s) fail", path2);
                 goto FREE_01;
             }
-            DMSG("[get-entry][NEW] %s.ekey = " MCM_DTYPE_EK_PF, path2, vap_v.ekey);
-            DMSG("[get-entry][NEW] %s.date = " MCM_DTYPE_S_PF, path2, vap_v.ssid);
-            DMSG("[get-entry][NEW] %s.date = " MCM_DTYPE_IUI_PF, path2, vap_v.channel);
+            DMSG("[get-entry][SYS] %s.ekey = " MCM_DTYPE_EK_PF, path2, vap_v.ekey);
+            DMSG("[get-entry][SYS] %s.ssid = " MCM_DTYPE_S_PF, path2, vap_v.ssid);
+            DMSG("[get-entry][SYS] %s.channel = " MCM_DTYPE_IUI_PF, path2, vap_v.channel);
         }
     }
 

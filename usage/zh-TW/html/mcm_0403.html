@@ -172,7 +172,8 @@ Some rights reserved. See README.
             <tr>
               <td class="css_td_list2_l1"><font class="css_font_b1">MCM_DSCHANGE_DEL</font></td>
               <td class="css_td_list2_l1">
-                <font class="css_font_g1">允許的操作</font>
+                <font class="css_font_r1">禁止的操作</font><br>
+                只是刪除資料, 新進資料區不會有資料
               </td>
             </tr>
           </table>
@@ -206,8 +207,27 @@ Some rights reserved. See README.
             <tr>
               <td class="css_td_list2_l2">MCM_DACCESS_NEW</td>
               <td class="css_td_list2_r1">
-                修改的資料先放在新進資料區, 不直接修改系統資料區的資料<br>
-                (外部程式修改資料是使用此模式)
+                <table class="css_table_list2">
+                  <tr>
+                    <td class="css_td_list2_l1"><font class="css_font_p1">設定資料</font></td>
+                    <td class="css_td_list2_r1">
+                      將設定的資料放到資料庫的新進資料區, 並標註資料被設定
+                    </td>
+                  </tr>
+                  <tr>
+                    <td class="css_td_list2_l1"><font class="css_font_p1">增加資料</font></td>
+                    <td class="css_td_list2_r1">
+                      在資料庫增加紀錄, 並將增加的資料放到新進資料區, 並標註資料被增加
+                    </td>
+                  </tr>
+                  <tr>
+                    <td class="css_td_list2_l1"><font class="css_font_p1">刪除資料</font></td>
+                    <td class="css_td_list2_r1">
+                      標註資料被刪除
+                    </td>
+                  </tr>
+                </table>
+                外部程式修改資料是使用此模式
               </td>
             </tr>
           </table>
@@ -321,7 +341,7 @@ Some rights reserved. See README.
                 <font class="css_font_b1">MCM_DACCESS_NEW</font> 模式<br>
               </td>
               <td class="css_td_list2_l1">原資料</td>
-              <td class="css_td_list2_l1">原資料</td>
+              <td class="css_td_list2_l1">無</td>
             </tr>
           </table>
           <br>
@@ -373,7 +393,7 @@ Some rights reserved. See README.
                 <font class="css_font_b1">MCM_DACCESS_NEW</font> 模式<br>
               </td>
               <td class="css_td_list2_l1">原資料</td>
-              <td class="css_td_list2_l1">原資料</td>
+              <td class="css_td_list2_l1">無</td>
               <td class="css_td_list2_l1">無</td>
               <td class="css_td_list2_l1">無</td>
               <td class="css_td_list2_l1">原資料</td>
@@ -483,7 +503,7 @@ Some rights reserved. See README.
                   <tr>
                     <td class="css_td_list1_l">02.&nbsp;</td>
                     <td class="css_td_list1_r">
-                      增加的資料會放在新進資料區, 系統資料區不存在此筆資料, 無法設定不存在的資料
+                      增加的資料會放在新進資料區, 所以在系統資料區沒有資料設定
                     </td>
                   </tr>
                 </table>
@@ -881,38 +901,18 @@ Some rights reserved. See README.
                   <tr>
                     <td class="css_td_list1_l">01.&nbsp;</td>
                     <td class="css_td_list1_r">
-                      <font class="css_font_g1">允許的操作</font>
+                      <font class="css_font_r1">禁止的操作</font>
                     </td>
                   </tr>
                   <tr>
                     <td class="css_td_list1_l">02.&nbsp;</td>
                     <td class="css_td_list1_r">
-                      設定新進資料區的資料
-                    </td>
-                  </tr>
-                  <tr>
-                    <td class="css_td_list1_l">03.&nbsp;</td>
-                    <td class="css_td_list1_r">
-                      資料狀態不變
-                    </td>
-                  </tr>
-                  <tr>
-                    <td class="css_td_list1_l">04.&nbsp;</td>
-                    <td class="css_td_list1_r">
-                      發生 [放棄資料] 處理時, 可以恢復資料
-                    </td>
-                  </tr>
-                  <tr>
-                    <td class="css_td_list1_l">05.&nbsp;</td>
-                    <td class="css_td_list1_r">
-                      發生 [套用資料] 處理時, 此筆資料會被刪除,
-                      對新進資料區做設定最後會無效
+                      刪除資料並不會在新進資料區放置資料, 所以在新進資料區沒有資料可以修改
                     </td>
                   </tr>
                 </table>
               </td>
             </tr>
-
             <tr>
               <td class="css_td_list2_l1" rowspan="4">
                 <font class="css_font_p1">增加資料</font><br>
