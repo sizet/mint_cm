@@ -437,7 +437,6 @@ int main(int argc, char **argv)
 FREE_02:
     free_xml_profile(&xml_info);
 FREE_01:
-printf("[%u]\n", fret);
     return fret;
 FREE_HELP:
     printf("\nmcm_build <-d> <-m> <-s>\n");
@@ -2158,22 +2157,19 @@ int load_node_profile(
                 goto FREE_01;
             }
 
-            if(group_node->member_node != NULL)
+            for(each_node = group_node->member_node, ncnt = 0; each_node != NULL;
+                each_node = each_node->next_node)
             {
-                for(each_node = group_node->member_node, ncnt = 0; each_node != NULL;
-                    each_node = each_node->next_node)
-                {
-                    if(each_node->node_type == MCM_DTYPE_EK_INDEX)
-                        ncnt++;
-                }
-                if(ncnt != 1)
-                {
-                    DMSG(MCM_PROFILE_ERROR_PREFIX_MSG
-                         "invalid tag [node], [%s/%s] must be assign only one [%s] member",
-                         group_line, "INVALID_NODE_04", MCM_DTYPE_GS_KEY, MCM_DTYPE_GD_KEY,
-                         MCM_DTYPE_EK_KEY);
-                    goto FREE_01;
-                }
+                if(each_node->node_type == MCM_DTYPE_EK_INDEX)
+                    ncnt++;
+            }
+            if(ncnt != 1)
+            {
+                DMSG(MCM_PROFILE_ERROR_PREFIX_MSG
+                     "invalid tag [node], [%s/%s] must be assign only one [%s] member",
+                     group_line, "INVALID_NODE_04", MCM_DTYPE_GS_KEY, MCM_DTYPE_GD_KEY,
+                     MCM_DTYPE_EK_KEY);
+                goto FREE_01;
             }
 
             if(group_node->child_node == NULL)
