@@ -71,7 +71,7 @@ function config_set()
     {
         // 設定 device.serial_number
         req_cmd += "&set.device.serial_number=" +
-                   mcm_jslib_convert_submit_str($("#serial_number_text").val());
+                   $("#serial_number_text").val();
     }
 
     // 執行內部模組.

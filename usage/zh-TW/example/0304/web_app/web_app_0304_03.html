@@ -66,7 +66,7 @@ function config_set()
     req_cmd += "&set.device.descript=" +
                mcm_jslib_convert_submit_str($("#descript_text").val());
     req_cmd += "&set.device.serial_number=" +
-               mcm_jslib_convert_submit_str($("#serial_number_text").val());
+               $("#serial_number_text").val();
 
     // 設定 device.system
     req_cmd += "&set.device.system.date=" +
@@ -74,9 +74,9 @@ function config_set()
     req_cmd += "&set.device.system.ip_addr=" +
                mcm_jslib_convert_submit_str($("#ip_addr_text").val());
     req_cmd += "&set.device.system.uptime=" +
-               mcm_jslib_convert_submit_str($("#uptime_text").val());
+               $("#uptime_text").val();
     req_cmd += "&set.device.system.loading=" +
-               mcm_jslib_convert_submit_str($("#loading_text").val());
+               $("#loading_text").val();
 
     // 送出修改資料請求.
     self_jslib = new mcm_jslib_lib_t();
