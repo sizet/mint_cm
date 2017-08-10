@@ -1635,14 +1635,21 @@ int parse_tag(
     read_len = strlen(read_con);
     if(read_len == 0)
         return 0;
-    if((read_len -= 1) == 0)
-        return 0;
-    if(read_con[read_len] != '\n')
+    if(read_con[read_len - 1] != '\n')
     {
-        DMSG("read_con too small");
+        DMSG("read_con buffer size too small or missing new line at the end of file");
         return -1;
     }
-    read_con[read_len] = '\0';
+    else
+    {
+        read_len--;
+        read_con[read_len] = '\0';
+    }
+    if(read_con[read_len - 1] == '\r')
+    {
+        read_len--;
+        read_con[read_len] = '\0';
+    }
 
     // 移除前端的 " " 和 "\t".
     for(ridx = 0; ridx < read_len; ridx++)
