@@ -70,137 +70,6 @@ struct part_info_t *part_list_head = NULL, *part_list_tail = NULL;
 
 
 
-int mcm_find_boundary(
-    char *content_con,
-    MCM_DTYPE_USIZE_TD content_len);
-
-int mcm_process_post(
-    char *post_con,
-    MCM_DTYPE_USIZE_TD post_len);
-
-
-
-
-int main(
-    int arg_cnt,
-    char **arg_list)
-{
-    char *env_loc;
-    char *post_buf;
-    MCM_DTYPE_USIZE_TD post_len, rcnt;
-    ssize_t rlen;
-
-
-#if MCM_CGIEMODE | MCM_CUHDMODE
-    dbg_tty_fd_h = open(MCM_DBG_DEV_TTY, O_WRONLY);
-    if(dbg_tty_fd_h == -1)
-    {
-        MCM_CGI_AEMSG(MCM_RCODE_CGI_UPLOAD_INTERNAL_ERROR, 0,
-                      "call open() fail [%s]\\n[%s]", strerror(errno), MCM_DBG_DEV_TTY);
-        goto FREE_01;
-    }
-#endif
-
-    snprintf(crlf_key, sizeof(crlf_key), MCM_CRLF_KEY);
-    snprintf(part_split_key, sizeof(part_split_key), MCM_PART_SPLIT_KEY);
-
-    // 確認是 POST 方法.
-    env_loc = getenv(MCM_CGI_REQUEST_METHOD_KEY);
-    if(env_loc == NULL)
-    {
-        MCM_CEMSG("invalid, not find %s", MCM_CGI_REQUEST_METHOD_KEY);
-        MCM_CGI_AEMSG(MCM_RCODE_CGI_UPLOAD_INTERNAL_ERROR, 0,
-                      "invalid, not find %s", MCM_CGI_REQUEST_METHOD_KEY);
-        goto FREE_01;
-    }
-    if(strcmp(env_loc, MCM_CGI_POST_KEY) != 0)
-    {
-        MCM_CEMSG("invalid, %s must be %s [%s]",
-                  MCM_CGI_REQUEST_METHOD_KEY, MCM_CGI_POST_KEY, env_loc);
-        MCM_CGI_AEMSG(MCM_RCODE_CGI_UPLOAD_INTERNAL_ERROR, 0,
-                      "invalid, %s must be %s\\n[%s]",
-                      MCM_CGI_REQUEST_METHOD_KEY, MCM_CGI_POST_KEY, env_loc);
-        goto FREE_01;
-    }
-
-    // 讀出 HTTP 的 CONTENT_TYPE.
-    // 例如 :
-    // [CONTENT_TYPE: multipart/form-data; boundary=---------------------------24548616531490].
-    // 會得到 [multipart/form-data; boundary=---------------------------24548616531490].
-    env_loc = getenv(MCM_CGI_CONTENT_TYPE_KEY);
-    if(env_loc == NULL)
-    {
-        MCM_CEMSG("invalid, not find %s", MCM_CGI_CONTENT_TYPE_KEY);
-        MCM_CGI_AEMSG(MCM_RCODE_CGI_UPLOAD_INTERNAL_ERROR, 0,
-                      "invalid, not find %s", MCM_CGI_CONTENT_TYPE_KEY);
-        goto FREE_01;
-    }
-    // 取出 boundary 資料.
-    if(mcm_find_boundary(env_loc, strlen(env_loc)) < MCM_RCODE_PASS)
-    {
-        MCM_CEMSG("call mcm_find_boundary() fail");
-        goto FREE_01;
-    }
-    MCM_CUHDMSG("boundary[" MCM_DTYPE_USIZE_PF "][%s]", boundary_len, boundary_key);
-
-    // 取得 POST 的資料的長度.
-    env_loc = getenv(MCM_CGI_CONTENT_LENGTH_KRY);
-    if(env_loc == NULL)
-    {
-        MCM_CEMSG("invalid, not find %s", MCM_CGI_CONTENT_LENGTH_KRY);
-        MCM_CGI_AEMSG(MCM_RCODE_CGI_UPLOAD_INTERNAL_ERROR, 0,
-                      "invalid, not find %s", MCM_CGI_CONTENT_LENGTH_KRY);
-        goto FREE_01;
-    }
-    post_len = MCM_DTYPE_USIZE_SB(env_loc, NULL, 10);
-    if(post_len == 0)
-    {
-        MCM_CEMSG("invalid, %s can not be 0", MCM_CGI_CONTENT_LENGTH_KRY);
-        MCM_CGI_AEMSG(MCM_RCODE_CGI_UPLOAD_INTERNAL_ERROR, 0,
-                      "invalid, %s can not be 0", MCM_CGI_CONTENT_LENGTH_KRY);
-        goto FREE_01;
-    }
-
-    post_buf = (char *) malloc(post_len + 1);
-    if(post_buf == NULL)
-    {
-        MCM_CEMSG("call malloc() fail [%s]", strerror(errno));
-        MCM_CGI_AEMSG(MCM_RCODE_CGI_UPLOAD_INTERNAL_ERROR, 0,
-                      "call malloc() fail\\n[%s]", strerror(errno));
-        goto FREE_01;
-    }
-    MCM_CUHDMSG("alloc post_buf[" MCM_DTYPE_USIZE_PF "][%p]", post_len + 1, post_buf);
-    post_buf[post_len] = '\0';
-
-    // 讀取 POST 資料.
-    for(rcnt = 0; rcnt < post_len; rcnt += rlen)
-    {
-        rlen = read(STDIN_FILENO, post_buf + rcnt, post_len - rcnt);
-        if(rlen == -1)
-        {
-            MCM_CEMSG("call read(STDIN_FILENO) fail [%s]", strerror(errno));
-            MCM_CGI_AEMSG(MCM_RCODE_CGI_UPLOAD_INTERNAL_ERROR, 0,
-                          "call read(STDIN_FILENO) fail\\n[%s]", strerror(errno));
-            goto FREE_01;
-        }
-    }
-
-    if(mcm_process_post(post_buf, post_len) < MCM_RCODE_PASS)
-    {
-        MCM_CEMSG("call mcm_process_post() fail");
-        goto FREE_01;
-    }
-
-    MCM_CUHDMSG("free post_buf[%p]", post_buf);
-    free(post_buf);
-FREE_01:
-#if MCM_CGIEMODE | MCM_CUHDMODE
-    if(dbg_tty_fd_h != -1)
-        close(dbg_tty_fd_h);
-#endif
-    return MCM_RCODE_PASS;
-}
-
 // 比對字串, 並回傳剩下的字串.
 int mcm_compare_key_ncmp(
     char **base_con,
@@ -836,4 +705,124 @@ FREE_01:
         free(part_list_tail);
     }
     return fret;
+}
+
+int main(
+    int arg_cnt,
+    char **arg_list)
+{
+    char *env_loc;
+    char *post_buf;
+    MCM_DTYPE_USIZE_TD post_len, rcnt;
+    ssize_t rlen;
+
+
+#if MCM_CGIEMODE | MCM_CUHDMODE
+    dbg_tty_fd_h = open(MCM_DBG_DEV_TTY, O_WRONLY);
+    if(dbg_tty_fd_h == -1)
+    {
+        MCM_CGI_AEMSG(MCM_RCODE_CGI_UPLOAD_INTERNAL_ERROR, 0,
+                      "call open() fail [%s]\\n[%s]", strerror(errno), MCM_DBG_DEV_TTY);
+        goto FREE_01;
+    }
+#endif
+
+    snprintf(crlf_key, sizeof(crlf_key), MCM_CRLF_KEY);
+    snprintf(part_split_key, sizeof(part_split_key), MCM_PART_SPLIT_KEY);
+
+    // 確認是 POST 方法.
+    env_loc = getenv(MCM_CGI_REQUEST_METHOD_KEY);
+    if(env_loc == NULL)
+    {
+        MCM_CEMSG("invalid, not find %s", MCM_CGI_REQUEST_METHOD_KEY);
+        MCM_CGI_AEMSG(MCM_RCODE_CGI_UPLOAD_INTERNAL_ERROR, 0,
+                      "invalid, not find %s", MCM_CGI_REQUEST_METHOD_KEY);
+        goto FREE_01;
+    }
+    if(strcmp(env_loc, MCM_CGI_POST_KEY) != 0)
+    {
+        MCM_CEMSG("invalid, %s must be %s [%s]",
+                  MCM_CGI_REQUEST_METHOD_KEY, MCM_CGI_POST_KEY, env_loc);
+        MCM_CGI_AEMSG(MCM_RCODE_CGI_UPLOAD_INTERNAL_ERROR, 0,
+                      "invalid, %s must be %s\\n[%s]",
+                      MCM_CGI_REQUEST_METHOD_KEY, MCM_CGI_POST_KEY, env_loc);
+        goto FREE_01;
+    }
+
+    // 讀出 HTTP 的 CONTENT_TYPE.
+    // 例如 :
+    // [CONTENT_TYPE: multipart/form-data; boundary=---------------------------24548616531490].
+    // 會得到 [multipart/form-data; boundary=---------------------------24548616531490].
+    env_loc = getenv(MCM_CGI_CONTENT_TYPE_KEY);
+    if(env_loc == NULL)
+    {
+        MCM_CEMSG("invalid, not find %s", MCM_CGI_CONTENT_TYPE_KEY);
+        MCM_CGI_AEMSG(MCM_RCODE_CGI_UPLOAD_INTERNAL_ERROR, 0,
+                      "invalid, not find %s", MCM_CGI_CONTENT_TYPE_KEY);
+        goto FREE_01;
+    }
+    // 取出 boundary 資料.
+    if(mcm_find_boundary(env_loc, strlen(env_loc)) < MCM_RCODE_PASS)
+    {
+        MCM_CEMSG("call mcm_find_boundary() fail");
+        goto FREE_01;
+    }
+    MCM_CUHDMSG("boundary[" MCM_DTYPE_USIZE_PF "][%s]", boundary_len, boundary_key);
+
+    // 取得 POST 的資料的長度.
+    env_loc = getenv(MCM_CGI_CONTENT_LENGTH_KRY);
+    if(env_loc == NULL)
+    {
+        MCM_CEMSG("invalid, not find %s", MCM_CGI_CONTENT_LENGTH_KRY);
+        MCM_CGI_AEMSG(MCM_RCODE_CGI_UPLOAD_INTERNAL_ERROR, 0,
+                      "invalid, not find %s", MCM_CGI_CONTENT_LENGTH_KRY);
+        goto FREE_01;
+    }
+    post_len = MCM_DTYPE_USIZE_SB(env_loc, NULL, 10);
+    if(post_len == 0)
+    {
+        MCM_CEMSG("invalid, %s can not be 0", MCM_CGI_CONTENT_LENGTH_KRY);
+        MCM_CGI_AEMSG(MCM_RCODE_CGI_UPLOAD_INTERNAL_ERROR, 0,
+                      "invalid, %s can not be 0", MCM_CGI_CONTENT_LENGTH_KRY);
+        goto FREE_01;
+    }
+
+    post_buf = (char *) malloc(post_len + 1);
+    if(post_buf == NULL)
+    {
+        MCM_CEMSG("call malloc() fail [%s]", strerror(errno));
+        MCM_CGI_AEMSG(MCM_RCODE_CGI_UPLOAD_INTERNAL_ERROR, 0,
+                      "call malloc() fail\\n[%s]", strerror(errno));
+        goto FREE_01;
+    }
+    MCM_CUHDMSG("alloc post_buf[" MCM_DTYPE_USIZE_PF "][%p]", post_len + 1, post_buf);
+    post_buf[post_len] = '\0';
+
+    // 讀取 POST 資料.
+    for(rcnt = 0; rcnt < post_len; rcnt += rlen)
+    {
+        rlen = read(STDIN_FILENO, post_buf + rcnt, post_len - rcnt);
+        if(rlen == -1)
+        {
+            MCM_CEMSG("call read(STDIN_FILENO) fail [%s]", strerror(errno));
+            MCM_CGI_AEMSG(MCM_RCODE_CGI_UPLOAD_INTERNAL_ERROR, 0,
+                          "call read(STDIN_FILENO) fail\\n[%s]", strerror(errno));
+            goto FREE_01;
+        }
+    }
+
+    if(mcm_process_post(post_buf, post_len) < MCM_RCODE_PASS)
+    {
+        MCM_CEMSG("call mcm_process_post() fail");
+        goto FREE_01;
+    }
+
+    MCM_CUHDMSG("free post_buf[%p]", post_buf);
+    free(post_buf);
+FREE_01:
+#if MCM_CGIEMODE | MCM_CUHDMODE
+    if(dbg_tty_fd_h != -1)
+        close(dbg_tty_fd_h);
+#endif
+    return MCM_RCODE_PASS;
 }

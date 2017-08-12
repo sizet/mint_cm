@@ -326,126 +326,6 @@ MCM_DTYPE_LEN_TD ek_len;
 
 
 
-int free_xml_profile(
-    struct mcm_xml_info_t *this_xml);
-
-int load_xml_profile(
-    char *file_path,
-    struct mcm_xml_info_t *xml_buf);
-
-int calculate_node_level_length(
-    struct mcm_xml_info_t *this_xml);
-
-int fill_node_config_name(
-    struct mcm_xml_info_t *this_xml);
-
-int output_config_data_info_file(
-    struct mcm_xml_info_t *this_xml);
-
-int output_jslib_data_info_file(
-    struct mcm_xml_info_t *this_xml);
-
-int output_model_profile_file(
-    char *file_path,
-    struct mcm_xml_info_t *this_xml);
-
-int output_store_profile_file(
-    char *file_path,
-    struct mcm_xml_info_t *this_xml);
-
-
-
-
-int main(int argc, char **argv)
-{
-    int fret = -1;
-    char opt_ch, *data_ppath = NULL, *model_ppath = NULL, *store_ppath = NULL;
-    struct mcm_xml_info_t xml_info;
-    MCM_DTYPE_EK_TD tmp_ek;
-
-
-    while((opt_ch = getopt(argc , argv, "d:m:s:"))!= -1)
-        switch(opt_ch)
-        {
-            case 'd':
-                data_ppath = optarg;
-                break;
-            case 'm':
-                model_ppath = optarg;
-                break;
-            case 's':
-                store_ppath = optarg;
-                break;
-            default:
-                goto FREE_HELP;
-        }
-    if(data_ppath == NULL)
-        goto FREE_HELP;
-    if(model_ppath == NULL)
-        goto FREE_HELP;
-    if(store_ppath == NULL)
-        goto FREE_HELP;
-
-    // 計算最大長度, -- = '\0'.
-    memset(&max_name_len, 0xFF, sizeof(max_name_len));
-    max_name_len--;
-
-    for(ek_len = 0, tmp_ek = MCM_CLIMIT_EK_MAX; tmp_ek > 0; tmp_ek /= 10)
-        ek_len++;
-
-    memset(&xml_info, 0, sizeof(struct mcm_xml_info_t));
-
-    if(load_xml_profile(data_ppath, &xml_info) < 0)
-    {
-        DMSG("call load_xml_profile() fail");
-        goto FREE_01;
-    }
-
-    calculate_node_level_length(&xml_info);
-
-    if(fill_node_config_name(&xml_info) < 0)
-    {
-        DMSG("call fill_node_config_name() fail");
-        goto FREE_02;
-    }
-
-    if(output_config_data_info_file(&xml_info) < 0)
-    {
-        DMSG("call output_config_data_info_file() fail");
-        goto FREE_02;
-    }
-
-    if(output_jslib_data_info_file(&xml_info) < 0)
-    {
-        DMSG("call output_jslib_data_info_file() fail");
-        goto FREE_02;
-    }
-
-    if(output_model_profile_file(model_ppath, &xml_info) < 0)
-    {
-        DMSG("call output_model_profile_file() fail");
-        goto FREE_02;
-    }
-
-    if(output_store_profile_file(store_ppath, &xml_info) < 0)
-    {
-        DMSG("call output_store_profile_file() fail");
-        goto FREE_02;
-    }
-
-    fret = 0;
-FREE_02:
-    free_xml_profile(&xml_info);
-FREE_01:
-    return fret;
-FREE_HELP:
-    printf("\nmcm_build <-d> <-m> <-s>\n");
-    printf("  -d : <-d data_ppath>, the path of the data_profile.\n");
-    printf("  -m : <-m model_ppath>, the path of the model_profile.\n");
-    printf("  -s : <-s store_ppath>, the path of the store_profile.\n\n");
-    return fret;
-}
-
 int check_tag_symbol_format(
     struct mcm_tag_info_t *this_tag,
     char *data_con,
@@ -3158,5 +3038,95 @@ int output_store_profile_file(
     fclose(file_fp);
     chmod(file_path, S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH | S_IWOTH);
 FREE_01:
+    return fret;
+}
+
+int main(int argc, char **argv)
+{
+    int fret = -1;
+    char opt_ch, *data_ppath = NULL, *model_ppath = NULL, *store_ppath = NULL;
+    struct mcm_xml_info_t xml_info;
+    MCM_DTYPE_EK_TD tmp_ek;
+
+
+    while((opt_ch = getopt(argc , argv, "d:m:s:"))!= -1)
+        switch(opt_ch)
+        {
+            case 'd':
+                data_ppath = optarg;
+                break;
+            case 'm':
+                model_ppath = optarg;
+                break;
+            case 's':
+                store_ppath = optarg;
+                break;
+            default:
+                goto FREE_HELP;
+        }
+    if(data_ppath == NULL)
+        goto FREE_HELP;
+    if(model_ppath == NULL)
+        goto FREE_HELP;
+    if(store_ppath == NULL)
+        goto FREE_HELP;
+
+    // 計算最大長度, -- = '\0'.
+    memset(&max_name_len, 0xFF, sizeof(max_name_len));
+    max_name_len--;
+
+    for(ek_len = 0, tmp_ek = MCM_CLIMIT_EK_MAX; tmp_ek > 0; tmp_ek /= 10)
+        ek_len++;
+
+    memset(&xml_info, 0, sizeof(struct mcm_xml_info_t));
+
+    if(load_xml_profile(data_ppath, &xml_info) < 0)
+    {
+        DMSG("call load_xml_profile() fail");
+        goto FREE_01;
+    }
+
+    calculate_node_level_length(&xml_info);
+
+    if(fill_node_config_name(&xml_info) < 0)
+    {
+        DMSG("call fill_node_config_name() fail");
+        goto FREE_02;
+    }
+
+    if(output_config_data_info_file(&xml_info) < 0)
+    {
+        DMSG("call output_config_data_info_file() fail");
+        goto FREE_02;
+    }
+
+    if(output_jslib_data_info_file(&xml_info) < 0)
+    {
+        DMSG("call output_jslib_data_info_file() fail");
+        goto FREE_02;
+    }
+
+    if(output_model_profile_file(model_ppath, &xml_info) < 0)
+    {
+        DMSG("call output_model_profile_file() fail");
+        goto FREE_02;
+    }
+
+    if(output_store_profile_file(store_ppath, &xml_info) < 0)
+    {
+        DMSG("call output_store_profile_file() fail");
+        goto FREE_02;
+    }
+
+    fret = 0;
+FREE_02:
+    free_xml_profile(&xml_info);
+FREE_01:
+    return fret;
+FREE_HELP:
+    printf("\nmcm_build <-d> <-m> <-s>\n");
+    printf("  -d : <-d data_ppath>, the path of the data_profile.\n");
+    printf("  -m : <-m model_ppath>, the path of the model_profile.\n");
+    printf("  -s : <-s store_ppath>, the path of the store_profile.\n\n");
     return fret;
 }
