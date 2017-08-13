@@ -21,10 +21,10 @@
 使用的 HTTP Server.
 
 **`mcm_cgi_config.cgi`**  
-處理網頁程式的資料存取.
+處理網頁程式的資料存取, 此程式會自動處理網頁端的資料存取, 不需要針對每個資料表手動撰寫存取程式. 對於取得資料, 網頁端會使用 AJAX POST 告知要哪些資料表的資料, 此程式會和 mcm_daemon 溝通取出指定的資料並組合成 JSON 格式回傳給網頁. 對於修改資料, 網頁端會使用 AJAX POST 告知要修改哪些資料, 此程式再通知 mcm_daemon 要修改哪些資料.  
 
 **`mcm_cgi_upload.cgi`**  
-處理網頁程式的檔案上傳.  
+處理網頁程式的檔案上傳, 使用上傳 form 處理, 支援使用 multipart/form-data 同時上傳 form 內的多個元素或檔案.  
 **`[custom upload handle]`**  
 自訂的檔案處理函式, 處理網頁程式上傳的檔案, 此部分和 mcm_cgi_upload.cgi 編譯在一起.
 
