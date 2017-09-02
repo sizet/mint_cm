@@ -480,7 +480,7 @@ int mcm_build_fail_rep(
     return MCM_RCODE_PASS;
 }
 
-int mcm_parse_get_alone(
+void mcm_parse_get_alone(
     struct mcm_service_session_t *this_session)
 {
     // 封包格式 :
@@ -495,8 +495,6 @@ int mcm_parse_get_alone(
     // PC.
     this_session->req_path = (char *) this_session->pkt_offset;
     MCM_SVDMSG("req_path[%s]", this_session->req_path);
-
-    return MCM_RCODE_PASS;
 }
 
 int mcm_build_get_alone(
@@ -647,7 +645,7 @@ FREE_01:
     return fret < MCM_RCODE_PASS ? fret : cret;
 }
 
-int mcm_parse_set_alone(
+void mcm_parse_set_alone(
     struct mcm_service_session_t *this_session)
 {
     void *tmp_offset;
@@ -684,8 +682,6 @@ int mcm_parse_set_alone(
     this_session->req_data_con = this_session->req_data_len > 0 ? tmp_offset : NULL;
     MCM_SVDMSG("req_config_info[" MCM_DTYPE_USIZE_PF "][%p]",
                this_session->req_data_len, this_session->req_data_con);
-
-    return MCM_RCODE_PASS;
 }
 
 int mcm_build_set_alone(
@@ -727,7 +723,6 @@ int mcm_req_set_alone(
     struct mcm_service_session_t *this_session)
 {
     int fret, cret;
-    MCM_DTYPE_LIST_TD path_limit;
     struct mcm_config_model_group_t *self_model_group;
     struct mcm_config_model_member_t *self_model_member;
     struct mcm_config_store_t *self_store;
@@ -738,9 +733,7 @@ int mcm_req_set_alone(
 
     mcm_parse_set_alone(this_session);
 
-    path_limit = this_session->call_from == MCM_CFROM_WEB ? MCM_PLIMIT_KEY : MCM_PLIMIT_BOTH;
-
-    fret = mcm_config_find_alone_use_full(this_session, this_session->req_path, path_limit,
+    fret = mcm_config_find_alone_use_full(this_session, this_session->req_path, MCM_PLIMIT_BOTH,
                                           &self_model_group, &self_model_member, &self_store);
     if(fret < MCM_RCODE_PASS)
     {
@@ -815,7 +808,7 @@ FREE_01:
     return fret < MCM_RCODE_PASS ? fret : cret;
 }
 
-int mcm_parse_get_entry(
+void mcm_parse_get_entry(
     struct mcm_service_session_t *this_session)
 {
     // 封包格式 :
@@ -830,8 +823,6 @@ int mcm_parse_get_entry(
     // PC.
     this_session->req_path = (char *) this_session->pkt_offset;
     MCM_SVDMSG("req_path[%s]", this_session->req_path);
-
-    return MCM_RCODE_PASS;
 }
 
 int mcm_build_get_entry(
@@ -927,7 +918,7 @@ FREE_01:
     return fret < MCM_RCODE_PASS ? fret : cret;
 }
 
-int mcm_parse_set_entry(
+void mcm_parse_set_entry(
     struct mcm_service_session_t *this_session)
 {
     void *tmp_offset;
@@ -958,8 +949,6 @@ int mcm_parse_set_entry(
     // DC.
     this_session->req_data_con = tmp_offset;
     MCM_SVDMSG("req_config_info[%p]", this_session->req_data_con);
-
-    return MCM_RCODE_PASS;
 }
 
 int mcm_build_set_entry(
@@ -1035,7 +1024,7 @@ FREE_01:
     return fret < MCM_RCODE_PASS ? fret : cret;
 }
 
-int mcm_parse_add_entry(
+void mcm_parse_add_entry(
     struct mcm_service_session_t *this_session)
 {
     void *tmp_offset;
@@ -1043,15 +1032,19 @@ int mcm_parse_add_entry(
 
 
     // 封包格式 :
-    // | T | REQ | PL | PC | DL | DC |.
+    // | T | REQ | PL | PC | IL | IC | DL | DC |.
     // T   [MCM_DTYPE_USIZE_TD].
-    //     紀錄封包的總長度, 內容 = T + REQ + PL + PC + DL + DC.
+    //     紀錄封包的總長度, 內容 = T + REQ + PL + PC + IL + IC + DL + DC.
     // REQ [MCM_DTYPE_LIST_TD].
     //     紀錄請求類型.
     // PL  [MCM_DTYPE_USIZE_TD].
     //     紀錄請求的路徑長度 (包括最後的 \0).
     // PC  [binary].
     //     紀錄請求的路徑.
+    // IL  [MCM_DTYPE_USIZE_TD].
+    //     紀錄請求的插入路徑長度 (包括最後的 \0).
+    // IC  [binary].
+    //     紀錄請求的插入路徑.
     // DL  [MCM_DTYPE_USIZE_TD].
     //     紀錄要傳送的資料的長度.
     // DC  [binary].
@@ -1065,14 +1058,19 @@ int mcm_parse_add_entry(
     this_session->req_path = (char *) tmp_offset;
     MCM_SVDMSG("req_path[" MCM_DTYPE_USIZE_PF "][%s]", xlen, this_session->req_path);
     tmp_offset += xlen;
+    // IL.
+    xlen = *((MCM_DTYPE_USIZE_TD *) tmp_offset);
+    tmp_offset += sizeof(MCM_DTYPE_USIZE_TD);
+    // IC.
+    this_session->req_other_path = (char *) tmp_offset;
+    MCM_SVDMSG("req_other_path[" MCM_DTYPE_USIZE_PF "][%s]", xlen, this_session->req_other_path);
+    tmp_offset += xlen;
     // DL.
     xlen = *((MCM_DTYPE_USIZE_TD *) tmp_offset);
     tmp_offset += sizeof(MCM_DTYPE_USIZE_TD);
     // DC.
     this_session->req_data_con = xlen > 0 ? tmp_offset : NULL;
     MCM_SVDMSG("req_config_info[" MCM_DTYPE_USIZE_PF "][%p]", xlen, this_session->req_data_con);
-
-    return MCM_RCODE_PASS;
 }
 
 int mcm_build_add_entry(
@@ -1116,7 +1114,7 @@ int mcm_req_add_entry(
     int fret, cret;
     MCM_DTYPE_LIST_TD path_limit;
     struct mcm_config_model_group_t *self_model_group;
-    struct mcm_config_store_t *self_store, *parent_store;
+    struct mcm_config_store_t *self_store, *parent_store, *insert_store;
     MCM_DTYPE_EK_TD self_key;
 
 
@@ -1135,9 +1133,17 @@ int mcm_req_add_entry(
         goto FREE_01;
     }
 
-    fret = mcm_config_add_entry_by_info(this_session, self_model_group, parent_store,
-                                        MCM_DACCESS_NEW, self_key, this_session->req_data_con,
-                                        NULL);
+    fret = mcm_config_find_entry_use_ik(this_session, self_model_group, parent_store,
+                                        this_session->req_other_path, path_limit, &insert_store);
+    if(fret < MCM_RCODE_PASS)
+    {
+        MCM_EMSG("call mcm_config_find_entry_use_ik() fail");
+        goto FREE_01;
+    }
+
+    fret = mcm_config_add_entry_by_info(this_session, self_model_group, parent_store, self_key,
+                                        insert_store, MCM_DACCESS_NEW, 
+                                        this_session->req_data_con, NULL);
     if(fret < MCM_RCODE_PASS)
     {
         MCM_EMSG("call mcm_config_add_entry_by_info() fail");
@@ -1149,7 +1155,7 @@ FREE_01:
     return fret < MCM_RCODE_PASS ? fret : cret;
 }
 
-int mcm_parse_del_entry(
+void mcm_parse_del_entry(
     struct mcm_service_session_t *this_session)
 {
     // 封包格式 :
@@ -1164,8 +1170,6 @@ int mcm_parse_del_entry(
     // PC.
     this_session->req_path = (char *) this_session->pkt_offset;
     MCM_SVDMSG("req_path[%s]", this_session->req_path);
-
-    return MCM_RCODE_PASS;
 }
 
 int mcm_build_del_entry(
@@ -1240,7 +1244,7 @@ FREE_01:
     return fret < MCM_RCODE_PASS ? fret : cret;
 }
 
-int mcm_parse_get_all_entry(
+void mcm_parse_get_all_entry(
     struct mcm_service_session_t *this_session)
 {
     // 封包格式 :
@@ -1255,8 +1259,6 @@ int mcm_parse_get_all_entry(
     // PC.
     this_session->req_path = (char *) this_session->pkt_offset;
     MCM_SVDMSG("req_path[%s]", this_session->req_path);
-
-    return MCM_RCODE_PASS;
 }
 
 int mcm_build_get_all_entry(
@@ -1368,7 +1370,7 @@ FREE_01:
     return fret < MCM_RCODE_PASS ? fret : cret;
 }
 
-int mcm_parse_del_all_entry(
+void mcm_parse_del_all_entry(
     struct mcm_service_session_t *this_session)
 {
     // 封包格式 :
@@ -1383,8 +1385,6 @@ int mcm_parse_del_all_entry(
     // PC.
     this_session->req_path = (char *) this_session->pkt_offset;
     MCM_SVDMSG("req_path[%s]", this_session->req_path);
-
-    return MCM_RCODE_PASS;
 }
 
 int mcm_build_del_all_entry(
@@ -1458,7 +1458,7 @@ FREE_01:
     return fret < MCM_RCODE_PASS ? fret : cret;
 }
 
-int mcm_parse_get_max_count(
+void mcm_parse_get_max_count(
     struct mcm_service_session_t *this_session)
 {
     // 封包格式 :
@@ -1473,8 +1473,6 @@ int mcm_parse_get_max_count(
     // PC.
     this_session->req_path = (char *) this_session->pkt_offset;
     MCM_SVDMSG("req_path[%s]", this_session->req_path);
-
-    return MCM_RCODE_PASS;
 }
 
 int mcm_build_get_max_count(
@@ -1541,7 +1539,7 @@ FREE_01:
     return fret < MCM_RCODE_PASS ? fret : cret;
 }
 
-int mcm_parse_get_count(
+void mcm_parse_get_count(
     struct mcm_service_session_t *this_session)
 {
     // 封包格式 :
@@ -1556,8 +1554,6 @@ int mcm_parse_get_count(
     // PC.
     this_session->req_path = (char *) this_session->pkt_offset;
     MCM_SVDMSG("req_path[%s]", this_session->req_path);
-
-    return MCM_RCODE_PASS;
 }
 
 int mcm_build_get_count(
@@ -1624,7 +1620,7 @@ FREE_01:
     return fret < MCM_RCODE_PASS ? fret : cret;
 }
 
-int mcm_parse_get_usable_key(
+void mcm_parse_get_usable_key(
     struct mcm_service_session_t *this_session)
 {
     // 封包格式 :
@@ -1639,8 +1635,6 @@ int mcm_parse_get_usable_key(
     // PC.
     this_session->req_path = (char *) this_session->pkt_offset;
     MCM_SVDMSG("req_path[%s]", this_session->req_path);
-
-    return MCM_RCODE_PASS;
 }
 
 int mcm_build_get_usable_key(
@@ -1707,7 +1701,7 @@ FREE_01:
     return fret < MCM_RCODE_PASS ? fret : cret;
 }
 
-int mcm_parse_update(
+void mcm_parse_update(
     struct mcm_service_session_t *this_session)
 {
     // 封包格式 :
@@ -1716,8 +1710,6 @@ int mcm_parse_update(
     //     紀錄封包的總長度, 內容 = T + REQ.
     // REQ [MCM_DTYPE_LIST_TD].
     //     紀錄請求類型.
-
-    return MCM_RCODE_PASS;
 }
 
 int mcm_build_update(
@@ -1777,7 +1769,7 @@ FREE_01:
     return fret < MCM_RCODE_PASS ? fret : cret;
 }
 
-int mcm_parse_save(
+void mcm_parse_save(
     struct mcm_service_session_t *this_session)
 {
     // 封包格式 :
@@ -1792,8 +1784,6 @@ int mcm_parse_save(
     // DC.
     this_session->req_data_con = this_session->pkt_offset;
     MCM_SVDMSG("req_config_info[%p]", this_session->req_data_con);
-
-    return MCM_RCODE_PASS;
 }
 
 int mcm_build_save(
@@ -1856,7 +1846,7 @@ FREE_01:
     return fret < MCM_RCODE_PASS ? fret : cret;
 }
 
-int mcm_parse_run(
+void mcm_parse_run(
     struct mcm_service_session_t *this_session)
 {
     // 封包格式 :
@@ -1871,8 +1861,6 @@ int mcm_parse_run(
     // PC.
     this_session->req_path = (char *) this_session->pkt_offset;
     MCM_SVDMSG("req_path[%s]", this_session->req_path);
-
-    return MCM_RCODE_PASS;
 }
 
 int mcm_build_run(
@@ -1962,7 +1950,7 @@ FREE_01:
     return fret < MCM_RCODE_PASS ? fret : cret;
 }
 
-int mcm_parse_shutdown(
+void mcm_parse_shutdown(
     struct mcm_service_session_t *this_session)
 {
     // 封包格式 :
@@ -1971,8 +1959,6 @@ int mcm_parse_shutdown(
     //     紀錄封包的總長度, 內容 = T + REQ.
     // REQ [MCM_DTYPE_LIST_TD].
     //     紀錄請求類型.
-
-    return MCM_RCODE_PASS;
 }
 
 int mcm_build_shutdown(
@@ -2032,7 +2018,7 @@ FREE_01:
     return fret < MCM_RCODE_PASS ? fret : cret;
 }
 
-int mcm_parse_check_store_file(
+void mcm_parse_check_store_file(
     struct mcm_service_session_t *this_session)
 {
     // 封包格式 :
@@ -2047,8 +2033,6 @@ int mcm_parse_check_store_file(
     // PC.
     this_session->req_path = (char *) this_session->pkt_offset;
     MCM_SVDMSG("req_path[%s]", this_session->req_path);
-
-    return MCM_RCODE_PASS;
 }
 
 int mcm_build_check_store_file(
@@ -2132,7 +2116,7 @@ FREE_01:
     return fret < MCM_RCODE_PASS ? fret : cret;
 }
 
-int mcm_parse_check_mask_path(
+void mcm_parse_check_mask_path(
     struct mcm_service_session_t *this_session)
 {
     // 封包格式 :
@@ -2147,8 +2131,6 @@ int mcm_parse_check_mask_path(
     // PC.
     this_session->req_path = (char *) this_session->pkt_offset;
     MCM_SVDMSG("req_path[%s]", this_session->req_path);
-
-    return MCM_RCODE_PASS;
 }
 
 int mcm_build_check_mask_path(
@@ -2208,7 +2190,7 @@ FREE_01:
     return fret < MCM_RCODE_PASS ? fret : cret;
 }
 
-int mcm_parse_get_path_max_length(
+void mcm_parse_get_path_max_length(
     struct mcm_service_session_t *this_session)
 {
     // 封包格式 :
@@ -2217,8 +2199,6 @@ int mcm_parse_get_path_max_length(
     //     紀錄封包的總長度, 內容 = T + REQ.
     // REQ [MCM_DTYPE_LIST_TD].
     //     紀錄請求類型.
-
-    return MCM_RCODE_PASS;
 }
 
 int mcm_build_get_path_max_length(
@@ -2285,7 +2265,7 @@ FREE_01:
     return fret < MCM_RCODE_PASS ? fret : cret;
 }
 
-int mcm_parse_get_list_name(
+void mcm_parse_get_list_name(
     struct mcm_service_session_t *this_session)
 {
     // 封包格式 :
@@ -2300,8 +2280,6 @@ int mcm_parse_get_list_name(
     // PC.
     this_session->req_path = (char *) this_session->pkt_offset;
     MCM_SVDMSG("req_path[%s]", this_session->req_path);
-
-    return MCM_RCODE_PASS;
 }
 
 int mcm_layout_get_list_name(
@@ -2419,7 +2397,7 @@ FREE_01:
     return fret < MCM_RCODE_PASS ? fret : cret;
 }
 
-int mcm_parse_get_list_type(
+void mcm_parse_get_list_type(
     struct mcm_service_session_t *this_session)
 {
     // 封包格式 :
@@ -2434,8 +2412,6 @@ int mcm_parse_get_list_type(
     // PC.
     this_session->req_path = (char *) this_session->pkt_offset;
     MCM_SVDMSG("req_path[%s]", this_session->req_path);
-
-    return MCM_RCODE_PASS;
 }
 
 int mcm_layout_get_list_type(
@@ -2553,7 +2529,7 @@ FREE_01:
     return fret < MCM_RCODE_PASS ? fret : cret;
 }
 
-int mcm_parse_get_list_value(
+void mcm_parse_get_list_value(
     struct mcm_service_session_t *this_session)
 {
     // 封包格式 :
@@ -2568,8 +2544,6 @@ int mcm_parse_get_list_value(
     // PC.
     this_session->req_path = (char *) this_session->pkt_offset;
     MCM_SVDMSG("req_path[%s]", this_session->req_path);
-
-    return MCM_RCODE_PASS;
 }
 
 int mcm_layout_get_list_value(
@@ -2690,7 +2664,7 @@ FREE_01:
     return fret < MCM_RCODE_PASS ? fret : cret;
 }
 
-int mcm_parse_set_any_type_alone(
+void mcm_parse_set_any_type_alone(
     struct mcm_service_session_t *this_session)
 {
     void *tmp_offset;
@@ -2727,8 +2701,6 @@ int mcm_parse_set_any_type_alone(
     this_session->req_data_con = this_session->req_data_len > 0 ? tmp_offset : NULL;
     MCM_SVDMSG("req_config_info[" MCM_DTYPE_USIZE_PF "][%p]",
                this_session->req_data_len, this_session->req_data_con);
-
-    return MCM_RCODE_PASS;
 }
 
 int mcm_build_set_any_type_alone(
@@ -2807,7 +2779,7 @@ FREE_01:
     return fret < MCM_RCODE_PASS ? fret : cret;
 }
 
-int mcm_parse_get_with_type_alone(
+void mcm_parse_get_with_type_alone(
     struct mcm_service_session_t *this_session)
 {
     // 封包格式 :
@@ -2822,8 +2794,6 @@ int mcm_parse_get_with_type_alone(
     // PC.
     this_session->req_path = (char *) this_session->pkt_offset;
     MCM_SVDMSG("req_path[%s]", this_session->req_path);
-
-    return MCM_RCODE_PASS;
 }
 
 int mcm_build_get_with_type_alone(

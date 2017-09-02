@@ -470,6 +470,86 @@ Some rights reserved. See README.
     </div>
     <br><br>
 
+    <div class="css_div_hook" id="hook_0302_insert_path_01"></div>
+    <font class="css_font_b1">[char *insert_path]</font><br>
+    在增加 entry 時, 指定要插入到哪個 entry 之前.<br><br>
+    格式 :<br>
+    <div class="css_div_block">
+      <font class="css_font_r1">index 模式 :</font>
+      <font class="css_font_g1">@$(entry-index)</font><br>
+      <font class="css_font_r1">&nbsp;&nbsp;key 模式 :</font>
+      <font class="css_font_g1">#$(entry-key)</font>
+    </div>
+    <br>
+    index / key 模式的差異主要是針對 entry 的搜尋方式.<br>
+    <table class="css_table_list2">
+      <tr>
+        <td class="css_td_list2_l2">index</td>
+        <td class="css_td_list2_r1">要插入到 group 內的第幾筆 entry (1, 2, 3, ...) 之前</td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l2">key</td>
+        <td class="css_td_list2_r1">要插入到 group 內 key 值相符的 entry (35, 10, 21, ...) 之前</td>
+      </tr>
+    </table>
+    <br>
+    <table class="css_table_list2">
+      <tr>
+        <td class="css_td_list2_l2">@</td>
+        <td class="css_td_list2_r1">
+          entry index 的前綴符號
+        </td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l2">$(entry-index)</td>
+        <td class="css_td_list2_r1">
+          entry 的 index 值, <font class="css_font_p1">1 ~ 4294967295</font>
+          <font class="css_font_c1">(MCM_DTYPE_EK_TD)</font>
+        </td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l2">#</td>
+        <td class="css_td_list2_r1">
+          entry key 的前綴符號
+        </td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l2">$(entry-key)</td>
+        <td class="css_td_list2_r1">
+          entry 的 key 值, <font class="css_font_p1">1 ~ 4294967295</font>
+          <font class="css_font_c1">(MCM_DTYPE_EK_TD)</font>
+        </td>
+      </tr>
+    </table>
+    <br>
+    注意事項.
+    <table class="css_table_list2">
+      <tr>
+        <td class="css_td_list2_l1">
+          如果輸入 <font class="css_font_p1">NULL</font> 或 <font class="css_font_p1">"" (空字串)</font>,
+          表示增加的 entry 要放在串列的尾端
+        </td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l1">
+          如果目標 index 或 key 不存在, 則增加的 entry 會放在串列的尾端
+        </td>
+      </tr>
+    </table>
+    <br>
+    範例 :<br>
+    <div class="css_div_block">
+      @1<br>
+      表示插入到第 1 筆 entry 之前, 也就是插入的 entry 變第 1 筆, 被插入的 entry 變第 2 筆<br><br>
+      #21<br>
+      表示插入到 key 為 21 的 entry 之前<br><br>
+      "" (空字串)<br>
+      表示放在串列的尾端<br><br>
+      NULL<br>
+      表示放在串列的尾端
+    </div>
+    <br><br>
+
     <div class="css_div_hook" id="hook_0302_typedef_01"></div>
     <font class="css_font_b1">存取 member 資料的變數的型態</font><br>
     根據在資料模型中指定的資料類型 <a href="mcm_0201.html#hook_0201_type_format_02">[詳細]</a>,
@@ -1971,6 +2051,16 @@ FREE_01:
             </tr>
             <tr>
               <td class="css_td_list2_l1">
+                <font class="css_font_r1">char *</font><br>
+                <font class="css_font_g1">insert_path</font><br>
+              </td>
+              <td class="css_td_list2_r1">
+                要插入到何處的路徑 <a href="#hook_0302_insert_path_01">[詳細]</a><br>
+                <font class="css_font_p1">[index 模式] / [key 模式]</font>
+              </td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l1">
                 <font class="css_font_r1">void *</font><br>
                 <font class="css_font_g1">data_con</font><br>
               </td>
@@ -2084,6 +2174,7 @@ int main(int argc, char **argv)
 
     // 範例 : 增加 device.vap.#123
     // 路徑 : "device.vap.#123"
+    // 插入 : 放在串列尾端 (NULL)
     // 類型 : struct mcm_dv_device_vap_t
     // 變數 : vap_v / sizeof(vap_v)
     // 加入的目標 (vap) 必須是 key 模式.
@@ -2093,7 +2184,7 @@ int main(int argc, char **argv)
     vap_v.channel = rand() % 200;
     DMSG("[add-entry] %s.ssid = " MCM_DTYPE_S_PF, path1, vap_v.ssid);
     DMSG("[add-entry] %s.channel = " MCM_DTYPE_IUI_PF, path1, vap_v.channel);
-    if(mcm_lulib_add_entry(&self_lulib, path1, &vap_v, sizeof(vap_v)) < MCM_RCODE_PASS)
+    if(mcm_lulib_add_entry(&self_lulib, path1, NULL, &vap_v, sizeof(vap_v)) < MCM_RCODE_PASS)
     {
         DMSG("call mcm_lulib_add_entry(%s) fail", path1);
         goto FREE_02;
@@ -2105,6 +2196,7 @@ int main(int argc, char **argv)
 
     // 範例 : 增加 device.vap.@3.station.#111
     // 路徑 : "device.vap.@3.station.#111"
+    // 插入 : 放在串列尾端 ("")
     // 類型 : struct mcm_dv_device_vap_station_t
     // 變數 : station_v / sizeof(station_v)
     // 加入的目標 (station) 必須是 key 模式.
@@ -2114,7 +2206,8 @@ int main(int argc, char **argv)
     station_v.rule = rand() % 50;
     DMSG("[add-entry] %s.mac_addr = " MCM_DTYPE_S_PF, path1, station_v.mac_addr);
     DMSG("[add-entry] %s.rule = " MCM_DTYPE_RK_PF, path1, station_v.rule);
-    if(mcm_lulib_add_entry(&self_lulib, path1, &station_v, sizeof(station_v)) < MCM_RCODE_PASS)
+    if(mcm_lulib_add_entry(&self_lulib, path1, "", &station_v, sizeof(station_v))
+                           < MCM_RCODE_PASS)
     {
         DMSG("call mcm_lulib_add_entry(%s) fail", path1);
         goto FREE_02;
@@ -2122,6 +2215,7 @@ int main(int argc, char **argv)
 
     // 範例 : 增加 device.vap.#234.station.#1
     // 路徑 : "device.vap.#234.station.#1"
+    // 插入 : 插入到第 1 筆 entry 之前 (@1)
     // 類型 : struct mcm_dv_device_vap_t
     // 變數 : vap_v / sizeof(vap_v)
     // 增加多層資料時, 要逐層增加.
@@ -2132,7 +2226,7 @@ int main(int argc, char **argv)
     vap_v.channel = rand() % 200;
     DMSG("[add-entry] %s.ssid = " MCM_DTYPE_S_PF, path1, vap_v.ssid);
     DMSG("[add-entry] %s.channel = " MCM_DTYPE_IUI_PF, path1, vap_v.channel);
-    if(mcm_lulib_add_entry(&self_lulib, path1, &vap_v, sizeof(vap_v)) < MCM_RCODE_PASS)
+    if(mcm_lulib_add_entry(&self_lulib, path1, "", &vap_v, sizeof(vap_v)) < MCM_RCODE_PASS)
     {
         DMSG("call mcm_lulib_add_entry(%s) fail", path1);
         goto FREE_02;
@@ -2144,18 +2238,20 @@ int main(int argc, char **argv)
     station_v.rule = rand() % 50;
     DMSG("[add-entry] %s.mac_addr = " MCM_DTYPE_S_PF, path1, station_v.mac_addr);
     DMSG("[add-entry] %s.rule = " MCM_DTYPE_RK_PF, path1, station_v.rule);
-    if(mcm_lulib_add_entry(&self_lulib, path1, &station_v, sizeof(station_v)) < MCM_RCODE_PASS)
+    if(mcm_lulib_add_entry(&self_lulib, path1, "@1", &station_v, sizeof(station_v))
+                           < MCM_RCODE_PASS)
     {
         DMSG("call mcm_lulib_add_entry(%s) fail", path1);
         goto FREE_02;
     }
 
     // 範例 : 增加 device.limit.#51
+    // 插入 : 插入到 key 為 60 的 entry 之前 (#60)
     // 路徑 : "device.limit.#51"
     // 使用初始值.
     path1 = "device.limit.#51";
     DMSG("[add-entry] %s", path1);
-    if(mcm_lulib_add_entry(&self_lulib, path1, NULL, 0) < MCM_RCODE_PASS)
+    if(mcm_lulib_add_entry(&self_lulib, path1, "#60", NULL, 0) < MCM_RCODE_PASS)
     {
         DMSG("call mcm_lulib_add_entry(%s) fail", path1);
         goto FREE_02;
@@ -3437,7 +3533,7 @@ mcm_lulib_del_entry(&self_lulib, path1);
 
 // 增加 device.vap.#55, 執行 module_config_vap 實作.
 path1 = "device.vap.#55";
-mcm_lulib_add_entry(&self_lulib, path1, &vap_v, sizeof(vap_v));
+mcm_lulib_add_entry(&self_lulib, path1, NULL, &vap_v, sizeof(vap_v));
 
 path1 = "module_config_vap";
 mcm_lulib_run(&self_lulib, path1);

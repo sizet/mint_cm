@@ -174,7 +174,7 @@ struct mcm_operate_type_map_t mcm_operate_type_map_info[] =
 {
     {MCM_OPERATE_GET_KEY,        MCM_OPERATE_GET_INDEX,        1, 0, do_get},
     {MCM_OPERATE_SET_KEY,        MCM_OPERATE_SET_INDEX,        1, 1, do_set},
-    {MCM_OPERATE_ADD_KEY,        MCM_OPERATE_ADD_INDEX,        1, 0, do_add},
+    {MCM_OPERATE_ADD_KEY,        MCM_OPERATE_ADD_INDEX,        1, 1, do_add},
     {MCM_OPERATE_DEL_KEY,        MCM_OPERATE_DEL_INDEX,        1, 0, do_del},
     {MCM_OPERATE_DEL_ALL_KEY,    MCM_OPERATE_DEL_ALL_INDEX,    1, 0, do_del_all},
     {MCM_OPERATE_MAX_COUNT_KEY,  MCM_OPERATE_MAX_COUNT_INDEX,  1, 0, do_max_count},
@@ -581,10 +581,12 @@ int do_add(
     int fret;
 
 
-    fret = mcm_lulib_add_entry(this_lulib, command_info->cmd_path, NULL, 0);
+    fret = mcm_lulib_add_entry(this_lulib, command_info->cmd_path,
+                               command_info->cmd_data, NULL, 0);
     if(fret < MCM_RCODE_PASS)
     {
-        MCM_EMSG("call mcm_lulib_add_entry(%s) fail", command_info->cmd_path);
+        MCM_EMSG("call mcm_lulib_add_entry([%s][%s]) fail",
+                 command_info->cmd_path, command_info->cmd_data);
         return fret;
     }
 

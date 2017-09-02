@@ -27,17 +27,15 @@ function config_run()
     var self_jslib, req_cmd = "", rep_ret;
 
 
-    // 執行 mcm_module_web_test_01
-    req_cmd += "&run.mcm_module_web_test_01";
-
-    // 執行 mcm_module_web_test_02
-    req_cmd += "&run.mcm_module_web_test_02";
+    // 執行 mcm_module_shutdown_test
+    req_cmd += "&run.mcm_module_shutdown_test";
 
     // 送出修改資料請求.
     self_jslib = new mcm_jslib_lib_t();
     self_jslib.socket_path = "@mintcm";
-    self_jslib.session_permission = mcm_session_permission.ro;
-    self_jslib.session_stack_size = 1048576;
+    // 內部模組中使用的 mcm_config_shutdown() 必須是讀寫模式.
+    self_jslib.session_permission = mcm_session_permission.rw;
+    self_jslib.session_stack_size = 0;
     self_jslib.request_command = req_cmd;
     self_jslib.after_complete = mcm_after_complete.reload;
     self_jslib.other_query = "";
@@ -58,9 +56,9 @@ function config_run()
 
 <body onload="body_init()">
 
-  <div>[run]</div>
+  <div>[shutdown]</div>
 
-  <button type="button" onclick="config_run()">run</button>
+  <button type="button" onclick="config_run()">shutdown</button>
 
 </body>
 

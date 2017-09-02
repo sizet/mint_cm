@@ -751,7 +751,7 @@ int case_add_entry(
     vap_v.channel = rand() % 200;
     DMSG("[add-entry] %s.ssid = " MCM_DTYPE_S_PF, path2, vap_v.ssid);
     DMSG("[add-entry] %s.channel = " MCM_DTYPE_IUI_PF, path2, vap_v.channel);
-    if(mcm_lulib_add_entry(this_lulib, path2, &vap_v, sizeof(vap_v)) < MCM_RCODE_PASS)
+    if(mcm_lulib_add_entry(this_lulib, path2, NULL, &vap_v, sizeof(vap_v)) < MCM_RCODE_PASS)
     {
         DMSG("call mcm_lulib_add_entry(%s) fail", path2);
         goto FREE_01;
@@ -802,7 +802,8 @@ int case_add_entry(
         station_v.rule = rand() % 50;
         DMSG("[add-entry] %s.mac_addr = " MCM_DTYPE_S_PF, path2, station_v.mac_addr);
         DMSG("[add-entry] %s.rule = " MCM_DTYPE_RK_PF, path2, station_v.rule);
-        if(mcm_lulib_add_entry(this_lulib, path2, &station_v, sizeof(station_v)) < MCM_RCODE_PASS)
+        if(mcm_lulib_add_entry(this_lulib, path2, "", &station_v, sizeof(station_v))
+                               < MCM_RCODE_PASS)
         {
             DMSG("call mcm_lulib_add_entry(%s) fail", path2);
             goto FREE_01;
@@ -835,11 +836,12 @@ int case_add_entry(
 
         // 增加 device.limit.{limit_key}
         // 不填入資料, 使用預設值.
+        // 每次增加都插入在第一筆之前.
         snprintf(path2, sizeof(path2), "device.limit.#%u", limit_key);
         DMSG("[add-entry] %s", path2);
-        if(mcm_lulib_add_entry(this_lulib, path2, NULL, 0) < MCM_RCODE_PASS)
+        if(mcm_lulib_add_entry(this_lulib, path2, "@1", NULL, 0) < MCM_RCODE_PASS)
         {
-            DMSG("call mcm_lulib_add_entry(%s) fail", path2);
+            DMSG("call mcm_lulib_add_entry([%s][%s]) fail", path2, "@1");
             goto FREE_01;
         }
     }

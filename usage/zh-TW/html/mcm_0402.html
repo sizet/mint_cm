@@ -417,7 +417,7 @@ int main(int argc, char **argv)
     // 範例 02b : 增加 device.vap.#51
     path1 = "device.vap.#51";
     DMSG("[add] %s", path1);
-    if(mcm_lulib_add_entry(&self_lulib, path1, NULL, 0) < MCM_RCODE_PASS)
+    if(mcm_lulib_add_entry(&self_lulib, path1, NULL, NULL, 0) < MCM_RCODE_PASS)
     {
         DMSG("call mcm_lulib_add_entry(%s) fail", path1);
         goto FREE_02;
@@ -756,7 +756,7 @@ int main(int argc, char **argv)
     // 範例 02b : 增加 device.vap.#51
     path1 = "device.vap.#51";
     DMSG("[add] %s", path1);
-    if(mcm_lulib_add_entry(&self_lulib, path1, NULL, 0) < MCM_RCODE_PASS)
+    if(mcm_lulib_add_entry(&self_lulib, path1, NULL, NULL, 0) < MCM_RCODE_PASS)
     {
         DMSG("call mcm_lulib_add_entry(%s) fail", path1);
         goto FREE_02;
@@ -1081,7 +1081,7 @@ int main(int argc, char **argv)
     // 範例 02b : 增加 device.vap.#51
     path1 = "device.vap.#51";
     DMSG("[add] %s", path1);
-    if(mcm_lulib_add_entry(&self_lulib, path1, NULL, 0) < MCM_RCODE_PASS)
+    if(mcm_lulib_add_entry(&self_lulib, path1, NULL, NULL, 0) < MCM_RCODE_PASS)
     {
         DMSG("call mcm_lulib_add_entry(%s) fail", path1);
         goto FREE_02;

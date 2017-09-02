@@ -13,10 +13,10 @@
 
 
 
-int mcm_daemon_set_shutdown(
+void mcm_daemon_set_shutdown(
     MCM_DTYPE_BOOL_TD shutdown_con);
 
-int mcm_daemon_get_shutdown(
+void mcm_daemon_get_shutdown(
     MCM_DTYPE_BOOL_TD *shutdown_buf);
 
 int mcm_daemon_shutdown(

@@ -122,6 +122,21 @@ int mcm_config_find_entry_by_full(
     struct mcm_config_model_group_t **self_model_group_buf,
     struct mcm_config_store_t **self_store_buf);
 
+int mcm_config_find_entry_use_ik(
+    struct mcm_service_session_t *this_session,
+    struct mcm_config_model_group_t *this_model_group,
+    struct mcm_config_store_t *parent_store,
+    char *ik_path,
+    MCM_DTYPE_LIST_TD check_number,
+    struct mcm_config_store_t **self_store_buf);
+
+int mcm_config_find_entry_by_ik(
+    struct mcm_service_session_t *this_session,
+    struct mcm_config_model_group_t *this_model_group,
+    struct mcm_config_store_t *parent_store,
+    char *ik_path,
+    struct mcm_config_store_t **self_store_buf);
+
 int mcm_config_get_alone_by_info(
     struct mcm_service_session_t *this_session,
     struct mcm_config_model_group_t *this_model_group,
@@ -182,14 +197,16 @@ int mcm_config_add_entry_by_info(
     struct mcm_service_session_t *this_session,
     struct mcm_config_model_group_t *this_model_group,
     struct mcm_config_store_t *parent_store,
-    MCM_DTYPE_FLAG_TD data_access,
     MCM_DTYPE_EK_TD this_key,
+    struct mcm_config_store_t *insert_store,
+    MCM_DTYPE_FLAG_TD data_access,
     void *data_con,
     struct mcm_config_store_t **new_store_buf);
 
 int mcm_config_add_entry_by_path(
     struct mcm_service_session_t *this_session,
     char *full_path,
+    char *insert_path,
     MCM_DTYPE_FLAG_TD data_access,
     void *data_con);
 

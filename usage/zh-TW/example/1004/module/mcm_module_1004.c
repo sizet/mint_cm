@@ -101,8 +101,8 @@ int mcm_module_get_session(
             DMSG("%s.last_access_uptime = " MCM_DTYPE_ISI_PF, path2, session_v.last_access_uptime);
 
             DMSG("[add-entry][SYS] %s", path2);
-            if(mcm_config_add_entry_by_info(this_session, tmp_group, tmp_parent_store,
-                                            MCM_DACCESS_SYS, i, &session_v, NULL) < MCM_RCODE_PASS)
+            if(mcm_config_add_entry_by_info(this_session, tmp_group, tmp_parent_store, i, NULL,
+                                            MCM_DACCESS_SYS, &session_v, NULL) < MCM_RCODE_PASS)
             {
                 DMSG("call mcm_config_add_entry_by_info(%s) fail", path2);
                 goto FREE_02;

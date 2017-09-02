@@ -311,6 +311,19 @@ Some rights reserved. See README.
     </table>
     <br><br>
 
+    <div class="css_div_hook" id="hook_0304_insert_path_01"></div>
+    <font class="css_font_b1">insert_path</font><br>
+    <a href="mcm_0302.html#hook_0302_insert_path_01">[詳細]</a><br>
+    <font class="css_font_r1">在網頁端使用只能使用 [key 模式].</font><br>
+    用途 :<br>
+    <table class="css_table_list1">
+      <tr>
+        <td class="css_td_list1_l">01.&nbsp;</td>
+        <td class="css_td_list1_r">增加資料時指定要插入到哪個 entry 之前. (add)</td>
+      </tr>
+    </table>
+    <br><br>
+
     網頁程式要存取資料庫時, 要將需求組合成一條條的指令送給 mcm_cgi_config 處理.
     <br><br>
 
@@ -1504,7 +1517,7 @@ function main_submit()
           <br><br>
           格式 :<br>
           <div class="css_div_block">
-            <font class="css_font_g1">"&add.$(full_path)"</font>
+            <font class="css_font_g1">"&add.$(full_path)=$(insert_path)"</font>
           </div>
           <br>
           <table class="css_table_list2">
@@ -1513,6 +1526,13 @@ function main_submit()
               <td class="css_td_list2_r1">
                 目標的路徑 <a href="#hook_0304_full_path_01">[詳細]</a><br>
                 <font class="css_font_p1">[entry 格式][key 模式]</font>
+              </td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l2">$(insert_path)</td>
+              <td class="css_td_list2_r1">
+                要插入到何處的路徑 <a href="#hook_0304_insert_path_01">[詳細]</a><br>
+                <font class="css_font_p1">[key 模式]</font>
               </td>
             </tr>
           </table>
@@ -1550,8 +1570,8 @@ function main_submit()
 <pre class="css_pre_code">
 var req_cmd = "", tmp_data;
 
-// 增加 device.vap.#123
-req_cmd += "&add.device.vap.#123";
+// 增加 device.vap.#123, 放在串列尾端 ("").
+req_cmd += "&add.device.vap.#123=";
 tmp_data = "public-" + Math.floor(Math.random() * 20);
 req_cmd += "&set.device.vap.#123.ssid=" +
            mcm_jslib_convert_submit_str(tmp_data);
@@ -1566,22 +1586,22 @@ req_cmd += "&set.device.vap.#123.extra.hidden=" + tmp_data;
 tmp_data = Math.floor(Math.random() * 20);
 req_cmd += "&set.device.vap.#123.extra.txpower=" + tmp_data;
 
-// 增加 device.vap.#234.station.#1
+// 增加 device.vap.#234.station.#1, 插入到第 1 筆 entry 之前 (假設第 1 筆資料的 key 是 8 (#8)).
 // 一開始 device.vap.#234 並不存在, 所以要逐層增加.
 // 增加 device.vap.#234
 // 不設值使用初始值.
-req_cmd += "&add.device.vap.#234";
+req_cmd += "&add.device.vap.#234=";
 // 增加 device.vap.#234.station.#1
-req_cmd += "&add.device.vap.#234.station.#1";
+req_cmd += "&add.device.vap.#234.station.#1=#8";
 tmp_data = "00:AA:22:BB:33:" + Math.floor(Math.random() * 100);
 req_cmd += "&set.device.vap.#234.station.#1.mac_addr=" +
            mcm_jslib_convert_submit_str(tmp_data);
 tmp_data = Math.floor(Math.random() * 20);
 req_cmd += "&set.device.vap.#234.station.#1.rule=" + tmp_data;
 
-// 增加 device.limit.#51
+// 增加 device.limit.#51, 插入到 key 為 60 的 entry 之前 (#60).
 // 不設值使用初始值.
-req_cmd += "&add.device.limit.#51";
+req_cmd += "&add.device.limit.#51=#60";
 </pre>
 <br>
           指令建立後, 使用 <font class="css_font_b1">mcm_jslib_submit_config()</font>
@@ -1627,7 +1647,7 @@ function main_command()
     req_cmd = "";
     console.clear();
 
-    tmp_cmd = "&add.device.vap.#123";
+    tmp_cmd = "&add.device.vap.#123=";
     req_cmd += tmp_cmd;
     console.log("[add] ", tmp_cmd);
 
@@ -1654,11 +1674,11 @@ function main_command()
     console.log("[set] ", tmp_cmd);
 
 
-    tmp_cmd = "&add.device.vap.#234";
+    tmp_cmd = "&add.device.vap.#234=";
     req_cmd += tmp_cmd;
     console.log("[add] ", tmp_cmd);
 
-    tmp_cmd = "&add.device.vap.#234.station.#1";
+    tmp_cmd = "&add.device.vap.#234.station.#1=#8";
     req_cmd += tmp_cmd;
     console.log("[add] ", tmp_cmd);
 
@@ -1674,7 +1694,7 @@ function main_command()
     console.log("[set] ", tmp_cmd);
 
 
-    tmp_cmd = "&add.device.limit.#51";
+    tmp_cmd = "&add.device.limit.#51=#60";
     req_cmd += tmp_cmd;
     console.log("[add] ", tmp_cmd);
 }
@@ -2278,7 +2298,7 @@ req_cmd += "&set.device.vap.#8.channel=11";
 req_cmd += "&del.device.vap.#15";
 
 // 增加 device.vap.#55
-req_cmd += "&add.device.vap.#55";
+req_cmd += "&add.device.vap.#55=";
 req_cmd += "&set.device.vap.#55.ssid=" +
            mcm_jslib_convert_submit_str("public-networ");
 req_cmd += "&set.device.vap.#55.channel=44";
@@ -2472,7 +2492,19 @@ rep_ret = mcm_jslib_submit_config(self_jslib);
             </tr>
             <tr>
               <td class="css_td_list2_l2">case-06</td>
+              <td class="css_td_list2_r1">增加資料-插入模式(多筆資料類型)</font>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l2">case-07</td>
               <td class="css_td_list2_r1">執行模組</font>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l2">case-08</td>
+              <td class="css_td_list2_r1">執行模組-儲存資料</font>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l2">case-09</td>
+              <td class="css_td_list2_r1">執行模組-結束 mcm_daemon</font>
             </tr>
           </table>
         </td>

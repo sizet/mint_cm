@@ -170,6 +170,18 @@ Some rights reserved. See README.
     </table>
     <br>
 
+    <div class="css_div_hook" id="hook_0305_insert_path_01"></div>
+    <font class="css_font_b1">insert_path</font><br>
+    <a href="mcm_0302.html#hook_0302_insert_path_01">[詳細]</a><br>
+    用途 :<br>
+    <table class="css_table_list1">
+      <tr>
+        <td class="css_td_list1_l">01.&nbsp;</td>
+        <td class="css_td_list1_r">增加資料時指定要插入到哪個 entry 之前. (add)</td>
+      </tr>
+    </table>
+    <br>
+
   </div>
 </div>
 <br>
@@ -555,7 +567,7 @@ fi
           <br><br>
           格式 :<br>
           <div class="css_div_block">
-            <font class="css_font_g1">add.$(full_path)</font>
+            <font class="css_font_g1">add.$(full_path)=$(insert_path)</font>
           </div>
           <br>
           <table class="css_table_list2">
@@ -564,6 +576,13 @@ fi
               <td class="css_td_list2_r1">
                 目標的路徑 <a href="#hook_0305_full_path_01">[詳細]</a><br>
                 <font class="css_font_p1">[entry 格式][index / key 模式]</font>
+              </td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l2">$(insert_path)</td>
+              <td class="css_td_list2_r1">
+                要插入到何處的路徑 <a href="#hook_0305_insert_path_01">[詳細]</a><br>
+                <font class="css_font_p1">[index 模式] / [key 模式]</font>
               </td>
             </tr>
           </table>
@@ -604,27 +623,27 @@ fi
           <br>
           範例 :<br>
 <pre class="css_pre_code">
-# 增加 device.vap.#51
-./mcm -a @mintcm -p rw add.device.vap.#51
+# 增加 device.vap.#51, 插入到第 1 筆 entry 之前 (@1).
+./mcm -a @mintcm -p rw add.device.vap.#51=@1
 
-# 增加 add.device.limit.#20 並設定資料.
-./mcm -a @mintcm -p rw add.device.limit.#20 set.device.limit.#20.name=limit-20 set.device.limit.#20.priority=12
+# 增加 add.device.limit.#20, 插入到 key 為 3 的 entry 之前 (#3), 並設定資料.
+./mcm -a @mintcm -p rw add.device.limit.#20=#3 set.device.limit.#20.name=limit-20 set.device.limit.#20.priority=12
 
-# 增加 device.vap.#76.station.#5 和 device.vap.#76.station.#7, 逐層增加.
-./mcm -a @mintcm -p rw add.device.vap.#76 add.device.vap.#76.station.#5 add.device.vap.#76.station.#7
+# 增加 device.vap.#76.station.#5 和 device.vap.#76.station.#7, 都放在串列尾端 (""), 逐層增加.
+./mcm -a @mintcm -p rw add.device.vap.#76= add.device.vap.#76.station.#5= add.device.vap.#76.station.#7=
 </pre>
           範例 :<br>
 <pre class="css_pre_code">
 #!/bin/sh
 
-# 增加 device.limit.#70
+# 增加 device.limit.#70, 放在串列尾端 ("").
 path="device.limit.#70"
-result=`./mcm -a @mintcm -p rw add.${path}`
+result=`./mcm -a @mintcm -p rw add.${path}=`
 
-# 增加 device.vap.#101 並設定資料.
+# 增加 device.vap.#101, 插入到 key 為 15 的 entry 之前 (#15), 並設定資料.
 list=
 path1="device.vap.#101"
-list="${list} add.${path1}"
+list="${list} add.${path1}=#15"
 # 設定 ssid 資料.
 path2="${path1}.ssid"
 value2="psk-101"
@@ -645,16 +664,16 @@ value2="123"
 list="${list} set.${path2}=${value2}"
 result=`./mcm -a @mintcm -p rw ${list}`
 
-# 先增加 device.vap.#200, 再增加 5 個 station.
+# 先增加 device.vap.#200, 插入到第 1 筆 entry 之前 (@1), 再增加 5 個 station.
 path1="device.vap.#200"
-result=`./mcm -a @mintcm -p rw add.${path1}`
+result=`./mcm -a @mintcm -p rw add.${path1}=@1`
 list=
 count1="5"
 for ((index1 = 1; index1 <= count1; index1++))
 do
-    # 增加 station.
+    # 增加 station, 每次增加都插入在第 1 筆之前 (@1).
     path2="${path1}.station.#${index1}"
-    list="${list} add.${path2}"
+    list="${list} add.${path2}=@1"
 
     # 設定 mac_addr 資料.
     path3="${path2}.mac_addr"
@@ -869,7 +888,7 @@ do
     if [ ${key2} -ne 0 ]; then
         # 增加資料筆數.
         path2="device.limit.#${key2}"
-        result=`./mcm -a @mintcm -p rw add.${path2}`
+        result=`./mcm -a @mintcm -p rw add.${path2}=`
         count2=$((${count2} + 1))
     else
         break

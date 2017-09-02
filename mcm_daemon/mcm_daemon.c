@@ -155,7 +155,7 @@ int mcm_daemon_exit(
     return MCM_RCODE_PASS;
 }
 
-int mcm_daemon_set_shutdown(
+void mcm_daemon_set_shutdown(
     MCM_DTYPE_BOOL_TD shutdown_con)
 {
     do
@@ -175,11 +175,9 @@ int mcm_daemon_set_shutdown(
     {
         MCM_EMSG("call sem_post() fail [%s]", strerror(errno));
     }
-
-    return MCM_RCODE_PASS;
 }
 
-int mcm_daemon_get_shutdown(
+void mcm_daemon_get_shutdown(
     MCM_DTYPE_BOOL_TD *shutdown_buf)
 {
     do
@@ -199,8 +197,6 @@ int mcm_daemon_get_shutdown(
     {
         MCM_EMSG("call sem_post() fail [%s]", strerror(errno));
     }
-
-    return MCM_RCODE_PASS;
 }
 
 int mcm_daemon_shutdown(

@@ -68,6 +68,7 @@ int mcm_lulib_set_entry(
 int mcm_lulib_add_entry(
     struct mcm_lulib_lib_t *this_lulib,
     char *full_path,
+    char *insert_path,
     void *data_con,
     MCM_DTYPE_USIZE_TD data_len);
 

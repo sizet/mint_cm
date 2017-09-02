@@ -798,11 +798,12 @@ EXPORT_SYMBOL(mcm_lklib_set_entry);
 int mcm_lklib_add_entry(
     struct mcm_lklib_lib_t *this_lklib,
     char *full_path,
+    char *insert_path,
     void *data_con,
     MCM_DTYPE_USIZE_TD data_len)
 {
     int fret;
-    MCM_DTYPE_USIZE_TD xlen;
+    MCM_DTYPE_USIZE_TD xlen, ilen;
     void *tmp_offset;
 
 
@@ -810,9 +811,11 @@ int mcm_lklib_add_entry(
     this_lklib->rep_msg_len = 0;
 
     xlen = strlen(full_path) + 1;
+    ilen = insert_path == NULL ? 1 : strlen(insert_path) + 1;
     this_lklib->pkt_len = sizeof(MCM_DTYPE_USIZE_TD) +
                           sizeof(MCM_DTYPE_LIST_TD) +
                           sizeof(MCM_DTYPE_USIZE_TD) + xlen +
+                          sizeof(MCM_DTYPE_USIZE_TD) + ilen +
                           sizeof(MCM_DTYPE_USIZE_TD) + data_len;
 
     if(this_lklib->pkt_len > this_lklib->pkt_size)
@@ -826,15 +829,19 @@ int mcm_lklib_add_entry(
     }
 
     // 封包格式 :
-    // | T | REQ | PL | PC | DL | DC |.
+    // | T | REQ | PL | PC | IL | IC | DL | DC |.
     // T   [MCM_DTYPE_USIZE_TD].
-    //     紀錄封包的總長度, 內容 = T + REQ + PL + PC + DL + DC.
+    //     紀錄封包的總長度, 內容 = T + REQ + PL + PC + IL + IC + DL + DC.
     // REQ [MCM_DTYPE_LIST_TD].
     //     紀錄請求類型.
     // PL  [MCM_DTYPE_USIZE_TD].
     //     紀錄請求的路徑長度 (包括最後的 \0).
     // PC  [binary].
     //     紀錄請求的路徑.
+    // IL  [MCM_DTYPE_USIZE_TD].
+    //     紀錄請求的插入路徑長度 (包括最後的 \0).
+    // IC  [binary].
+    //     紀錄請求的插入路徑.
     // DL  [MCM_DTYPE_USIZE_TD].
     //     紀錄要傳送的資料的長度.
     // DC  [binary].
@@ -842,6 +849,15 @@ int mcm_lklib_add_entry(
 
     // T + REQ + PL + PC.
     MCM_BUILD_BASE_REP_03(tmp_offset, this_lklib, MCM_SREQUEST_ADD_ENTRY, full_path, xlen);
+    // IL.
+    *((MCM_DTYPE_USIZE_TD *) tmp_offset) = ilen;
+    tmp_offset += sizeof(MCM_DTYPE_USIZE_TD);
+    // IC.
+    if(insert_path == NULL)
+        *((char *) tmp_offset) = '\0';
+    else
+        memcpy(tmp_offset, insert_path, ilen);
+    tmp_offset += ilen;
     // DL.
     *((MCM_DTYPE_USIZE_TD *) tmp_offset) = data_len;
     tmp_offset += sizeof(MCM_DTYPE_USIZE_TD);

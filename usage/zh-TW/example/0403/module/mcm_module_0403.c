@@ -633,7 +633,7 @@ int mcm_module_del_usablekey_add_entry(
         limit_v.priority = (rand() % 30000) * ((rand() % 3) - 1);
         DMSG("[add-entry][SYS] %s.name = " MCM_DTYPE_S_PF, path2, limit_v.name);
         DMSG("[add-entry][SYS] %s.priority = " MCM_DTYPE_ISI_PF, path2, limit_v.priority);
-        if(mcm_config_add_entry_by_path(this_session, path2, MCM_DACCESS_SYS, &limit_v)
+        if(mcm_config_add_entry_by_path(this_session, path2, NULL, MCM_DACCESS_SYS, &limit_v)
                                         < MCM_RCODE_PASS)
         {
             DMSG("call mcm_config_add_entry_by_path(%s) fail", path2);
@@ -674,7 +674,7 @@ int mcm_module_delall_add_entry(
     {
         // 填充路徑.
         snprintf(path2, sizeof(path2), "device.client.#%u", i + 1);
-        // 增加.
+        // 增加, 每次增加都插入在第一筆之前.
         memset(&client_v, 0, sizeof(client_v));
         snprintf(client_v.mac_addr, sizeof(client_v.mac_addr), "01:23:45:67:%02X", rand() % 255);
         client_v.location_x = ((MCM_DTYPE_FLD_TD) 45000) / ((rand() % 100) + 1);
@@ -682,7 +682,7 @@ int mcm_module_delall_add_entry(
         DMSG("[add-entry][SYS] %s.mac_addr = " MCM_DTYPE_S_PF, path2, client_v.mac_addr);
         DMSG("[add-entry][SYS] %s.location_x = " MCM_DTYPE_FLD_PF, path2, client_v.location_x);
         DMSG("[add-entry][SYS] %s.location_y = " MCM_DTYPE_FLD_PF, path2, client_v.location_y);
-        if(mcm_config_add_entry_by_path(this_session, path2, MCM_DACCESS_SYS, &client_v)
+        if(mcm_config_add_entry_by_path(this_session, path2, "@1", MCM_DACCESS_SYS, &client_v)
                                         < MCM_RCODE_PASS)
         {
             DMSG("call mcm_config_add_entry_by_path(%s) fail", path2);

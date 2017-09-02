@@ -356,7 +356,7 @@ int mcm_parse_parameter(
     tmp_len = *data_len;
 
     if(tmp_len <= 0)
-        return -1;
+        return MCM_RCODE_CGI_CONFIG_INTERNAL_ERROR;
 
     for(didx1 = 0; didx1 < tmp_len; didx1++)
         if(tmp_con[didx1] == MCM_PARAMETER_SPLIT_KEY)
@@ -380,7 +380,7 @@ int mcm_parse_parameter(
     *data_con = tmp_con + didx1;
     *data_len = tmp_len - didx1;
 
-    return 0;
+    return MCM_RCODE_PASS;
 }
 
 // 取出必要的參數.
@@ -400,7 +400,7 @@ int mcm_parse_query(
 
     while(1)
     {
-        if(mcm_parse_parameter(&query_con, &query_len, &tmp_name, &tmp_value) < 0)
+        if(mcm_parse_parameter(&query_con, &query_len, &tmp_name, &tmp_value) < MCM_RCODE_PASS)
             break;
         MCM_CCDMSG("[%s][%s]", tmp_name, tmp_value);
 
@@ -874,7 +874,8 @@ int mcm_check_push_command(
             }
 
             // 檢查 set 指令的資料內容部分.
-            if(each_command->operate_type == MCM_CONFIG_SET_INDEX)
+            if((each_command->operate_type == MCM_CONFIG_SET_INDEX) ||
+               (each_command->operate_type == MCM_CONFIG_ADD_INDEX))
             {
                 // 找出指令的資料內容部分.
                 fret = mcm_find_push_command_config_data_value(each_command);
@@ -2031,7 +2032,8 @@ int mcm_do_push_command(
 
     if(command_list_info->operate_type == MCM_CONFIG_SET_INDEX)
     {
-        MCM_CCDMSG("cmd [%s][%s][%s]", MCM_CONFIG_SET_KEY, command_list_info->push_config_path,
+        MCM_CCDMSG("cmd [%s][%s][%s]",
+                   MCM_CONFIG_SET_KEY, command_list_info->push_config_path,
                    command_list_info->push_config_data_value);
         fret = mcm_lulib_set_any_type_alone(this_lulib, command_list_info->push_config_path,
                                             command_list_info->push_config_data_value);
@@ -2049,13 +2051,19 @@ int mcm_do_push_command(
     else
     if(command_list_info->operate_type == MCM_CONFIG_ADD_INDEX)
     {
-        MCM_CCDMSG("cmd [%s][%s]", MCM_CONFIG_ADD_KEY, command_list_info->push_config_path);
-        fret = mcm_lulib_add_entry(this_lulib, command_list_info->push_config_path, NULL, 0);
+        MCM_CCDMSG("cmd [%s][%s][%s]",
+                   MCM_CONFIG_ADD_KEY, command_list_info->push_config_path,
+                   command_list_info->push_config_data_value);
+        fret = mcm_lulib_add_entry(this_lulib, command_list_info->push_config_path,
+                                   command_list_info->push_config_data_value, NULL, 0);
         if(fret < MCM_RCODE_PASS)
         {
-            MCM_CEMSG("call mcm_lulib_add_entry(%s) fail", command_list_info->push_config_path);
-            MCM_CGI_AEMSG(fret, 0, "call mcm_lulib_add_entry() fail\\n[%s]",
-                          command_list_info->push_config_path);
+            MCM_CEMSG("call mcm_lulib_add_entry([%s][%s]) fail",
+                      command_list_info->push_config_path,
+                      command_list_info->push_config_data_value);
+            MCM_CGI_AEMSG(fret, 0, "call mcm_lulib_add_entry() fail\\n[%s][%s]",
+                          command_list_info->push_config_path,
+                          command_list_info->push_config_data_value);
             return fret;
         }
     }

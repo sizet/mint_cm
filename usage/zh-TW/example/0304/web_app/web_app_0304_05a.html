@@ -139,7 +139,7 @@ function config_station_add()
                ".station.#" + $("#ekey_text").val();
 
     // 增加 device.vap.{vap_key}.station.{station_key}
-    req_cmd += "&add." + tmp_path;
+    req_cmd += "&add." + tmp_path + "=";
     // 設定 device.vap.{vap_key}.station.{station_key}
     req_cmd += "&set." + tmp_path + ".mac_addr=" +
                mcm_jslib_convert_submit_str($("#mac_addr_text").val());

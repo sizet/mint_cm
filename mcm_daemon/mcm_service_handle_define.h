@@ -37,6 +37,7 @@ struct mcm_service_session_t
     MCM_DTYPE_USIZE_TD pkt_size;
     MCM_DTYPE_LIST_TD req_type;
     char *req_path;
+    char *req_other_path;
     void *req_data_con;
     MCM_DTYPE_USIZE_TD req_data_len;
     void *cache_buf;

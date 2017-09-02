@@ -14,30 +14,88 @@ Some rights reserved. See README.
 <script type="text/javascript" src="json3.js"></script>
 <script type="text/javascript" src="mcm_jslib_api.js"></script>
 <script type="text/javascript" src="mcm_jslib_data_info_auto.js"></script>
+<script type="text/javascript" src="web_app_0304_script.js"></script>
 <link rel="stylesheet" href="web_app_0304_style.css">
 
 <script type="text/javascript">
 function body_init()
 {
+    var self_jslib, req_cmd, rep_ret, mcm_dv, data_array, i, tmp_html;
+
+
+    $("#ekey_text").val("");
+    $("#name_text").val("");
+    $("#priority_text").val("");
+
+    // 指定要讀出的資料.
+    req_cmd = "&get.device.limit.*";
+
+    // 送出讀出資料請求.
+    self_jslib = new mcm_jslib_lib_t();
+    self_jslib.socket_path = "@mintcm";
+    self_jslib.session_permission = mcm_session_permission.ro;
+    self_jslib.session_stack_size = 0;
+    self_jslib.request_command = req_cmd;
+    self_jslib.data_format = mcm_data_format.all_default;
+    self_jslib.other_query = "";
+    rep_ret = mcm_jslib_obtain_config(self_jslib);
+    if(rep_ret.rep_code < mcm_return_code.pass)
+    {
+        alert("call mcm_jslib_obtain_config() fail" +
+              "[" + rep_ret.rep_code + "]");
+        mcm_jslib_run_script(rep_ret.rep_data);
+        return;
+    }
+    // 處理資料格式.
+    mcm_dv = JSON.parse(rep_ret.rep_data);
+
+    // 顯示 device.limit.* 選單.
+    for(i = 0; i < mcm_dv.device.limit.length; i++)
+    {
+        tmp_html = "device.limit.#" + mcm_dv.device.limit[i].ekey;
+        $("#limit_select").append($("<option></option>")
+            .attr("value", "#" + mcm_dv.device.limit[i].ekey).text(tmp_html));
+    }
+    $("#limit_select").append($("<option></option>").attr("value", "").text("- add to last -"));
+
+    // 顯示 device.limit.{i}
+    for(i = 0; i < mcm_dv.device.limit.length; i++)
+    {
+        data_array = new Array(5);
+        data_array[0] = i + 1;
+        data_array[1] = mcm_dv.device.limit[i].ekey;
+        data_array[2] = mcm_jslib_convert_html_str(mcm_dv.device.limit[i].name);
+        data_array[3] = mcm_dv.device.limit[i].priority;
+        tmp_html = "config_limit_del(" + mcm_dv.device.limit[i].ekey + ")";
+        data_array[4] = jsapi_make_button("del", tmp_html);
+        tmp_html = jsapi_make_trtd("css_td1", data_array);
+        $("#limit_list").find("tbody").append(tmp_html);
+    }
 }
 
-// 執行模組.
-function config_run()
+// 增加 device.limit.*
+function config_limit_add()
 {
-    var self_jslib, req_cmd = "", rep_ret;
+    var self_jslib, req_cmd = "", rep_ret, tmp_path;
 
 
-    // 執行 mcm_module_web_test_01
-    req_cmd += "&run.mcm_module_web_test_01";
+    // 填充 device.limit.{limit_key} 路徑.
+    tmp_path = "device.limit.#" + $("#ekey_text").val();
 
-    // 執行 mcm_module_web_test_02
-    req_cmd += "&run.mcm_module_web_test_02";
+    // 增加 device.limit.{limit_key}, 指定要插入到何處.
+    req_cmd += "&add." + tmp_path + "=" +
+               $("#limit_select").find(":selected").val();
+    // 設定 device.limit.{limit_key}
+    req_cmd += "&set." + tmp_path + ".name=" +
+               mcm_jslib_convert_submit_str($("#name_text").val());
+    req_cmd += "&set." + tmp_path + ".priority=" +
+               $("#priority_text").val();
 
     // 送出修改資料請求.
     self_jslib = new mcm_jslib_lib_t();
     self_jslib.socket_path = "@mintcm";
-    self_jslib.session_permission = mcm_session_permission.ro;
-    self_jslib.session_stack_size = 1048576;
+    self_jslib.session_permission = mcm_session_permission.rw;
+    self_jslib.session_stack_size = 0;
     self_jslib.request_command = req_cmd;
     self_jslib.after_complete = mcm_after_complete.reload;
     self_jslib.other_query = "";
@@ -52,15 +110,89 @@ function config_run()
     mcm_jslib_run_script(rep_ret.rep_data);
 }
 
+// 刪除 device.limit.*
+function config_limit_del(
+    limit_key)
+{
+    var self_jslib, req_cmd = "", rep_ret;
+
+
+    // 刪除 device.limit.{limit_key}
+    req_cmd += "&del.device.limit.#" + limit_key;
+
+    // 送出修改資料請求.
+    self_jslib = new mcm_jslib_lib_t();
+    self_jslib.socket_path = "@mintcm";
+    self_jslib.session_permission = mcm_session_permission.rw;
+    self_jslib.session_stack_size = 0;
+    self_jslib.request_command = req_cmd;
+    self_jslib.after_complete = mcm_after_complete.reload;
+    self_jslib.other_query = "";
+    rep_ret = mcm_jslib_submit_config(self_jslib);
+    if(rep_ret.rep_code < mcm_return_code.pass)
+    {
+        alert("call mcm_jslib_submit_config() fail" +
+              "[" + rep_ret.rep_code + "]");
+        mcm_jslib_run_script(rep_ret.rep_data);
+        return;
+    }
+    mcm_jslib_run_script(rep_ret.rep_data);
+}
 </script>
 
 </head>
 
 <body onload="body_init()">
 
-  <div>[run]</div>
+  <div>[add][device.limit.*]</div>
 
-  <button type="button" onclick="config_run()">run</button>
+  <table class="css_table1">
+    <tr>
+      <td class="css_td1" colspan="3">device.limit.*</td>
+    </tr>
+    <tr>
+      <td class="css_td1" colspan="3">
+        insert before :
+        <select id="limit_select"></select>
+      </td>
+    </tr>
+    <tr>
+      <td class="css_td1">ekey</td>
+      <td class="css_td1">name</td>
+      <td class="css_td1">priority</td>
+    </tr>
+    <tr>
+      <td class="css_td1">
+        <input id="ekey_text" type="text" size="8">
+      </td>
+      <td class="css_td1">
+        <input id="name_text" type="text" size="24">
+      </td>
+      <td class="css_td1">
+        <input id="priority_text" type="text" size="8">
+      </td>
+    </tr>
+  </table>
+
+  <button type="button" onclick="config_limit_add()">add</button>
+  <br><br>
+
+  <table id="limit_list" class="css_table1">
+    <thead>
+      <tr>
+        <td class="css_td1" colspan="5">device.limit.*</td>
+      </tr>
+      <tr>
+        <td class="css_td1">no</td>
+        <td class="css_td1">ekey</td>
+        <td class="css_td1">name</td>
+        <td class="css_td1">priority</td>
+        <td class="css_td1"></td>
+      </tr>
+    </thead>
+    <tbody>
+    </tbody>
+  </table>
 
 </body>
 

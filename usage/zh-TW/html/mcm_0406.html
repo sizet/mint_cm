@@ -60,6 +60,11 @@ Some rights reserved. See README.
     存取的目標 entry 或 member 的路徑. <a href="mcm_0302.html#hook_0302_full_path_01">[詳細]</a>
     <br><br><br>
 
+    <div class="css_div_hook" id="hook_0406_insert_path_01"></div>
+    <font class="css_font_b1">[char *insert_path]</font><br>
+    在增加 entry 時, 指定要插入到哪個 entry 之前. <a href="mcm_0302.html#hook_0302_insert_path_01">[詳細]</a>
+    <br><br><br>
+
     <div class="css_div_hook" id="hook_0406_group_info_01"></div>
     <font class="css_font_b1">[struct mcm_config_model_group_t *group_info]</font><br>
     紀錄 group 的資訊的結構. <a href="mcm_0404.html#hook_0404_group_info_01">[詳細]</a>
@@ -1039,7 +1044,7 @@ int main(int argc, char **argv)
     // 範例-04 : 增加 device.vap.@3.station.#1
     path1 = "device.vap.@3.station.#1";
     DMSG("[add-entry] %s", path1);
-    if(mcm_lulib_add_entry(&self_lulib, path1, NULL, 0) < MCM_RCODE_PASS)
+    if(mcm_lulib_add_entry(&self_lulib, path1, NULL, NULL, 0) < MCM_RCODE_PASS)
     {
         DMSG("call mcm_lulib_add_entry(%s) fail", path1);
         goto FREE_02;
@@ -1701,7 +1706,7 @@ int main(int argc, char **argv)
     // 範例-04 : 增加 device.vap.#23.station.#1
     path1 = "device.vap.#23.station.#1";
     DMSG("[add-entry] %s", path1);
-    if(mcm_lulib_add_entry(&self_lulib, path1, NULL, 0) < MCM_RCODE_PASS)
+    if(mcm_lulib_add_entry(&self_lulib, path1, NULL, NULL, 0) < MCM_RCODE_PASS)
     {
         DMSG("call mcm_lulib_add_entry(%s) fail", path1);
         goto FREE_02;
@@ -1907,20 +1912,31 @@ FREE_01:
             </tr>
             <tr>
               <td class="css_td_list2_l1">
-                <font class="css_font_r1">MCM_DTYPE_FLAG_TD</font><br>
-                <font class="css_font_g1">data_access</font><br>
-              </td>
-              <td class="css_td_list2_r1">
-                要使用何種模式 <a href="#hook_0406_data_access_01">[詳細]</a>
-              </td>
-            </tr>
-            <tr>
-              <td class="css_td_list2_l1">
                 <font class="css_font_r1">MCM_DTYPE_EK_TD</font><br>
                 <font class="css_font_g1">this_key</font>
               </td>
               <td class="css_td_list2_r1">
                 加入的 entry 的 key
+              </td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l1">
+                <font class="css_font_r1">struct mcm_config_store_t *</font><br>
+                <font class="css_font_g1">insert_store</font>
+              </td>
+              <td class="css_td_list2_r1">
+                要插入到何處的 store <a href="#hook_0406_store_info_01">[詳細]</a>
+                <a href="#hook_0406_insert_path_01">[詳細]</a><br>
+                <font class="css_font_p1">可為 NULL, 表示加入到串列尾端</font>
+              </td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l1">
+                <font class="css_font_r1">MCM_DTYPE_FLAG_TD</font><br>
+                <font class="css_font_g1">data_access</font><br>
+              </td>
+              <td class="css_td_list2_r1">
+                要使用何種模式 <a href="#hook_0406_data_access_01">[詳細]</a>
               </td>
             </tr>
             <tr>
@@ -2027,7 +2043,7 @@ int main(int argc, char **argv)
     // 範例-03 : 增加 device.vap.#200
     path1 = "device.vap.#200";
     DMSG("[add-entry] %s", path1);
-    if(mcm_lulib_add_entry(&self_lulib, path1, NULL, 0) < MCM_RCODE_PASS)
+    if(mcm_lulib_add_entry(&self_lulib, path1, NULL, NULL, 0) < MCM_RCODE_PASS)
     {
         DMSG("call mcm_lulib_add_entry(%s) fail", path1);
         goto FREE_02;
@@ -2072,16 +2088,16 @@ int mcm_module_add_entry_value_test(
     struct mcm_service_session_t *this_session)
 {
     int fret = MCM_RCODE_MODULE_INTERNAL_ERROR;
-    char *path1, path2[MCM_PATH_MAX_LENGTH];
+    char *path1, path2[MCM_PATH_MAX_LENGTH], *insert_path;
     struct mcm_config_model_group_t *tmp_group;
-    struct mcm_config_store_t *tmp_parent_store, *new_store;
+    struct mcm_config_store_t *tmp_parent_store, *insert_store, *new_store;
     struct mcm_dv_device_vap_station_t station_v;
     struct mcm_dv_device_limit_t limit_v;
     MCM_DTYPE_EK_TD tmp_key;
 
     srand(time(NULL));
 
-    // 範例-01 : 增加 device.vap.#100 (SYS 模式)
+    // 範例-01 : 增加 device.vap.#100, 插入到第 1 筆 entry 之前 (@1), (SYS 模式)
     path1 = "device.vap.*";
     // 先使用路徑取得資訊.
     if(mcm_config_find_entry_by_mix(this_session, path1, &tmp_group, NULL, NULL,
@@ -2090,18 +2106,26 @@ int mcm_module_add_entry_value_test(
         DMSG("call mcm_config_find_entry_by_mix(%s) fail", path1);
         goto FREE_01;
     }
+    // 找到要插入的位置 (@1)
+    insert_path = "@1";
+    if(mcm_config_find_entry_by_ik(this_session, tmp_group, tmp_parent_store, insert_path,
+                                   &insert_store) < MCM_RCODE_PASS)
+    {
+        DMSG("call mcm_config_find_entry_by_ik(%s) fail", insert_path);
+        goto FREE_01;
+    }
     // 增加.
     tmp_key = 100;
     snprintf(path2, sizeof(path2), "device.vap.#%u", tmp_key);
     DMSG("[add-entry][SYS] %s", path2);
-    if(mcm_config_add_entry_by_info(this_session, tmp_group, tmp_parent_store, MCM_DACCESS_SYS,
-                                    tmp_key, NULL, NULL) < MCM_RCODE_PASS)
+    if(mcm_config_add_entry_by_info(this_session, tmp_group, tmp_parent_store, tmp_key,
+                                    insert_store, MCM_DACCESS_SYS, NULL, NULL) < MCM_RCODE_PASS)
     {
         DMSG("call mcm_config_add_entry_by_info(%s) fail", path2);
         goto FREE_01;
     }
 
-    // 範例-02 : 增加 device.vap.@1.station.#10 (SYS 模式)
+    // 範例-02 : 增加 device.vap.@1.station.#10, 放在串列尾端 (NULL), (SYS 模式)
     path1 = "device.vap.@1.station.*";
     // 先使用路徑取得資訊.
     if(mcm_config_find_entry_by_mix(this_session, path1, &tmp_group, NULL, NULL,
@@ -2114,14 +2138,14 @@ int mcm_module_add_entry_value_test(
     tmp_key = 10;
     snprintf(path2, sizeof(path2), "device.vap.@1.station.#%u", tmp_key);
     DMSG("[add-entry][SYS] %s", path2);
-    if(mcm_config_add_entry_by_info(this_session, tmp_group, tmp_parent_store, MCM_DACCESS_SYS,
-                                    tmp_key, NULL, &new_store) < MCM_RCODE_PASS)
+    if(mcm_config_add_entry_by_info(this_session, tmp_group, tmp_parent_store, tmp_key, NULL,
+                                    MCM_DACCESS_SYS, NULL, &new_store) < MCM_RCODE_PASS)
     {
         DMSG("call mcm_config_add_entry_by_info(%s) fail", path2);
         goto FREE_01;
     }
 
-    // 範例-04 : 增加 device.vap.#200.station.#10 (NEW 模式)
+    // 範例-04 : 增加 device.vap.#200.station.#10, 放在串列尾端 (NULL), (NEW 模式)
     // 先使用路徑取得資訊.
     path1 = "device.vap.#200.station.*";
     if(mcm_config_find_entry_by_mix(this_session, path1, &tmp_group, NULL, NULL,
@@ -2138,20 +2162,28 @@ int mcm_module_add_entry_value_test(
     station_v.rule = rand() % 50;
     DMSG("[add-entry][NEW] %s.mac_addr = " MCM_DTYPE_S_PF, path2, station_v.mac_addr);
     DMSG("[add-entry][NEW] %s.rule = " MCM_DTYPE_RK_PF, path2, station_v.rule);
-    if(mcm_config_add_entry_by_info(this_session, tmp_group, tmp_parent_store, MCM_DACCESS_NEW,
-                                    tmp_key, &station_v, NULL) < MCM_RCODE_PASS)
+    if(mcm_config_add_entry_by_info(this_session, tmp_group, tmp_parent_store, tmp_key, NULL,
+                                    MCM_DACCESS_NEW, &station_v, NULL) < MCM_RCODE_PASS)
     {
         DMSG("call mcm_config_add_entry_by_info(%s) fail", path2);
         goto FREE_01;
     }
 
-    // 範例-05 : 增加 device.limit.#50 (NEW 模式)
+    // 範例-05 : 增加 device.limit.#50, 插入到 key 為 6 的 entry 之前 (#6), (NEW 模式)
     // 先使用路徑取得資訊.
     path1 = "device.limit.*";
     if(mcm_config_find_entry_by_mix(this_session, path1, &tmp_group, NULL, NULL,
                                     &tmp_parent_store) < MCM_RCODE_PASS)
     {
         DMSG("call mcm_config_find_entry_by_mix(%s) fail", path1);
+        goto FREE_01;
+    }
+    // 找到要插入的位置 (#6)
+    insert_path = "#6";
+    if(mcm_config_find_entry_by_ik(this_session, tmp_group, tmp_parent_store, insert_path,
+                                   &insert_store) < MCM_RCODE_PASS)
+    {
+        DMSG("call mcm_config_find_entry_by_ik(%s) fail", insert_path);
         goto FREE_01;
     }
     // 增加.
@@ -2162,8 +2194,9 @@ int mcm_module_add_entry_value_test(
     limit_v.priority = rand() % 100;
     DMSG("[add-entry][NEW] %s.name = " MCM_DTYPE_S_PF, path2, limit_v.name);
     DMSG("[add-entry][NEW] %s.priority = " MCM_DTYPE_ISI_PF, path2, limit_v.priority);
-    if(mcm_config_add_entry_by_info(this_session, tmp_group, tmp_parent_store, MCM_DACCESS_NEW,
-                                    tmp_key, &limit_v, &new_store) < MCM_RCODE_PASS)
+    if(mcm_config_add_entry_by_info(this_session, tmp_group, tmp_parent_store, tmp_key,
+                                    insert_store, MCM_DACCESS_NEW, &limit_v, &new_store)
+                                    < MCM_RCODE_PASS)
     {
         DMSG("call mcm_config_add_entry_by_info(%s) fail", path2);
         goto FREE_01;

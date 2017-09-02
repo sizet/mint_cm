@@ -101,7 +101,7 @@ function module_run()
             tmp_path = "device.vap.#" + $("#ekey_text_" + i).val();
 
             // 增加 device.vap.{i}
-            req_cmd += "&add." + tmp_path;
+            req_cmd += "&add." + tmp_path + "=";
 
             // 設定 device.vap.{i}.ssid
             req_cmd += "&set." + tmp_path + ".ssid=" +

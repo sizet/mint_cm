@@ -218,23 +218,112 @@ Some rights reserved. See README.
     存取的目標 entry 或 member 的路徑. <a href="mcm_0302.html#hook_0302_full_path_01">[詳細]</a>
     <br><br><br>
 
+    <div class="css_div_hook" id="hook_0404_ik_path_01"></div>
+    <font class="css_font_b1">[char *ik_path]</font><br>
+    找到 group 內的目標 entry,
+    使用在增加 entry 時, 指定要插入在哪個 entry 之前. <a href="mcm_0302.html#hook_0302_insert_path_01">[詳細]</a>
+    <br><br><br>
+
     <div class="css_div_hook" id="hook_0404_group_info_01"></div>
     <font class="css_font_b1">[struct mcm_config_model_group_t *group_info]</font><br>
     紀錄 group 的資訊的結構, 也就是在 <a href="mcm_0201.html">#02-01#</a> 中資料模型中的資料,
     如 $(name), $(type), $(max), $(save) 等等.
-    <br><br><br>
+    資料串列的結構成員 :<br>
+    <table class="css_table_list2">
+      <tr>
+        <td class="css_td_list2_r1">
+          <font class="css_font_r1">struct mcm_config_model_group_t *</font><br>
+          <font class="css_font_g1">parent_model_group</font>
+        </td>
+        <td class="css_td_list2_r1">指向 parent</td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_r1">
+          <font class="css_font_r1">struct mcm_config_model_group_t *</font><br>
+          <font class="css_font_g1">next_model_group</font>
+        </td>
+        <td class="css_td_list2_r1">指向下一個</td>
+      </tr>
+    </table>
+    例如 :<br>
+    <div class="css_div_block">
+      以 02-02 的資料模型為例 :<br>
+      device<br>
+      &nbsp;&nbsp;system<br>
+      &nbsp;&nbsp;vap<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;extra<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;station<br>
+      &nbsp;&nbsp;limit<br>
+      &nbsp;&nbsp;client<br><br>
+      device :<br>
+      parent_model_group = NULL<br>
+      next_model_group = NULL<br><br>
+      system :<br>
+      parent_model_group = device<br>
+      next_model_group = vap<br><br>
+      vap :<br>
+      parent_model_group = device<br>
+      next_model_group = limit<br><br>
+      extra :<br>
+      parent_model_group = vap<br>
+      next_model_group = station<br><br>
+      station :<br>
+      parent_model_group = vap<br>
+      next_model_group = NULL<br><br>
+      limit :<br>
+      parent_model_group = device<br>
+      next_model_group = client<br><br>
+      client :<br>
+      parent_model_group = device<br>
+      next_model_group = NULL
+    </div>
+    <br><br>
 
     <div class="css_div_hook" id="hook_0404_member_info_01"></div>
     <font class="css_font_b1">[struct mcm_config_model_member_t *member_info]</font><br>
     紀錄 member 的資訊的結構, 也就是在 <a href="mcm_0201.html">#02-01#</a> 中資料模型中的資料,
     如 $(name), $(type), $(default) 等等.
-    <br><br><br>
+    資料串列的結構成員 :<br>
+    <table class="css_table_list2">
+      <tr>
+        <td class="css_td_list2_r1">
+          <font class="css_font_r1">struct mcm_config_model_member_t *</font><br>
+          <font class="css_font_g1">next_model_member</font>
+        </td>
+        <td class="css_td_list2_r1">指向下一個</td>
+      </tr>
+    </table>
+    例如 :<br>
+    <div class="css_div_block">
+      以 02-02 的資料模型的 system 為例 :<br>
+      system 內部的 member 有 :<br>
+      date<br>
+      ip_addr<br>
+      uptime<br>
+      loading<br><br>
+      date :<br>
+      next_model_member = ip_addr<br><br>
+      ip_addr :<br>
+      next_model_member = uptime<br><br>
+      uptime :<br>
+      next_model_member = loading<br><br>
+      loading :<br>
+      next_model_member = NULL
+    </div>
+    <br><br>
 
     <div class="css_div_hook" id="hook_0404_store_info_01"></div>
     <font class="css_font_b1">[struct mcm_config_store_t *store_info]</font><br>
     紀錄資料的狀態和數值的結構.<br>
-    會使用到的結構成員 :<br>
+    資料串列的結構成員 :<br>
     <table class="css_table_list2">
+      <tr>
+        <td class="css_td_list2_r1">
+          <font class="css_font_r1">struct mcm_config_store_t *</font><br>
+          <font class="css_font_g1">parent_store</font>
+        </td>
+        <td class="css_td_list2_r1">指向 parent</td>
+      </tr>
       <tr>
         <td class="css_td_list2_r1">
           <font class="css_font_r1">struct mcm_config_store_t *</font><br>
@@ -249,14 +338,60 @@ Some rights reserved. See README.
         </td>
         <td class="css_td_list2_r1">指向下一筆</td>
       </tr>
-      <tr>
-        <td class="css_td_list2_r1">
-          <font class="css_font_r1">struct mcm_config_store_t *</font><br>
-          <font class="css_font_g1">parent_store</font>
-        </td>
-        <td class="css_td_list2_r1">指向 parent</td>
-      </tr>
     </table>
+    例如 :<br>
+    <div class="css_div_block">
+      目前有以下資料 :<br>
+      device.vap.#8 ssid:open-1 channel:10<br>
+      device.vap.#8.extra hidden:1 tx_power:9<br>
+      device.vap.#8.station.#5 mac_addr:00:aa:bb:cc:dd:05 rule:15<br>
+      device.vap.#8.station.#7 mac_addr:00:aa:bb:cc:dd:07 rule:17<br>
+      device.vap.#15 ssid:radius-2 channel:44<br>
+      device.vap.#15.extra hidden:0 tx_power:10<br>
+      device.vap.#15.station.#30 mac_addr:00:aa:bb:cc:dd:ee rule:5<br>
+      device.vap.#15.station.#33 mac_addr:00:aa:bb:cc:dd:ff rule:6<br>
+      device.vap.#15.station.#41 mac_addr:00:aa:bb:cc:dd:41 rule:7<br><br>
+      device.vap.#8.extra :<br>
+      parent_store = device.vap.#8<br>
+      prev_store = NULL<br>
+      next_store = NULL<br><br>
+      device.vap.#8.station.#5 :<br>
+      parent_store = device.vap.#8<br>
+      prev_store = NULL<br>
+      next_store = device.vap.#8.station.#7<br><br>
+      device.vap.#8.station.#7 :<br>
+      parent_store = device.vap.#8<br>
+      prev_store = device.vap.#8.station.#5<br>
+      next_store = NULL<br><br>
+      device.vap.#15.extra :<br>
+      parent_store = device.vap.#15<br>
+      prev_store = NULL<br>
+      next_store = NULL<br><br>
+      device.vap.#15.station.#30 :<br>
+      parent_store = device.vap.#15<br>
+      prev_store = NULL<br>
+      next_store = device.vap.#15.station.#33<br><br>
+      device.vap.#15.station.#33 :<br>
+      parent_store = device.vap.#15<br>
+      prev_store = device.vap.#15.station.#30<br>
+      next_store = device.vap.#15.station.#41<br><br>
+      device.vap.#15.station.#41 :<br>
+      parent_store = device.vap.#15<br>
+      prev_store = device.vap.#15.station.#33<br>
+      next_store = NULL<br><br>
+      device.vap.#8 :<br>
+      parent_store = device<br>
+      prev_store = NULL<br>
+      next_store = device.vap.#15<br><br>
+      device.vap.#15 :<br>
+      parent_store = device<br>
+      prev_store = device.vap.#8<br>
+      next_store = NULL<br><br>
+      device :<br>
+      parent_store = NULL<br>
+      prev_store = NULL<br>
+      next_store = NULL
+    </div>
     <br>
 
   </div>
@@ -606,7 +741,6 @@ int mcm_module_mix_path_test(
     struct mcm_config_model_group_t *tmp_group;
     struct mcm_config_store_t *tmp_store_list, *tmp_store_tree, *parent_store;
 
-
     // 範例 : 尋找 device
     path1 = "device";
     DMSG("[mix_path] %s", path1);
@@ -799,7 +933,6 @@ int mcm_module_alone_full_path(
     struct mcm_config_model_member_t *tmp_member;
     struct mcm_config_store_t *tmp_store;
 
-
     // 範例 : 尋找 device.descript
     path1 = "device.descript";
     DMSG("[alone_full_path] %s", path1);
@@ -981,7 +1114,6 @@ int mcm_module_entry_full_path(
     struct mcm_config_model_group_t *tmp_group;
     struct mcm_config_store_t *tmp_store;
 
-
     // 範例 : 尋找 device
     path1 = "device";
     DMSG("[entry_full_path] %s", path1);
@@ -1009,6 +1141,223 @@ int mcm_module_entry_full_path(
                                      < MCM_RCODE_PASS)
     {
         DMSG("call mcm_config_find_entry_by_full(%s) fail", path1);
+        goto FREE_01;
+    }
+
+    fret = MCM_RCODE_PASS;
+FREE_01:
+    return fret;
+}
+</pre>
+        </td>
+      </tr>
+    </table>
+    <br>
+
+    <div class="css_div_hook" id="hook_0404_mcm_config_find_entry_by_ik_01"></div>
+    <table class="css_table_box">
+      <tr>
+        <td class="css_td_box">
+          <font class="css_font_b2">mcm_config_find_entry_by_ik</font><br>
+          使用目標的 group_info 和 parent_store, 找到目標的 store_info.<br>
+          在增加 entry 時如果要指定插入到目標 entry 之前, 可以使用此函式找到目標 entry.<br>
+          <table class="css_table_list2">
+            <tr>
+              <td class="css_td_list2_t1">參數</td>
+              <td class="css_td_list2_t1">說明</td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l1">
+                <font class="css_font_r1">struct mcm_service_session_t *</font><br>
+                <font class="css_font_g1">this_session</font>
+              </td>
+              <td class="css_td_list2_r1">
+                請求端的連線資訊
+              </td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l1">
+                <font class="css_font_r1">struct mcm_config_model_group_t *</font><br>
+                <font class="css_font_g1">this_model_group</font>
+              </td>
+              <td class="css_td_list2_r1">
+                目標的 group_info <a href="#hook_0404_group_info_01">[詳細]</a><br>
+              </td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l1">
+                <font class="css_font_r1">struct mcm_config_store_t *</font><br>
+                <font class="css_font_g1">parent_store</font>
+              </td>
+              <td class="css_td_list2_r1">
+                目標的 parent 的 store_info <a href="#hook_0404_store_info_01">[詳細]</a><br>
+              </td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l1">
+                <font class="css_font_r1">char *</font><br>
+                <font class="css_font_g1">ik_path</font><br>
+              </td>
+              <td class="css_td_list2_r1">
+                目標的路徑 <a href="#hook_0404_ik_path_01">[詳細]</a><br>
+                <font class="css_font_p1">[index 模式] / [key 模式]</font>
+              </td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l1">
+                <font class="css_font_r1">struct mcm_config_store_t **</font><br>
+                <font class="css_font_g1">self_store_buf</font>
+              </td>
+              <td class="css_td_list2_r1">
+                紀錄 store_info 的緩衝 <a href="#hook_0404_store_info_01">[詳細]</a><br>
+              </td>
+            </tr>
+          </table>
+          <table class="css_table_list2">
+            <tr>
+              <td class="css_td_list2_t1">回傳</td>
+              <td class="css_td_list2_t1">說明</td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l2">&gt;= MCM_RCODE_PASS</td>
+              <td class="css_td_list2_r1">成功</td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l2">&nbsp;&lt; MCM_RCODE_PASS</td>
+              <td class="css_td_list2_r1">錯誤</td>
+            </tr>
+          </table>
+          <br>
+          注意事項 :<br>
+          <table class="css_table_list1">
+            <tr>
+              <td class="css_td_list1_l">01.&nbsp;</td>
+              <td class="css_td_list1_r">
+                如果 ik_path 是 NULL 或 "" (空字串) 或找不到目標 entry, self_store_buf 會得到 NULL,
+                回傳值會是 MCM_RCODE_PASS.
+              </td>
+            </tr>
+          </table>
+          <br>
+          範例 :<br>
+<pre class="css_pre_code">
+外部程式部分
+
+#include &lt;errno.h&gt;
+#include &lt;stdio.h&gt;
+#include &lt;string.h&gt;
+#include &lt;stdlib.h&gt;
+#include "mcm_lheader/mcm_type.h"
+#include "mcm_lheader/mcm_size.h"
+#include "mcm_lheader/mcm_connect.h"
+#include "mcm_lheader/mcm_return.h"
+#include "mcm_lheader/mcm_data_exinfo_auto.h"
+#include "mcm_lulib/mcm_lulib_api.h"
+
+#define DMSG(msg_fmt, msgs...) printf("%s(%04u): " msg_fmt "\n", __FILE__, __LINE__, ##msgs)
+
+int main(int argc, char **argv)
+{
+    char *path1;
+    struct mcm_lulib_lib_t self_lulib;
+
+    memset(&self_lulib, 0, sizeof(struct mcm_lulib_lib_t));
+    self_lulib.socket_path = "@mintcm";
+    self_lulib.call_from = MCM_CFROM_USER;
+    self_lulib.session_permission = MCM_SPERMISSION_RO;
+    self_lulib.session_stack_size = 0;
+    if(mcm_lulib_init(&self_lulib) < MCM_RCODE_PASS)
+    {
+        DMSG("call mcm_lulib_init() fail");
+        goto FREE_01;
+    }
+
+    // 呼叫內部模組.
+    path1 = "mcm_module_entry_ik_path";
+    DMSG("[run] %s", path1);
+    if(mcm_lulib_run(&self_lulib, path1) < MCM_RCODE_PASS)
+    {
+        DMSG("call mcm_lulib_run(%s) fail", path1);
+        goto FREE_02;
+    }
+
+FREE_02:
+    mcm_lulib_exit(&self_lulib);
+FREE_01:
+    return 0;
+}
+</pre>
+<pre class="css_pre_code">
+內部模組部分
+
+#include &lt;errno.h&gt;
+#include &lt;stdio.h&gt;
+#include &lt;string.h&gt;
+#include &lt;stdlib.h&gt;
+#include "../../mcm_lib/mcm_lheader/mcm_type.h"
+#include "../../mcm_lib/mcm_lheader/mcm_size.h"
+#include "../../mcm_lib/mcm_lheader/mcm_control.h"
+#include "../../mcm_lib/mcm_lheader/mcm_connect.h"
+#include "../../mcm_lib/mcm_lheader/mcm_return.h"
+#include "../../mcm_lib/mcm_lheader/mcm_debug.h"
+#include "../../mcm_lib/mcm_lheader/mcm_data_exinfo_auto.h"
+#include "../mcm_service_handle_extern.h"
+#include "../mcm_config_handle_extern.h"
+
+#define DMSG(msg_fmt, msgs...) printf("%s(%04u): " msg_fmt "\n", __FILE__, __LINE__, ##msgs)
+
+int mcm_module_entry_ik_path(
+    struct mcm_service_session_t *this_session)
+{
+    int fret = MCM_RCODE_MODULE_INTERNAL_ERROR;
+    char *path1;
+    struct mcm_config_model_group_t *tmp_group;
+    struct mcm_config_store_t *parent_store, *tmp_store;
+
+    // 01. 範例 : 尋找 device.vap.#23
+
+    // 01a. 先尋找 device.vap.*
+    path1 = "device.vap.*";
+    DMSG("[mix_path] %s", path1);
+    if(mcm_config_find_entry_by_mix(this_session, path1, &tmp_group, NULL, NULL, &parent_store)
+                                    < MCM_RCODE_PASS)
+    {
+        DMSG("call mcm_config_find_entry_by_mix(%s) fail", path1);
+        goto FREE_01;
+    }
+
+    // 01b. 找到 "#23".
+    path1 = "#23";
+    DMSG("[ik_path] %s", path1);
+    if(mcm_config_find_entry_by_ik(this_session, tmp_group, parent_store, path1, &tmp_store)
+                                   < MCM_RCODE_PASS)
+    {
+        DMSG("call mcm_config_find_entry_by_ik(%s) fail", path1);
+        goto FREE_01;
+    }
+
+    // 02. 範例 : 尋找 device.vap.@2.station.#33, 接著尋找 station.#30
+
+    // 02a. 先尋找 device.vap.@2.station.#30
+    path1 = "device.vap.@2.station.#30";
+    DMSG("[entry_full_path] %s", path1);
+    if(mcm_config_find_entry_by_full(this_session, path1, &tmp_group, &tmp_store)
+                                     < MCM_RCODE_PASS)
+    {
+        DMSG("call mcm_config_find_entry_by_full(%s) fail", path1);
+        goto FREE_01;
+    }
+
+    // 02b. 指向 device.vap.@2
+    parent_store = tmp_store->parent_store;
+
+    // 02c. 找到 station.#30
+    path1 = "#30";
+    DMSG("[ik_path] %s", path1);
+    if(mcm_config_find_entry_by_ik(this_session, tmp_group, parent_store, path1, &tmp_store)
+                                   < MCM_RCODE_PASS)
+    {
+        DMSG("call mcm_config_find_entry_by_ik(%s) fail", path1);
         goto FREE_01;
     }
 

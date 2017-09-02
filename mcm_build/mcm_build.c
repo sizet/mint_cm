@@ -1009,7 +1009,7 @@ int check_arrange_format(
 }
 
 #if MCM_SUPPORT_DTYPE_S
-int convert_hex_to_char(
+void convert_hex_to_char(
     char *data_con,
     char *char_buf)
 {
@@ -1024,8 +1024,6 @@ int convert_hex_to_char(
     }
 
     *char_buf = tmp_sum;
-
-    return 0;
 }
 #endif
 

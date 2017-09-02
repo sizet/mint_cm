@@ -123,6 +123,11 @@ Some rights reserved. See README.
     存取的目標 entry 或 member 的路徑. <a href="mcm_0302.html#hook_0302_full_path_01">[詳細]</a>
     <br><br><br>
 
+    <div class="css_div_hook" id="hook_0303_insert_path_01"></div>
+    <font class="css_font_b1">[char *insert_path]</font><br>
+    在增加 entry 時, 指定要插入到哪個 entry 之前. <a href="mcm_0302.html#hook_0302_insert_path_01">[詳細]</a>
+    <br><br><br>
+
     <div class="css_div_hook" id="hook_0303_typedef_01"></div>
     <font class="css_font_b1">存取 member 資料的變數的型態</font><br>
     根據在資料模型中指定的資料類型, 需要使用對應的型態的變數來紀錄.
@@ -1620,6 +1625,16 @@ MODULE_LICENSE("GPL");
             </tr>
             <tr>
               <td class="css_td_list2_l1">
+                <font class="css_font_r1">char *</font><br>
+                <font class="css_font_g1">insert_path</font><br>
+              </td>
+              <td class="css_td_list2_r1">
+                要插入到何處的路徑 <a href="#hook_0303_insert_path_01">[詳細]</a><br>
+                <font class="css_font_p1">[index 模式] / [key 模式]</font>
+              </td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l1">
                 <font class="css_font_r1">void *</font><br>
                 <font class="css_font_g1">data_con</font><br>
               </td>
@@ -1742,6 +1757,7 @@ static int __init main_init(void)
 
     // 範例 : 增加 device.vap.#123
     // 路徑 : "device.vap.#123"
+    // 插入 : 放在串列尾端 (NULL)
     // 類型 : struct mcm_dv_device_vap_t
     // 變數 : vap_v / sizeof(vap_v)
     // 加入的目標 (vap) 必須是 key 模式.
@@ -1751,7 +1767,7 @@ static int __init main_init(void)
     vap_v.channel = rand() % 200;
     DMSG("[add-entry] %s.ssid = " MCM_DTYPE_S_PF, path1, vap_v.ssid);
     DMSG("[add-entry] %s.channel = " MCM_DTYPE_IUI_PF, path1, vap_v.channel);
-    if(mcm_lklib_add_entry(&self_lklib, path1, &vap_v, sizeof(vap_v)) < MCM_RCODE_PASS)
+    if(mcm_lklib_add_entry(&self_lklib, path1, NULL, &vap_v, sizeof(vap_v)) < MCM_RCODE_PASS)
     {
         DMSG("call mcm_lklib_add_entry(%s) fail", path1);
         goto FREE_02;
@@ -1764,6 +1780,7 @@ static int __init main_init(void)
 
     // 範例 : 增加 device.vap.@3.station.#111
     // 路徑 : "device.vap.@3.station.#111"
+    // 插入 : 放在串列尾端 ("")
     // 類型 : struct mcm_dv_device_vap_station_t
     // 變數 : station_v / sizeof(station_v)
     // 加入的目標 (station) 必須是 key 模式.
@@ -1773,7 +1790,8 @@ static int __init main_init(void)
     station_v.rule = rand() % 50;
     DMSG("[add-entry] %s.mac_addr = " MCM_DTYPE_S_PF, path1, station_v.mac_addr);
     DMSG("[add-entry] %s.rule = " MCM_DTYPE_RK_PF, path1, station_v.rule);
-    if(mcm_lklib_add_entry(&self_lklib, path1, &station_v, sizeof(station_v)) < MCM_RCODE_PASS)
+    if(mcm_lklib_add_entry(&self_lklib, path1, "", &station_v, sizeof(station_v))
+                           < MCM_RCODE_PASS)
     {
         DMSG("call mcm_lklib_add_entry(%s) fail", path1);
         goto FREE_02;
@@ -1781,6 +1799,7 @@ static int __init main_init(void)
 
     // 範例 : 增加 device.vap.#234.station.#1
     // 路徑 : "device.vap.#234.station.#1"
+    // 插入 : 插入到第 1 筆 entry 之前 (@1)
     // 類型 : struct mcm_dv_device_vap_t
     // 變數 : vap_v / sizeof(vap_v)
     // 增加多層資料時, 要逐層增加.
@@ -1791,7 +1810,7 @@ static int __init main_init(void)
     vap_v.channel = rand() % 200;
     DMSG("[add-entry] %s.ssid = " MCM_DTYPE_S_PF, path1, vap_v.ssid);
     DMSG("[add-entry] %s.channel = " MCM_DTYPE_IUI_PF, path1, vap_v.channel);
-    if(mcm_lklib_add_entry(&self_lklib, path1, &vap_v, sizeof(vap_v)) < MCM_RCODE_PASS)
+    if(mcm_lklib_add_entry(&self_lklib, path1, "", &vap_v, sizeof(vap_v)) < MCM_RCODE_PASS)
     {
         DMSG("call mcm_lklib_add_entry(%s) fail", path1);
         goto FREE_02;
@@ -1803,7 +1822,8 @@ static int __init main_init(void)
     station_v.rule = rand() % 50;
     DMSG("[add-entry] %s.mac_addr = " MCM_DTYPE_S_PF, path1, station_v.mac_addr);
     DMSG("[add-entry] %s.rule = " MCM_DTYPE_RK_PF, path1, station_v.rule);
-    if(mcm_lklib_add_entry(&self_lklib, path1, &station_v, sizeof(station_v)) < MCM_RCODE_PASS)
+    if(mcm_lklib_add_entry(&self_lklib, path1, "@1", &station_v, sizeof(station_v))
+                           < MCM_RCODE_PASS)
     {
         DMSG("call mcm_lklib_add_entry(%s) fail", path1);
         goto FREE_02;
@@ -1811,10 +1831,11 @@ static int __init main_init(void)
 
     // 範例 : 增加 device.limit.#51
     // 路徑 : "device.limit.#51"
+    // 插入 : 插入到 key 為 60 的 entry 之前 (#60)
     // 使用初始值.
     path1 = "device.limit.#51";
     DMSG("[add-entry] %s", path1);
-    if(mcm_lklib_add_entry(&self_lklib, path1, NULL, 0) < MCM_RCODE_PASS)
+    if(mcm_lklib_add_entry(&self_lklib, path1, "#60", NULL, 0) < MCM_RCODE_PASS)
     {
         DMSG("call mcm_lklib_add_entry(%s) fail", path1);
         goto FREE_02;
@@ -3202,7 +3223,7 @@ mcm_lklib_del_entry(&self_lklib, path1);
 
 // 增加 device.vap.#55, 執行 module_config_vap 實作.
 path1 = "device.vap.#55";
-mcm_lklib_add_entry(&self_lklib, path1, &vap_v, sizeof(vap_v));
+mcm_lklib_add_entry(&self_lklib, path1, NULL, &vap_v, sizeof(vap_v));
 
 path1 = "module_config_vap";
 mcm_lklib_run(&self_lklib, path1);

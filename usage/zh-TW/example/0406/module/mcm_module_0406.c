@@ -785,8 +785,8 @@ int mcm_module_del_usablekey_add_entry(
         snprintf(path2, sizeof(path2), "device.limit.#%u", new_key);
         DMSG("[add-entry][SYS] %s.name = " MCM_DTYPE_S_PF, path2, limit_v.name);
         DMSG("[add-entry][SYS] %s.priority = " MCM_DTYPE_ISI_PF, path2, limit_v.priority);
-        if(mcm_config_add_entry_by_info(this_session, tmp_group, tmp_parent_store,
-                                        MCM_DACCESS_SYS, new_key, &limit_v, NULL) < MCM_RCODE_PASS)
+        if(mcm_config_add_entry_by_info(this_session, tmp_group, tmp_parent_store, new_key, NULL,
+                                        MCM_DACCESS_SYS, &limit_v, NULL) < MCM_RCODE_PASS)
         {
             DMSG("call mcm_config_add_entry_by_info(%s) fail", path2);
             goto FREE_01;
@@ -804,7 +804,7 @@ int mcm_module_delall_add_entry(
     int fret = MCM_RCODE_MODULE_INTERNAL_ERROR;
     char *path1, path2[MCM_PATH_MAX_LENGTH];
     struct mcm_config_model_group_t *tmp_group;
-    struct mcm_config_store_t *tmp_parent_store;
+    struct mcm_config_store_t *tmp_parent_store, *tmp_store = NULL;
     MCM_DTYPE_EK_TD i;
     struct mcm_dv_device_client_t client_v;
 
@@ -835,7 +835,7 @@ int mcm_module_delall_add_entry(
     // 增加 device.client.*
     for(i = 0; i < MCM_MCOUNT_DEVICE_CLIENT_MAX_COUNT; i++)
     {
-        // 增加.
+        // 增加, 每次增加都插入在第一筆之前.
         memset(&client_v, 0, sizeof(client_v));
         snprintf(client_v.mac_addr, sizeof(client_v.mac_addr), "01:23:45:67:%02X", rand() % 255);
         client_v.location_x = ((MCM_DTYPE_FLD_TD) 45000) / ((rand() % 100) + 1);
@@ -844,8 +844,9 @@ int mcm_module_delall_add_entry(
         DMSG("[add-entry][SYS] %s.mac_addr = " MCM_DTYPE_S_PF, path2, client_v.mac_addr);
         DMSG("[add-entry][SYS] %s.location_x = " MCM_DTYPE_FLD_PF, path2, client_v.location_x);
         DMSG("[add-entry][SYS] %s.location_y = " MCM_DTYPE_FLD_PF, path2, client_v.location_y);
-        if(mcm_config_add_entry_by_info(this_session, tmp_group, tmp_parent_store,
-                                        MCM_DACCESS_SYS, i + 1, &client_v, NULL) < MCM_RCODE_PASS)
+        if(mcm_config_add_entry_by_info(this_session, tmp_group, tmp_parent_store, i + 1,
+                                        tmp_store, MCM_DACCESS_SYS, &client_v, &tmp_store)
+                                        < MCM_RCODE_PASS)
         {
             DMSG("call mcm_config_add_entry_by_info(%s) fail", path2);
             goto FREE_01;

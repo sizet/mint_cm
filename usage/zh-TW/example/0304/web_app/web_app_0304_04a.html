@@ -83,7 +83,7 @@ function config_vap_add()
     tmp_path = "device.vap.#" + $("#ekey_text").val();
 
     // 增加 device.vap.{vap_key}
-    req_cmd += "&add." + tmp_path;
+    req_cmd += "&add." + tmp_path + "=";
     // 設定 device.vap.{vap_key}
     req_cmd += "&set." + tmp_path + ".ssid=" +
                mcm_jslib_convert_submit_str($("#ssid_text").val());

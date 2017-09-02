@@ -63,6 +63,7 @@ int mcm_lklib_set_entry(
 int mcm_lklib_add_entry(
     struct mcm_lklib_lib_t *this_lklib,
     char *full_path,
+    char *insert_path,
     void *data_con,
     MCM_DTYPE_USIZE_TD data_len);
 
