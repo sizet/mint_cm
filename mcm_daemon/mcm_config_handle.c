@@ -5665,10 +5665,14 @@ int mcm_config_find_group_by_mask(
 //     MCM_PLIMIT_KEY   : 必須是 key.
 // self_model_group_buf (O) :
 //   儲存找到的 model group 的緩衝.
-// self_store_list_buf (O) :
-//   儲存找到的 store 的串列頭緩衝.
+// self_store_list_head_buf (O) :
+//   儲存找到的 store 的串列頭端緩衝.
+// self_store_list_tail_buf (O) :
+//   儲存找到的 store 的串列尾端緩衝.
 // self_store_tree_buf (O) :
 //   儲存找到的 store 的樹根緩衝.
+// self_count_buf (O) :
+//   儲存找到的 entry 數目的緩衝.
 // parent_store_buf (O) :
 //   儲存找到的 store 的 parent 的緩衝.
 // return :
@@ -5679,8 +5683,10 @@ int mcm_config_find_entry_use_mix(
     char *mix_path,
     MCM_DTYPE_LIST_TD check_number,
     struct mcm_config_model_group_t **self_model_group_buf,
-    struct mcm_config_store_t **self_store_list_buf,
+    struct mcm_config_store_t **self_store_list_head_buf,
+    struct mcm_config_store_t **self_store_list_tail_buf,
     struct mcm_config_store_t **self_store_tree_buf,
+    MCM_DTYPE_EK_TD *self_count_buf,
     struct mcm_config_store_t **parent_store_buf)
 {
     struct mcm_config_model_group_t *self_model_group;
@@ -5689,7 +5695,7 @@ int mcm_config_find_entry_use_mix(
     MCM_DTYPE_USIZE_TD plen, pidx, ploc, nclen;
     MCM_DTYPE_LIST_TD next_part = MCM_CPPATH_NAME, last_part = 0, ik_type;
     MCM_DTYPE_BOOL_TD last_mask = 0;
-    MCM_DTYPE_EK_TD target_ik;
+    MCM_DTYPE_EK_TD target_ik, *store_count_in_parent;
 
 
     MCM_CFDMSG("=> %s", __FUNCTION__);
@@ -5822,14 +5828,31 @@ int mcm_config_find_entry_use_mix(
 
     if(self_model_group_buf != NULL)
         *self_model_group_buf = self_model_group;
-    if(self_store_list_buf != NULL)
+
+    if(self_store_list_head_buf != NULL)
     {
         store_in_parent = parent_store->child_store_list_head_array +
                           self_model_group->store_index_in_parent;
-        *self_store_list_buf = *store_in_parent;
+        *self_store_list_head_buf = *store_in_parent;
     }
+
+    if(self_store_list_tail_buf != NULL)
+    {
+        store_in_parent = parent_store->child_store_list_tail_array +
+                          self_model_group->store_index_in_parent;
+        *self_store_list_tail_buf = *store_in_parent;
+    }
+
     if(self_store_tree_buf != NULL)
         *self_store_tree_buf = self_store_tree;
+
+    if(self_count_buf != NULL)
+    {
+        store_count_in_parent = parent_store->child_store_count_array +
+                                self_model_group->store_index_in_parent;
+        *self_count_buf = *store_count_in_parent;
+    }
+
     if(parent_store_buf != NULL)
         *parent_store_buf = parent_store;
 
@@ -5841,12 +5864,14 @@ int mcm_config_find_entry_use_mix(
 //   session 資料.
 // mix_path (I) :
 //   要處理的路徑.
-// self_model_group_buf (O) :
-//   儲存找到的 model group 的緩衝.
-// self_store_list_buf (O) :
-//   儲存找到的 store 的串列頭緩衝.
+// self_store_list_head_buf (O) :
+//   儲存找到的 store 的串列頭端緩衝.
+// self_store_list_tail_buf (O) :
+//   儲存找到的 store 的串列尾端緩衝.
 // self_store_tree_buf (O) :
 //   儲存找到的 store 的樹根緩衝.
+// self_count_buf (O) :
+//   儲存找到的 entry 數目的緩衝.
 // parent_store_buf (O) :
 //   儲存找到的 store 的 parent 的緩衝.
 // return :
@@ -5856,8 +5881,10 @@ int mcm_config_find_entry_by_mix(
     struct mcm_service_session_t *this_session,
     char *mix_path,
     struct mcm_config_model_group_t **self_model_group_buf,
-    struct mcm_config_store_t **self_store_list_buf,
+    struct mcm_config_store_t **self_store_list_head_buf,
+    struct mcm_config_store_t **self_store_list_tail_buf,
     struct mcm_config_store_t **self_store_tree_buf,
+    MCM_DTYPE_EK_TD *self_count_buf,
     struct mcm_config_store_t **parent_store_buf)
 {
     int fret;
@@ -5866,8 +5893,9 @@ int mcm_config_find_entry_by_mix(
     MCM_CFDMSG("=> %s", __FUNCTION__);
 
     fret = mcm_config_find_entry_use_mix(this_session, mix_path, MCM_PLIMIT_BOTH,
-                                         self_model_group_buf, self_store_list_buf,
-                                         self_store_tree_buf, parent_store_buf);
+                                         self_model_group_buf, self_store_list_head_buf,
+                                         self_store_list_tail_buf,  self_store_tree_buf,
+                                         self_count_buf, parent_store_buf);
     if(fret < MCM_RCODE_PASS)
         if(fret != MCM_RCODE_CONFIG_NOT_FIND_STORE)
         {
@@ -7678,7 +7706,8 @@ int mcm_config_get_all_entry_by_path(
     MCM_CFDMSG("[%s]", mix_path);
 
     fret = mcm_config_find_entry_use_mix(this_session, mix_path, MCM_PLIMIT_BOTH,
-                                         &self_model_group, NULL, NULL, &parent_store);
+                                         &self_model_group, NULL, NULL, NULL, NULL,
+                                         &parent_store);
     if(fret < MCM_RCODE_PASS)
     {
         MCM_EMSG("call mcm_config_find_entry_use_mix() fail");
@@ -7868,7 +7897,8 @@ int mcm_config_del_all_entry_by_path(
     MCM_CFDMSG("[%s]", mix_path);
 
     fret = mcm_config_find_entry_use_mix(this_session, mix_path, MCM_PLIMIT_BOTH,
-                                         &self_model_group, NULL, NULL, &parent_store);
+                                         &self_model_group, NULL, NULL, NULL, NULL,
+                                         &parent_store);
     if(fret < MCM_RCODE_PASS)
     {
         MCM_EMSG("call mcm_config_find_entry_use_mix() fail");
@@ -8050,7 +8080,8 @@ int mcm_config_get_count_by_path(
     MCM_CFDMSG("[%s]", mix_path);
 
     fret = mcm_config_find_entry_use_mix(this_session, mix_path, MCM_PLIMIT_BOTH,
-                                         &self_model_group, NULL, NULL, &parent_store);
+                                         &self_model_group, NULL, NULL, NULL, NULL,
+                                         &parent_store);
     if(fret < MCM_RCODE_PASS)
     {
         MCM_EMSG("call mcm_config_find_entry_use_mix() fail");
@@ -8218,7 +8249,8 @@ int mcm_config_get_usable_key_by_path(
     MCM_CFDMSG("[%s]", mix_path);
 
     fret = mcm_config_find_entry_use_mix(this_session, mix_path, MCM_PLIMIT_BOTH,
-                                         &self_model_group, NULL, NULL, &parent_store);
+                                         &self_model_group, NULL, NULL, NULL, NULL,
+                                         &parent_store);
     if(fret < MCM_RCODE_PASS)
     {
         MCM_EMSG("call mcm_config_find_entry_use_mix() fail");

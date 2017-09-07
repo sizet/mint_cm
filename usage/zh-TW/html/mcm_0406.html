@@ -454,10 +454,12 @@ int mcm_module_get_count_test(
     struct mcm_config_store_t *tmp_parent_store;
     MCM_DTYPE_EK_TD count;
 
+    // 方法一.
+
     // 範例 : 取得 device.system 的資料筆數.
     path1 = "device.system";
     // 先使用路徑取得資訊.
-    if(mcm_config_find_entry_by_mix(this_session, path1, &tmp_group, NULL, NULL,
+    if(mcm_config_find_entry_by_mix(this_session, path1, &tmp_group, NULL, NULL, NULL, NULL,
                                     &tmp_parent_store) < MCM_RCODE_PASS)
     {
         DMSG("call mcm_config_find_entry_by_mix(%s) fail", path1);
@@ -475,7 +477,7 @@ int mcm_module_get_count_test(
     // 範例 : 取得 device.system 的資料筆數.
     path1 = "device.vap.*";
     // 先使用路徑取得資訊.
-    if(mcm_config_find_entry_by_mix(this_session, path1, &tmp_group, NULL, NULL,
+    if(mcm_config_find_entry_by_mix(this_session, path1, &tmp_group, NULL, NULL, NULL, NULL,
                                     &tmp_parent_store) < MCM_RCODE_PASS)
     {
         DMSG("call mcm_config_find_entry_by_mix(%s) fail", path1);
@@ -493,7 +495,7 @@ int mcm_module_get_count_test(
     // 範例 : 取得 device.vap#@1.station.* 的資料筆數.
     path1 = "device.vap.@1.station.*";
     // 先使用路徑取得資訊.
-    if(mcm_config_find_entry_by_mix(this_session, path1, &tmp_group, NULL, NULL,
+    if(mcm_config_find_entry_by_mix(this_session, path1, &tmp_group, NULL, NULL, NULL, NULL,
                                     &tmp_parent_store) < MCM_RCODE_PASS)
     {
         DMSG("call mcm_config_find_entry_by_mix(%s) fail", path1);
@@ -511,7 +513,7 @@ int mcm_module_get_count_test(
     // 範例 : 取得 device.vap.#23.station.* 的資料筆數.
     path1 = "device.vap.#23.station.*";
     // 先使用路徑取得資訊.
-    if(mcm_config_find_entry_by_mix(this_session, path1, &tmp_group, NULL, NULL,
+    if(mcm_config_find_entry_by_mix(this_session, path1, &tmp_group, NULL, NULL, NULL, NULL,
                                     &tmp_parent_store) < MCM_RCODE_PASS)
     {
         DMSG("call mcm_config_find_entry_by_mix(%s) fail", path1);
@@ -522,6 +524,19 @@ int mcm_module_get_count_test(
                                     < MCM_RCODE_PASS)
     {
         DMSG("call mcm_config_get_count_by_info(%s) fail", path1);
+        goto FREE_01;
+    }
+    DMSG("[count] %s = " MCM_DTYPE_EK_PF, path1, count);
+
+    // 方法二.
+
+    // 範例 : 取得 device.system 的資料筆數.
+    path1 = "device.limit.*";
+    // 直接使用路徑取得資訊和資料筆數.
+    if(mcm_config_find_entry_by_mix(this_session, path1, &tmp_group, NULL, NULL, NULL, &count,
+                                    NULL) < MCM_RCODE_PASS)
+    {
+        DMSG("call mcm_config_find_entry_by_mix(%s) fail", path1);
         goto FREE_01;
     }
     DMSG("[count] %s = " MCM_DTYPE_EK_PF, path1, count);
@@ -2100,7 +2115,7 @@ int mcm_module_add_entry_value_test(
     // 範例-01 : 增加 device.vap.#100, 插入到第 1 筆 entry 之前 (@1), (SYS 模式)
     path1 = "device.vap.*";
     // 先使用路徑取得資訊.
-    if(mcm_config_find_entry_by_mix(this_session, path1, &tmp_group, NULL, NULL,
+    if(mcm_config_find_entry_by_mix(this_session, path1, &tmp_group, NULL, NULL, NULL, NULL,
                                     &tmp_parent_store) < MCM_RCODE_PASS)
     {
         DMSG("call mcm_config_find_entry_by_mix(%s) fail", path1);
@@ -2128,7 +2143,7 @@ int mcm_module_add_entry_value_test(
     // 範例-02 : 增加 device.vap.@1.station.#10, 放在串列尾端 (NULL), (SYS 模式)
     path1 = "device.vap.@1.station.*";
     // 先使用路徑取得資訊.
-    if(mcm_config_find_entry_by_mix(this_session, path1, &tmp_group, NULL, NULL,
+    if(mcm_config_find_entry_by_mix(this_session, path1, &tmp_group, NULL, NULL, NULL, NULL,
                                     &tmp_parent_store) < MCM_RCODE_PASS)
     {
         DMSG("call mcm_config_find_entry_by_mix(%s) fail", path1);
@@ -2148,7 +2163,7 @@ int mcm_module_add_entry_value_test(
     // 範例-04 : 增加 device.vap.#200.station.#10, 放在串列尾端 (NULL), (NEW 模式)
     // 先使用路徑取得資訊.
     path1 = "device.vap.#200.station.*";
-    if(mcm_config_find_entry_by_mix(this_session, path1, &tmp_group, NULL, NULL,
+    if(mcm_config_find_entry_by_mix(this_session, path1, &tmp_group, NULL, NULL, NULL, NULL,
                                     &tmp_parent_store) < MCM_RCODE_PASS)
     {
         DMSG("call mcm_config_find_entry_by_mix(%s) fail", path1);
@@ -2172,7 +2187,7 @@ int mcm_module_add_entry_value_test(
     // 範例-05 : 增加 device.limit.#50, 插入到 key 為 6 的 entry 之前 (#6), (NEW 模式)
     // 先使用路徑取得資訊.
     path1 = "device.limit.*";
-    if(mcm_config_find_entry_by_mix(this_session, path1, &tmp_group, NULL, NULL,
+    if(mcm_config_find_entry_by_mix(this_session, path1, &tmp_group, NULL, NULL, NULL, NULL,
                                     &tmp_parent_store) < MCM_RCODE_PASS)
     {
         DMSG("call mcm_config_find_entry_by_mix(%s) fail", path1);
@@ -2569,7 +2584,7 @@ int mcm_module_del_all_entry_value_test(
     // 範例-01 : 刪除 device.vap.@1.* (SYS 模式)
     path1 = "device.vap.@1.station.*";
     // 先使用路徑取得資訊.
-    if(mcm_config_find_entry_by_mix(this_session, path1, &tmp_group, NULL, NULL,
+    if(mcm_config_find_entry_by_mix(this_session, path1, &tmp_group, NULL, NULL, NULL, NULL,
                                     &tmp_parent_store) < MCM_RCODE_PASS)
     {
         DMSG("call mcm_config_find_entry_by_mix(%s) fail", path1);
@@ -2587,7 +2602,7 @@ int mcm_module_del_all_entry_value_test(
     // 範例-02 : 刪除 device.vap.#15.* (NEW 模式)
     path1 = "device.vap.#15.station.*";
     // 先使用路徑取得資訊.
-    if(mcm_config_find_entry_by_mix(this_session, path1, &tmp_group, NULL, NULL,
+    if(mcm_config_find_entry_by_mix(this_session, path1, &tmp_group, NULL, NULL, NULL, NULL,
                                     &tmp_parent_store) < MCM_RCODE_PASS)
     {
         DMSG("call mcm_config_find_entry_by_mix(%s) fail", path1);
@@ -2605,7 +2620,7 @@ int mcm_module_del_all_entry_value_test(
     // 範例-03 : 刪除 device.limit.* (NEW 模式)
     path1 = "device.limit.*";
     // 先使用路徑取得資訊.
-    if(mcm_config_find_entry_by_mix(this_session, path1, &tmp_group, NULL, NULL,
+    if(mcm_config_find_entry_by_mix(this_session, path1, &tmp_group, NULL, NULL, NULL, NULL,
                                     &tmp_parent_store) < MCM_RCODE_PASS)
     {
         DMSG("call mcm_config_find_entry_by_mix(%s) fail", path1);
@@ -2792,7 +2807,7 @@ int mcm_module_get_usable_key_test(
     // 範例-01 : 取得 device.vap.* 可用的 key
     path1 = "device.vap.*";
     // 先使用路徑取得資訊.
-    if(mcm_config_find_entry_by_mix(this_session, path1, &tmp_group, NULL, NULL,
+    if(mcm_config_find_entry_by_mix(this_session, path1, &tmp_group, NULL, NULL, NULL, NULL,
                                     &tmp_parent_store) < MCM_RCODE_PASS)
     {
         DMSG("call mcm_config_find_entry_by_mix(%s) fail", path1);
@@ -2817,7 +2832,7 @@ int mcm_module_get_usable_key_test(
     // 範例-02 : 取得 device.vap.#15.station.* 可用的 key
     path1 = "device.vap.#15.station.*";
     // 先使用路徑取得資訊.
-    if(mcm_config_find_entry_by_mix(this_session, path1, &tmp_group, NULL, NULL,
+    if(mcm_config_find_entry_by_mix(this_session, path1, &tmp_group, NULL, NULL, NULL, NULL,
                                     &tmp_parent_store) < MCM_RCODE_PASS)
     {
         DMSG("call mcm_config_find_entry_by_mix(%s) fail", path1);

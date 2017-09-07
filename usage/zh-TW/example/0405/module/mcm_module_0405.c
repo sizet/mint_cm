@@ -154,10 +154,10 @@ int mcm_module_status_test_get_vap(
 
     // 找到 device.vap.* 的開頭 entry.
     path1 = "device.vap.*";
-    if(mcm_config_find_entry_by_mix(this_session, path1, &vap_group, &vap_store, NULL, NULL)
-                                    < MCM_RCODE_PASS)
+    if(mcm_config_find_entry_by_mix(this_session, path1, &vap_group, &vap_store, NULL, NULL, NULL,
+                                    NULL) < MCM_RCODE_PASS)
     {
-        DMSG("call mcm_config_find_entry_by_full(%s) fail", path1);
+        DMSG("call mcm_config_find_entry_by_mix(%s) fail", path1);
         goto FREE_01;
     }
 
@@ -224,9 +224,9 @@ int mcm_module_status_test_get_station(
         // 找到 device.vap.{i}.station.* 的開頭 entry.
         snprintf(path2, sizeof(path2), "device.vap.@%u.station.*", i + 1);
         if(mcm_config_find_entry_by_mix(this_session, path2, &station_group, &station_store, NULL,
-                                        NULL) < MCM_RCODE_PASS)
+                                        NULL, NULL, NULL) < MCM_RCODE_PASS)
         {
-            DMSG("call mcm_config_find_entry_by_full(%s) fail", path2);
+            DMSG("call mcm_config_find_entry_by_mix(%s) fail", path2);
             goto FREE_01;
         }
         // 取得狀態.
@@ -251,9 +251,9 @@ int mcm_module_status_test_get_station(
         // 找到 device.vap.{i}.station.* 的開頭 entry.
         snprintf(path2, sizeof(path2), "device.vap.@%u.station.*", i + 1);
         if(mcm_config_find_entry_by_mix(this_session, path2, &station_group, &station_store, NULL,
-                                        NULL) < MCM_RCODE_PASS)
+                                        NULL, NULL, NULL) < MCM_RCODE_PASS)
         {
-            DMSG("call mcm_config_find_entry_by_full(%s) fail", path2);
+            DMSG("call mcm_config_find_entry_by_mix(%s) fail", path2);
             goto FREE_01;
         }
         // 取得狀態.

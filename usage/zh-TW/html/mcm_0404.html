@@ -621,12 +621,23 @@ FREE_01:
             <tr>
               <td class="css_td_list2_l1">
                 <font class="css_font_r1">struct mcm_config_store_t **</font><br>
-                <font class="css_font_g1">self_store_list_buf</font>
+                <font class="css_font_g1">self_store_list_head_buf</font>
               </td>
               <td class="css_td_list2_r1">
                 紀錄 store_info 的緩衝 <a href="#hook_0404_store_info_01">[詳細]</a><br>
                 <font class="css_font_p1">可為 NULL, 表示不記錄</font><br>
-                mcm_daemon 的資料存放方式是使用紅黑樹加上雙向鏈結串列, 這邊是回傳<font class="css_font_r1">雙向鏈結串列的開頭節點</font>
+                mcm_daemon 的資料存放方式是使用紅黑樹加上雙向鏈結串列, 這邊是回傳<font class="css_font_r1">雙向鏈結串列的頭端節點</font>
+              </td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l1">
+                <font class="css_font_r1">struct mcm_config_store_t **</font><br>
+                <font class="css_font_g1">self_store_list_tail_buf</font>
+              </td>
+              <td class="css_td_list2_r1">
+                紀錄 store_info 的緩衝 <a href="#hook_0404_store_info_01">[詳細]</a><br>
+                <font class="css_font_p1">可為 NULL, 表示不記錄</font><br>
+                mcm_daemon 的資料存放方式是使用紅黑樹加上雙向鏈結串列, 這邊是回傳<font class="css_font_r1">雙向鏈結串列的尾端節點</font>
               </td>
             </tr>
             <tr>
@@ -638,6 +649,16 @@ FREE_01:
                 紀錄 store_info 的緩衝 <a href="#hook_0404_store_info_01">[詳細]</a><br>
                 <font class="css_font_p1">可為 NULL, 表示不記錄</font><br>
                 mcm_daemon 的資料存放方式是使用紅黑樹加上雙向鏈結串列, 這邊是回傳<font class="css_font_r1">紅黑樹的樹根節點</font>
+              </td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l1">
+                <font class="css_font_r1">struct MCM_DTYPE_EK_TD *</font><br>
+                <font class="css_font_g1">self_count_buf</font>
+              </td>
+              <td class="css_td_list2_r1">
+                紀錄資料筆數的緩衝 <a href="#hook_0404_store_info_01">[詳細]</a><br>
+                <font class="css_font_p1">可為 NULL, 表示不記錄</font>
               </td>
             </tr>
             <tr>
@@ -743,13 +764,16 @@ int mcm_module_mix_path_test(
     int fret = MCM_RCODE_MODULE_INTERNAL_ERROR;
     char *path1;
     struct mcm_config_model_group_t *tmp_group;
-    struct mcm_config_store_t *tmp_store_list, *tmp_store_tree, *parent_store;
+    struct mcm_config_store_t *tmp_store_list_head, *tmp_store_list_tail, *tmp_store_tree,
+        *parent_store;
+    MCM_DTYPE_EK_TD tmp_store_count;
 
     // 範例 : 尋找 device
     path1 = "device";
     DMSG("[mix_path] %s", path1);
-    if(mcm_config_find_entry_by_mix(this_session, path1, &tmp_group, &tmp_store_list,
-                                    &tmp_store_tree, NULL) < MCM_RCODE_PASS)
+    if(mcm_config_find_entry_by_mix(this_session, path1, &tmp_group, &tmp_store_list_head,
+                                    &tmp_store_list_tail, &tmp_store_count, &tmp_store_tree,
+                                    NULL) < MCM_RCODE_PASS)
     {
         DMSG("call mcm_config_find_entry_by_mix(%s) fail", path1);
         goto FREE_01;
@@ -758,8 +782,9 @@ int mcm_module_mix_path_test(
     // 範例 : 尋找 device.vap.*
     path1 = "device.vap.*";
     DMSG("[mix_path] %s", path1);
-    if(mcm_config_find_entry_by_mix(this_session, path1, &tmp_group, &tmp_store_list,
-                                    &tmp_store_tree, &parent_store) < MCM_RCODE_PASS)
+    if(mcm_config_find_entry_by_mix(this_session, path1, &tmp_group, &tmp_store_list_head,
+                                    &tmp_store_list_tail, &tmp_store_count, &tmp_store_tree,
+                                    &parent_store) < MCM_RCODE_PASS)
     {
         DMSG("call mcm_config_find_entry_by_mix(%s) fail", path1);
         goto FREE_01;
@@ -768,8 +793,9 @@ int mcm_module_mix_path_test(
     // 範例 : 尋找 device.vap.@1.station.*
     path1 = "device.vap.@1.station.*";
     DMSG("[mix_path] %s", path1);
-    if(mcm_config_find_entry_by_mix(this_session, path1, &tmp_group, &tmp_store_list,
-                                    &tmp_store_tree, &parent_store) < MCM_RCODE_PASS)
+    if(mcm_config_find_entry_by_mix(this_session, path1, &tmp_group, &tmp_store_list_head,
+                                    &tmp_store_list_tail, &tmp_store_count, &tmp_store_tree,
+                                    &parent_store) < MCM_RCODE_PASS)
     {
         DMSG("call mcm_config_find_entry_by_mix(%s) fail", path1);
         goto FREE_01;
@@ -1340,8 +1366,8 @@ int mcm_module_entry_ik_path(
     // 01a. 先尋找 device.vap.*
     path1 = "device.vap.*";
     DMSG("[mix_path] %s", path1);
-    if(mcm_config_find_entry_by_mix(this_session, path1, &tmp_group, NULL, NULL, &parent_store)
-                                    < MCM_RCODE_PASS)
+    if(mcm_config_find_entry_by_mix(this_session, path1, &tmp_group, NULL, NULL, NULL, NULL,
+                                    &parent_store) < MCM_RCODE_PASS)
     {
         DMSG("call mcm_config_find_entry_by_mix(%s) fail", path1);
         goto FREE_01;

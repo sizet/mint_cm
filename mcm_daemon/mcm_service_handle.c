@@ -1330,7 +1330,8 @@ int mcm_req_get_all_entry(
     mcm_parse_get_all_entry(this_session);
 
     fret = mcm_config_find_entry_use_mix(this_session, this_session->req_path, MCM_PLIMIT_BOTH,
-                                         &self_model_group, NULL, NULL, &parent_store);
+                                         &self_model_group, NULL, NULL, NULL, NULL,
+                                         &parent_store);
     if(fret < MCM_RCODE_PASS)
     {
         MCM_EMSG("call mcm_config_find_entry_use_mix() fail");
@@ -1439,7 +1440,8 @@ int mcm_req_del_all_entry(
     path_limit = this_session->call_from == MCM_CFROM_WEB ? MCM_PLIMIT_KEY : MCM_PLIMIT_BOTH;
 
     fret = mcm_config_find_entry_use_mix(this_session, this_session->req_path, path_limit,
-                                         &self_model_group, NULL, NULL, &parent_store);
+                                         &self_model_group, NULL, NULL, NULL, NULL,
+                                         &parent_store);
     if(fret < MCM_RCODE_PASS)
     {
         MCM_EMSG("call mcm_config_find_entry_use_mix() fail");

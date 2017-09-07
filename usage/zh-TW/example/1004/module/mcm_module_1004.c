@@ -49,8 +49,8 @@ int mcm_module_get_session(
 
     // 先使用路徑取得資訊.
     path1 = "device.web.session.*";
-    if(mcm_config_find_entry_by_mix(this_session, path1, &tmp_group, NULL, NULL, &tmp_parent_store)
-                                    < MCM_RCODE_PASS)
+    if(mcm_config_find_entry_by_mix(this_session, path1, &tmp_group, NULL, NULL, NULL, NULL,
+                                    &tmp_parent_store) < MCM_RCODE_PASS)
     {
         DMSG("call mcm_config_find_entry_by_mix(%s) fail", path1);
         goto FREE_02;
@@ -188,8 +188,8 @@ int mcm_module_kick_session(
 
     // device.web.session.* 的開頭 store_info.
     path1 = "device.web.session.*";
-    if(mcm_config_find_entry_by_mix(this_session, path1, &tmp_group, &tmp_store, NULL, NULL)
-                                    < MCM_RCODE_PASS)
+    if(mcm_config_find_entry_by_mix(this_session, path1, &tmp_group, &tmp_store, NULL, NULL, NULL,
+                                    NULL) < MCM_RCODE_PASS)
     {
         DMSG("call mcm_config_find_entry_by_mix(%s) fail", path1);
         goto FREE_02;

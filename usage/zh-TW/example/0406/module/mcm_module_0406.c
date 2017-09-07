@@ -201,14 +201,17 @@ int mcm_module_count(
 
     DMSG("count test :");
 
+    // 方法一.
+
     // device 的資料筆數.
     path1 = "device";
-    if(mcm_config_find_entry_by_mix(this_session, path1, &tmp_group, NULL, NULL, &tmp_parent_store)
-                                    < MCM_RCODE_PASS)
+    if(mcm_config_find_entry_by_mix(this_session, path1, &tmp_group, NULL, NULL, NULL, NULL,
+                                    &tmp_parent_store) < MCM_RCODE_PASS)
     {
         DMSG("call mcm_config_find_entry_by_mix(%s) fail", path1);
         goto FREE_01;
     }
+    // 取得資料筆數.
     if(mcm_config_get_count_by_info(this_session, tmp_group, tmp_parent_store, &count1)
                                     < MCM_RCODE_PASS)
     {
@@ -217,34 +220,24 @@ int mcm_module_count(
     }
     DMSG("[count] %s = " MCM_DTYPE_EK_PF, path1, count1);
 
+    // 方法二.
+
     // device.system 的資料筆數.
     path1 = "device.system";
-    if(mcm_config_find_entry_by_mix(this_session, path1, &tmp_group, NULL, NULL, &tmp_parent_store)
-                                    < MCM_RCODE_PASS)
+    if(mcm_config_find_entry_by_mix(this_session, path1, &tmp_group, NULL, NULL, NULL, &count1,
+                                    NULL) < MCM_RCODE_PASS)
     {
         DMSG("call mcm_config_find_entry_by_mix(%s) fail", path1);
-        goto FREE_01;
-    }
-    if(mcm_config_get_count_by_info(this_session, tmp_group, tmp_parent_store, &count1)
-                                    < MCM_RCODE_PASS)
-    {
-        DMSG("call mcm_config_get_count_by_info(%s) fail", path1);
         goto FREE_01;
     }
     DMSG("[count] %s = " MCM_DTYPE_EK_PF, path1, count1);
 
     // device.vap.* 的資料筆數.
     path1 = "device.vap.*";
-    if(mcm_config_find_entry_by_mix(this_session, path1, &tmp_group, NULL, NULL, &tmp_parent_store)
-                                    < MCM_RCODE_PASS)
+    if(mcm_config_find_entry_by_mix(this_session, path1, &tmp_group, NULL, NULL, NULL, &count1,
+                                    NULL) < MCM_RCODE_PASS)
     {
         DMSG("call mcm_config_find_entry_by_mix(%s) fail", path1);
-        goto FREE_01;
-    }
-    if(mcm_config_get_count_by_info(this_session, tmp_group, tmp_parent_store, &count1)
-                                    < MCM_RCODE_PASS)
-    {
-        DMSG("call mcm_config_get_count_by_info(%s) fail", path1);
         goto FREE_01;
     }
     DMSG("[count] %s = " MCM_DTYPE_EK_PF, path1, count1);
@@ -253,16 +246,10 @@ int mcm_module_count(
     for(i = 0; i < count1; i++)
     {
         snprintf(path2, sizeof(path2), "device.vap.@%u.extra", i + 1);
-        if(mcm_config_find_entry_by_mix(this_session, path2, &tmp_group, NULL, NULL,
-                                        &tmp_parent_store) < MCM_RCODE_PASS)
+        if(mcm_config_find_entry_by_mix(this_session, path2, &tmp_group, NULL, NULL, NULL,
+                                        &count2, NULL) < MCM_RCODE_PASS)
         {
             DMSG("call mcm_config_find_entry_by_mix(%s) fail", path2);
-            goto FREE_01;
-        }
-        if(mcm_config_get_count_by_info(this_session, tmp_group, tmp_parent_store, &count2)
-                                        < MCM_RCODE_PASS)
-        {
-            DMSG("call mcm_config_get_count_by_info(%s) fail", path2);
             goto FREE_01;
         }
         DMSG("[count] %s = " MCM_DTYPE_EK_PF, path2, count2);
@@ -272,16 +259,10 @@ int mcm_module_count(
     for(i = 0; i < count1; i++)
     {
         snprintf(path2, sizeof(path2), "device.vap.@%u.station.*", i + 1);
-        if(mcm_config_find_entry_by_mix(this_session, path2, &tmp_group, NULL, NULL,
-                                        &tmp_parent_store) < MCM_RCODE_PASS)
+        if(mcm_config_find_entry_by_mix(this_session, path2, &tmp_group, NULL, NULL, NULL,
+                                        &count2, NULL) < MCM_RCODE_PASS)
         {
             DMSG("call mcm_config_find_entry_by_mix(%s) fail", path2);
-            goto FREE_01;
-        }
-        if(mcm_config_get_count_by_info(this_session, tmp_group, tmp_parent_store, &count2)
-                                        < MCM_RCODE_PASS)
-        {
-            DMSG("call mcm_config_get_count_by_info(%s) fail", path2);
             goto FREE_01;
         }
         DMSG("[count] %s = " MCM_DTYPE_EK_PF, path2, count2);
@@ -289,32 +270,20 @@ int mcm_module_count(
 
     // device.limit.* 的資料筆數.
     path1 = "device.limit.*";
-    if(mcm_config_find_entry_by_mix(this_session, path1, &tmp_group, NULL, NULL, &tmp_parent_store)
-                                    < MCM_RCODE_PASS)
+    if(mcm_config_find_entry_by_mix(this_session, path1, &tmp_group, NULL, NULL, NULL, &count1,
+                                    NULL) < MCM_RCODE_PASS)
     {
         DMSG("call mcm_config_find_entry_by_mix(%s) fail", path1);
-        goto FREE_01;
-    }
-    if(mcm_config_get_count_by_info(this_session, tmp_group, tmp_parent_store, &count1)
-                                    < MCM_RCODE_PASS)
-    {
-        DMSG("call mcm_config_get_count_by_info(%s) fail", path1);
         goto FREE_01;
     }
     DMSG("[count] %s = " MCM_DTYPE_EK_PF, path1, count1);
 
     // device.client.* 的資料筆數.
     path1 = "device.client.*";
-    if(mcm_config_find_entry_by_mix(this_session, path1, &tmp_group, NULL, NULL, &tmp_parent_store)
-                                    < MCM_RCODE_PASS)
+    if(mcm_config_find_entry_by_mix(this_session, path1, &tmp_group, NULL, NULL, NULL, &count1,
+                                    NULL) < MCM_RCODE_PASS)
     {
         DMSG("call mcm_config_find_entry_by_mix(%s) fail", path1);
-        goto FREE_01;
-    }
-    if(mcm_config_get_count_by_info(this_session, tmp_group, tmp_parent_store, &count1)
-                                    < MCM_RCODE_PASS)
-    {
-        DMSG("call mcm_config_get_count_by_info(%s) fail", path1);
         goto FREE_01;
     }
     DMSG("[count] %s = " MCM_DTYPE_EK_PF, path1, count1);
@@ -510,8 +479,8 @@ int mcm_module_get_entry(
 
     // device.vap.* 的開頭 store_info.
     path1 = "device.vap.*";
-    if(mcm_config_find_entry_by_mix(this_session, path1, &tmp_group, &tmp_store, NULL, NULL)
-                                    < MCM_RCODE_PASS)
+    if(mcm_config_find_entry_by_mix(this_session, path1, &tmp_group, &tmp_store, NULL, NULL,
+                                    NULL, NULL) < MCM_RCODE_PASS)
     {
         DMSG("call mcm_config_find_entry_by_mix(%s) fail", path1);
         goto FREE_01;
@@ -734,7 +703,7 @@ int mcm_module_del_usablekey_add_entry(
 
     // device.limit.* 的開頭 store_info 和 parent store_info.
     path1 = "device.limit.*";
-    if(mcm_config_find_entry_by_mix(this_session, path1, &tmp_group, &tmp_store, NULL,
+    if(mcm_config_find_entry_by_mix(this_session, path1, &tmp_group, &tmp_store, NULL, NULL, NULL,
                                     &tmp_parent_store) < MCM_RCODE_PASS)
     {
         DMSG("call mcm_config_find_entry_by_mix(%s) fail", path1);
@@ -816,7 +785,7 @@ int mcm_module_delall_add_entry(
 
     // device.client.* 的 parent store_info.
     path1 = "device.client.*";
-    if(mcm_config_find_entry_by_mix(this_session, path1, &tmp_group, NULL, NULL,
+    if(mcm_config_find_entry_by_mix(this_session, path1, &tmp_group, NULL, NULL, NULL, NULL,
                                     &tmp_parent_store) < MCM_RCODE_PASS)
     {
         DMSG("call mcm_config_find_entry_by_mix(%s) fail", path1);

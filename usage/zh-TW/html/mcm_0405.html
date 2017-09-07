@@ -618,8 +618,8 @@ int mcm_module_status_test_get_entry_self(
     // 範例-02 : 取得 device.vap.* 的狀態.
     path1 = "device.vap.*";
     // 先使用路徑取得資訊.
-    if(mcm_config_find_entry_by_mix(this_session, path1, &tmp_group, &tmp_store, NULL, NULL)
-                                    < MCM_RCODE_PASS)
+    if(mcm_config_find_entry_by_mix(this_session, path1, &tmp_group, &tmp_store, NULL, NULL, NULL,
+                                    NULL) < MCM_RCODE_PASS)
     {
         DMSG("call mcm_config_find_entry_by_mix(%s) fail", path1);
         goto FREE_01;
@@ -911,8 +911,8 @@ int mcm_module_status_test_get_entry_all(
     // 範例-02-01 : 取得 device.vap.* 的狀態.
     path1 = "device.vap.*";
     // 先使用路徑取得資訊.
-    if(mcm_config_find_entry_by_mix(this_session, path1, &tmp_group, &tmp_store, NULL, NULL)
-                                    < MCM_RCODE_PASS)
+    if(mcm_config_find_entry_by_mix(this_session, path1, &tmp_group, &tmp_store, NULL, NULL, NULL,
+                                    NULL) < MCM_RCODE_PASS)
     {
         DMSG("call mcm_config_find_entry_by_mix(%s) fail", path1);
         goto FREE_01;

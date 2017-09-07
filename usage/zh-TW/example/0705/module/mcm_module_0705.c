@@ -590,8 +590,8 @@ int mcm_module_check_vap(
     // 取得 device.vap.* 資料.
     path1 = "device.vap.*";
     // 使用進階模式存取, 先使用路徑取得資訊.
-    if(mcm_config_find_entry_by_mix(this_session, path1, &tmp_group, &tmp_store, NULL, NULL)
-                                    < MCM_RCODE_PASS)
+    if(mcm_config_find_entry_by_mix(this_session, path1, &tmp_group, &tmp_store, NULL, NULL, NULL,
+                                    NULL) < MCM_RCODE_PASS)
     {
         DMSG("call mcm_config_find_entry_by_mix(%s) fail", path1);
         goto FREE_01;
@@ -1028,8 +1028,8 @@ int mcm_module_check_station(
         // 取得 device.vap.* 資料.
         snprintf(path2, sizeof(path2), "device.vap.@%u.station.*", i + 1);
         // 使用進階模式存取, 先使用路徑取得資訊.
-        if(mcm_config_find_entry_by_mix(this_session, path2, &tmp_group, &tmp_store, NULL, NULL)
-                                        < MCM_RCODE_PASS)
+        if(mcm_config_find_entry_by_mix(this_session, path2, &tmp_group, &tmp_store, NULL, NULL,
+                                        NULL, NULL) < MCM_RCODE_PASS)
         {
             DMSG("call mcm_config_find_entry_by_mix(%s) fail", path1);
             goto FREE_01;
@@ -1240,8 +1240,8 @@ int mcm_module_check_limit(
     // 取得 device.limit.* 資料.
     path1 = "device.limit.*";
     // 使用進階模式存取, 先使用路徑取得資訊.
-    if(mcm_config_find_entry_by_mix(this_session, path1, &tmp_group, &tmp_store, NULL, NULL)
-                                    < MCM_RCODE_PASS)
+    if(mcm_config_find_entry_by_mix(this_session, path1, &tmp_group, &tmp_store, NULL, NULL, NULL,
+                                    NULL) < MCM_RCODE_PASS)
     {
         DMSG("call mcm_config_find_entry_by_mix(%s) fail", path1);
         goto FREE_01;
