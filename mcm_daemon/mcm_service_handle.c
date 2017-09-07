@@ -1136,10 +1136,11 @@ int mcm_req_add_entry(
     fret = mcm_config_find_entry_use_ik(this_session, self_model_group, parent_store,
                                         this_session->req_other_path, path_limit, &insert_store);
     if(fret < MCM_RCODE_PASS)
-    {
-        MCM_EMSG("call mcm_config_find_entry_use_ik() fail");
-        goto FREE_01;
-    }
+        if(fret != MCM_RCODE_CONFIG_NOT_FIND_STORE)
+        {
+            MCM_EMSG("call mcm_config_find_entry_use_ik() fail");
+            goto FREE_01;
+        }
 
     fret = mcm_config_add_entry_by_info(this_session, self_model_group, parent_store, self_key,
                                         insert_store, MCM_DACCESS_NEW, 

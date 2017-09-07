@@ -662,7 +662,11 @@ FREE_01:
             </tr>
             <tr>
               <td class="css_td_list2_l2">&nbsp;&lt; MCM_RCODE_PASS</td>
-              <td class="css_td_list2_r1">錯誤</td>
+              <td class="css_td_list2_r1">
+                錯誤<br>
+                <font class="css_font_p1">MCM_RCODE_CONFIG_INVALID_PATH</font> : 路徑格式錯誤<br>
+                <font class="css_font_p1">MCM_RCODE_CONFIG_NOT_FIND_STORE</font> : 目標不存在<br>
+              </td>
             </tr>
           </table>
           <br>
@@ -853,7 +857,11 @@ FREE_01:
             </tr>
             <tr>
               <td class="css_td_list2_l2">&nbsp;&lt; MCM_RCODE_PASS</td>
-              <td class="css_td_list2_r1">錯誤</td>
+              <td class="css_td_list2_r1">
+                錯誤<br>
+                <font class="css_font_p1">MCM_RCODE_CONFIG_INVALID_PATH</font> : 路徑格式錯誤<br>
+                <font class="css_font_p1">MCM_RCODE_CONFIG_NOT_FIND_STORE</font> : 目標不存在<br>
+              </td>
             </tr>
           </table>
           <br>
@@ -1035,7 +1043,11 @@ FREE_01:
             </tr>
             <tr>
               <td class="css_td_list2_l2">&nbsp;&lt; MCM_RCODE_PASS</td>
-              <td class="css_td_list2_r1">錯誤</td>
+              <td class="css_td_list2_r1">
+                錯誤<br>
+                <font class="css_font_p1">MCM_RCODE_CONFIG_INVALID_PATH</font> : 路徑格式錯誤<br>
+                <font class="css_font_p1">MCM_RCODE_CONFIG_NOT_FIND_STORE</font> : 目標不存在<br>
+              </td>
             </tr>
           </table>
           <br>
@@ -1224,7 +1236,11 @@ FREE_01:
             </tr>
             <tr>
               <td class="css_td_list2_l2">&nbsp;&lt; MCM_RCODE_PASS</td>
-              <td class="css_td_list2_r1">錯誤</td>
+              <td class="css_td_list2_r1">
+                錯誤<br>
+                <font class="css_font_p1">MCM_RCODE_CONFIG_INVALID_PATH</font> : 路徑格式錯誤<br>
+                <font class="css_font_p1">MCM_RCODE_CONFIG_NOT_FIND_STORE</font> : 目標不存在<br>
+              </td>
             </tr>
           </table>
           <br>
@@ -1233,8 +1249,13 @@ FREE_01:
             <tr>
               <td class="css_td_list1_l">01.&nbsp;</td>
               <td class="css_td_list1_r">
-                如果 ik_path 是 NULL 或 "" (空字串) 或找不到目標 entry, self_store_buf 會得到 NULL,
-                回傳值會是 MCM_RCODE_PASS.
+                如果 ik_path 是 NULL 或 "" (空字串), self_store_buf 會得到 NULL, 並回傳 MCM_RCODE_PASS.
+              </td>
+            </tr>
+            <tr>
+              <td class="css_td_list1_l">02.&nbsp;</td>
+              <td class="css_td_list1_r">
+                如果 ik_path 有值但是目標不存在, self_store_buf 會得到 NULL, 並回傳 MCM_RCODE_CONFIG_NOT_FIND_STORE.
               </td>
             </tr>
           </table>
