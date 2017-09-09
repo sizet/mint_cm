@@ -3702,15 +3702,7 @@ int mcm_load_store_anysis_member(
             MCM_CFDMSG("parameter[" MCM_DTYPE_USIZE_PF "][%s]", plen, read_con + ploc);
 
             if(plen == 0)
-            {
-                MCM_EMSG(MCM_SPROFILE_ERROR_PREFIX_MSG
-                         "invalid member, not find any member",
-                         MCM_SSOURCE(file_source), file_line, "INVALID_MEMBER_01");
-                if(file_source == MCM_FSOURCE_DEFAULT)
-                    return MCM_RCODE_CONFIG_INTERNAL_ERROR;
-                else
-                    goto NEXT_PARAMETER;
-            }
+                goto NEXT_PARAMETER;
 
             for(xidx = 0; xidx < plen; xidx++)
                 if(read_con[ploc + xidx] == MCM_SPROFILE_MEMBER_SPLIT_KEY)
@@ -3719,7 +3711,7 @@ int mcm_load_store_anysis_member(
             {
                 MCM_EMSG(MCM_SPROFILE_ERROR_PREFIX_MSG
                          "invalid member, not find member-value split key [%c] [%s]",
-                         MCM_SSOURCE(file_source), file_line, "INVALID_MEMBER_02",
+                         MCM_SSOURCE(file_source), file_line, "INVALID_MEMBER_01",
                          MCM_SPROFILE_MEMBER_SPLIT_KEY, read_con + ploc);
                 if(file_source == MCM_FSOURCE_DEFAULT)
                 {
@@ -3748,7 +3740,8 @@ int mcm_load_store_anysis_member(
             {
                 MCM_EMSG(MCM_SPROFILE_ERROR_PREFIX_MSG
                          "invalid member, unknown member [%s]",
-                         MCM_SSOURCE(file_source), file_line, "INVALID_MEMBER_03", read_con + nloc);
+                         MCM_SSOURCE(file_source), file_line, "INVALID_MEMBER_02",
+                         read_con + nloc);
                 if(file_source == MCM_FSOURCE_DEFAULT)
                 {
                     return MCM_RCODE_CONFIG_INTERNAL_ERROR;
@@ -3770,7 +3763,8 @@ int mcm_load_store_anysis_member(
             {
                 MCM_EMSG(MCM_SPROFILE_ERROR_PREFIX_MSG
                          "invalid member, member duplic [%s]",
-                         MCM_SSOURCE(file_source), file_line, "INVALID_MEMBER_04", read_con + nloc);
+                         MCM_SSOURCE(file_source), file_line, "INVALID_MEMBER_03",
+                         read_con + nloc);
                 if(file_source == MCM_FSOURCE_DEFAULT)
                 {
                     return MCM_RCODE_CONFIG_INTERNAL_ERROR;
@@ -3821,7 +3815,7 @@ NEXT_PARAMETER:
         {
             MCM_EMSG(MCM_SPROFILE_ERROR_PREFIX_MSG
                      "invalid member, member lose [%s]",
-                     MCM_SSOURCE(file_source), file_line, "INVALID_MEMBER_05",
+                     MCM_SSOURCE(file_source), file_line, "INVALID_MEMBER_04",
                      self_model_member->member_name);
             if(file_source == MCM_FSOURCE_DEFAULT)
                 return MCM_RCODE_CONFIG_INTERNAL_ERROR;
