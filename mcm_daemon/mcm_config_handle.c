@@ -72,8 +72,7 @@ enum MCM_MODEL_NODE_TYPE
 enum MCM_CHECK_PART_PATH_METHOD
 {
     MCM_CPPATH_NAME = 0,
-    MCM_CPPATH_IK,
-    MCM_CPPATH_MASK
+    MCM_CPPATH_NUMBER
 };
 
 enum MCM_MODIFY_OBJECT
@@ -92,11 +91,16 @@ enum MCM_DATA_MODIFY_METHOD
 
 
 
-struct mcm_load_store_t
+struct mcm_store_link_t
 {
     struct mcm_config_model_group_t *link_model_group;
     struct mcm_config_store_t *link_store;
-    MCM_DTYPE_EK_TD target_key;
+    MCM_DTYPE_EK_TD use_key;
+};
+struct mcm_store_level_t
+{
+    struct mcm_store_link_t each_level[MCM_CONFIG_PATH_MAX_LEVEL];
+    MCM_DTYPE_USIZE_TD max_level;
 };
 
 #if MCM_CFDMODE
@@ -2554,8 +2558,6 @@ int mcm_load_store_base_data(
 }
 
 // 處理路徑上個個 store 的 model group 類型和 key 值.
-// this_model_group (I) :
-//   使用的 model group tree.
 // full_path (I) :
 //   要處理的路徑.
 // path_len (I) :
@@ -2567,141 +2569,37 @@ int mcm_load_store_base_data(
 //     MCM_FSOURCE_VERIFY  : 待檢查檔.
 // file_line (I) :
 //   此資料是在檔案中的第幾行.
-// load_store_con (O) :
+// store_level (I) :
 //   儲存路徑上個個 store 的資料.
-// level_buf (O) :
-//   儲存路徑的 store 的層數.
-// self_model_buf (O) :
+// self_model_group_buf (O) :
 //   儲存路徑最尾端的 store 的 model group 類型.
 // return :
 //   <= MCM_RCODE_PASS : 成功.
 //   >  MCM_RCODE_PASS : 錯誤.
 int mcm_load_store_find_model(
-    struct mcm_config_model_group_t *this_model_group,
     char *full_path,
     MCM_DTYPE_USIZE_TD path_len,
     MCM_DTYPE_LIST_TD file_source,
     MCM_DTYPE_USIZE_TD file_line,
-    struct mcm_load_store_t *load_store_con,
-    MCM_DTYPE_USIZE_TD *level_buf,
-    struct mcm_config_model_group_t **self_model_buf)
+    struct mcm_store_level_t *store_level,
+    struct mcm_config_model_group_t **self_model_group_buf)
 {
-    MCM_DTYPE_USIZE_TD pidx, ploc, nlen;
-    MCM_DTYPE_EK_TD self_int;
-    MCM_DTYPE_LIST_TD next_part = MCM_CPPATH_NAME;
-
-
     MCM_CFDMSG("=> %s", __FUNCTION__);
-    MCM_CFDMSG("[%s]", full_path);
 
-    *level_buf = 0;
-
-    for(ploc = pidx = 0; pidx <= path_len; pidx++)
-    {
-        if((full_path[pidx] == MCM_SPROFILE_PATH_SPLIT_KEY) || (full_path[pidx] == '\0'))
-        {
-            if((nlen = pidx - ploc) == 0)
-            {
-                MCM_EMSG(MCM_SPROFILE_ERROR_PREFIX_MSG
-                         "invalid entry, empty stage",
-                         MCM_SSOURCE(file_source), file_line, "INVALID_ENTRY-FORMAT_01");
-                return MCM_RCODE_CONFIG_INTERNAL_ERROR;
-            }
-
-            // 此段落是記錄 name.
-            if(full_path[ploc] != MCM_SPROFILE_PATH_KEY_KEY)
-            {
-                if(next_part == MCM_CPPATH_IK)
-                {
-                    MCM_EMSG(MCM_SPROFILE_ERROR_PREFIX_MSG
-                             "invalid entry, this part must be key [%s]",
-                             MCM_SSOURCE(file_source), file_line, "INVALID_ENTRY-FORMAT_02",
-                             full_path + ploc);
-                    return MCM_RCODE_CONFIG_INTERNAL_ERROR;
-                }
-
-                // ploc == 0, 表示目前是最上層 (root),
-                // ploc > 0, 往下一層尋找.
-                if(ploc > 0)
-                    this_model_group = this_model_group->child_model_group_tree;
-
-                // 尋找相同的 name.
-                this_model_group = mcm_tree_find_group(this_model_group, full_path + ploc, nlen);
-                if(this_model_group == NULL)
-                {
-                    MCM_EMSG(MCM_SPROFILE_ERROR_PREFIX_MSG
-                             "invalid entry, not fine group name [%s]",
-                             MCM_SSOURCE(file_source), file_line, "INVALID_ENTRY-FORMAT_03",
-                             full_path + ploc);
-                    return MCM_RCODE_CONFIG_INTERNAL_ERROR;
-                }
-
-                memset(load_store_con + *level_buf, 0, sizeof(struct mcm_load_store_t));
-                // 紀錄此層 store 的 model group 類型.
-                load_store_con[*level_buf].link_model_group = this_model_group;
-
-                // 對於 gd 類型, 下一個段落是記錄 key 值, 還是算同一層, 還不算下一層.
-                if(this_model_group->group_type == MCM_DTYPE_GS_INDEX)
-                    (*level_buf)++;
-
-                // gs 類型的 model group, 下一階段的路徑必須是 name (下一層),
-                // gd 類型的 model group, 下一階段的路徑必須是 key.
-                next_part = this_model_group->group_type == MCM_DTYPE_GS_INDEX ?
-                            MCM_CPPATH_NAME : MCM_CPPATH_IK;
-            }
-            // 此段落是記錄 key.
-            else
-            {
-                if(next_part == MCM_CPPATH_NAME)
-                {
-                    MCM_EMSG(MCM_SPROFILE_ERROR_PREFIX_MSG
-                             "invalid entry, this part must be name [%s]",
-                             MCM_SSOURCE(file_source), file_line, "INVALID_ENTRY-FORMAT_04",
-                             full_path + ploc);
-                    return MCM_RCODE_CONFIG_INTERNAL_ERROR;
-                }
-
-                self_int = MCM_DTYPE_EK_SB(full_path + ploc + 1, NULL, 10);
-                if(self_int < 1)
-                {
-                    MCM_EMSG(MCM_SPROFILE_ERROR_PREFIX_MSG
-                             "invalid entry, invalid key [%s]",
-                             MCM_SSOURCE(file_source), file_line, "INVALID_ENTRY-FORMAT_05",
-                             full_path + ploc + 1);
-                    return MCM_RCODE_CONFIG_INTERNAL_ERROR;
-                }
-
-                load_store_con[*level_buf].target_key = self_int;
-                (*level_buf)++;
-
-                // 下一階段的路徑必須是 name (下一層).
-                next_part = MCM_CPPATH_NAME;
-            }
-
-            ploc = pidx + 1;
-        }
-    }
-
-    if(next_part != MCM_CPPATH_NAME)
-    {
-        MCM_EMSG(MCM_SPROFILE_ERROR_PREFIX_MSG
-                 "invalid entry, lost last stage",
-                 MCM_SSOURCE(file_source), file_line, "INVALID_ENTRY-FORMAT_06");
-        return MCM_RCODE_CONFIG_INTERNAL_ERROR;
-    }
-
-    *self_model_buf = this_model_group;
-
-    return MCM_RCODE_PASS;
+    return mcm_config_anysis_path(NULL, MCM_APATH_LOAD_STORE,
+                                  full_path, path_len,
+                                  file_source, file_line, store_level,
+                                  MCM_PLIMIT_KEY, MCM_PLIMIT_KEY, 1,
+                                  self_model_group_buf, NULL,
+                                  NULL, NULL,
+                                  NULL, NULL, NULL, NULL, NULL);
 }
 
 // 檢查路徑上的個個 store 是否超過最大筆數限制.
 // this_store (I) :
 //   使用的 store tree.
-// load_store_con (I) :
+// store_level (I) :
 //   儲存路徑上個個 store 的資料.
-// max_level (I) :
-//   路徑的 store 層數.
 // file_source (I) :
 //   檔案來源類型.
 //     MCM_FSOURCE_DEFAULT : 預設值檔.
@@ -2714,8 +2612,7 @@ int mcm_load_store_find_model(
 //   <  MCM_RCODE_PASS : 已超過.
 int mcm_load_store_check_count(
     struct mcm_config_store_t *this_store,
-    struct mcm_load_store_t *load_store_con,
-    MCM_DTYPE_USIZE_TD max_level,
+    struct mcm_store_level_t *store_level,
     MCM_DTYPE_LIST_TD file_source,
     MCM_DTYPE_USIZE_TD file_line)
 {
@@ -2731,9 +2628,9 @@ int mcm_load_store_check_count(
 
     parent_store = this_store;
 
-    for(lidx = self_count = is_full = 0; lidx < max_level; lidx++)
+    for(lidx = self_count = is_full = 0; lidx < store_level->max_level; lidx++)
     {
-        self_model_group = load_store_con[lidx].link_model_group;
+        self_model_group = store_level->each_level[lidx].link_model_group;
 
         if(parent_store != NULL)
         {
@@ -2747,16 +2644,16 @@ int mcm_load_store_check_count(
             else
             {
                 store_tree_in_parent = parent_store->child_store_tree_array +
-                    load_store_con[lidx].link_model_group->store_index_in_parent;
+                    store_level->each_level[lidx].link_model_group->store_index_in_parent;
                 self_store = *store_tree_in_parent;
 
                 store_count_in_parent = parent_store->child_store_count_array +
-                    load_store_con[lidx].link_model_group->store_index_in_parent;
+                    store_level->each_level[lidx].link_model_group->store_index_in_parent;
                 self_count = *store_count_in_parent;
             }
 
             // 尋找是否存在.
-            self_store = mcm_tree_find_store(self_store, load_store_con[lidx].target_key);
+            self_store = mcm_tree_find_store(self_store, store_level->each_level[lidx].use_key);
 
             // != NULL 表示存在現有的 store tree 中, 不用比對是否超過最大筆數.
             if((parent_store = self_store) == NULL)
@@ -2767,7 +2664,7 @@ int mcm_load_store_check_count(
         MCM_CFDMSG("check count[%s.%c" MCM_DTYPE_EK_PF "][%s]"
                    "[" MCM_DTYPE_EK_PF "/" MCM_DTYPE_EK_PF "][%s]",
                    self_model_group->group_name, MCM_SPROFILE_PATH_KEY_KEY,
-                   load_store_con[lidx].target_key,
+                   store_level->each_level[lidx].use_key,
                    self_model_group->group_type == MCM_DTYPE_GS_INDEX ?
                    MCM_DTYPE_GS_KEY : MCM_DTYPE_GD_KEY,
                    self_count, self_model_group->group_max, is_full != 0 ? "full" : "allow");
@@ -2790,10 +2687,8 @@ int mcm_load_store_check_count(
 // 檢查路徑上的個個 store 是否存在 store tree 中.
 // this_store (I) :
 //   使用的 store tree.
-// load_store_con (O) :
+// store_level (O) :
 //   儲存路徑上個個 store 的資料.
-// max_level (I) :
-//   路徑的 store 層數.
 // target_store_buf (O) :
 //   儲存路徑上最尾端的 sotre.
 // return :
@@ -2801,8 +2696,7 @@ int mcm_load_store_check_count(
 //   <  MCM_RCODE_PASS : sotre 不存在 store tree 中.
 int mcm_load_store_find_store(
     struct mcm_config_store_t *this_store,
-    struct mcm_load_store_t *load_store_con,
-    MCM_DTYPE_USIZE_TD max_level,
+    struct mcm_store_level_t *store_level,
     struct mcm_config_store_t **target_store_buf)
 {
     struct mcm_config_store_t *self_store = NULL, *parent_store, **store_tree_in_parent;
@@ -2816,10 +2710,10 @@ int mcm_load_store_find_store(
 
     parent_store = this_store;
 
-    for(lidx = 0; lidx < max_level; lidx++)
+    for(lidx = 0; lidx < store_level->max_level; lidx++)
     {
 #if MCM_CFDMODE
-        dbg_model_group = load_store_con[lidx].link_model_group;
+        dbg_model_group = store_level->each_level[lidx].link_model_group;
 #endif
 
         if(parent_store != NULL)
@@ -2831,21 +2725,22 @@ int mcm_load_store_find_store(
             else
             {
                 store_tree_in_parent = parent_store->child_store_tree_array +
-                    load_store_con[lidx].link_model_group->store_index_in_parent;
+                    store_level->each_level[lidx].link_model_group->store_index_in_parent;
                 self_store = *store_tree_in_parent;
             }
 
             // 尋找是否存在.
-            self_store = mcm_tree_find_store(self_store, load_store_con[lidx].target_key);
+            self_store = mcm_tree_find_store(self_store, store_level->each_level[lidx].use_key);
 
             // == NULL 表示不存在, 無法再往下一層處理.
-            load_store_con[lidx].link_store = parent_store = self_store;
+            store_level->each_level[lidx].link_store = parent_store = self_store;
         }
 
 #if MCM_CFDMODE
         MCM_CFDMSG("check lose[%s.%c" MCM_DTYPE_EK_PF "][%s]",
                    dbg_model_group->group_name, MCM_SPROFILE_PATH_KEY_KEY,
-                   load_store_con[lidx].target_key, self_store == NULL ? "lose" : "find");
+                   store_level->each_level[lidx].use_key,
+                   self_store == NULL ? "lose" : "find");
 #endif
     }
 
@@ -2855,18 +2750,15 @@ int mcm_load_store_find_store(
 }
 
 // 建立路徑上的個個 store.
-// load_store_con (I) :
+// store_level (I) :
 //   路徑上個個 store 的資料.
-// max_level (I) :
-//   路徑的 store 層數.
 // new_store_buf (I) :
 //   紀錄路徑上最尾端的 sotre.
 // return :
 //   >= MCM_RCODE_PASS : 成功.
 //   <  MCM_RCODE_PASS : 錯誤.
 int mcm_load_store_fill_store(
-    struct mcm_load_store_t *load_store_con,
-    MCM_DTYPE_USIZE_TD max_level,
+    struct mcm_store_level_t *store_level,
     struct mcm_config_store_t **new_store_buf)
 {
     int fret;
@@ -2882,15 +2774,15 @@ int mcm_load_store_fill_store(
 
     MCM_CFDMSG("=> %s", __FUNCTION__);
 
-    parent_store = load_store_con[0].link_store;
+    parent_store = store_level->each_level[0].link_store;
 
-    for(lidx = 0; lidx < max_level; lidx++)
+    for(lidx = 0; lidx < store_level->max_level; lidx++)
     {
-        self_model_group = load_store_con[lidx].link_model_group;
+        self_model_group = store_level->each_level[lidx].link_model_group;
 
-        if(load_store_con[lidx].link_store != NULL)
+        if(store_level->each_level[lidx].link_store != NULL)
         {
-            self_store = load_store_con[lidx].link_store;
+            self_store = store_level->each_level[lidx].link_store;
 #if MCM_CFDMODE
             MCM_DBG_GET_ENTRY_KEY(self_model_group, self_store, data_loc, self_key);
             MCM_CFDMSG("find[%s.%c" MCM_DTYPE_EK_PF "]",
@@ -2900,7 +2792,7 @@ int mcm_load_store_fill_store(
         else
         {
             // 建立缺少的 store.
-            self_key = load_store_con[lidx].target_key;
+            self_key = store_level->each_level[lidx].use_key;
             MCM_CFDMSG("fill[%s][%c" MCM_DTYPE_EK_PF "]",
                        self_model_group->group_name, MCM_SPROFILE_PATH_KEY_KEY, self_key);
 
@@ -2915,7 +2807,7 @@ int mcm_load_store_fill_store(
             if(self_model_group->member_real_count > 0)
             {
                 tmp_status = MCM_DSERROR_LOSE_MEMBER;
-                if(lidx < (max_level - 1))
+                if(lidx < (store_level->max_level - 1))
                     tmp_status |= MCM_DSERROR_LOSE_ENTRY;
                 mcm_config_set_entry_self_status(NULL, self_model_group, self_store,
                                                  MCM_DSASSIGN_SET, tmp_status);
@@ -4102,8 +3994,6 @@ int mcm_load_store_check_error(
 }
 
 // 處理讀取 store 檔案.
-// this_model_group (I) :
-//   使用的 model group.
 // file_fp (I) :
 //   目標檔案.
 // file_source (I) :
@@ -4123,7 +4013,6 @@ int mcm_load_store_check_error(
 //   >= MCM_RCODE_PASS : 成功.
 //   <  MCM_RCODE_PASS : 錯誤.
 int mcm_load_store_process(
-    struct mcm_config_model_group_t *this_model_group,
     FILE *file_fp,
     MCM_DTYPE_LIST_TD file_source,
     char **read_buf_buf,
@@ -4134,9 +4023,9 @@ int mcm_load_store_process(
     int fret;
     struct mcm_config_model_group_t *self_model_group;
     struct mcm_config_store_t *self_store;
-    struct mcm_load_store_t self_load_store[MCM_CONFIG_PATH_MAX_LEVEL];
+    struct mcm_store_level_t store_level;
     char *read_con;
-    MCM_DTYPE_USIZE_TD read_len, ridx, ploc, plen, mloc, mlen, file_line = 0, self_level;
+    MCM_DTYPE_USIZE_TD read_len, ridx, ploc, plen, mloc, mlen, file_line = 0;
     MCM_DTYPE_BOOL_TD read_eof;
     MCM_DTYPE_DS_TD tmp_status;
 #if MCM_CFDMODE
@@ -4228,9 +4117,9 @@ int mcm_load_store_process(
         mloc = ridx < read_len ? ridx + 1 : ridx;
         mlen = ridx < read_len ? read_len - (ridx + 1) : 0;
 
-        fret = mcm_load_store_find_model(this_model_group, read_con + ploc, plen,
-                                         file_source, file_line, self_load_store, &self_level,
-                                         &self_model_group);
+        memset(&store_level, 0, sizeof(struct mcm_store_level_t));
+        fret = mcm_load_store_find_model(read_con + ploc, plen, file_source, file_line,
+                                         &store_level, &self_model_group);
         if(fret < MCM_RCODE_PASS)
         {
             if(file_source == MCM_FSOURCE_DEFAULT)
@@ -4255,8 +4144,7 @@ int mcm_load_store_process(
             }
         }
 
-        fret = mcm_load_store_check_count(*new_store_buf, self_load_store, self_level,
-                                          file_source, file_line);
+        fret = mcm_load_store_check_count(*new_store_buf, &store_level, file_source, file_line);
         if(fret < MCM_RCODE_PASS)
         {
             if(file_source == MCM_FSOURCE_DEFAULT)
@@ -4282,10 +4170,9 @@ int mcm_load_store_process(
             }
         }
 
-        if(mcm_load_store_find_store(*new_store_buf, self_load_store, self_level, &self_store)
-                                     < MCM_RCODE_PASS)
+        if(mcm_load_store_find_store(*new_store_buf, &store_level, &self_store) < MCM_RCODE_PASS)
         {
-            fret = mcm_load_store_fill_store(self_load_store, self_level, &self_store);
+            fret = mcm_load_store_fill_store(&store_level, &self_store);
             if(fret < MCM_RCODE_PASS)
             {
                 MCM_EMSG("call mcm_load_store_fill_store() fail");
@@ -4342,7 +4229,7 @@ int mcm_load_store_process(
         goto FREE_02;
     }
 
-    fret = mcm_load_store_fill_status(this_model_group, *new_store_buf, file_source);
+    fret = mcm_load_store_fill_status(mcm_config_root_model_group, *new_store_buf, file_source);
     if(fret < MCM_RCODE_PASS)
     {
         MCM_EMSG("call mcm_load_store_fill_status() fail");
@@ -4412,9 +4299,8 @@ int mcm_config_load_store(
         goto FREE_02;
     }
 
-    fret = mcm_load_store_process(mcm_config_root_model_group, file_fp, file_source,
-                                  &read_buf, &read_size, &mcm_config_base_data,
-                                  &mcm_config_root_store);
+    fret = mcm_load_store_process(file_fp, file_source, &read_buf, &read_size,
+                                  &mcm_config_base_data, &mcm_config_root_store);
     if(fret < MCM_RCODE_PASS)
     {
         MCM_EMSG("call mcm_load_store_process() fail");
@@ -5476,6 +5362,22 @@ int mcm_config_remove_store_current_profile(
     return MCM_RCODE_PASS;
 }
 
+// 以 index / key 尋找對應的 sotre.
+// this_model_group (I) :
+//   目標 model group.
+// parent_store (I) :
+//   目標 store 的 parent.
+// self_store_tree (I) :
+//   目標 store 的樹根.
+// ik_type (I) :
+//   用 index 還是 key 尋找.
+//     MCM_PLIMIT_INDEX : index.
+//     MCM_PLIMIT_KEY   : key.
+// target_ik (I) :
+//   要尋找的目標 index / key.
+// return :
+//   != NULL : 到對應的 store.
+//   == NULL : 找不到對應的 store.
 struct mcm_config_store_t *mcm_find_store(
     struct mcm_config_model_group_t *self_model_group,
     struct mcm_config_store_t *parent_store,
@@ -5527,6 +5429,425 @@ struct mcm_config_store_t *mcm_find_store(
     return target_store;
 }
 
+// 分析路徑.
+// this_session (I) :
+//   session 資料.
+// anysis_method (I) :
+//   使用何種方法分析.
+//     MCM_APATH_LOAD_STORE : 分析 full_path (不含 member) 類型的路徑.
+//     MCM_APATH_GROUP_MASK : 分析 mask_path 類型的路徑.
+//     MCM_APATH_ENTRY_MIX  : 分析 mix_path 類型的路徑.
+//     MCM_APATH_ALONE_FULL : 分析 full_path (含有 member) 類型的路徑.
+//     MCM_APATH_ENTRY_FULL : 分析 full_path (不含 member) 類型的路徑.
+// this_path (I) :
+//   要分析的路徑.
+// path_len (I) :
+//   路徑長度, 可為 0 (0 的話會在函式內重新計算).
+// file_source (I) :
+//   anysis_method == MCM_APATH_LOAD_STORE 時才需要.
+//   檔案來源類型.
+//     MCM_FSOURCE_DEFAULT : 預設值檔.
+//     MCM_FSOURCE_CURRENT : 現在值檔.
+//     MCM_FSOURCE_VERIFY  : 待檢查檔.
+// file_line (I) :
+//   anysis_method == MCM_APATH_LOAD_STORE 時才需要.
+//   此資料是在檔案中的第幾行.
+// store_level (I) :
+//   anysis_method == MCM_APATH_LOAD_STORE 時才需要.
+//   儲存路徑上個個 store 的資料.
+// check_non_last_number (I) :
+//   anysis_method != MCM_APATH_GROUP_MASK 時才需要.
+//   檢查除了最後一段的 index / key 是否指定正確.
+//     MCM_PLIMIT_BOTH  : 不限制 index 或 key.
+//     MCM_PLIMIT_INDEX : 必須是 index.
+//     MCM_PLIMIT_KEY   : 必須是 key.
+// check_last_number (I) :
+//   anysis_method != MCM_APATH_GROUP_MASK / MCM_APATH_ENTRY_MIX 時才需要.
+//   檢查最後一段的 index / key 是否指定正確.
+//     MCM_PLIMIT_BOTH  : 不限制 index 或 key.
+//     MCM_PLIMIT_INDEX : 必須是 index.
+//     MCM_PLIMIT_KEY   : 必須是 key.
+// check_last_exist (I) :
+//   anysis_method == MCM_APATH_ENTRY_FULL 時才需要.
+//   是否檢查最後的 index / key 是否存在.
+//     0 : 否, 對於 add 操作.
+//     1 : 是, 對於非 add 操作.
+// self_model_group_buf (O) :
+//   儲存找到的 model group 的緩衝.
+// self_store_buf (O) :
+//   anysis_method == MCM_APATH_ALONE_FULL / MCM_APATH_ENTRY_FULL 時才需要.
+//   儲存找到的 store 的緩衝.
+// self_ik_buf (O) :
+//   anysis_method == MCM_APATH_ENTRY_FULL 時才需要.
+//   儲存最後一段的 index / key 的緩衝.
+// self_store_list_head_buf (O) :
+//   anysis_method == MCM_APATH_ENTRY_MIX 時才需要.
+//   儲存找到的 store 的串列頭端緩衝.
+// self_store_list_tail_buf (O) :
+//   anysis_method == MCM_APATH_ENTRY_MIX 時才需要.
+//   儲存找到的 store 的串列尾端緩衝.
+// self_store_tree_buf (O) :
+//   anysis_method == MCM_APATH_ENTRY_MIX 時才需要.
+//   儲存找到的 store 的樹根緩衝.
+// self_count_buf (O) :
+//   anysis_method == MCM_APATH_ENTRY_MIX 時才需要.
+//   儲存找到的 entry 數目的緩衝.
+// parent_store_buf (O) :
+//   anysis_method == MCM_APATH_ENTRY_MIX / MCM_APATH_ENTRY_FULL 時才需要.
+//   儲存找到的 store 的 parent 的緩衝.
+// return :
+//   == MCM_RCODE_PASS : 成功.
+//   == MCM_RCODE_CONFIG_INVALID_PATH   : 無效的路徑.
+//   == MCM_RCODE_CONFIG_NOT_FIND_STORE : 找不到對應的 store.
+//                                        (anysis_method != MCM_APATH_GROUP_MASK 時才會有).
+int mcm_config_anysis_path(
+    struct mcm_service_session_t *this_session,
+    MCM_DTYPE_LIST_TD anysis_method,
+    char *this_path,
+    MCM_DTYPE_USIZE_TD path_len,
+    MCM_DTYPE_LIST_TD file_source,
+    MCM_DTYPE_USIZE_TD file_line,
+    void *store_level,
+    MCM_DTYPE_LIST_TD check_non_last_number,
+    MCM_DTYPE_LIST_TD check_last_number,
+    MCM_DTYPE_LIST_TD check_last_exist,
+    struct mcm_config_model_group_t **self_model_group_buf,
+    struct mcm_config_model_member_t **self_model_member_buf,
+    struct mcm_config_store_t **self_store_buf,
+    MCM_DTYPE_EK_TD *self_ik_buf,
+    struct mcm_config_store_t **self_store_list_head_buf,
+    struct mcm_config_store_t **self_store_list_tail_buf,
+    struct mcm_config_store_t **self_store_tree_buf,
+    MCM_DTYPE_EK_TD *self_count_buf,
+    struct mcm_config_store_t **parent_store_buf)
+{
+    struct mcm_config_model_group_t *self_model_group;
+    struct mcm_config_model_member_t *self_model_member = NULL;
+    struct mcm_config_store_t *self_store_target = NULL, *self_store_tree = NULL,
+        *parent_store = NULL, **store_in_parent;
+    struct mcm_store_level_t *level_data = NULL;
+    MCM_DTYPE_USIZE_TD plen, pidx, ploc, nlen;
+    MCM_DTYPE_LIST_TD next_part = MCM_CPPATH_NAME, ik_type, check_type;
+    MCM_DTYPE_BOOL_TD is_mask = 0, check_exist;
+    MCM_DTYPE_EK_TD tmp_ik = 0, *store_count_in_parent;
+#if MCM_CFDMODE
+    char dbg_part[MCM_CONFIG_PATH_MAX_LENGTH];
+    MCM_DTYPE_USIZE_TD dbg_len;
+#endif
+
+
+    MCM_CFDMSG("=> %s", __FUNCTION__);
+
+    MCM_CFDMSG("[" MCM_DTYPE_LIST_PF "][%s]", anysis_method, this_path);
+
+    plen = path_len != 0 ? path_len : strlen(this_path);
+
+    // MCM_APATH_ALONE_FULL 類型的路徑.
+    // 例如 :
+    // device.vap.@1.ssid
+    // 迴圈只需要走訪到最後的 "d", ploc 在迴圈內最後會指向 "s", 在迴圈內只會處理 "device.vap.@1",
+    // "ssid" 會給 member 處理.
+    // 非 MCM_APATH_ALONE_FULL 類型的路徑.
+    // 例如 :
+    // device.vap.*.station.*
+    // device.vap.#1.station.*
+    // device.vap.@1.station.#1
+    // 迴圈需要走訪到最後的 "\0", 在迴圈內需要處理全部的路徑段落.
+    if(plen > 0)
+        if(anysis_method == MCM_APATH_ALONE_FULL)
+            plen--;
+
+    if(plen == 0)
+    {
+        if(anysis_method == MCM_APATH_LOAD_STORE)
+        {
+            MCM_EMSG(MCM_SPROFILE_ERROR_PREFIX_MSG
+                     "invalid path, empty path",
+                     MCM_SSOURCE(file_source), file_line, "INVALID_ENTRY-FORMAT_01");
+        }
+        else
+        {
+            MCM_EMSG("invalid path, empty path");
+        }
+        return MCM_RCODE_CONFIG_INVALID_PATH;
+    }
+
+    self_model_group = mcm_config_root_model_group;
+
+    if((anysis_method == MCM_APATH_ENTRY_MIX) ||
+       (anysis_method == MCM_APATH_ALONE_FULL) ||
+       (anysis_method == MCM_APATH_ENTRY_FULL))
+    {
+        self_store_target = self_store_tree = mcm_config_root_store;
+    }
+    else
+    if(anysis_method == MCM_APATH_LOAD_STORE)
+    {
+        level_data = (struct mcm_store_level_t *) store_level;
+    }
+
+    for(ploc = pidx = 0; pidx <= plen; pidx++)
+    {
+        // 找到分隔字元 ".".
+        if((this_path[pidx] == MCM_SPROFILE_PATH_SPLIT_KEY) || (this_path[pidx] == '\0'))
+        {
+            nlen = (pidx - ploc);
+            if(nlen == 0)
+            {
+                if(anysis_method == MCM_APATH_LOAD_STORE)
+                {
+                    MCM_EMSG(MCM_SPROFILE_ERROR_PREFIX_MSG
+                             "invalid path, empty stage [%s]",
+                             MCM_SSOURCE(file_source), file_line, "INVALID_ENTRY-FORMAT_01",
+                             this_path);
+                }
+                else
+                {
+                    MCM_EMSG("invalid path, empty stage [%s]", this_path);
+                }
+                return MCM_RCODE_CONFIG_INVALID_PATH;
+            }
+
+#if MCM_CFDMODE
+            dbg_len = nlen <= (sizeof(dbg_part) - 1) ?  nlen : sizeof(dbg_part) - 1;
+            memcpy(dbg_part, this_path + ploc, dbg_len);
+            dbg_part[dbg_len] = '\0';
+#endif
+
+            // 此段落是紀錄 group name.
+            if(next_part == MCM_CPPATH_NAME)
+            {
+                MCM_CFDMSG("group  [%s]", dbg_part);
+
+                // == 0, 表示在最開始, 在最上層 group 尋找,
+                //  > 0, 往下一層 group 尋找.
+                if(ploc > 0)
+                    self_model_group = self_model_group->child_model_group_tree;
+
+                // 尋找符合的 group name.
+                self_model_group = mcm_tree_find_group(self_model_group, this_path + ploc, nlen);
+                if(self_model_group == NULL)
+                {
+                    if(anysis_method == MCM_APATH_LOAD_STORE)
+                    {
+                        MCM_EMSG(MCM_SPROFILE_ERROR_PREFIX_MSG
+                                 "invalid path, not fine group name [%s]",
+                                 MCM_SSOURCE(file_source), file_line, "INVALID_ENTRY-FORMAT_02",
+                                 this_path);
+                    }
+                    else
+                    {
+                        MCM_EMSG("invalid path, not find group name [%s]", this_path);
+                    }
+                    return MCM_RCODE_CONFIG_INVALID_PATH;
+                }
+
+                if(anysis_method == MCM_APATH_LOAD_STORE)
+                {
+                    // 紀錄此層 store 的 model group 類型.
+                    level_data->each_level[level_data->max_level].link_model_group =
+                        self_model_group;
+
+                    // 對於 gs 類型, 下一個段落是下一層,
+                    // 對於 gd 類型, 下一個段落是記錄 index / key 值, 還不是下一層.
+                    if(self_model_group->group_type == MCM_DTYPE_GS_INDEX)
+                        level_data->max_level++;
+                }
+                else
+                if((anysis_method == MCM_APATH_ENTRY_MIX) ||
+                   (anysis_method == MCM_APATH_ALONE_FULL) ||
+                   (anysis_method == MCM_APATH_ENTRY_FULL))
+                {
+                    // 找到對應的 store, 最上層固定只有一個所以最上層不用找.
+                    if(self_model_group->parent_model_group != NULL)
+                    {
+                        parent_store = self_store_target;
+
+                        store_in_parent = parent_store->child_store_tree_array +
+                                          self_model_group->store_index_in_parent;
+                        self_store_tree = *store_in_parent;
+
+                        // gs 類型的 group 不會進入 index / key 部份處理,
+                        // 設定此 store 為下一層 store 的 parent store.
+                        if(self_model_group->group_type == MCM_DTYPE_GS_INDEX)
+                            self_store_target = self_store_tree;
+                    }
+                }
+
+                // gs 類型的 group, 下一階段的路徑必須是 name (下一層),
+                // gd 類型的 group, 下一階段的路徑必須是 index / key / mask.
+                next_part = self_model_group->group_type == MCM_DTYPE_GS_INDEX ?
+                            MCM_CPPATH_NAME : MCM_CPPATH_NUMBER;
+            }
+            else
+            {
+                MCM_CFDMSG("number [%s]", dbg_part);
+
+                // 處理 MCM_APATH_GROUP_MASK 類型的路徑 (index / key / mask 部分是 mask).
+                if(anysis_method == MCM_APATH_GROUP_MASK)
+                {
+                    if(this_path[ploc] != MCM_SPROFILE_PATH_MASK_KEY)
+                    {
+                        MCM_EMSG("invalid path, this part must be mask [%s]", this_path);
+                        return MCM_RCODE_CONFIG_INVALID_PATH;
+                    }
+                }
+                // 處理非 MCM_APATH_GROUP_MASK 類型的路徑.
+                else
+                {
+                    // MCM_APATH_ENTRY_MIX 類型的路徑最後一段必須是 mask.
+                    if(anysis_method == MCM_APATH_ENTRY_MIX)
+                        if(pidx == plen)
+                        {
+                            if(this_path[ploc] != MCM_SPROFILE_PATH_MASK_KEY)
+                            {
+                                MCM_EMSG("invalid path, this part must be mask [%s]", this_path);
+                                return MCM_RCODE_CONFIG_INVALID_PATH;
+                            }
+                            is_mask = 1;
+                        }
+
+                    // 不是 mask 則處理 index / key.
+                    if(is_mask == 0)
+                    {
+                        ik_type = this_path[ploc] == MCM_SPROFILE_PATH_INDEX_KEY ?
+                                  MCM_PLIMIT_INDEX : MCM_PLIMIT_KEY;
+
+                        check_type = pidx < plen ? check_non_last_number : check_last_number;
+                        if((check_type & ik_type) == 0)
+                        {
+                            MCM_EMSG("invalid path, this part must be %s [%s]",
+                                     check_type == MCM_PLIMIT_INDEX ? "index" : "key", this_path);
+                            return MCM_RCODE_CONFIG_INVALID_PATH;
+                        }
+
+                        tmp_ik = MCM_DTYPE_EK_SB(this_path + ploc + 1, NULL, 10);
+                        if(tmp_ik < 1)
+                        {
+                            if(anysis_method == MCM_APATH_LOAD_STORE)
+                            {
+                                MCM_EMSG(MCM_SPROFILE_ERROR_PREFIX_MSG
+                                         "invalid path, invalid key [%s]",
+                                         MCM_SSOURCE(file_source), file_line,
+                                         "INVALID_ENTRY-FORMAT_03", this_path);
+                            }
+                            else
+                            {
+                                MCM_EMSG("invalid path, invalid %s [%s]",
+                                         ik_type == MCM_PLIMIT_INDEX ? "index" : "key",
+                                         this_path);
+                            }
+                            return MCM_RCODE_CONFIG_INTERNAL_ERROR;
+                        }
+
+                        if(anysis_method == MCM_APATH_LOAD_STORE)
+                        {
+                            level_data->each_level[level_data->max_level].use_key = tmp_ik;
+                            level_data->max_level++;
+                        }
+                        else
+                        {
+                            // add store 時, 路徑的最後一段所指定的目標 store (key) 可以不存在.
+                            if(pidx < plen)
+                                check_exist = 1;
+                            else
+                                check_exist = check_last_exist == 0 ? 0 : 1;
+
+                            if(check_exist != 0)
+                            {
+                                self_store_target = mcm_find_store(self_model_group, parent_store,
+                                                                   self_store_tree, ik_type,
+                                                                   tmp_ik);
+                                if(self_store_target == NULL)
+                                {
+                                    MCM_CFDMSG("invalid path, not find %s [%s]"
+                                               "[" MCM_DTYPE_EK_PF "]",
+                                               ik_type == MCM_PLIMIT_INDEX ? "index" : "key",
+                                               this_path, tmp_ik);
+                                    return MCM_RCODE_CONFIG_NOT_FIND_STORE;
+                                }
+                            }
+                        }
+                    }
+                }
+
+                // 下一階段的路徑必須是 name (下一層).
+                next_part = MCM_CPPATH_NAME;
+            }
+
+            ploc = pidx + 1;
+        }
+    }
+
+    if(anysis_method == MCM_APATH_ALONE_FULL)
+    {
+        MCM_CFDMSG("member [%s]", this_path + ploc);
+
+        // 處理 member 部分.
+        self_model_member = mcm_tree_find_member(self_model_group->member_tree,
+                                                 this_path + ploc, pidx - ploc);
+        if(self_model_member == NULL)
+        {
+            MCM_EMSG("invalid path, not find member [%s]", this_path);
+            return MCM_RCODE_CONFIG_INVALID_PATH;
+        }
+    }
+
+    if(self_model_group_buf != NULL)
+        *self_model_group_buf = self_model_group;
+
+    if(anysis_method == MCM_APATH_ALONE_FULL)
+        if(self_model_member_buf != NULL)
+            *self_model_member_buf = self_model_member;
+
+    if((anysis_method == MCM_APATH_ALONE_FULL) ||
+       (anysis_method == MCM_APATH_ENTRY_FULL))
+    {
+        if(self_store_buf != NULL)
+            *self_store_buf = self_store_target;
+    }
+
+    if(anysis_method == MCM_APATH_ENTRY_FULL)
+        if(self_ik_buf != NULL)
+            *self_ik_buf = tmp_ik;
+
+    if(anysis_method == MCM_APATH_ENTRY_MIX)
+    {
+        if(self_store_list_head_buf != NULL)
+        {
+            store_in_parent = parent_store->child_store_list_head_array +
+                              self_model_group->store_index_in_parent;
+            *self_store_list_head_buf = *store_in_parent;
+        }
+
+        if(self_store_list_tail_buf != NULL)
+        {
+            store_in_parent = parent_store->child_store_list_tail_array +
+                              self_model_group->store_index_in_parent;
+            *self_store_list_tail_buf = *store_in_parent;
+        }
+
+        if(self_store_tree_buf != NULL)
+            *self_store_tree_buf = self_store_tree;
+
+        if(self_count_buf != NULL)
+        {
+            store_count_in_parent = parent_store->child_store_count_array +
+                                    self_model_group->store_index_in_parent;
+            *self_count_buf = *store_count_in_parent;
+        }
+    }
+
+    if((anysis_method == MCM_APATH_ENTRY_MIX) ||
+       (anysis_method == MCM_APATH_ENTRY_FULL))
+    {
+        if(parent_store_buf != NULL)
+            *parent_store_buf = parent_store;
+    }
+
+    return 0;
+}
+
 // 以路徑 (mask_path) 尋找對應的 model group.
 // this_session (I) :
 //   session 資料.
@@ -5535,322 +5856,31 @@ struct mcm_config_store_t *mcm_find_store(
 // self_model_group_buf (O) :
 //   儲存找到的 model group 的緩衝.
 // return :
-//   >= MCM_RCODE_PASS : 成功.
-//   <  MCM_RCODE_PASS : 錯誤.
+//   == MCM_RCODE_PASS                : 成功.
+//   == MCM_RCODE_CONFIG_INVALID_PATH : 無效的路徑.
 int mcm_config_find_group_by_mask(
     struct mcm_service_session_t *this_session,
     char *mask_path,
     struct mcm_config_model_group_t **self_model_group_buf)
 {
-    struct mcm_config_model_group_t *self_model_group;
-    MCM_DTYPE_USIZE_TD plen, pidx, ploc, nclen;
-    MCM_DTYPE_LIST_TD next_part = MCM_CPPATH_NAME, last_part = 0;
+    int fret;
 
 
     MCM_CFDMSG("=> %s", __FUNCTION__);
 
-    MCM_CFDMSG("[%s]", mask_path);
-
-    self_model_group = mcm_config_root_model_group;
-    plen = strlen(mask_path);
-
-    for(ploc = pidx = 0; pidx <= plen; pidx++)
+    fret = mcm_config_anysis_path(this_session, MCM_APATH_GROUP_MASK,
+                                  mask_path, 0,
+                                  0, 0, NULL,
+                                  0, 0, -1,
+                                  self_model_group_buf, NULL,
+                                  NULL, NULL,
+                                  NULL, NULL, NULL, NULL, NULL);
+    if(fret < MCM_RCODE_PASS)
     {
-        // 找到分隔字元 ".".
-        if((mask_path[pidx] == MCM_SPROFILE_PATH_SPLIT_KEY) || (mask_path[pidx] == '\0'))
-        {
-            if((nclen = (pidx - ploc)) == 0)
-            {
-                MCM_EMSG("invalid path, empty stage [%s]", mask_path);
-                return MCM_RCODE_CONFIG_INVALID_PATH;
-            }
-
-            // 不是 mask, 搜尋 name.
-            if(mask_path[ploc] != MCM_SPROFILE_PATH_MASK_KEY)
-            {
-                if(next_part == MCM_CPPATH_IK)
-                {
-                    MCM_EMSG("invalid path, this part must be mask [%s]", mask_path);
-                    return MCM_RCODE_CONFIG_INVALID_PATH;
-                }
-
-                // == 0, 表示在最開始, 在最上層 group 尋找,
-                //  > 0, 往下一層 group 尋找.
-                if(ploc > 0)
-                    self_model_group = self_model_group->child_model_group_tree;
-
-                // 尋找符合的 name.
-                self_model_group = mcm_tree_find_group(self_model_group, mask_path + ploc, nclen);
-                if(self_model_group == NULL)
-                {
-                    MCM_EMSG("invalid path, not find name [%s]", mask_path);
-                    return MCM_RCODE_CONFIG_INVALID_PATH;
-                }
-
-                // gs 類型的 group, 下一階段的路徑必須是 name (下一層),
-                // gd 類型的 group, 下一階段的路徑必須是 mask.
-                next_part = self_model_group->group_type == MCM_DTYPE_GS_INDEX ?
-                            MCM_CPPATH_NAME : MCM_CPPATH_IK;
-                // 紀錄最後的路徑是 name 類型.
-                if(pidx == plen)
-                    last_part = MCM_CPPATH_NAME;
-            }
-            else
-            {
-                if(next_part == MCM_CPPATH_NAME)
-                {
-                    MCM_EMSG("invalid path, this part must be name [%s]", mask_path);
-                    return MCM_RCODE_CONFIG_INVALID_PATH;
-                }
-
-                // 階段徑必須是 mask (*).
-                if((mask_path[ploc + 1] != MCM_SPROFILE_PATH_SPLIT_KEY) &&
-                   (mask_path[ploc + 1] != '\0'))
-                {
-                    MCM_EMSG("invalid path, this part must be mask [%s]", mask_path);
-                    return MCM_RCODE_CONFIG_INVALID_PATH;
-                }
-
-                // 下一階段的路徑必須是 name (下一層).
-                next_part = MCM_CPPATH_NAME;
-                // 紀錄最後的路徑是 mask 類型.
-                if(pidx == plen)
-                    last_part = MCM_CPPATH_IK;
-            }
-
-            ploc = pidx + 1;
-        }
+        MCM_EMSG("call mcm_config_anysis_path() fail");
     }
 
-    if(self_model_group->group_type == MCM_DTYPE_GS_INDEX)
-    {
-        // gs 類型 group, 最後必須是 name 結尾.
-        if(last_part != MCM_CPPATH_NAME)
-        {
-            MCM_EMSG("invalid path, last part must be name [%s]", mask_path);
-            return MCM_RCODE_CONFIG_INVALID_PATH;
-        }
-    }
-    else
-    {
-        // gd 類型 group, 最後必須是 mask 結尾.
-        if(last_part != MCM_CPPATH_IK)
-        {
-            MCM_EMSG("invalid path, last part must be mask [%s]", mask_path);
-            return MCM_RCODE_CONFIG_INVALID_PATH;
-        }
-    }
-
-    if(self_model_group_buf != NULL)
-        *self_model_group_buf = self_model_group;
-
-    return MCM_RCODE_PASS;
-}
-
-// 以路徑 (mix_path) 尋找對應的 model group, sotre.
-// this_session (I) :
-//   session 資料.
-// mix_path (I) :
-//   要處理的路徑.
-// check_number (I) :
-//   檢查 index / key 是否指定正確.
-//     MCM_PLIMIT_BOTH  : 不限制 index 或 key.
-//     MCM_PLIMIT_INDEX : 必須是 index.
-//     MCM_PLIMIT_KEY   : 必須是 key.
-// self_model_group_buf (O) :
-//   儲存找到的 model group 的緩衝.
-// self_store_list_head_buf (O) :
-//   儲存找到的 store 的串列頭端緩衝.
-// self_store_list_tail_buf (O) :
-//   儲存找到的 store 的串列尾端緩衝.
-// self_store_tree_buf (O) :
-//   儲存找到的 store 的樹根緩衝.
-// self_count_buf (O) :
-//   儲存找到的 entry 數目的緩衝.
-// parent_store_buf (O) :
-//   儲存找到的 store 的 parent 的緩衝.
-// return :
-//   >= MCM_RCODE_PASS : 成功.
-//   <  MCM_RCODE_PASS : 錯誤.
-int mcm_config_find_entry_use_mix(
-    struct mcm_service_session_t *this_session,
-    char *mix_path,
-    MCM_DTYPE_LIST_TD check_number,
-    struct mcm_config_model_group_t **self_model_group_buf,
-    struct mcm_config_store_t **self_store_list_head_buf,
-    struct mcm_config_store_t **self_store_list_tail_buf,
-    struct mcm_config_store_t **self_store_tree_buf,
-    MCM_DTYPE_EK_TD *self_count_buf,
-    struct mcm_config_store_t **parent_store_buf)
-{
-    struct mcm_config_model_group_t *self_model_group;
-    struct mcm_config_store_t *target_store, *self_store_tree, *parent_store = NULL,
-        **store_in_parent;
-    MCM_DTYPE_USIZE_TD plen, pidx, ploc, nclen;
-    MCM_DTYPE_LIST_TD next_part = MCM_CPPATH_NAME, last_part = 0, ik_type;
-    MCM_DTYPE_BOOL_TD last_mask = 0;
-    MCM_DTYPE_EK_TD target_ik, *store_count_in_parent;
-
-
-    MCM_CFDMSG("=> %s", __FUNCTION__);
-
-    MCM_CFDMSG("[%s]", mix_path);
-
-    self_model_group = mcm_config_root_model_group;
-    target_store = self_store_tree = mcm_config_root_store;
-    plen = strlen(mix_path);
-
-    for(ploc = pidx = 0; pidx <= plen; pidx++)
-    {
-        // 找到分隔字元 ".".
-        if((mix_path[pidx] == MCM_SPROFILE_PATH_SPLIT_KEY) || (mix_path[pidx] == '\0'))
-        {
-            if((nclen = (pidx - ploc)) == 0)
-            {
-                MCM_EMSG("invalid path, empty stage [%s]", mix_path);
-                return MCM_RCODE_CONFIG_INVALID_PATH;
-            }
-
-            // 尋找 name.
-            if((mix_path[ploc] != MCM_SPROFILE_PATH_INDEX_KEY) &&
-               (mix_path[ploc] != MCM_SPROFILE_PATH_KEY_KEY) &&
-               (mix_path[ploc] != MCM_SPROFILE_PATH_MASK_KEY))
-            {
-                if(next_part == MCM_CPPATH_IK)
-                {
-                    MCM_EMSG("invalid path, this part must be index/key/mask [%s]", mix_path);
-                    return MCM_RCODE_CONFIG_INVALID_PATH;
-                }
-
-                // == 0, 表示在最開始, 在最上層 group 尋找,
-                //  > 0, 往下一層 group 尋找.
-                if(ploc > 0)
-                    self_model_group = self_model_group->child_model_group_tree;
-
-                // 尋找符合的 name.
-                self_model_group = mcm_tree_find_group(self_model_group, mix_path + ploc, nclen);
-                if(self_model_group == NULL)
-                {
-                    MCM_EMSG("invalid path, not find name [%s]", mix_path);
-                    return MCM_RCODE_CONFIG_INVALID_PATH;
-                }
-
-                // 找到對應的 store, 最上層固定只有一個所以最上層不用找.
-                if(self_model_group->parent_model_group != NULL)
-                {
-                    parent_store = target_store;
-
-                    store_in_parent = parent_store->child_store_tree_array +
-                                      self_model_group->store_index_in_parent;
-                    self_store_tree = *store_in_parent;
-
-                    // gs 類型的 group 不會進入 index / key 部份處理,
-                    // 設定此 store 為下一層 store 的 parent store.
-                    if(self_model_group->group_type == MCM_DTYPE_GS_INDEX)
-                        target_store = self_store_tree;
-                }
-
-                // gs 類型的 group, 下一階段的路徑必須是 name (下一層),
-                // gd 類型的 group, 下一階段的路徑必須是 index / key.
-                next_part = self_model_group->group_type == MCM_DTYPE_GS_INDEX ?
-                            MCM_CPPATH_NAME : MCM_CPPATH_IK;
-                // 紀錄最後的路徑是 name 類型.
-                if(pidx == plen)
-                    last_part = MCM_CPPATH_NAME;
-            }
-            else
-            {
-                if(next_part == MCM_CPPATH_NAME)
-                {
-                    MCM_EMSG("invalid path, this part must be name [%s]", mix_path);
-                    return MCM_RCODE_CONFIG_INVALID_PATH;
-                }
-
-                // 不是最後一段必須是 index / key, 最後一段必須是 mask.
-                if(mix_path[ploc] == MCM_SPROFILE_PATH_MASK_KEY)
-                {
-                    if(pidx < plen)
-                    {
-                        MCM_EMSG("invalid path, this part must be index/key [%s]", mix_path);
-                        return MCM_RCODE_CONFIG_INVALID_PATH;
-                    }
-                    last_mask = 1;
-                }
-                else
-                {
-                    ik_type = mix_path[ploc] == MCM_SPROFILE_PATH_INDEX_KEY ?
-                              MCM_PLIMIT_INDEX : MCM_PLIMIT_KEY;
-
-                    if((check_number & ik_type) == 0)
-                    {
-                        MCM_EMSG("invalid path, this part must be %s [%s]",
-                                 check_number == MCM_PLIMIT_INDEX ? "index" : "key", mix_path);
-                        return MCM_RCODE_CONFIG_INVALID_PATH;
-                    }
-
-                    target_ik = MCM_DTYPE_EK_SB(mix_path + ploc + 1, NULL, 10);
-
-                    target_store = mcm_find_store(self_model_group, parent_store, self_store_tree,
-                                                  ik_type, target_ik);
-                    if(target_store == NULL)
-                    {
-                        MCM_CFDMSG("invalid path, not find %s [%s][" MCM_DTYPE_EK_PF "]",
-                                   ik_type == MCM_PLIMIT_INDEX ? "index" : "key",
-                                   mix_path, target_ik);
-                        return MCM_RCODE_CONFIG_NOT_FIND_STORE;
-                    }
-                }
-
-                // 下一階段的路徑必須是 name (下一層).
-                next_part = MCM_CPPATH_NAME;
-                // 紀錄最後的路徑是 index / key / mask 類型.
-                if(pidx == plen)
-                    last_part = last_mask == 0 ? MCM_CPPATH_IK : MCM_CPPATH_MASK;
-            }
-
-            ploc = pidx + 1;
-        }
-    }
-
-    // gd 類型 group, 最後必須是 mask 結尾.
-    if(self_model_group->group_type == MCM_DTYPE_GD_INDEX)
-        if(last_part != MCM_CPPATH_MASK)
-        {
-            MCM_EMSG("invalid path, last part must be mask [%s]", mix_path);
-            return MCM_RCODE_CONFIG_INVALID_PATH;
-        }
-
-    if(self_model_group_buf != NULL)
-        *self_model_group_buf = self_model_group;
-
-    if(self_store_list_head_buf != NULL)
-    {
-        store_in_parent = parent_store->child_store_list_head_array +
-                          self_model_group->store_index_in_parent;
-        *self_store_list_head_buf = *store_in_parent;
-    }
-
-    if(self_store_list_tail_buf != NULL)
-    {
-        store_in_parent = parent_store->child_store_list_tail_array +
-                          self_model_group->store_index_in_parent;
-        *self_store_list_tail_buf = *store_in_parent;
-    }
-
-    if(self_store_tree_buf != NULL)
-        *self_store_tree_buf = self_store_tree;
-
-    if(self_count_buf != NULL)
-    {
-        store_count_in_parent = parent_store->child_store_count_array +
-                                self_model_group->store_index_in_parent;
-        *self_count_buf = *store_count_in_parent;
-    }
-
-    if(parent_store_buf != NULL)
-        *parent_store_buf = parent_store;
-
-    return MCM_RCODE_PASS;
+    return fret;
 }
 
 // 以路徑 (mix_path) 尋找對應的 model group, sotre.
@@ -5869,8 +5899,9 @@ int mcm_config_find_entry_use_mix(
 // parent_store_buf (O) :
 //   儲存找到的 store 的 parent 的緩衝.
 // return :
-//   >= MCM_RCODE_PASS : 成功.
-//   <  MCM_RCODE_PASS : 錯誤.
+//   == MCM_RCODE_PASS                  : 成功.
+//   == MCM_RCODE_CONFIG_INVALID_PATH   : 無效的路徑.
+//   == MCM_RCODE_CONFIG_NOT_FIND_STORE : 找不到對應的 store.
 int mcm_config_find_entry_by_mix(
     struct mcm_service_session_t *this_session,
     char *mix_path,
@@ -5886,14 +5917,18 @@ int mcm_config_find_entry_by_mix(
 
     MCM_CFDMSG("=> %s", __FUNCTION__);
 
-    fret = mcm_config_find_entry_use_mix(this_session, mix_path, MCM_PLIMIT_BOTH,
-                                         self_model_group_buf, self_store_list_head_buf,
-                                         self_store_list_tail_buf,  self_store_tree_buf,
-                                         self_count_buf, parent_store_buf);
+    fret = mcm_config_anysis_path(this_session, MCM_APATH_ENTRY_MIX,
+                                  mix_path, 0,
+                                  0, 0, NULL,
+                                  MCM_PLIMIT_BOTH, 0, -1,
+                                  self_model_group_buf, NULL,
+                                  NULL, NULL,
+                                  self_store_list_head_buf, self_store_list_tail_buf,
+                                  self_store_tree_buf, self_count_buf, parent_store_buf);
     if(fret < MCM_RCODE_PASS)
         if(fret != MCM_RCODE_CONFIG_NOT_FIND_STORE)
         {
-            MCM_EMSG("call mcm_config_find_entry_use_mix() fail");
+            MCM_EMSG("call mcm_config_anysis_path() fail");
         }
 
     return fret;
@@ -5904,11 +5939,6 @@ int mcm_config_find_entry_by_mix(
 //   session 資料.
 // full_path (I) :
 //   要處理的路徑.
-// check_number (I) :
-//   檢查 index / key 是否指定正確.
-//     MCM_PLIMIT_BOTH  : 不限制 index 或 key.
-//     MCM_PLIMIT_INDEX : 必須是 index.
-//     MCM_PLIMIT_KEY   : 必須是 key.
 // self_model_group_buf (O) :
 //   儲存找到的 model group 的緩衝.
 // self_model_member_buf (O) :
@@ -5916,164 +5946,9 @@ int mcm_config_find_entry_by_mix(
 // self_store_buf (O) :
 //   儲存找到的 store 的緩衝.
 // return :
-//   >= MCM_RCODE_PASS : 成功.
-//   <  MCM_RCODE_PASS : 錯誤.
-int mcm_config_find_alone_use_full(
-    struct mcm_service_session_t *this_session,
-    char *full_path,
-    MCM_DTYPE_LIST_TD check_number,
-    struct mcm_config_model_group_t **self_model_group_buf,
-    struct mcm_config_model_member_t **self_model_member_buf,
-    struct mcm_config_store_t **self_store_buf)
-{
-    struct mcm_config_model_group_t *self_model_group;
-    struct mcm_config_model_member_t *self_model_member;
-    struct mcm_config_store_t *target_store, *self_store_tree, *parent_store = NULL,
-        **store_in_parent;
-    MCM_DTYPE_USIZE_TD plen, pidx, ploc, nclen;
-    MCM_DTYPE_LIST_TD next_part = MCM_CPPATH_NAME, ik_type;
-    MCM_DTYPE_EK_TD target_ik;
-
-
-    MCM_CFDMSG("=> %s", __FUNCTION__);
-
-    MCM_CFDMSG("[%s]", full_path);
-
-    self_model_group = mcm_config_root_model_group;
-    target_store = self_store_tree = mcm_config_root_store;
-    plen = strlen(full_path);
-
-    // 處理 model group 部分.
-    for(ploc = pidx = 0; pidx < plen; pidx++)
-    {
-        // 找到分隔字元 ".".
-        if(full_path[pidx] == MCM_SPROFILE_PATH_SPLIT_KEY)
-        {
-            if((nclen = (pidx - ploc)) == 0)
-            {
-                MCM_EMSG("invalid path, empty stage [%s]", full_path);
-                return MCM_RCODE_CONFIG_INVALID_PATH;
-            }
-
-            // 尋找 name.
-            if((full_path[ploc] != MCM_SPROFILE_PATH_INDEX_KEY) &&
-               (full_path[ploc] != MCM_SPROFILE_PATH_KEY_KEY))
-            {
-                if(next_part == MCM_CPPATH_IK)
-                {
-                    MCM_EMSG("invalid path, this part must be index/key [%s]", full_path);
-                    return MCM_RCODE_CONFIG_INVALID_PATH;
-                }
-
-                // == 0, 表示在最開始, 在最上層 group 尋找,
-                //  > 0, 往下一層 group 尋找.
-                if(ploc > 0)
-                    self_model_group = self_model_group->child_model_group_tree;
-
-                // 尋找符合的 name.
-                self_model_group = mcm_tree_find_group(self_model_group, full_path + ploc, nclen);
-                if(self_model_group == NULL)
-                {
-                    MCM_EMSG("invalid path, not fine name [%s]", full_path);
-                    return MCM_RCODE_CONFIG_INVALID_PATH;
-                }
-
-                // 找到對應的 store, 最上層固定只有一個所以最上層不用找.
-                if(self_model_group->parent_model_group != NULL)
-                {
-                    parent_store = target_store;
-
-                    store_in_parent = parent_store->child_store_tree_array +
-                                      self_model_group->store_index_in_parent;
-                    self_store_tree = *store_in_parent;
-
-                    // gs 類型的 group 不會進入 index / key 部份處理,
-                    // 設定此 store 為下一層 store 的 parent store.
-                    if(self_model_group->group_type == MCM_DTYPE_GS_INDEX)
-                        target_store = self_store_tree;
-                }
-
-                // gs 類型的 group, 下一階段的路徑必須是 name (下一層),
-                // gd 類型的 group, 下一階段的路徑必須是 index / key.
-                next_part = self_model_group->group_type == MCM_DTYPE_GS_INDEX ?
-                            MCM_CPPATH_NAME : MCM_CPPATH_IK;
-            }
-            else
-            {
-                if(next_part == MCM_CPPATH_NAME)
-                {
-                    MCM_EMSG("invalid path, this part must be string [%s]", full_path);
-                    return MCM_RCODE_CONFIG_INVALID_PATH;
-                }
-
-                ik_type = full_path[ploc] == MCM_SPROFILE_PATH_INDEX_KEY ?
-                          MCM_PLIMIT_INDEX : MCM_PLIMIT_KEY;
-
-                if((check_number & ik_type) == 0)
-                {
-                    MCM_EMSG("invalid path, this part must be %s [%s]",
-                             check_number == MCM_PLIMIT_INDEX ? "index" : "key", full_path);
-                    return MCM_RCODE_CONFIG_INVALID_PATH;
-                }
-
-                target_ik = MCM_DTYPE_EK_SB(full_path + ploc + 1, NULL, 10);
-
-                target_store = mcm_find_store(self_model_group, parent_store, self_store_tree,
-                                              ik_type, target_ik);
-                if(target_store == NULL)
-                {
-                    MCM_CFDMSG("invalid path, not find %s [%s][" MCM_DTYPE_EK_PF "]",
-                               ik_type == MCM_PLIMIT_INDEX ? "index" : "key",
-                               full_path, target_ik);
-                    return MCM_RCODE_CONFIG_NOT_FIND_STORE;
-                }
-
-                // 下一階段的路徑必須是 name (下一層).
-                next_part = MCM_CPPATH_NAME;
-            }
-
-            ploc = pidx + 1;
-        }
-    }
-    if(ploc == 0)
-    {
-        MCM_EMSG("invalid path, not fine name [%s]", full_path);
-        return MCM_RCODE_CONFIG_INVALID_PATH;
-    }
-
-    // 處理 model member 部分.
-    self_model_member = mcm_tree_find_member(self_model_group->member_tree,
-                                             full_path + ploc, strlen(full_path + ploc));
-    if(self_model_member == NULL)
-    {
-        MCM_EMSG("invalid path, not find member [%s]", full_path);
-        return MCM_RCODE_CONFIG_INVALID_PATH;
-    }
-
-    if(self_model_group_buf != NULL)
-        *self_model_group_buf = self_model_group;
-    if(self_model_member_buf != NULL)
-        *self_model_member_buf = self_model_member;
-    if(self_store_buf != NULL)
-        *self_store_buf = target_store;
-
-    return MCM_RCODE_PASS;
-}
-
-// 以路徑 (full_path) 尋找對應的 model group, model member, sotre.
-// this_session (I) :
-//   session 資料.
-// full_path (I) :
-//   要處理的路徑.
-// self_model_group_buf (O) :
-//   儲存找到的 model group 的緩衝.
-// self_model_member_buf (O) :
-//   儲存找到的 model member 的緩衝.
-// self_store_buf (O) :
-//   儲存找到的 store 的緩衝.
-// return :
-//   >= MCM_RCODE_PASS : 成功.
-//   <  MCM_RCODE_PASS : 錯誤.
+//   == MCM_RCODE_PASS                  : 成功.
+//   == MCM_RCODE_CONFIG_INVALID_PATH   : 無效的路徑.
+//   == MCM_RCODE_CONFIG_NOT_FIND_STORE : 找不到對應的 store.
 int mcm_config_find_alone_by_full(
     struct mcm_service_session_t *this_session,
     char *full_path,
@@ -6086,13 +5961,17 @@ int mcm_config_find_alone_by_full(
 
     MCM_CFDMSG("=> %s", __FUNCTION__);
 
-    fret = mcm_config_find_alone_use_full(this_session, full_path, MCM_PLIMIT_BOTH,
-                                          self_model_group_buf, self_model_member_buf,
-                                          self_store_buf);
+    fret = mcm_config_anysis_path(this_session, MCM_APATH_ALONE_FULL,
+                                  full_path, 0,
+                                  0, 0, NULL,
+                                  MCM_PLIMIT_BOTH, MCM_PLIMIT_BOTH, 1,
+                                  self_model_group_buf, self_model_member_buf,
+                                  self_store_buf, NULL,
+                                  NULL, NULL, NULL, NULL, NULL);
     if(fret < MCM_RCODE_PASS)
         if(fret != MCM_RCODE_CONFIG_NOT_FIND_STORE)
         {
-            MCM_EMSG("call mcm_config_find_alone_use_full() fail");
+            MCM_EMSG("call mcm_config_anysis_path() fail");
         }
 
     return fret;
@@ -6103,200 +5982,14 @@ int mcm_config_find_alone_by_full(
 //   session 資料.
 // full_path (I) :
 //   要處理的路徑.
-// check_non_last_number (I) :
-//   檢查除了最後的 index / key 是否指定正確.
-//     MCM_PLIMIT_BOTH  : 不限制 index 或 key.
-//     MCM_PLIMIT_INDEX : 必須是 index.
-//     MCM_PLIMIT_KEY   : 必須是 key.
-// check_last_number (I) :
-//   檢查最後的 index / key 是否指定正確.
-//     MCM_PLIMIT_BOTH  : 不限制 index 或 key.
-//     MCM_PLIMIT_INDEX : 必須是 index.
-//     MCM_PLIMIT_KEY   : 必須是 key.
-// check_last_exist (I) :
-//   是否檢查最後的 index / key 是否存在.
-//     0 : 否, 對於 add 操作.
-//     1 : 是, 對於非 add 操作.
-// self_model_group_buf (O) :
-//   儲存找到的 model group 的緩衝.
-// self_store_buf (O) :
-//   儲存找到的 store 的緩衝.
-// parent_store_buf (O) :
-//   儲存找到的 store 的 parent 的緩衝.
-// self_ik_buf (O) :
-//   儲存找到的 key 的緩衝.
-// return :
-//   >= MCM_RCODE_PASS : 成功.
-//   <  MCM_RCODE_PASS : 錯誤.
-int mcm_config_find_entry_use_full(
-    struct mcm_service_session_t *this_session,
-    char *full_path,
-    MCM_DTYPE_LIST_TD check_non_last_number,
-    MCM_DTYPE_LIST_TD check_last_number,
-    MCM_DTYPE_BOOL_TD check_last_exist,
-    struct mcm_config_model_group_t **self_model_group_buf,
-    struct mcm_config_store_t **self_store_buf,
-    struct mcm_config_store_t **parent_store_buf,
-    MCM_DTYPE_EK_TD *self_ik_buf)
-{
-    struct mcm_config_model_group_t *self_model_group;
-    struct mcm_config_store_t *target_store, *self_store_tree, *parent_store = NULL,
-        **store_in_parent;
-    MCM_DTYPE_USIZE_TD plen, pidx, ploc, nclen;
-    MCM_DTYPE_LIST_TD check_type, next_part = MCM_CPPATH_NAME, last_part = 0, ik_type;
-    MCM_DTYPE_BOOL_TD check_exist;
-    MCM_DTYPE_EK_TD target_ik = 0;
-
-
-    MCM_CFDMSG("=> %s", __FUNCTION__);
-
-    MCM_CFDMSG("[%s]", full_path);
-
-    self_model_group = mcm_config_root_model_group;
-    target_store = self_store_tree = mcm_config_root_store;
-    plen = strlen(full_path);
-
-    for(ploc = pidx = 0; pidx <= plen; pidx++)
-    {
-        // 找到分隔字元 ".".
-        if((full_path[pidx] == MCM_SPROFILE_PATH_SPLIT_KEY) || (full_path[pidx] == '\0'))
-        {
-            if((nclen = (pidx - ploc)) == 0)
-            {
-                MCM_EMSG("invalid path, empty stage [%s]", full_path);
-                return MCM_RCODE_CONFIG_INVALID_PATH;
-            }
-
-            // 尋找 name.
-            if((full_path[ploc] != MCM_SPROFILE_PATH_INDEX_KEY) &&
-               (full_path[ploc] != MCM_SPROFILE_PATH_KEY_KEY))
-            {
-                if(next_part == MCM_CPPATH_IK)
-                {
-                    MCM_EMSG("invalid path, this part must be index/key [%s]", full_path);
-                    return MCM_RCODE_CONFIG_INVALID_PATH;
-                }
-
-                // == 0, 表示在最開始, 在最上層 group 尋找,
-                //  > 0, 往下一層 group 尋找.
-                if(ploc > 0)
-                    self_model_group = self_model_group->child_model_group_tree;
-
-                // 尋找符合的 name.
-                self_model_group = mcm_tree_find_group(self_model_group, full_path + ploc, nclen);
-                if(self_model_group == NULL)
-                {
-                    MCM_EMSG("invalid path, not find name [%s]", full_path);
-                    return MCM_RCODE_CONFIG_INVALID_PATH;
-                }
-
-                // 找到對應的 store, 最上層固定只有一個所以最上層不用找.
-                if(self_model_group->parent_model_group != NULL)
-                {
-                    parent_store = target_store;
-
-                    store_in_parent = parent_store->child_store_tree_array +
-                                      self_model_group->store_index_in_parent;
-                    self_store_tree = *store_in_parent;
-
-                    // gs 類型的 group 不會進入 index / key 部份處理,
-                    // 設定此 store 為下一層 store 的 parent store.
-                    if(self_model_group->group_type == MCM_DTYPE_GS_INDEX)
-                        target_store = self_store_tree;
-                }
-
-                // gs 類型的 group, 下一階段的路徑必須是 name (下一層),
-                // gd 類型的 group, 下一階段的路徑必須是 index / key.
-                next_part = self_model_group->group_type == MCM_DTYPE_GS_INDEX ?
-                            MCM_CPPATH_NAME : MCM_CPPATH_IK;
-                // 紀錄最後的路徑是 name 類型.
-                if(pidx == plen)
-                    last_part = MCM_CPPATH_NAME;
-            }
-            else
-            {
-                if(next_part == MCM_CPPATH_NAME)
-                {
-                    MCM_EMSG("invalid path, this part must be name [%s]", full_path);
-                    return MCM_RCODE_CONFIG_INVALID_PATH;
-                }
-
-                ik_type = full_path[ploc] == MCM_SPROFILE_PATH_INDEX_KEY ?
-                          MCM_PLIMIT_INDEX : MCM_PLIMIT_KEY;
-
-                check_type = pidx < plen ? check_non_last_number : check_last_number;
-                if((check_type & ik_type) == 0)
-                {
-                    MCM_EMSG("invalid path, this part must be %s [%s]",
-                             check_type == MCM_PLIMIT_INDEX ? "index" : "key", full_path);
-                    return MCM_RCODE_CONFIG_INVALID_PATH;
-                }
-
-                // self_ik_buf 會需要增加的 store 的 key 值,
-                // 此部分不可放在 if(check_exist != 0) {...} 內.
-                target_ik = MCM_DTYPE_EK_SB(full_path + ploc + 1, NULL, 10);
-
-                if(pidx < plen)
-                    check_exist = 1;
-                else
-                    check_exist = check_last_exist == 0 ? 0 : 1;
-
-                if(check_exist != 0)
-                {
-                    target_store = mcm_find_store(self_model_group, parent_store, self_store_tree,
-                                                  ik_type, target_ik);
-                    if(target_store == NULL)
-                    {
-                        MCM_CFDMSG("invalid path, not find %s [%s][" MCM_DTYPE_EK_PF "]",
-                                   ik_type == MCM_PLIMIT_INDEX ? "index" : "key", full_path,
-                                   target_ik);
-                        return MCM_RCODE_CONFIG_NOT_FIND_STORE;
-                    }
-                }
-
-                // 下一階段的路徑必須是 name (下一層).
-                next_part = MCM_CPPATH_NAME;
-                // 紀錄最後的路徑是 index / key 類型.
-                if(pidx == plen)
-                    last_part = MCM_CPPATH_IK;
-            }
-
-            ploc = pidx + 1;
-        }
-    }
-
-    // gd 類型 group, 最後必須是 index / key 結尾.
-    if(self_model_group->group_type == MCM_DTYPE_GD_INDEX)
-        if(last_part != MCM_CPPATH_IK)
-        {
-            MCM_EMSG("invalid path, last part must be index/key [%s]", full_path);
-            return MCM_RCODE_CONFIG_INVALID_PATH;
-        }
-
-    if(self_model_group_buf != NULL)
-        *self_model_group_buf = self_model_group;
-    if(self_store_buf != NULL)
-        *self_store_buf = target_store;
-    if(parent_store_buf != NULL)
-        *parent_store_buf = parent_store;
-    if(self_ik_buf != NULL)
-        *self_ik_buf = target_ik;
-
-    return MCM_RCODE_PASS;
-}
-
-// 以路徑 (full_path) 尋找對應的 model group, sotre.
-// this_session (I) :
-//   session 資料.
-// full_path (I) :
-//   要處理的路徑.
 // self_model_group_buf (O) :
 //   儲存找到的 model group 的緩衝.
 // self_store_buf (O) :
 //   儲存找到的 store 的緩衝.
 // return :
-//   >= MCM_RCODE_PASS : 成功.
-//   <  MCM_RCODE_PASS : 錯誤.
+//   == MCM_RCODE_PASS                  : 成功.
+//   == MCM_RCODE_CONFIG_INVALID_PATH   : 無效的路徑.
+//   == MCM_RCODE_CONFIG_NOT_FIND_STORE : 找不到對應的 store.
 int mcm_config_find_entry_by_full(
     struct mcm_service_session_t *this_session,
     char *full_path,
@@ -6308,13 +6001,17 @@ int mcm_config_find_entry_by_full(
 
     MCM_CFDMSG("=> %s", __FUNCTION__);
 
-    fret = mcm_config_find_entry_use_full(this_session, full_path, MCM_PLIMIT_BOTH,
-                                          MCM_PLIMIT_BOTH, 1, self_model_group_buf,
-                                          self_store_buf, NULL, NULL);
+    fret = mcm_config_anysis_path(this_session, MCM_APATH_ENTRY_FULL,
+                                  full_path, 0,
+                                  0, 0, NULL,
+                                  MCM_PLIMIT_BOTH, MCM_PLIMIT_BOTH, 1,
+                                  self_model_group_buf, NULL,
+                                  self_store_buf, NULL,
+                                  NULL, NULL, NULL, NULL, NULL);
     if(fret < MCM_RCODE_PASS)
         if(fret != MCM_RCODE_CONFIG_NOT_FIND_STORE)
         {
-            MCM_EMSG("call mcm_config_find_entry_use_full() fail");
+            MCM_EMSG("call mcm_config_anysis_path() fail");
         }
 
     return fret;
@@ -6326,7 +6023,7 @@ int mcm_config_find_entry_by_full(
 // this_model_group (I) :
 //   目標 model group.
 // parent_store (I) :
-//   要新增的 store 的 parent.
+//   目標 store 的 parent.
 // ik_path (I) :
 //   要處理的 index / key 的路徑.
 // check_number (I) :
@@ -6336,6 +6033,9 @@ int mcm_config_find_entry_by_full(
 //     MCM_PLIMIT_KEY   : 必須是 key.
 // self_store_buf (O) :
 //   儲存找到的 store 的緩衝.
+// return :
+//   == MCM_RCODE_PASS                  : 成功.
+//   == MCM_RCODE_CONFIG_NOT_FIND_STORE : 找不到對應的 store.
 int mcm_config_find_entry_use_ik(
     struct mcm_service_session_t *this_session,
     struct mcm_config_model_group_t *this_model_group,
@@ -6389,11 +6089,14 @@ int mcm_config_find_entry_use_ik(
 // this_model_group (I) :
 //   目標 model group.
 // parent_store (I) :
-//   要新增的 store 的 parent.
+//   目標 store 的 parent.
 // ik_path (I) :
 //   要處理的 index / key 的路徑.
 // self_store_buf (O) :
 //   儲存找到的 store 的緩衝.
+// return :
+//   == MCM_RCODE_PASS                  : 成功.
+//   == MCM_RCODE_CONFIG_NOT_FIND_STORE : 找不到對應的 store.
 int mcm_config_find_entry_by_ik(
     struct mcm_service_session_t *this_session,
     struct mcm_config_model_group_t *this_model_group,
@@ -6617,11 +6320,16 @@ int mcm_config_get_alone_by_path(
 
     MCM_CFDMSG("[%s]", full_path);
 
-    fret = mcm_config_find_alone_use_full(this_session, full_path, MCM_PLIMIT_BOTH,
-                                          &self_model_group, &self_model_member, &self_store);
+    fret = mcm_config_anysis_path(this_session, MCM_APATH_ALONE_FULL,
+                                  full_path, 0,
+                                  0, 0, NULL,
+                                  MCM_PLIMIT_BOTH, MCM_PLIMIT_BOTH, 1,
+                                  &self_model_group, &self_model_member,
+                                  &self_store, NULL,
+                                  NULL, NULL, NULL, NULL, NULL);
     if(fret < MCM_RCODE_PASS)
     {
-        MCM_EMSG("call mcm_config_find_alone_use_full() fail");
+        MCM_EMSG("call mcm_config_anysis_path() fail");
         return fret;
     }
 
@@ -6894,11 +6602,16 @@ int mcm_config_set_alone_by_path(
 
     MCM_CFDMSG("[%s]", full_path);
 
-    fret = mcm_config_find_alone_use_full(this_session, full_path, MCM_PLIMIT_BOTH,
-                                          &self_model_group, &self_model_member, &self_store);
+    fret = mcm_config_anysis_path(this_session, MCM_APATH_ALONE_FULL,
+                                  full_path, 0,
+                                  0, 0, NULL,
+                                  MCM_PLIMIT_BOTH, MCM_PLIMIT_BOTH, 1,
+                                  &self_model_group, &self_model_member,
+                                  &self_store, NULL,
+                                  NULL, NULL, NULL, NULL, NULL);
     if(fret < MCM_RCODE_PASS)
     {
-        MCM_EMSG("call mcm_config_find_alone_use_full() fail");
+        MCM_EMSG("call mcm_config_anysis_path() fail");
         return fret;
     }
 
@@ -7004,12 +6717,16 @@ int mcm_config_get_entry_by_path(
 
     MCM_CFDMSG("[%s]", full_path);
 
-    fret = mcm_config_find_entry_use_full(this_session, full_path, MCM_PLIMIT_BOTH,
-                                          MCM_PLIMIT_BOTH, 1, &self_model_group, &self_store,
-                                          NULL, NULL);
+    fret = mcm_config_anysis_path(this_session, MCM_APATH_ENTRY_FULL,
+                                  full_path, 0,
+                                  0, 0, NULL,
+                                  MCM_PLIMIT_BOTH, MCM_PLIMIT_BOTH, 1,
+                                  &self_model_group, NULL,
+                                  &self_store, NULL,
+                                  NULL, NULL, NULL, NULL, NULL);
     if(fret < MCM_RCODE_PASS)
     {
-        MCM_EMSG("call mcm_config_find_entry_use_full() fail");
+        MCM_EMSG("call mcm_config_anysis_path() fail");
         return fret;
     }
 
@@ -7153,12 +6870,16 @@ int mcm_config_set_entry_by_path(
 
     MCM_CFDMSG("[%s]", full_path);
 
-    fret = mcm_config_find_entry_use_full(this_session, full_path, MCM_PLIMIT_BOTH,
-                                          MCM_PLIMIT_BOTH, 1, &self_model_group, &self_store,
-                                          NULL, NULL);
+    fret = mcm_config_anysis_path(this_session, MCM_APATH_ENTRY_FULL,
+                                  full_path, 0,
+                                  0, 0, NULL,
+                                  MCM_PLIMIT_BOTH, MCM_PLIMIT_BOTH, 1,
+                                  &self_model_group, NULL,
+                                  &self_store, NULL,
+                                  NULL, NULL, NULL, NULL, NULL);
     if(fret < MCM_RCODE_PASS)
     {
-        MCM_EMSG("call mcm_config_find_entry_use_full() fail");
+        MCM_EMSG("call mcm_config_anysis_path() fail");
         return fret;
     }
 
@@ -7355,12 +7076,17 @@ int mcm_config_add_entry_by_path(
 
     MCM_CFDMSG("[%s]", full_path);
 
-    fret = mcm_config_find_entry_use_full(this_session, full_path, MCM_PLIMIT_BOTH,
-                                          MCM_PLIMIT_KEY, 0, &self_model_group, &self_store,
-                                          &parent_store, &self_key);
+
+    fret = mcm_config_anysis_path(this_session, MCM_APATH_ENTRY_FULL,
+                                  full_path, 0,
+                                  0, 0, NULL,
+                                  MCM_PLIMIT_BOTH, MCM_PLIMIT_KEY, 0,
+                                  &self_model_group, NULL,
+                                  &self_store, &self_key,
+                                  NULL, NULL, NULL, NULL, &parent_store);
     if(fret < MCM_RCODE_PASS)
     {
-        MCM_EMSG("call mcm_config_find_entry_use_full() fail");
+        MCM_EMSG("call mcm_config_anysis_path() fail");
         return fret;
     }
 
@@ -7512,12 +7238,16 @@ int mcm_config_del_entry_by_path(
 
     MCM_CFDMSG("[%s]", full_path);
 
-    fret = mcm_config_find_entry_use_full(this_session, full_path, MCM_PLIMIT_BOTH,
-                                          MCM_PLIMIT_BOTH, 1, &self_model_group, &self_store,
-                                          NULL, NULL);
+    fret = mcm_config_anysis_path(this_session, MCM_APATH_ENTRY_FULL,
+                                  full_path, 0,
+                                  0, 0, NULL,
+                                  MCM_PLIMIT_BOTH, MCM_PLIMIT_BOTH, 1,
+                                  &self_model_group, NULL,
+                                  &self_store, NULL,
+                                  NULL, NULL, NULL, NULL, NULL);
     if(fret < MCM_RCODE_PASS)
     {
-        MCM_EMSG("call mcm_config_find_entry_use_full() fail");
+        MCM_EMSG("call mcm_config_anysis_path() fail");
         return fret;
     }
 
@@ -7699,12 +7429,16 @@ int mcm_config_get_all_entry_by_path(
 
     MCM_CFDMSG("[%s]", mix_path);
 
-    fret = mcm_config_find_entry_use_mix(this_session, mix_path, MCM_PLIMIT_BOTH,
-                                         &self_model_group, NULL, NULL, NULL, NULL,
-                                         &parent_store);
+    fret = mcm_config_anysis_path(this_session, MCM_APATH_ENTRY_MIX,
+                                  mix_path, 0,
+                                  0, 0, NULL,
+                                  MCM_PLIMIT_BOTH, 0, -1,
+                                  &self_model_group, NULL,
+                                  NULL, NULL,
+                                  NULL, NULL, NULL, NULL, &parent_store);
     if(fret < MCM_RCODE_PASS)
     {
-        MCM_EMSG("call mcm_config_find_entry_use_mix() fail");
+        MCM_EMSG("call mcm_config_anysis_path() fail");
         return fret;
     }
 
@@ -7890,12 +7624,16 @@ int mcm_config_del_all_entry_by_path(
 
     MCM_CFDMSG("[%s]", mix_path);
 
-    fret = mcm_config_find_entry_use_mix(this_session, mix_path, MCM_PLIMIT_BOTH,
-                                         &self_model_group, NULL, NULL, NULL, NULL,
-                                         &parent_store);
+    fret = mcm_config_anysis_path(this_session, MCM_APATH_ENTRY_MIX,
+                                  mix_path, 0,
+                                  0, 0, NULL,
+                                  MCM_PLIMIT_BOTH, 0, -1,
+                                  &self_model_group, NULL,
+                                  NULL, NULL,
+                                  NULL, NULL, NULL, NULL, &parent_store);
     if(fret < MCM_RCODE_PASS)
     {
-        MCM_EMSG("call mcm_config_find_entry_use_mix() fail");
+        MCM_EMSG("call mcm_config_anysis_path() fail");
         return fret;
     }
 
@@ -8073,12 +7811,16 @@ int mcm_config_get_count_by_path(
 
     MCM_CFDMSG("[%s]", mix_path);
 
-    fret = mcm_config_find_entry_use_mix(this_session, mix_path, MCM_PLIMIT_BOTH,
-                                         &self_model_group, NULL, NULL, NULL, NULL,
-                                         &parent_store);
+    fret = mcm_config_anysis_path(this_session, MCM_APATH_ENTRY_MIX,
+                                  mix_path, 0,
+                                  0, 0, NULL,
+                                  MCM_PLIMIT_BOTH, 0, -1,
+                                  &self_model_group, NULL,
+                                  NULL, NULL,
+                                  NULL, NULL, NULL, NULL, &parent_store);
     if(fret < MCM_RCODE_PASS)
     {
-        MCM_EMSG("call mcm_config_find_entry_use_mix() fail");
+        MCM_EMSG("call mcm_config_anysis_path() fail");
         return fret;
     }
 
@@ -8242,12 +7984,16 @@ int mcm_config_get_usable_key_by_path(
 
     MCM_CFDMSG("[%s]", mix_path);
 
-    fret = mcm_config_find_entry_use_mix(this_session, mix_path, MCM_PLIMIT_BOTH,
-                                         &self_model_group, NULL, NULL, NULL, NULL,
-                                         &parent_store);
+    fret = mcm_config_anysis_path(this_session, MCM_APATH_ENTRY_MIX,
+                                  mix_path, 0,
+                                  0, 0, NULL,
+                                  MCM_PLIMIT_BOTH, 0, -1,
+                                  &self_model_group, NULL,
+                                  NULL, NULL,
+                                  NULL, NULL, NULL, NULL, &parent_store);
     if(fret < MCM_RCODE_PASS)
     {
-        MCM_EMSG("call mcm_config_find_entry_use_mix() fail");
+        MCM_EMSG("call mcm_config_anysis_path() fail");
         return fret;
     }
 
@@ -8324,11 +8070,16 @@ int mcm_config_get_alone_status_by_path(
 
     MCM_CFDMSG("[%s]", full_path);
 
-    fret = mcm_config_find_alone_use_full(this_session, full_path, MCM_PLIMIT_BOTH,
-                                          &self_model_group, &self_model_member, &self_store);
+    fret = mcm_config_anysis_path(this_session, MCM_APATH_ALONE_FULL,
+                                  full_path, 0,
+                                  0, 0, NULL,
+                                  MCM_PLIMIT_BOTH, MCM_PLIMIT_BOTH, 1,
+                                  &self_model_group, &self_model_member,
+                                  &self_store, NULL,
+                                  NULL, NULL, NULL, NULL, NULL);
     if(fret < MCM_RCODE_PASS)
     {
-        MCM_EMSG("call mcm_config_find_alone_use_full() fail");
+        MCM_EMSG("call mcm_config_anysis_path() fail");
         return fret;
     }
 
@@ -8402,12 +8153,16 @@ int mcm_config_get_entry_self_status_by_path(
 
     MCM_CFDMSG("[%s]", full_path);
 
-    fret = mcm_config_find_entry_use_full(this_session, full_path, MCM_PLIMIT_BOTH,
-                                          MCM_PLIMIT_BOTH, 1, &self_model_group, &self_store,
-                                          NULL, NULL);
+    fret = mcm_config_anysis_path(this_session, MCM_APATH_ENTRY_FULL,
+                                  full_path, 0,
+                                  0, 0, NULL,
+                                  MCM_PLIMIT_BOTH, MCM_PLIMIT_BOTH, 1,
+                                  &self_model_group, NULL,
+                                  &self_store, NULL,
+                                  NULL, NULL, NULL, NULL, NULL);
     if(fret < MCM_RCODE_PASS)
     {
-        MCM_EMSG("call mcm_config_find_entry_use_full() fail");
+        MCM_EMSG("call mcm_config_anysis_path() fail");
         return fret;
     }
 
@@ -8489,12 +8244,16 @@ int mcm_config_get_entry_all_status_by_path(
 
     MCM_CFDMSG("[%s]", full_path);
 
-    fret = mcm_config_find_entry_use_full(this_session, full_path, MCM_PLIMIT_BOTH,
-                                          MCM_PLIMIT_BOTH, 1, &self_model_group, &self_store,
-                                          NULL, NULL);
+    fret = mcm_config_anysis_path(this_session, MCM_APATH_ENTRY_FULL,
+                                  full_path, 0,
+                                  0, 0, NULL,
+                                  MCM_PLIMIT_BOTH, MCM_PLIMIT_BOTH, 1,
+                                  &self_model_group, NULL,
+                                  &self_store, NULL,
+                                  NULL, NULL, NULL, NULL, NULL);
     if(fret < MCM_RCODE_PASS)
     {
-        MCM_EMSG("call mcm_config_find_entry_use_full() fail");
+        MCM_EMSG("call mcm_config_anysis_path() fail");
         return fret;
     }
 
@@ -8778,8 +8537,8 @@ int mcm_config_check_store_file(
         goto FREE_02;
     }
 
-    fret = mcm_load_store_process(mcm_config_root_model_group, file_fp, MCM_FSOURCE_VERIFY,
-                                  &read_buf, &read_size, &self_base, &self_store);
+    fret = mcm_load_store_process(file_fp, MCM_FSOURCE_VERIFY, &read_buf, &read_size, &self_base,
+                                  &self_store);
     if(fret < MCM_RCODE_PASS)
     {
         MCM_EMSG("call mcm_load_store_process() fail");

@@ -68,21 +68,31 @@ int mcm_config_shutdown(
 int mcm_config_remove_store_current_profile(
     struct mcm_service_session_t *this_session);
 
-int mcm_config_find_group_by_mask(
+int mcm_config_anysis_path(
     struct mcm_service_session_t *this_session,
-    char *mask_path,
-    struct mcm_config_model_group_t **self_model_group_buf);
-
-int mcm_config_find_entry_use_mix(
-    struct mcm_service_session_t *this_session,
-    char *mix_path,
-    MCM_DTYPE_LIST_TD check_number,
+    MCM_DTYPE_LIST_TD check_method,
+    char *this_path,
+    MCM_DTYPE_USIZE_TD path_len,
+    MCM_DTYPE_LIST_TD file_source,
+    MCM_DTYPE_USIZE_TD file_line,
+    void *store_level,
+    MCM_DTYPE_LIST_TD check_non_last_number,
+    MCM_DTYPE_LIST_TD check_last_number,
+    MCM_DTYPE_LIST_TD check_last_exist,
     struct mcm_config_model_group_t **self_model_group_buf,
+    struct mcm_config_model_member_t **self_model_member_buf,
+    struct mcm_config_store_t **self_store_buf,
+    MCM_DTYPE_EK_TD *self_ik_buf,
     struct mcm_config_store_t **self_store_list_head_buf,
     struct mcm_config_store_t **self_store_list_tail_buf,
     struct mcm_config_store_t **self_store_tree_buf,
     MCM_DTYPE_EK_TD *self_count_buf,
     struct mcm_config_store_t **parent_store_buf);
+
+int mcm_config_find_group_by_mask(
+    struct mcm_service_session_t *this_session,
+    char *mask_path,
+    struct mcm_config_model_group_t **self_model_group_buf);
 
 int mcm_config_find_entry_by_mix(
     struct mcm_service_session_t *this_session,
@@ -94,31 +104,12 @@ int mcm_config_find_entry_by_mix(
     MCM_DTYPE_EK_TD *self_count_buf,
     struct mcm_config_store_t **parent_store_buf);
 
-int mcm_config_find_alone_use_full(
-    struct mcm_service_session_t *this_session,
-    char *full_path,
-    MCM_DTYPE_LIST_TD check_number,
-    struct mcm_config_model_group_t **self_model_group_buf,
-    struct mcm_config_model_member_t **self_model_member_buf,
-    struct mcm_config_store_t **self_store_buf);
-
 int mcm_config_find_alone_by_full(
     struct mcm_service_session_t *this_session,
     char *full_path,
     struct mcm_config_model_group_t **self_model_group_buf,
     struct mcm_config_model_member_t **self_model_member_buf,
     struct mcm_config_store_t **self_store_buf);
-
-int mcm_config_find_entry_use_full(
-    struct mcm_service_session_t *this_session,
-    char *full_path,
-    MCM_DTYPE_LIST_TD check_non_last_number,
-    MCM_DTYPE_LIST_TD check_last_number,
-    MCM_DTYPE_BOOL_TD check_last_exist,
-    struct mcm_config_model_group_t **self_model_group_buf,
-    struct mcm_config_store_t **self_store_buf,
-    struct mcm_config_store_t **parent_store_buf,
-    MCM_DTYPE_EK_TD *self_ik_buf);
 
 int mcm_config_find_entry_by_full(
     struct mcm_service_session_t *this_session,

@@ -559,11 +559,16 @@ int mcm_req_get_alone(
 
     mcm_parse_get_alone(this_session);
 
-    fret = mcm_config_find_alone_use_full(this_session, this_session->req_path, MCM_PLIMIT_BOTH,
-                                          &self_model_group, &self_model_member, &self_store);
+    fret = mcm_config_anysis_path(this_session, MCM_APATH_ALONE_FULL,
+                                  this_session->req_path, 0,
+                                  0, 0, NULL,
+                                  MCM_PLIMIT_BOTH, MCM_PLIMIT_BOTH, 1,
+                                  &self_model_group, &self_model_member,
+                                  &self_store, NULL,
+                                  NULL, NULL, NULL, NULL, NULL);
     if(fret < MCM_RCODE_PASS)
     {
-        MCM_EMSG("call mcm_config_find_alone_use_full() fail");
+        MCM_EMSG("call mcm_config_anysis_path() fail");
         goto FREE_01;
     }
 
@@ -733,11 +738,16 @@ int mcm_req_set_alone(
 
     mcm_parse_set_alone(this_session);
 
-    fret = mcm_config_find_alone_use_full(this_session, this_session->req_path, MCM_PLIMIT_BOTH,
-                                          &self_model_group, &self_model_member, &self_store);
+    fret = mcm_config_anysis_path(this_session, MCM_APATH_ALONE_FULL,
+                                  this_session->req_path, 0,
+                                  0, 0, NULL,
+                                  MCM_PLIMIT_BOTH, MCM_PLIMIT_BOTH, 1,
+                                  &self_model_group, &self_model_member,
+                                  &self_store, NULL,
+                                  NULL, NULL, NULL, NULL, NULL);
     if(fret < MCM_RCODE_PASS)
     {
-        MCM_EMSG("call mcm_config_find_alone_use_full() fail");
+        MCM_EMSG("call mcm_config_anysis_path() fail");
         goto FREE_01;
     }
 
@@ -884,12 +894,16 @@ int mcm_req_get_entry(
 
     mcm_parse_get_entry(this_session);
 
-    fret = mcm_config_find_entry_use_full(this_session, this_session->req_path,
-                                          MCM_PLIMIT_BOTH, MCM_PLIMIT_BOTH, 1,
-                                          &self_model_group, &self_store, NULL, NULL);
+    fret = mcm_config_anysis_path(this_session, MCM_APATH_ENTRY_FULL,
+                                  this_session->req_path, 0,
+                                  0, 0, NULL,
+                                  MCM_PLIMIT_BOTH, MCM_PLIMIT_BOTH, 1,
+                                  &self_model_group, NULL,
+                                  &self_store, NULL,
+                                  NULL, NULL, NULL, NULL, NULL);
     if(fret < MCM_RCODE_PASS)
     {
-        MCM_EMSG("call mcm_config_find_entry_use_full() fail");
+        MCM_EMSG("call mcm_config_anysis_path() fail");
         goto FREE_01;
     }
 
@@ -991,7 +1005,6 @@ int mcm_req_set_entry(
     struct mcm_service_session_t *this_session)
 {
     int fret, cret;
-    MCM_DTYPE_LIST_TD path_limit;
     struct mcm_config_model_group_t *self_model_group;
     struct mcm_config_store_t *self_store;
 
@@ -1000,14 +1013,16 @@ int mcm_req_set_entry(
 
     mcm_parse_set_entry(this_session);
 
-    path_limit = this_session->call_from == MCM_CFROM_WEB ? MCM_PLIMIT_KEY : MCM_PLIMIT_BOTH;
-
-    fret = mcm_config_find_entry_use_full(this_session, this_session->req_path,
-                                          path_limit, path_limit, 1,
-                                          &self_model_group, &self_store, NULL, NULL);
+    fret = mcm_config_anysis_path(this_session, MCM_APATH_ENTRY_FULL,
+                                  this_session->req_path, 0,
+                                  0, 0, NULL,
+                                  MCM_PLIMIT_BOTH, MCM_PLIMIT_BOTH, 1,
+                                  &self_model_group, NULL,
+                                  &self_store, NULL,
+                                  NULL, NULL, NULL, NULL, NULL);
     if(fret < MCM_RCODE_PASS)
     {
-        MCM_EMSG("call mcm_config_find_entry_use_full() fail");
+        MCM_EMSG("call mcm_config_anysis_path() fail");
         goto FREE_01;
     }
 
@@ -1124,12 +1139,16 @@ int mcm_req_add_entry(
 
     path_limit = this_session->call_from == MCM_CFROM_WEB ? MCM_PLIMIT_KEY : MCM_PLIMIT_BOTH;
 
-    fret = mcm_config_find_entry_use_full(this_session, this_session->req_path,
-                                          path_limit, MCM_PLIMIT_KEY, 0,
-                                          &self_model_group, &self_store, &parent_store, &self_key);
+    fret = mcm_config_anysis_path(this_session, MCM_APATH_ENTRY_FULL,
+                                  this_session->req_path, 0,
+                                  0, 0, NULL,
+                                  path_limit, MCM_PLIMIT_KEY, 0,
+                                  &self_model_group, NULL,
+                                  &self_store, &self_key,
+                                  NULL, NULL, NULL, NULL, &parent_store);
     if(fret < MCM_RCODE_PASS)
     {
-        MCM_EMSG("call mcm_config_find_entry_use_full() fail");
+        MCM_EMSG("call mcm_config_anysis_path() fail");
         goto FREE_01;
     }
 
@@ -1223,12 +1242,16 @@ int mcm_req_del_entry(
 
     path_limit = this_session->call_from == MCM_CFROM_WEB ? MCM_PLIMIT_KEY : MCM_PLIMIT_BOTH;
 
-    fret = mcm_config_find_entry_use_full(this_session, this_session->req_path,
-                                          path_limit, path_limit, 1,
-                                          &self_model_group, &self_store, NULL, NULL);
+    fret = mcm_config_anysis_path(this_session, MCM_APATH_ENTRY_FULL,
+                                  this_session->req_path, 0,
+                                  0, 0, NULL,
+                                  path_limit, path_limit, 1,
+                                  &self_model_group, NULL,
+                                  &self_store, NULL,
+                                  NULL, NULL, NULL, NULL, NULL);
     if(fret < MCM_RCODE_PASS)
     {
-        MCM_EMSG("call mcm_config_find_entry_use_full() fail");
+        MCM_EMSG("call mcm_config_anysis_path() fail");
         goto FREE_01;
     }
 
@@ -1329,12 +1352,16 @@ int mcm_req_get_all_entry(
 
     mcm_parse_get_all_entry(this_session);
 
-    fret = mcm_config_find_entry_use_mix(this_session, this_session->req_path, MCM_PLIMIT_BOTH,
-                                         &self_model_group, NULL, NULL, NULL, NULL,
-                                         &parent_store);
+    fret = mcm_config_anysis_path(this_session, MCM_APATH_ENTRY_MIX,
+                                  this_session->req_path, 0,
+                                  0, 0, NULL,
+                                  MCM_PLIMIT_BOTH, 0, -1,
+                                  &self_model_group, NULL,
+                                  NULL, NULL,
+                                  NULL, NULL, NULL, NULL, &parent_store);
     if(fret < MCM_RCODE_PASS)
     {
-        MCM_EMSG("call mcm_config_find_entry_use_mix() fail");
+        MCM_EMSG("call mcm_config_anysis_path() fail");
         goto FREE_01;
     }
 
@@ -1439,12 +1466,16 @@ int mcm_req_del_all_entry(
 
     path_limit = this_session->call_from == MCM_CFROM_WEB ? MCM_PLIMIT_KEY : MCM_PLIMIT_BOTH;
 
-    fret = mcm_config_find_entry_use_mix(this_session, this_session->req_path, path_limit,
-                                         &self_model_group, NULL, NULL, NULL, NULL,
-                                         &parent_store);
+    fret = mcm_config_anysis_path(this_session, MCM_APATH_ENTRY_MIX,
+                                  this_session->req_path, 0,
+                                  0, 0, NULL,
+                                  path_limit, 0, -1,
+                                  &self_model_group, NULL,
+                                  NULL, NULL,
+                                  NULL, NULL, NULL, NULL, &parent_store);
     if(fret < MCM_RCODE_PASS)
     {
-        MCM_EMSG("call mcm_config_find_entry_use_mix() fail");
+        MCM_EMSG("call mcm_config_anysis_path() fail");
         goto FREE_01;
     }
 
@@ -2632,12 +2663,17 @@ int mcm_req_get_list_value(
 
     mcm_parse_get_list_value(this_session);
 
-    fret = mcm_config_find_entry_use_full(this_session, this_session->req_path,
-                                          MCM_PLIMIT_BOTH, MCM_PLIMIT_BOTH, 1,
-                                          &self_model_group, &self_store, NULL, NULL);
+
+    fret = mcm_config_anysis_path(this_session, MCM_APATH_ENTRY_FULL,
+                                  this_session->req_path, 0,
+                                  0, 0, NULL,
+                                  MCM_PLIMIT_BOTH, MCM_PLIMIT_BOTH, 1,
+                                  &self_model_group, NULL,
+                                  &self_store, NULL,
+                                  NULL, NULL, NULL, NULL, NULL);
     if(fret < MCM_RCODE_PASS)
     {
-        MCM_EMSG("call mcm_config_find_entry_use_full() fail");
+        MCM_EMSG("call mcm_config_anysis_path() fail");
         goto FREE_01;
     }
 
@@ -2758,11 +2794,16 @@ int mcm_req_set_any_type_alone(
 
     path_limit = this_session->call_from == MCM_CFROM_WEB ? MCM_PLIMIT_KEY : MCM_PLIMIT_BOTH;
 
-    fret = mcm_config_find_alone_use_full(this_session, this_session->req_path, path_limit,
-                                          &self_model_group, &self_model_member, &self_store);
+    fret = mcm_config_anysis_path(this_session, MCM_APATH_ALONE_FULL,
+                                  this_session->req_path, 0,
+                                  0, 0, NULL,
+                                  path_limit, path_limit, 1,
+                                  &self_model_group, &self_model_member,
+                                  &self_store, NULL,
+                                  NULL, NULL, NULL, NULL, NULL);
     if(fret < MCM_RCODE_PASS)
     {
-        MCM_EMSG("call mcm_config_find_alone_use_full() fail");
+        MCM_EMSG("call mcm_config_anysis_path() fail");
         goto FREE_01;
     }
 
@@ -2868,11 +2909,16 @@ int mcm_req_get_with_type_alone(
 
     mcm_parse_get_with_type_alone(this_session);
 
-    fret = mcm_config_find_alone_use_full(this_session, this_session->req_path, MCM_PLIMIT_BOTH,
-                                          &self_model_group, &self_model_member, &self_store);
+    fret = mcm_config_anysis_path(this_session, MCM_APATH_ALONE_FULL,
+                                  this_session->req_path, 0,
+                                  0, 0, NULL,
+                                  MCM_PLIMIT_BOTH, MCM_PLIMIT_BOTH, 1,
+                                  &self_model_group, &self_model_member,
+                                  &self_store, NULL,
+                                  NULL, NULL, NULL, NULL, NULL);
     if(fret < MCM_RCODE_PASS)
     {
-        MCM_EMSG("call mcm_config_find_alone_use_full() fail");
+        MCM_EMSG("call mcm_config_anysis_path() fail");
         goto FREE_01;
     }
 
