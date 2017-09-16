@@ -61,9 +61,9 @@ struct mcm_config_model_group_t
     // group 的 member 數目 (不含 ek 類型的 member).
     MCM_DTYPE_USIZE_TD member_real_count;
     // 鍊結 head member (link-list).
-    struct mcm_config_model_member_t *member_list;
+    struct mcm_config_model_member_t *model_member_list;
     // 鍊結 root member (avl-tree).
-    struct mcm_config_model_member_t *member_tree;
+    struct mcm_config_model_member_t *model_member_tree;
     // group 的 member 中 ek 類型的 member 在 -
     // mcm_lib/mcm_lheader/mcm_config_data_define_info_auto.h 中 struct mcm_ds_xxxx 的偏移植.
     MCM_DTYPE_USIZE_TD entry_key_offset_status;

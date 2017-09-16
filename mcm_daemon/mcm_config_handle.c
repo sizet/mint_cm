@@ -1184,11 +1184,11 @@ int mcm_destory_model(
 
         MCM_CFDMSG("destory[%s]", self_model_group->group_name);
 
-        MCM_CFDMSG("free member_list[%p]", self_model_group->member_list);
-        for(self_model_member = self_model_group->member_list; self_model_member != NULL;
-            self_model_member = self_model_group->member_list)
+        MCM_CFDMSG("free model_member_list[%p]", self_model_group->model_member_list);
+        for(self_model_member = self_model_group->model_member_list; self_model_member != NULL;
+            self_model_member = self_model_group->model_member_list)
         {
-            self_model_group->member_list = self_model_member->next_model_member;
+            self_model_group->model_member_list = self_model_member->next_model_member;
 
             MCM_CFDMSG("destory member[%s]", self_model_member->member_name);
 
@@ -1515,10 +1515,11 @@ int mcm_create_model(
                                parent_model_group->entry_key_offset_value);
                 }
 
-                if(parent_model_group->member_list == NULL)
+                if(parent_model_group->model_member_list == NULL)
                 {
-                    parent_model_group->member_list = self_model_member;
-                    MCM_CFDMSG("link member_list[%p]", parent_model_group->member_list);
+                    parent_model_group->model_member_list = self_model_member;
+                    MCM_CFDMSG("link model_member_list[%p]",
+                               parent_model_group->model_member_list);
                 }
                 if(last_model_member != NULL)
                 {
@@ -1527,10 +1528,10 @@ int mcm_create_model(
                                last_model_member, last_model_member->next_model_member);
                 }
 
-                parent_model_group->member_tree =
-                    mcm_tree_add_member(parent_model_group->member_tree, self_model_member);
-                MCM_CFDMSG("link parent->member_tree[%s][%s]",
-                           parent_model_group->member_tree->member_name,
+                parent_model_group->model_member_tree =
+                    mcm_tree_add_member(parent_model_group->model_member_tree, self_model_member);
+                MCM_CFDMSG("link parent->model_member_tree[%s][%s]",
+                           parent_model_group->model_member_tree->member_name,
                            self_model_member->member_name);
 
                 break;
@@ -1566,8 +1567,8 @@ FREE_01:
     {
         if(self_model_member != NULL)
         {
-            if(parent_model_group->member_list == self_model_member)
-                parent_model_group->member_list = NULL;
+            if(parent_model_group->model_member_list == self_model_member)
+                parent_model_group->model_member_list = NULL;
             if(last_model_member == self_model_member)
                 last_model_member->next_model_member = NULL;
             if(self_model_member->member_name != NULL)
@@ -1843,7 +1844,7 @@ int mcm_assign_store_default(
     }
     else
     {
-        for(self_model_member = this_model_group->member_list; self_model_member != NULL;
+        for(self_model_member = this_model_group->model_member_list; self_model_member != NULL;
             self_model_member = self_model_member->next_model_member)
         {
             data_loc = this_store->data_value_sys + self_model_member->offset_in_value;
@@ -2002,7 +2003,7 @@ int mcm_destory_store(
         if(self_store->need_update != 0)
             mcm_del_update_store(self_store);
 
-        if(self_model_group->member_list != NULL)
+        if(self_model_group->model_member_list != NULL)
         {
             MCM_CFDMSG("[%s.%c" MCM_DTYPE_EK_PF "] free data_status[%p]",
                        self_model_group->group_name, MCM_SPROFILE_PATH_KEY_KEY, dbg_key,
@@ -2137,7 +2138,7 @@ int mcm_create_store(
                    sizeof(struct mcm_config_store_t), self_store);
 
         // 如果有 model_member, 替 model_member 取得儲存空間.
-        if(this_model_group->member_list != NULL)
+        if(this_model_group->model_member_list != NULL)
         {
             fret = mcm_assign_store_default(this_model_group, self_store, assign_default,
                                             default_key);
@@ -3624,7 +3625,7 @@ int mcm_load_store_anysis_member(
             dloc = ploc + xidx + 1;
             dlen = plen - (xidx + 1);
 
-            self_model_member = mcm_tree_find_member(this_model_group->member_tree,
+            self_model_member = mcm_tree_find_member(this_model_group->model_member_tree,
                                                      read_con + nloc, nlen);
             MCM_CFDMSG("search name(member)[" MCM_DTYPE_USIZE_PF "][%s][%s]",
                        nlen, read_con + nloc, self_model_member == NULL ? "unknown" : "find");
@@ -3695,7 +3696,7 @@ NEXT_PARAMETER:
         }
     }
 
-    for(self_model_member = this_model_group->member_list; self_model_member != NULL;
+    for(self_model_member = this_model_group->model_member_list; self_model_member != NULL;
         self_model_member = self_model_member->next_model_member)
     {
         if(self_model_member->member_type == MCM_DTYPE_EK_INDEX)
@@ -4443,7 +4444,8 @@ int mcm_save_store_process(
         {
             fprintf(file_fp, "%s%c", store_path_con, MCM_SPROFILE_PARAMETER_SPLIT_KEY);
 
-            for(self_model_member = self_model_group->member_list; self_model_member != NULL;
+            for(self_model_member = self_model_group->model_member_list;
+                self_model_member != NULL;
                 self_model_member = self_model_member->next_model_member)
             {
                 if(self_model_member->member_type == MCM_DTYPE_EK_INDEX)
@@ -5784,7 +5786,7 @@ int mcm_config_anysis_path(
         MCM_CFDMSG("member [%s]", this_path + ploc);
 
         // 處理 member 部分.
-        self_model_member = mcm_tree_find_member(self_model_group->member_tree,
+        self_model_member = mcm_tree_find_member(self_model_group->model_member_tree,
                                                  this_path + ploc, pidx - ploc);
         if(self_model_member == NULL)
         {
@@ -8208,7 +8210,7 @@ int mcm_config_get_entry_all_status_by_info(
     MCM_DBG_SHOW_ENTRY_PATH(this_model_group, this_store, dbg_dloc, dbg_key);
 #endif
 
-    for(self_model_member = this_model_group->member_list; self_model_member != NULL;
+    for(self_model_member = this_model_group->model_member_list; self_model_member != NULL;
         self_model_member = self_model_member->next_model_member)
     {
         buf_loc = data_buf + self_model_member->offset_in_status;
@@ -8452,7 +8454,7 @@ int mcm_config_set_entry_all_status(
     MCM_DBG_SHOW_ENTRY_PATH(this_model_group, this_store, data_loc, dbg_key);
 #endif
 
-    for(self_model_member = this_model_group->member_list; self_model_member != NULL;
+    for(self_model_member = this_model_group->model_member_list; self_model_member != NULL;
         self_model_member = self_model_member->next_model_member)
     {
         if(self_model_member->member_type == MCM_DTYPE_EK_INDEX)
@@ -8601,7 +8603,7 @@ int mcm_config_get_list_name_size(
 
     MCM_CFDMSG("[%s]", this_model_group->group_name);
 
-    for(self_model_member = this_model_group->member_list; self_model_member != NULL;
+    for(self_model_member = this_model_group->model_member_list; self_model_member != NULL;
         self_model_member = self_model_member->next_model_member)
     {
         // 格式 : [name_len][name][0].
@@ -8638,7 +8640,7 @@ int mcm_config_get_list_name_data(
 
     buf_loc = data_buf;
 
-    for(self_model_member = this_model_group->member_list; self_model_member != NULL;
+    for(self_model_member = this_model_group->model_member_list; self_model_member != NULL;
         self_model_member = self_model_member->next_model_member)
     {
         // 格式 : [name_len][name][0].
@@ -8678,7 +8680,7 @@ int mcm_config_get_list_type_size(
 
     MCM_CFDMSG("[%s]", this_model_group->group_name);
 
-    for(self_model_member = this_model_group->member_list; self_model_member != NULL;
+    for(self_model_member = this_model_group->model_member_list; self_model_member != NULL;
         self_model_member = self_model_member->next_model_member)
     {
         // 格式 : [data_type].
@@ -8714,7 +8716,7 @@ int mcm_config_get_list_type_data(
 
     buf_loc = data_buf;
 
-    for(self_model_member = this_model_group->member_list; self_model_member != NULL;
+    for(self_model_member = this_model_group->model_member_list; self_model_member != NULL;
         self_model_member = self_model_member->next_model_member)
     {
         // 格式 : [data_type].
@@ -8764,7 +8766,7 @@ int mcm_config_get_list_value_size(
                this_store->data_value_new : this_store->data_value_sys;
 #endif
 
-    for(self_model_member = this_model_group->member_list; self_model_member != NULL;
+    for(self_model_member = this_model_group->model_member_list; self_model_member != NULL;
         self_model_member = self_model_member->next_model_member)
     {
         // 格式 : [data_value_size][data_value].
@@ -8884,7 +8886,7 @@ int mcm_config_get_list_value_data(
 
     buf_loc = data_buf;
 
-    for(self_model_member = this_model_group->member_list; self_model_member != NULL;
+    for(self_model_member = this_model_group->model_member_list; self_model_member != NULL;
         self_model_member = self_model_member->next_model_member)
     {
         // 格式 : [data_value_size][data_value].
