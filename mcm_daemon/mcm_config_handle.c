@@ -164,7 +164,7 @@ void *mcm_config_module_fp = NULL;
 
 
 // model group (avl-tree) 旋轉調整 (left-left).
-struct mcm_config_model_group_t *mcm_tree_rotate_ll_group(
+struct mcm_config_model_group_t *mcm_tree_rotate_ll_model_group(
     struct mcm_config_model_group_t *this_model_group)
 {
     struct mcm_config_model_group_t *base_model_group;
@@ -185,7 +185,7 @@ struct mcm_config_model_group_t *mcm_tree_rotate_ll_group(
 }
 
 // model group (avl-tree) 旋轉調整 (right-right).
-struct mcm_config_model_group_t *mcm_tree_rotate_rr_group(
+struct mcm_config_model_group_t *mcm_tree_rotate_rr_model_group(
     struct mcm_config_model_group_t *this_model_group)
 {
     struct mcm_config_model_group_t *base_model_group;
@@ -206,27 +206,27 @@ struct mcm_config_model_group_t *mcm_tree_rotate_rr_group(
 }
 
 // model group (avl-tree) 旋轉調整 (left-right).
-struct mcm_config_model_group_t *mcm_tree_rotate_lr_group(
+struct mcm_config_model_group_t *mcm_tree_rotate_lr_model_group(
     struct mcm_config_model_group_t *this_model_group)
 {
     this_model_group->ltree_model_group =
-        mcm_tree_rotate_rr_group(this_model_group->ltree_model_group);
+        mcm_tree_rotate_rr_model_group(this_model_group->ltree_model_group);
 
-    return mcm_tree_rotate_ll_group(this_model_group);
+    return mcm_tree_rotate_ll_model_group(this_model_group);
 }
 
 // model group (avl-tree) 旋轉調整 (right-left).
-struct mcm_config_model_group_t *mcm_tree_rotate_rl_group(
+struct mcm_config_model_group_t *mcm_tree_rotate_rl_model_group(
     struct mcm_config_model_group_t *this_model_group)
 {
     this_model_group->rtree_model_group =
-        mcm_tree_rotate_ll_group(this_model_group->rtree_model_group);
+        mcm_tree_rotate_ll_model_group(this_model_group->rtree_model_group);
 
-    return mcm_tree_rotate_rr_group(this_model_group);
+    return mcm_tree_rotate_rr_model_group(this_model_group);
 }
 
 // model group (avl-tree) 增加節點.
-struct mcm_config_model_group_t *mcm_tree_add_group(
+struct mcm_config_model_group_t *mcm_tree_add_model_group(
     struct mcm_config_model_group_t *base_model_group,
     struct mcm_config_model_group_t *this_model_group)
 {
@@ -239,7 +239,7 @@ struct mcm_config_model_group_t *mcm_tree_add_group(
         if(strcmp(this_model_group->group_name, base_model_group->group_name) < 0)
         {
             base_model_group->ltree_model_group =
-                mcm_tree_add_group(base_model_group->ltree_model_group, this_model_group);
+                mcm_tree_add_model_group(base_model_group->ltree_model_group, this_model_group);
 
             if((MCM_TREE_HEIGHT_GROUP(base_model_group->ltree_model_group) -
                 MCM_TREE_HEIGHT_GROUP(base_model_group->rtree_model_group)) >= 2)
@@ -247,18 +247,18 @@ struct mcm_config_model_group_t *mcm_tree_add_group(
                 if(strcmp(this_model_group->group_name,
                           base_model_group->ltree_model_group->group_name) < 0)
                 {
-                    base_model_group = mcm_tree_rotate_ll_group(base_model_group);
+                    base_model_group = mcm_tree_rotate_ll_model_group(base_model_group);
                 }
                 else
                 {
-                    base_model_group = mcm_tree_rotate_lr_group(base_model_group);
+                    base_model_group = mcm_tree_rotate_lr_model_group(base_model_group);
                 }
             }
         }
         else
         {
             base_model_group->rtree_model_group =
-                mcm_tree_add_group(base_model_group->rtree_model_group, this_model_group);
+                mcm_tree_add_model_group(base_model_group->rtree_model_group, this_model_group);
 
             if((MCM_TREE_HEIGHT_GROUP(base_model_group->rtree_model_group) -
                 MCM_TREE_HEIGHT_GROUP(base_model_group->ltree_model_group)) >= 2)
@@ -266,11 +266,11 @@ struct mcm_config_model_group_t *mcm_tree_add_group(
                 if(strcmp(this_model_group->group_name,
                           base_model_group->rtree_model_group->group_name) > 0)
                 {
-                    base_model_group = mcm_tree_rotate_rr_group(base_model_group);
+                    base_model_group = mcm_tree_rotate_rr_model_group(base_model_group);
                 }
                 else
                 {
-                    base_model_group = mcm_tree_rotate_rl_group(base_model_group);
+                    base_model_group = mcm_tree_rotate_rl_model_group(base_model_group);
                 }
             }
         }
@@ -284,7 +284,7 @@ struct mcm_config_model_group_t *mcm_tree_add_group(
 }
 
 // model group (avl-tree) 搜尋 (使用 group_name).
-struct mcm_config_model_group_t *mcm_tree_find_group(
+struct mcm_config_model_group_t *mcm_tree_find_model_group(
     struct mcm_config_model_group_t *this_model_group,
     char *name_str,
     MCM_DTYPE_USIZE_TD name_len)
@@ -319,7 +319,7 @@ struct mcm_config_model_group_t *mcm_tree_find_group(
 }
 
 // model member (avl-tree) 旋轉調整 (left-left).
-struct mcm_config_model_member_t *mcm_tree_rotate_ll_member(
+struct mcm_config_model_member_t *mcm_tree_rotate_ll_model_member(
     struct mcm_config_model_member_t *this_model_member)
 {
     struct mcm_config_model_member_t *base_model_member;
@@ -340,7 +340,7 @@ struct mcm_config_model_member_t *mcm_tree_rotate_ll_member(
 }
 
 // model member (avl-tree) 旋轉調整 (right-right).
-struct mcm_config_model_member_t *mcm_tree_rotate_rr_member(
+struct mcm_config_model_member_t *mcm_tree_rotate_rr_model_member(
     struct mcm_config_model_member_t *this_model_member)
 {
     struct mcm_config_model_member_t *base_model_member;
@@ -361,27 +361,27 @@ struct mcm_config_model_member_t *mcm_tree_rotate_rr_member(
 }
 
 // model member (avl-tree) 旋轉調整 (left-right).
-struct mcm_config_model_member_t *mcm_tree_rotate_lr_member(
+struct mcm_config_model_member_t *mcm_tree_rotate_lr_model_member(
     struct mcm_config_model_member_t *this_model_member)
 {
     this_model_member->ltree_model_member =
-        mcm_tree_rotate_rr_member(this_model_member->ltree_model_member);
+        mcm_tree_rotate_rr_model_member(this_model_member->ltree_model_member);
 
-    return mcm_tree_rotate_ll_member(this_model_member);
+    return mcm_tree_rotate_ll_model_member(this_model_member);
 }
 
 // model member (avl-tree) 旋轉調整 (right-left).
-struct mcm_config_model_member_t *mcm_tree_rotate_rl_member(
+struct mcm_config_model_member_t *mcm_tree_rotate_rl_model_member(
     struct mcm_config_model_member_t *this_model_member)
 {
     this_model_member->rtree_model_member =
-        mcm_tree_rotate_ll_member(this_model_member->rtree_model_member);
+        mcm_tree_rotate_ll_model_member(this_model_member->rtree_model_member);
 
-    return mcm_tree_rotate_rr_member(this_model_member);
+    return mcm_tree_rotate_rr_model_member(this_model_member);
 }
 
 // model member (avl-tree) 增加節點.
-struct mcm_config_model_member_t *mcm_tree_add_member(
+struct mcm_config_model_member_t *mcm_tree_add_model_member(
     struct mcm_config_model_member_t *base_model_member,
     struct mcm_config_model_member_t *this_model_member)
 {
@@ -394,7 +394,8 @@ struct mcm_config_model_member_t *mcm_tree_add_member(
         if(strcmp(this_model_member->member_name, base_model_member->member_name) < 0)
         {
             base_model_member->ltree_model_member =
-                mcm_tree_add_member(base_model_member->ltree_model_member, this_model_member);
+                mcm_tree_add_model_member(base_model_member->ltree_model_member,
+                                          this_model_member);
 
             if((MCM_TREE_HEIGHT_MEMBER(base_model_member->ltree_model_member) -
                 MCM_TREE_HEIGHT_MEMBER(base_model_member->rtree_model_member)) >= 2)
@@ -402,18 +403,19 @@ struct mcm_config_model_member_t *mcm_tree_add_member(
                 if(strcmp(this_model_member->member_name,
                           base_model_member->ltree_model_member->member_name) < 0)
                 {
-                    base_model_member = mcm_tree_rotate_ll_member(base_model_member);
+                    base_model_member = mcm_tree_rotate_ll_model_member(base_model_member);
                 }
                 else
                 {
-                    base_model_member = mcm_tree_rotate_lr_member(base_model_member);
+                    base_model_member = mcm_tree_rotate_lr_model_member(base_model_member);
                 }
             }
         }
         else
         {
             base_model_member->rtree_model_member =
-                mcm_tree_add_member(base_model_member->rtree_model_member, this_model_member);
+                mcm_tree_add_model_member(base_model_member->rtree_model_member,
+                                          this_model_member);
 
             if((MCM_TREE_HEIGHT_MEMBER(base_model_member->rtree_model_member) -
                 MCM_TREE_HEIGHT_MEMBER(base_model_member->ltree_model_member)) >= 2)
@@ -421,11 +423,11 @@ struct mcm_config_model_member_t *mcm_tree_add_member(
                 if(strcmp(this_model_member->member_name,
                           base_model_member->rtree_model_member->member_name) > 0)
                 {
-                    base_model_member = mcm_tree_rotate_rr_member(base_model_member);
+                    base_model_member = mcm_tree_rotate_rr_model_member(base_model_member);
                 }
                 else
                 {
-                    base_model_member = mcm_tree_rotate_rl_member(base_model_member);
+                    base_model_member = mcm_tree_rotate_rl_model_member(base_model_member);
                 }
             }
         }
@@ -439,7 +441,7 @@ struct mcm_config_model_member_t *mcm_tree_add_member(
 }
 
 // model member (avl-tree) 搜尋 (使用 member_name).
-struct mcm_config_model_member_t *mcm_tree_find_member(
+struct mcm_config_model_member_t *mcm_tree_find_model_member(
     struct mcm_config_model_member_t *this_model_member,
     char *name_str,
     MCM_DTYPE_USIZE_TD name_len)
@@ -531,7 +533,7 @@ void mcm_tree_rotate_r_store(
     this_store->ptree_store = head_store;
 }
 
-// store (rb-tree) 新增節點後的調整.
+// store (rb-tree) 增加節點後的調整.
 void mcm_tree_adjust_add_store(
     struct mcm_config_store_t *this_store,
     struct mcm_config_store_t **base_store)
@@ -643,7 +645,7 @@ void mcm_tree_add_store(
     mcm_tree_adjust_add_store(this_store, base_store);
 }
 
-// store (rb-tree) 移除節點後的調整.
+// store (rb-tree) 刪除節點後的調整.
 void mcm_tree_adjust_del_store(
     struct mcm_config_store_t *this_store,
     struct mcm_config_store_t *parent_store,
@@ -1410,8 +1412,8 @@ int mcm_create_model(
                     if(parent_model_group != NULL)
                     {
                         parent_model_group->child_model_group_tree =
-                            mcm_tree_add_group(parent_model_group->child_model_group_tree,
-                                               self_model_group);
+                            mcm_tree_add_model_group(parent_model_group->child_model_group_tree,
+                                                     self_model_group);
                         MCM_CFDMSG("link parent->child_model_group_tree[%s][%s]",
                                    parent_model_group->child_model_group_tree->group_name,
                                    self_model_group->group_name);
@@ -1529,7 +1531,8 @@ int mcm_create_model(
                 }
 
                 parent_model_group->model_member_tree =
-                    mcm_tree_add_member(parent_model_group->model_member_tree, self_model_member);
+                    mcm_tree_add_model_member(parent_model_group->model_member_tree,
+                                              self_model_member);
                 MCM_CFDMSG("link parent->model_member_tree[%s][%s]",
                            parent_model_group->model_member_tree->member_name,
                            self_model_member->member_name);
@@ -3625,8 +3628,8 @@ int mcm_load_store_anysis_member(
             dloc = ploc + xidx + 1;
             dlen = plen - (xidx + 1);
 
-            self_model_member = mcm_tree_find_member(this_model_group->model_member_tree,
-                                                     read_con + nloc, nlen);
+            self_model_member = mcm_tree_find_model_member(this_model_group->model_member_tree,
+                                                           read_con + nloc, nlen);
             MCM_CFDMSG("search name(member)[" MCM_DTYPE_USIZE_PF "][%s][%s]",
                        nlen, read_con + nloc, self_model_member == NULL ? "unknown" : "find");
             if(self_model_member == NULL)
@@ -5627,7 +5630,8 @@ int mcm_config_anysis_path(
                     self_model_group = self_model_group->child_model_group_tree;
 
                 // 尋找符合的 group name.
-                self_model_group = mcm_tree_find_group(self_model_group, this_path + ploc, nlen);
+                self_model_group = mcm_tree_find_model_group(self_model_group,
+                                                             this_path + ploc, nlen);
                 if(self_model_group == NULL)
                 {
                     if(anysis_method == MCM_APATH_LOAD_STORE)
@@ -5786,8 +5790,8 @@ int mcm_config_anysis_path(
         MCM_CFDMSG("member [%s]", this_path + ploc);
 
         // 處理 member 部分.
-        self_model_member = mcm_tree_find_member(self_model_group->model_member_tree,
-                                                 this_path + ploc, pidx - ploc);
+        self_model_member = mcm_tree_find_model_member(self_model_group->model_member_tree,
+                                                       this_path + ploc, pidx - ploc);
         if(self_model_member == NULL)
         {
             MCM_EMSG("invalid path, not find member [%s]", this_path);
