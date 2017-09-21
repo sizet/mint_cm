@@ -1793,6 +1793,438 @@ FREE_01:
 }
 EXPORT_SYMBOL(mcm_lklib_check_store_file);
 
+int mcm_lklib_do_get_alone(
+    struct mcm_lklib_lib_t *this_lklib,
+    char *full_path,
+    void *data_buf)
+{
+    int fret;
+
+
+    fret = mcm_lklib_init(this_lklib);
+    if(fret < MCM_RCODE_PASS)
+    {
+        MCM_KEMSG("call mcm_lklib_init() fail");
+        return fret;
+    }
+
+    fret = mcm_lklib_get_alone(this_lklib, full_path, data_buf);
+    if(fret < MCM_RCODE_PASS)
+    {
+        MCM_KEMSG("call mcm_lklib_get_alone() fail");
+    }
+
+    mcm_lklib_exit(this_lklib);
+
+    return fret;
+}
+EXPORT_SYMBOL(mcm_lklib_do_get_alone);
+
+int mcm_lklib_do_set_alone(
+    struct mcm_lklib_lib_t *this_lklib,
+    char *full_path,
+    void *data_con,
+    MCM_DTYPE_USIZE_TD data_len)
+{
+    int fret;
+
+
+    fret = mcm_lklib_init(this_lklib);
+    if(fret < MCM_RCODE_PASS)
+    {
+        MCM_KEMSG("call mcm_lklib_init() fail");
+        return fret;
+    }
+
+    fret = mcm_lklib_set_alone(this_lklib, full_path, data_con, data_len);
+    if(fret < MCM_RCODE_PASS)
+    {
+        MCM_KEMSG("call mcm_lklib_set_alone() fail");
+    }
+
+    mcm_lklib_exit(this_lklib);
+
+    return fret;
+}
+EXPORT_SYMBOL(mcm_lklib_do_set_alone);
+
+int mcm_lklib_do_get_entry(
+    struct mcm_lklib_lib_t *this_lklib,
+    char *full_path,
+    void *data_buf)
+{
+    int fret;
+
+
+    fret = mcm_lklib_init(this_lklib);
+    if(fret < MCM_RCODE_PASS)
+    {
+        MCM_KEMSG("call mcm_lklib_init() fail");
+        return fret;
+    }
+
+    fret = mcm_lklib_get_entry(this_lklib, full_path, data_buf);
+    if(fret < MCM_RCODE_PASS)
+    {
+        MCM_KEMSG("call mcm_lklib_get_entry() fail");
+    }
+
+    mcm_lklib_exit(this_lklib);
+
+    return fret;
+}
+EXPORT_SYMBOL(mcm_lklib_do_get_entry);
+
+int mcm_lklib_do_set_entry(
+    struct mcm_lklib_lib_t *this_lklib,
+    char *full_path,
+    void *data_con,
+    MCM_DTYPE_USIZE_TD data_len)
+{
+    int fret;
+
+
+    fret = mcm_lklib_init(this_lklib);
+    if(fret < MCM_RCODE_PASS)
+    {
+        MCM_KEMSG("call mcm_lklib_init() fail");
+        return fret;
+    }
+
+    fret = mcm_lklib_set_entry(this_lklib, full_path, data_con, data_len);
+    if(fret < MCM_RCODE_PASS)
+    {
+        MCM_KEMSG("call mcm_lklib_set_entry() fail");
+    }
+
+    mcm_lklib_exit(this_lklib);
+
+    return fret;
+}
+EXPORT_SYMBOL(mcm_lklib_do_set_entry);
+
+int mcm_lklib_do_add_entry(
+    struct mcm_lklib_lib_t *this_lklib,
+    char *full_path,
+    char *insert_path,
+    void *data_con,
+    MCM_DTYPE_USIZE_TD data_len)
+{
+    int fret;
+
+
+    fret = mcm_lklib_init(this_lklib);
+    if(fret < MCM_RCODE_PASS)
+    {
+        MCM_KEMSG("call mcm_lklib_init() fail");
+        return fret;
+    }
+
+    fret = mcm_lklib_add_entry(this_lklib, full_path, insert_path, data_con, data_len);
+    if(fret < MCM_RCODE_PASS)
+    {
+        MCM_KEMSG("call mcm_lklib_add_entry() fail");
+    }
+
+    mcm_lklib_exit(this_lklib);
+
+    return fret;
+}
+EXPORT_SYMBOL(mcm_lklib_do_add_entry);
+
+int mcm_lklib_do_del_entry(
+    struct mcm_lklib_lib_t *this_lklib,
+    char *full_path)
+{
+    int fret;
+
+
+    fret = mcm_lklib_init(this_lklib);
+    if(fret < MCM_RCODE_PASS)
+    {
+        MCM_KEMSG("call mcm_lklib_init() fail");
+        return fret;
+    }
+
+    fret = mcm_lklib_del_entry(this_lklib, full_path);
+    if(fret < MCM_RCODE_PASS)
+    {
+        MCM_KEMSG("call mcm_lklib_del_entry() fail");
+    }
+
+    mcm_lklib_exit(this_lklib);
+
+    return fret;
+}
+EXPORT_SYMBOL(mcm_lklib_do_del_entry);
+
+int mcm_lklib_do_get_all_entry(
+    struct mcm_lklib_lib_t *this_lklib,
+    char *mix_path,
+    MCM_DTYPE_EK_TD *count_buf,
+    void **data_buf)
+{
+    int fret;
+
+
+    fret = mcm_lklib_init(this_lklib);
+    if(fret < MCM_RCODE_PASS)
+    {
+        MCM_KEMSG("call mcm_lklib_init() fail");
+        return fret;
+    }
+
+    fret = mcm_lklib_get_all_entry(this_lklib, mix_path, count_buf, data_buf);
+    if(fret < MCM_RCODE_PASS)
+    {
+        MCM_KEMSG("call mcm_lklib_get_all_entry() fail");
+    }
+
+    mcm_lklib_exit(this_lklib);
+
+    return fret;
+}
+EXPORT_SYMBOL(mcm_lklib_do_get_all_entry);
+
+int mcm_lklib_do_del_all_entry(
+    struct mcm_lklib_lib_t *this_lklib,
+    char *mix_path)
+{
+    int fret;
+
+
+    fret = mcm_lklib_init(this_lklib);
+    if(fret < MCM_RCODE_PASS)
+    {
+        MCM_KEMSG("call mcm_lklib_init() fail");
+        return fret;
+    }
+
+    fret = mcm_lklib_del_all_entry(this_lklib, mix_path);
+    if(fret < MCM_RCODE_PASS)
+    {
+        MCM_KEMSG("call mcm_lklib_del_all_entry() fail");
+    }
+
+    mcm_lklib_exit(this_lklib);
+
+    return fret;
+}
+EXPORT_SYMBOL(mcm_lklib_do_del_all_entry);
+
+int mcm_lklib_do_get_max_count(
+    struct mcm_lklib_lib_t *this_lklib,
+    char *mask_path,
+    MCM_DTYPE_EK_TD *count_buf)
+{
+    int fret;
+
+
+    fret = mcm_lklib_init(this_lklib);
+    if(fret < MCM_RCODE_PASS)
+    {
+        MCM_KEMSG("call mcm_lklib_init() fail");
+        return fret;
+    }
+
+    fret = mcm_lklib_get_max_count(this_lklib, mask_path, count_buf);
+    if(fret < MCM_RCODE_PASS)
+    {
+        MCM_KEMSG("call mcm_lklib_get_max_count() fail");
+    }
+
+    mcm_lklib_exit(this_lklib);
+
+    return fret;
+}
+EXPORT_SYMBOL(mcm_lklib_do_get_max_count);
+
+int mcm_lklib_do_get_count(
+    struct mcm_lklib_lib_t *this_lklib,
+    char *mix_path,
+    MCM_DTYPE_EK_TD *count_buf)
+{
+    int fret;
+
+
+    fret = mcm_lklib_init(this_lklib);
+    if(fret < MCM_RCODE_PASS)
+    {
+        MCM_KEMSG("call mcm_lklib_init() fail");
+        return fret;
+    }
+
+    fret = mcm_lklib_get_count(this_lklib, mix_path, count_buf);
+    if(fret < MCM_RCODE_PASS)
+    {
+        MCM_KEMSG("call mcm_lklib_get_count() fail");
+    }
+
+    mcm_lklib_exit(this_lklib);
+
+    return fret;
+}
+EXPORT_SYMBOL(mcm_lklib_do_get_count);
+
+int mcm_lklib_do_get_usable_key(
+    struct mcm_lklib_lib_t *this_lklib,
+    char *mix_path,
+    MCM_DTYPE_EK_TD *key_buf)
+{
+    int fret;
+
+
+    fret = mcm_lklib_init(this_lklib);
+    if(fret < MCM_RCODE_PASS)
+    {
+        MCM_KEMSG("call mcm_lklib_init() fail");
+        return fret;
+    }
+
+    fret = mcm_lklib_get_usable_key(this_lklib, mix_path, key_buf);
+    if(fret < MCM_RCODE_PASS)
+    {
+        MCM_KEMSG("call mcm_lklib_get_usable_key() fail");
+    }
+
+    mcm_lklib_exit(this_lklib);
+
+    return fret;
+}
+EXPORT_SYMBOL(mcm_lklib_do_get_usable_key);
+
+int mcm_lklib_do_update(
+    struct mcm_lklib_lib_t *this_lklib)
+{
+    int fret;
+
+
+    fret = mcm_lklib_init(this_lklib);
+    if(fret < MCM_RCODE_PASS)
+    {
+        MCM_KEMSG("call mcm_lklib_init() fail");
+        return fret;
+    }
+
+    fret = mcm_lklib_update(this_lklib);
+    if(fret < MCM_RCODE_PASS)
+    {
+        MCM_KEMSG("call mcm_lklib_update() fail");
+    }
+
+    mcm_lklib_exit(this_lklib);
+
+    return fret;
+}
+EXPORT_SYMBOL(mcm_lklib_do_update);
+
+int mcm_lklib_do_save(
+    struct mcm_lklib_lib_t *this_lklib,
+    MCM_DTYPE_BOOL_TD force_save)
+{
+    int fret;
+
+
+    fret = mcm_lklib_init(this_lklib);
+    if(fret < MCM_RCODE_PASS)
+    {
+        MCM_KEMSG("call mcm_lklib_init() fail");
+        return fret;
+    }
+
+    fret = mcm_lklib_save(this_lklib, force_save);
+    if(fret < MCM_RCODE_PASS)
+    {
+        MCM_KEMSG("call mcm_lklib_save() fail");
+    }
+
+    mcm_lklib_exit(this_lklib);
+
+    return fret;
+}
+EXPORT_SYMBOL(mcm_lklib_do_save);
+
+int mcm_lklib_do_run(
+    struct mcm_lklib_lib_t *this_lklib,
+    char *module_function)
+{
+    int fret;
+
+
+    fret = mcm_lklib_init(this_lklib);
+    if(fret < MCM_RCODE_PASS)
+    {
+        MCM_KEMSG("call mcm_lklib_init() fail");
+        return fret;
+    }
+
+    fret = mcm_lklib_run(this_lklib, module_function);
+    if(fret < MCM_RCODE_PASS)
+    {
+        MCM_KEMSG("call mcm_lklib_run() fail");
+    }
+
+    mcm_lklib_exit(this_lklib);
+
+    return fret;
+}
+EXPORT_SYMBOL(mcm_lklib_do_run);
+
+int mcm_lklib_do_shutdown(
+    struct mcm_lklib_lib_t *this_lklib)
+{
+    int fret;
+
+
+    fret = mcm_lklib_init(this_lklib);
+    if(fret < MCM_RCODE_PASS)
+    {
+        MCM_KEMSG("call mcm_lklib_init() fail");
+        return fret;
+    }
+
+    fret = mcm_lklib_shutdown(this_lklib);
+    if(fret < MCM_RCODE_PASS)
+    {
+        MCM_KEMSG("call mcm_lklib_shutdown() fail");
+    }
+
+    mcm_lklib_exit(this_lklib);
+
+    return fret;
+}
+EXPORT_SYMBOL(mcm_lklib_do_shutdown);
+
+int mcm_lklib_do_check_store_file(
+    struct mcm_lklib_lib_t *this_lklib,
+    char *file_path,
+    MCM_DTYPE_LIST_TD *store_result_buf,
+    char *store_version_buf,
+    MCM_DTYPE_USIZE_TD store_version_size)
+{
+    int fret;
+
+
+    fret = mcm_lklib_init(this_lklib);
+    if(fret < MCM_RCODE_PASS)
+    {
+        MCM_KEMSG("call mcm_lklib_init() fail");
+        return fret;
+    }
+
+    fret = mcm_lklib_check_store_file(this_lklib, file_path, store_result_buf,
+                                      store_version_buf, store_version_size);
+    if(fret < MCM_RCODE_PASS)
+    {
+        MCM_KEMSG("call mcm_lklib_check_store_file() fail");
+    }
+
+    mcm_lklib_exit(this_lklib);
+
+    return fret;
+}
+EXPORT_SYMBOL(mcm_lklib_do_check_store_file);
+
 static int __init init_mcm_lklib_api(void)
 {
     MCM_LKDMSG("init_mcm_lklib_api");

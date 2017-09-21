@@ -117,6 +117,85 @@ int mcm_lklib_check_store_file(
     char *store_version_buf,
     MCM_DTYPE_USIZE_TD store_version_size);
 
+int mcm_lklib_do_get_alone(
+    struct mcm_lklib_lib_t *this_lklib,
+    char *full_path,
+    void *data_buf);
+
+int mcm_lklib_do_set_alone(
+    struct mcm_lklib_lib_t *this_lklib,
+    char *full_path,
+    void *data_con,
+    MCM_DTYPE_USIZE_TD data_len);
+
+int mcm_lklib_do_get_entry(
+    struct mcm_lklib_lib_t *this_lklib,
+    char *full_path,
+    void *data_buf);
+
+int mcm_lklib_do_set_entry(
+    struct mcm_lklib_lib_t *this_lklib,
+    char *full_path,
+    void *data_con,
+    MCM_DTYPE_USIZE_TD data_len);
+
+int mcm_lklib_do_add_entry(
+    struct mcm_lklib_lib_t *this_lklib,
+    char *full_path,
+    char *insert_path,
+    void *data_con,
+    MCM_DTYPE_USIZE_TD data_len);
+
+int mcm_lklib_do_del_entry(
+    struct mcm_lklib_lib_t *this_lklib,
+    char *full_path);
+
+int mcm_lklib_do_get_all_entry(
+    struct mcm_lklib_lib_t *this_lklib,
+    char *mix_path,
+    MCM_DTYPE_EK_TD *count_buf,
+    void **data_buf);
+
+int mcm_lklib_do_del_all_entry(
+    struct mcm_lklib_lib_t *this_lklib,
+    char *mix_path);
+
+int mcm_lklib_do_get_max_count(
+    struct mcm_lklib_lib_t *this_lklib,
+    char *mask_path,
+    MCM_DTYPE_EK_TD *count_buf);
+
+int mcm_lklib_do_get_count(
+    struct mcm_lklib_lib_t *this_lklib,
+    char *mix_path,
+    MCM_DTYPE_EK_TD *count_buf);
+
+int mcm_lklib_do_get_usable_key(
+    struct mcm_lklib_lib_t *this_lklib,
+    char *mix_path,
+    MCM_DTYPE_EK_TD *key_buf);
+
+int mcm_lklib_do_update(
+    struct mcm_lklib_lib_t *this_lklib);
+
+int mcm_lklib_do_save(
+    struct mcm_lklib_lib_t *this_lklib,
+    MCM_DTYPE_BOOL_TD force_save);
+
+int mcm_lklib_do_run(
+    struct mcm_lklib_lib_t *this_lklib,
+    char *module_function);
+
+int mcm_lklib_do_shutdown(
+    struct mcm_lklib_lib_t *this_lklib);
+
+int mcm_lklib_do_check_store_file(
+    struct mcm_lklib_lib_t *this_lklib,
+    char *file_path,
+    MCM_DTYPE_LIST_TD *store_result_buf,
+    char *store_version_buf,
+    MCM_DTYPE_USIZE_TD store_version_size);
+
 
 
 

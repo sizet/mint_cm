@@ -2756,3 +2756,419 @@ FREE_01:
     this_lulib->rep_code = fret;
     return fret;
 }
+
+int mcm_lulib_do_get_alone(
+    struct mcm_lulib_lib_t *this_lulib,
+    char *full_path,
+    void *data_buf)
+{
+    int fret;
+
+
+    fret = mcm_lulib_init(this_lulib);
+    if(fret < MCM_RCODE_PASS)
+    {
+        MCM_EMSG("call mcm_lulib_init() fail");
+        return fret;
+    }
+
+    fret = mcm_lulib_get_alone(this_lulib, full_path, data_buf);
+    if(fret < MCM_RCODE_PASS)
+    {
+        MCM_EMSG("call mcm_lulib_get_alone() fail");
+    }
+
+    mcm_lulib_exit(this_lulib);
+
+    return fret;
+}
+
+int mcm_lulib_do_set_alone(
+    struct mcm_lulib_lib_t *this_lulib,
+    char *full_path,
+    void *data_con,
+    MCM_DTYPE_USIZE_TD data_len)
+{
+    int fret;
+
+
+    fret = mcm_lulib_init(this_lulib);
+    if(fret < MCM_RCODE_PASS)
+    {
+        MCM_EMSG("call mcm_lulib_init() fail");
+        return fret;
+    }
+
+    fret = mcm_lulib_set_alone(this_lulib, full_path, data_con, data_len);
+    if(fret < MCM_RCODE_PASS)
+    {
+        MCM_EMSG("call mcm_lulib_set_alone() fail");
+    }
+
+    mcm_lulib_exit(this_lulib);
+
+    return fret;
+}
+
+int mcm_lulib_do_get_entry(
+    struct mcm_lulib_lib_t *this_lulib,
+    char *full_path,
+    void *data_buf)
+{
+    int fret;
+
+
+    fret = mcm_lulib_init(this_lulib);
+    if(fret < MCM_RCODE_PASS)
+    {
+        MCM_EMSG("call mcm_lulib_init() fail");
+        return fret;
+    }
+
+    fret = mcm_lulib_get_entry(this_lulib, full_path, data_buf);
+    if(fret < MCM_RCODE_PASS)
+    {
+        MCM_EMSG("call mcm_lulib_get_entry() fail");
+    }
+
+    mcm_lulib_exit(this_lulib);
+
+    return fret;
+}
+
+int mcm_lulib_do_set_entry(
+    struct mcm_lulib_lib_t *this_lulib,
+    char *full_path,
+    void *data_con,
+    MCM_DTYPE_USIZE_TD data_len)
+{
+    int fret;
+
+
+    fret = mcm_lulib_init(this_lulib);
+    if(fret < MCM_RCODE_PASS)
+    {
+        MCM_EMSG("call mcm_lulib_init() fail");
+        return fret;
+    }
+
+    fret = mcm_lulib_set_entry(this_lulib, full_path, data_con, data_len);
+    if(fret < MCM_RCODE_PASS)
+    {
+        MCM_EMSG("call mcm_lulib_set_entry() fail");
+    }
+
+    mcm_lulib_exit(this_lulib);
+
+    return fret;
+}
+
+int mcm_lulib_do_add_entry(
+    struct mcm_lulib_lib_t *this_lulib,
+    char *full_path,
+    char *insert_path,
+    void *data_con,
+    MCM_DTYPE_USIZE_TD data_len)
+{
+    int fret;
+
+
+    fret = mcm_lulib_init(this_lulib);
+    if(fret < MCM_RCODE_PASS)
+    {
+        MCM_EMSG("call mcm_lulib_init() fail");
+        return fret;
+    }
+
+    fret = mcm_lulib_add_entry(this_lulib, full_path, insert_path, data_con, data_len);
+    if(fret < MCM_RCODE_PASS)
+    {
+        MCM_EMSG("call mcm_lulib_add_entry() fail");
+    }
+
+    mcm_lulib_exit(this_lulib);
+
+    return fret;
+}
+
+int mcm_lulib_do_del_entry(
+    struct mcm_lulib_lib_t *this_lulib,
+    char *full_path)
+{
+    int fret;
+
+
+    fret = mcm_lulib_init(this_lulib);
+    if(fret < MCM_RCODE_PASS)
+    {
+        MCM_EMSG("call mcm_lulib_init() fail");
+        return fret;
+    }
+
+    fret = mcm_lulib_del_entry(this_lulib, full_path);
+    if(fret < MCM_RCODE_PASS)
+    {
+        MCM_EMSG("call mcm_lulib_del_entry() fail");
+    }
+
+    mcm_lulib_exit(this_lulib);
+
+    return fret;
+}
+
+int mcm_lulib_do_get_all_entry(
+    struct mcm_lulib_lib_t *this_lulib,
+    char *mix_path,
+    MCM_DTYPE_EK_TD *count_buf,
+    void **data_buf)
+{
+    int fret;
+
+
+    fret = mcm_lulib_init(this_lulib);
+    if(fret < MCM_RCODE_PASS)
+    {
+        MCM_EMSG("call mcm_lulib_init() fail");
+        return fret;
+    }
+
+    fret = mcm_lulib_get_all_entry(this_lulib, mix_path, count_buf, data_buf);
+    if(fret < MCM_RCODE_PASS)
+    {
+        MCM_EMSG("call mcm_lulib_get_all_entry() fail");
+    }
+
+    mcm_lulib_exit(this_lulib);
+
+    return fret;
+}
+
+int mcm_lulib_do_del_all_entry(
+    struct mcm_lulib_lib_t *this_lulib,
+    char *mix_path)
+{
+    int fret;
+
+
+    fret = mcm_lulib_init(this_lulib);
+    if(fret < MCM_RCODE_PASS)
+    {
+        MCM_EMSG("call mcm_lulib_init() fail");
+        return fret;
+    }
+
+    fret = mcm_lulib_del_all_entry(this_lulib, mix_path);
+    if(fret < MCM_RCODE_PASS)
+    {
+        MCM_EMSG("call mcm_lulib_del_all_entry() fail");
+    }
+
+    mcm_lulib_exit(this_lulib);
+
+    return fret;
+}
+
+int mcm_lulib_do_get_max_count(
+    struct mcm_lulib_lib_t *this_lulib,
+    char *mask_path,
+    MCM_DTYPE_EK_TD *count_buf)
+{
+    int fret;
+
+
+    fret = mcm_lulib_init(this_lulib);
+    if(fret < MCM_RCODE_PASS)
+    {
+        MCM_EMSG("call mcm_lulib_init() fail");
+        return fret;
+    }
+
+    fret = mcm_lulib_get_max_count(this_lulib, mask_path, count_buf);
+    if(fret < MCM_RCODE_PASS)
+    {
+        MCM_EMSG("call mcm_lulib_get_max_count() fail");
+    }
+
+    mcm_lulib_exit(this_lulib);
+
+    return fret;
+}
+
+int mcm_lulib_do_get_count(
+    struct mcm_lulib_lib_t *this_lulib,
+    char *mix_path,
+    MCM_DTYPE_EK_TD *count_buf)
+{
+    int fret;
+
+
+    fret = mcm_lulib_init(this_lulib);
+    if(fret < MCM_RCODE_PASS)
+    {
+        MCM_EMSG("call mcm_lulib_init() fail");
+        return fret;
+    }
+
+    fret = mcm_lulib_get_count(this_lulib, mix_path, count_buf);
+    if(fret < MCM_RCODE_PASS)
+    {
+        MCM_EMSG("call mcm_lulib_get_count() fail");
+    }
+
+    mcm_lulib_exit(this_lulib);
+
+    return fret;
+}
+
+int mcm_lulib_do_get_usable_key(
+    struct mcm_lulib_lib_t *this_lulib,
+    char *mix_path,
+    MCM_DTYPE_EK_TD *key_buf)
+{
+    int fret;
+
+
+    fret = mcm_lulib_init(this_lulib);
+    if(fret < MCM_RCODE_PASS)
+    {
+        MCM_EMSG("call mcm_lulib_init() fail");
+        return fret;
+    }
+
+    fret = mcm_lulib_get_usable_key(this_lulib, mix_path, key_buf);
+    if(fret < MCM_RCODE_PASS)
+    {
+        MCM_EMSG("call mcm_lulib_get_usable_key() fail");
+    }
+
+    mcm_lulib_exit(this_lulib);
+
+    return fret;
+}
+
+int mcm_lulib_do_update(
+    struct mcm_lulib_lib_t *this_lulib)
+{
+    int fret;
+
+
+    fret = mcm_lulib_init(this_lulib);
+    if(fret < MCM_RCODE_PASS)
+    {
+        MCM_EMSG("call mcm_lulib_init() fail");
+        return fret;
+    }
+
+    fret = mcm_lulib_update(this_lulib);
+    if(fret < MCM_RCODE_PASS)
+    {
+        MCM_EMSG("call mcm_lulib_update() fail");
+    }
+
+    mcm_lulib_exit(this_lulib);
+
+    return fret;
+}
+
+int mcm_lulib_do_save(
+    struct mcm_lulib_lib_t *this_lulib,
+    MCM_DTYPE_BOOL_TD force_save)
+{
+    int fret;
+
+
+    fret = mcm_lulib_init(this_lulib);
+    if(fret < MCM_RCODE_PASS)
+    {
+        MCM_EMSG("call mcm_lulib_init() fail");
+        return fret;
+    }
+
+    fret = mcm_lulib_save(this_lulib, force_save);
+    if(fret < MCM_RCODE_PASS)
+    {
+        MCM_EMSG("call mcm_lulib_save() fail");
+    }
+
+    mcm_lulib_exit(this_lulib);
+
+    return fret;
+}
+
+int mcm_lulib_do_run(
+    struct mcm_lulib_lib_t *this_lulib,
+    char *module_function)
+{
+    int fret;
+
+
+    fret = mcm_lulib_init(this_lulib);
+    if(fret < MCM_RCODE_PASS)
+    {
+        MCM_EMSG("call mcm_lulib_init() fail");
+        return fret;
+    }
+
+    fret = mcm_lulib_run(this_lulib, module_function);
+    if(fret < MCM_RCODE_PASS)
+    {
+        MCM_EMSG("call mcm_lulib_run() fail");
+    }
+
+    mcm_lulib_exit(this_lulib);
+
+    return fret;
+}
+
+int mcm_lulib_do_shutdown(
+    struct mcm_lulib_lib_t *this_lulib)
+{
+    int fret;
+
+
+    fret = mcm_lulib_init(this_lulib);
+    if(fret < MCM_RCODE_PASS)
+    {
+        MCM_EMSG("call mcm_lulib_init() fail");
+        return fret;
+    }
+
+    fret = mcm_lulib_shutdown(this_lulib);
+    if(fret < MCM_RCODE_PASS)
+    {
+        MCM_EMSG("call mcm_lulib_shutdown() fail");
+    }
+
+    mcm_lulib_exit(this_lulib);
+
+    return fret;
+}
+
+int mcm_lulib_do_check_store_file(
+    struct mcm_lulib_lib_t *this_lulib,
+    char *file_path,
+    MCM_DTYPE_LIST_TD *store_result_buf,
+    char *store_version_buf,
+    MCM_DTYPE_USIZE_TD store_version_size)
+{
+    int fret;
+
+
+    fret = mcm_lulib_init(this_lulib);
+    if(fret < MCM_RCODE_PASS)
+    {
+        MCM_EMSG("call mcm_lulib_init() fail");
+        return fret;
+    }
+
+    fret = mcm_lulib_check_store_file(this_lulib, file_path, store_result_buf,
+                                      store_version_buf, store_version_size);
+    if(fret < MCM_RCODE_PASS)
+    {
+        MCM_EMSG("call mcm_lulib_check_store_file() fail");
+    }
+
+    mcm_lulib_exit(this_lulib);
+
+    return fret;
+}
