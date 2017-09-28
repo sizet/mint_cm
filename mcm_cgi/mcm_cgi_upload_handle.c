@@ -330,12 +330,10 @@ int mcm_parse_disposition(
         // 取出 [filename="${file-name}"] 的 ${file-name}.
         fret = mcm_parse_parameter(&base_con, &base_len, MCM_FILENAME_KEY, MCM_FILENAME_LEN,
                                    &tmp_filename);
-#if MCM_CUHDMODE
         if(fret >= MCM_RCODE_PASS)
         {
             MCM_CUHDMSG("[%s][%s]", MCM_FILENAME_KEY, tmp_filename);
         }
-#endif
         fret = MCM_RCODE_PASS;
     }
 

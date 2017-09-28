@@ -108,13 +108,12 @@ int mcm_realloc_buf_lib(
         }
         return MCM_RCODE_LULIB_ALLOC_FAIL;
     }
-#if MCM_LUDMODE
     if(mcm_lulib_show_msg != 0)
     {
         MCM_LUDMSG("realloc [" MCM_DTYPE_USIZE_PF "][%p] -> [" MCM_DTYPE_USIZE_PF "][%p]",
                    this_lulib->pkt_size, this_lulib->pkt_buf, new_size, tmp_buf);
     }
-#endif
+
     this_lulib->pkt_buf = tmp_buf;
     this_lulib->pkt_size = new_size;
 
@@ -211,12 +210,10 @@ int mcm_recv_rep(
             break;
         }
     }
-#if MCM_LUDMODE
     if(mcm_lulib_show_msg != 0)
     {
         MCM_LUDMSG("rep[" MCM_DTYPE_USIZE_PF "]", this_lulib->pkt_len);
     }
-#endif
 
     return MCM_RCODE_PASS;
 }
@@ -255,12 +252,10 @@ int mcm_parse_base_rep(
     tmp_offset += sizeof(MCM_DTYPE_USIZE_TD);
     // REP.
     this_lulib->rep_code = *((MCM_DTYPE_LIST_TD *) tmp_offset);
-#if MCM_LUDMODE
     if(mcm_lulib_show_msg != 0)
     {
         MCM_LUDMSG("rep_code[" MCM_DTYPE_LIST_PF "]", this_lulib->rep_code);
     }
-#endif
     tmp_offset += sizeof(MCM_DTYPE_LIST_TD);
     if(with_msg != 0)
     {
@@ -269,13 +264,11 @@ int mcm_parse_base_rep(
         tmp_offset += sizeof(MCM_DTYPE_USIZE_TD);
         // MC.
         this_lulib->rep_msg_con = tmp_offset;
-#if MCM_LUDMODE
         if(mcm_lulib_show_msg != 0)
         {
             MCM_LUDMSG("rep_msg[" MCM_DTYPE_USIZE_PF "][%s]",
                        this_lulib->rep_msg_len, this_lulib->rep_msg_con);
         }
-#endif
         tmp_offset += this_lulib->rep_msg_len;
     }
     // ...
@@ -341,14 +334,12 @@ int mcm_lulib_init(
     connect_data.call_from = this_lulib->call_from;
     connect_data.session_permission = this_lulib->session_permission;
     connect_data.session_stack_size = this_lulib->session_stack_size;
-#if MCM_LUDMODE
     if(mcm_lulib_show_msg != 0)
     {
         MCM_LUDMSG("connect[" MCM_DTYPE_LIST_PF "][%s][" MCM_DTYPE_USIZE_PF "]",
                    connect_data.call_from, MCM_DBG_SPERMISSION(connect_data.session_permission),
                    connect_data.session_stack_size);
     }
-#endif
 
     if(send(this_lulib->sock_fd, &connect_data, sizeof(struct mcm_connect_option_t), 0) == -1)
     {
@@ -388,20 +379,16 @@ FREE_01:
 int mcm_lulib_exit(
     struct mcm_lulib_lib_t *this_lulib)
 {
-#if MCM_LUDMODE
     if(mcm_lulib_show_msg != 0)
     {
         MCM_LUDMSG("close sock_fd[%d]", this_lulib->sock_fd);
     }
-#endif
     close(this_lulib->sock_fd);
 
-#if MCM_LUDMODE
     if(mcm_lulib_show_msg != 0)
     {
         MCM_LUDMSG("free pkt_buf[%p]", this_lulib->pkt_buf);
     }
-#endif
     free(this_lulib->pkt_buf);
 
     return MCM_RCODE_PASS;
@@ -495,12 +482,10 @@ int mcm_lulib_get_alone(
     tmp_offset = this_lulib->pkt_offset;
     // DL.
     xlen = *((MCM_DTYPE_USIZE_TD *) tmp_offset);
-#if MCM_LUDMODE
     if(mcm_lulib_show_msg != 0)
     {
         MCM_LUDMSG("data_len[" MCM_DTYPE_USIZE_PF "]", xlen);
     }
-#endif
     tmp_offset += sizeof(MCM_DTYPE_USIZE_TD);
     // DC.
     if(xlen > 0)
@@ -702,12 +687,10 @@ int mcm_lulib_get_entry(
     tmp_offset = this_lulib->pkt_offset;
     // DL.
     xlen = *((MCM_DTYPE_USIZE_TD *) tmp_offset);
-#if MCM_LUDMODE
     if(mcm_lulib_show_msg != 0)
     {
         MCM_LUDMSG("data_len[" MCM_DTYPE_USIZE_PF "]", xlen);
     }
-#endif
     tmp_offset += sizeof(MCM_DTYPE_USIZE_TD);
     // DC.
     if(xlen > 0)
@@ -1110,21 +1093,17 @@ int mcm_lulib_get_all_entry(
     tmp_offset = this_lulib->pkt_offset;
     // EC.
     tmp_count = *((MCM_DTYPE_EK_TD *) tmp_offset);
-#if MCM_LUDMODE
     if(mcm_lulib_show_msg != 0)
     {
         MCM_LUDMSG("count[" MCM_DTYPE_EK_PF "]", tmp_count);
     }
-#endif
     tmp_offset += sizeof(MCM_DTYPE_EK_TD);
     // DL.
     xlen = *((MCM_DTYPE_USIZE_TD *) tmp_offset);
-#if MCM_LUDMODE
     if(mcm_lulib_show_msg != 0)
     {
         MCM_LUDMSG("data_len[" MCM_DTYPE_USIZE_PF "]", xlen);
     }
-#endif
     tmp_offset += sizeof(MCM_DTYPE_USIZE_TD);
     // DC.
     if(xlen > 0)
@@ -1321,12 +1300,10 @@ int mcm_lulib_get_max_count(
     tmp_offset = this_lulib->pkt_offset;
     // EC.
     *count_buf = *((MCM_DTYPE_EK_TD *) tmp_offset);
-#if MCM_LUDMODE
     if(mcm_lulib_show_msg != 0)
     {
         MCM_LUDMSG("max_count[" MCM_DTYPE_EK_PF "]", *count_buf);
     }
-#endif
 
 FREE_01:
     this_lulib->rep_code = fret;
@@ -1419,12 +1396,10 @@ int mcm_lulib_get_count(
     tmp_offset = this_lulib->pkt_offset;
     // EC.
     *count_buf = *((MCM_DTYPE_EK_TD *) tmp_offset);
-#if MCM_LUDMODE
     if(mcm_lulib_show_msg != 0)
     {
         MCM_LUDMSG("count[" MCM_DTYPE_EK_PF "]", *count_buf);
     }
-#endif
 
 FREE_01:
     this_lulib->rep_code = fret;
@@ -1517,12 +1492,10 @@ int mcm_lulib_get_usable_key(
     tmp_offset = this_lulib->pkt_offset;
     // EK.
     *key_buf = *((MCM_DTYPE_EK_TD *) tmp_offset);
-#if MCM_LUDMODE
     if(mcm_lulib_show_msg != 0)
     {
         MCM_LUDMSG("usable_key[" MCM_DTYPE_EK_PF "]", *key_buf);
     }
-#endif
 
 FREE_01:
     this_lulib->rep_code = fret;
@@ -1952,21 +1925,17 @@ int mcm_lulib_check_store_file(
     tmp_offset = this_lulib->pkt_offset;
     // SR.
     *store_result_buf = *((MCM_DTYPE_LIST_TD *) tmp_offset);
-#if MCM_LUDMODE
     if(mcm_lulib_show_msg != 0)
     {
         MCM_LUDMSG("store_result[" MCM_DTYPE_LIST_PF "]", *store_result_buf);
     }
-#endif
     tmp_offset += sizeof(MCM_DTYPE_LIST_TD);
     // VL.
     xlen = *((MCM_DTYPE_USIZE_TD *) tmp_offset);
-#if MCM_LUDMODE
     if(mcm_lulib_show_msg != 0)
     {
         MCM_LUDMSG("version_len[" MCM_DTYPE_USIZE_PF "]", xlen);
     }
-#endif
     tmp_offset += sizeof(MCM_DTYPE_USIZE_TD);
     // VC.
     if(xlen > 0)
@@ -1975,12 +1944,10 @@ int mcm_lulib_check_store_file(
         clen = clen > xlen ? xlen : clen;
         memcpy(store_version_buf, tmp_offset, clen);
         store_version_buf[clen] = '\0';
-#if MCM_LUDMODE
         if(mcm_lulib_show_msg != 0)
         {
             MCM_LUDMSG("version_con[%s]", store_version_buf);
         }
-#endif
     }
 
 FREE_01:
@@ -2152,12 +2119,10 @@ int mcm_lulib_get_path_max_length(
     tmp_offset = this_lulib->pkt_offset;
     // PML.
     *max_len_buf = *((MCM_DTYPE_USIZE_TD *) tmp_offset);
-#if MCM_LUDMODE
     if(mcm_lulib_show_msg != 0)
     {
         MCM_LUDMSG("path_max_length[" MCM_DTYPE_USIZE_PF "]", *max_len_buf);
     }
-#endif
 
 FREE_01:
     this_lulib->rep_code = fret;
@@ -2252,12 +2217,10 @@ int mcm_lulib_get_list_name(
     tmp_offset = this_lulib->pkt_offset;
     // DL.
     xlen = *((MCM_DTYPE_USIZE_TD *) tmp_offset);
-#if MCM_LUDMODE
     if(mcm_lulib_show_msg != 0)
     {
         MCM_LUDMSG("data_len[" MCM_DTYPE_USIZE_PF "]", xlen);
     }
-#endif
     tmp_offset += sizeof(MCM_DTYPE_USIZE_TD);
     // DC.
     if(xlen > 0)
@@ -2370,12 +2333,10 @@ int mcm_lulib_get_list_type(
     tmp_offset = this_lulib->pkt_offset;
     // DL.
     xlen = *((MCM_DTYPE_USIZE_TD *) tmp_offset);
-#if MCM_LUDMODE
     if(mcm_lulib_show_msg != 0)
     {
         MCM_LUDMSG("data_len[" MCM_DTYPE_USIZE_PF "]", xlen);
     }
-#endif
     tmp_offset += sizeof(MCM_DTYPE_USIZE_TD);
     // DC.
     if(xlen > 0)
@@ -2489,12 +2450,10 @@ int mcm_lulib_get_list_value(
     tmp_offset = this_lulib->pkt_offset;
     // DL.
     xlen = *((MCM_DTYPE_USIZE_TD *) tmp_offset);
-#if MCM_LUDMODE
     if(mcm_lulib_show_msg != 0)
     {
         MCM_LUDMSG("data_len[" MCM_DTYPE_USIZE_PF "]", xlen);
     }
-#endif
     tmp_offset += sizeof(MCM_DTYPE_USIZE_TD);
     // DC.
     if(xlen > 0)
@@ -2719,29 +2678,23 @@ int mcm_lulib_get_with_type_alone(
     tmp_offset = this_lulib->pkt_offset;
     // DT.
     tmp_type = *((MCM_DTYPE_LIST_TD *) tmp_offset);
-#if MCM_LUDMODE
     if(mcm_lulib_show_msg != 0)
     {
-        MCM_LUDMSG("data_type[" MCM_DTYPE_LIST_TD "]", tmp_type);
+        MCM_LUDMSG("data_type[" MCM_DTYPE_LIST_PF "]", tmp_type);
     }
-#endif
     tmp_offset += sizeof(MCM_DTYPE_LIST_TD);
     // DL.
     tmp_len = *((MCM_DTYPE_USIZE_TD *) tmp_offset);
-#if MCM_LUDMODE
     if(mcm_lulib_show_msg != 0)
     {
         MCM_LUDMSG("data_len[" MCM_DTYPE_USIZE_PF "]", tmp_len);
     }
-#endif
     tmp_offset += sizeof(MCM_DTYPE_USIZE_TD);
     //DC.
-#if MCM_LUDMODE
     if(mcm_lulib_show_msg != 0)
     {
         MCM_LUDMSG("data_con[%s]", (char *) tmp_offset);
     }
-#endif
 
     if(type_buf != NULL)
         *type_buf = tmp_type;

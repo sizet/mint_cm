@@ -108,12 +108,10 @@ int maam_lulib_kick_session(
     struct maam_auth_sys_t *auth_sys_info,
     struct maam_session_t *session_info)
 {
-#if MAAM_LUDMODE
     if(maam_lulib_show_msg != 0)
     {
         MAAM_LUDMSG("kick session [%s][%s]", session_info->account_name, session_info->session_key);
     }
-#endif
 
     if(session_info->prev_session != -1)
     {
