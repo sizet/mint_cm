@@ -485,10 +485,11 @@ int mcm_lulib_get_alone(
     fret = mcm_parse_base_rep(this_lulib, 0);
     if(fret < MCM_RCODE_PASS)
     {
-        if(mcm_lulib_show_msg != 0)
-        {
-            MCM_EMSG("call mcm_parse_base_rep() fail");
-        }
+        if(fret != MCM_RCODE_CONFIG_NOT_FIND_STORE)
+            if(mcm_lulib_show_msg != 0)
+            {
+                MCM_EMSG("call mcm_parse_base_rep() fail");
+            }
         goto FREE_01;
     }
     tmp_offset = this_lulib->pkt_offset;
@@ -600,10 +601,11 @@ int mcm_lulib_set_alone(
     fret = mcm_parse_base_rep(this_lulib, 0);
     if(fret < MCM_RCODE_PASS)
     {
-        if(mcm_lulib_show_msg != 0)
-        {
-            MCM_EMSG("call mcm_parse_base_rep() fail");
-        }
+        if(fret != MCM_RCODE_CONFIG_NOT_FIND_STORE)
+            if(mcm_lulib_show_msg != 0)
+            {
+                MCM_EMSG("call mcm_parse_base_rep() fail");
+            }
         goto FREE_01;
     }
 
@@ -690,10 +692,11 @@ int mcm_lulib_get_entry(
     fret = mcm_parse_base_rep(this_lulib, 0);
     if(fret < MCM_RCODE_PASS)
     {
-        if(mcm_lulib_show_msg != 0)
-        {
-            MCM_EMSG("call mcm_parse_base_rep() fail");
-        }
+        if(fret != MCM_RCODE_CONFIG_NOT_FIND_STORE)
+            if(mcm_lulib_show_msg != 0)
+            {
+                MCM_EMSG("call mcm_parse_base_rep() fail");
+            }
         goto FREE_01;
     }
     tmp_offset = this_lulib->pkt_offset;
@@ -797,10 +800,11 @@ int mcm_lulib_set_entry(
     fret = mcm_parse_base_rep(this_lulib, 0);
     if(fret < MCM_RCODE_PASS)
     {
-        if(mcm_lulib_show_msg != 0)
-        {
-            MCM_EMSG("call mcm_parse_base_rep() fail");
-        }
+        if(fret != MCM_RCODE_CONFIG_NOT_FIND_STORE)
+            if(mcm_lulib_show_msg != 0)
+            {
+                MCM_EMSG("call mcm_parse_base_rep() fail");
+            }
         goto FREE_01;
     }
 
@@ -913,10 +917,11 @@ int mcm_lulib_add_entry(
     fret = mcm_parse_base_rep(this_lulib, 0);
     if(fret < MCM_RCODE_PASS)
     {
-        if(mcm_lulib_show_msg != 0)
-        {
-            MCM_EMSG("call mcm_parse_base_rep() fail");
-        }
+        if(fret != MCM_RCODE_CONFIG_NOT_FIND_STORE)
+            if(mcm_lulib_show_msg != 0)
+            {
+                MCM_EMSG("call mcm_parse_base_rep() fail");
+            }
         goto FREE_01;
     }
 
@@ -998,10 +1003,11 @@ int mcm_lulib_del_entry(
     fret = mcm_parse_base_rep(this_lulib, 0);
     if(fret < MCM_RCODE_PASS)
     {
-        if(mcm_lulib_show_msg != 0)
-        {
-            MCM_EMSG("call mcm_parse_base_rep() fail");
-        }
+        if(fret != MCM_RCODE_CONFIG_NOT_FIND_STORE)
+            if(mcm_lulib_show_msg != 0)
+            {
+                MCM_EMSG("call mcm_parse_base_rep() fail");
+            }
         goto FREE_01;
     }
 
@@ -1094,10 +1100,11 @@ int mcm_lulib_get_all_entry(
     fret = mcm_parse_base_rep(this_lulib, 0);
     if(fret < MCM_RCODE_PASS)
     {
-        if(mcm_lulib_show_msg != 0)
-        {
-            MCM_EMSG("call mcm_parse_base_rep() fail");
-        }
+        if(fret != MCM_RCODE_CONFIG_NOT_FIND_STORE)
+            if(mcm_lulib_show_msg != 0)
+            {
+                MCM_EMSG("call mcm_parse_base_rep() fail");
+            }
         goto FREE_01;
     }
     tmp_offset = this_lulib->pkt_offset;
@@ -1216,10 +1223,11 @@ int mcm_lulib_del_all_entry(
     fret = mcm_parse_base_rep(this_lulib, 0);
     if(fret < MCM_RCODE_PASS)
     {
-        if(mcm_lulib_show_msg != 0)
-        {
-            MCM_EMSG("call mcm_parse_base_rep() fail");
-        }
+        if(fret != MCM_RCODE_CONFIG_NOT_FIND_STORE)
+            if(mcm_lulib_show_msg != 0)
+            {
+                MCM_EMSG("call mcm_parse_base_rep() fail");
+            }
         goto FREE_01;
     }
 
@@ -1401,10 +1409,11 @@ int mcm_lulib_get_count(
     fret = mcm_parse_base_rep(this_lulib, 0);
     if(fret < MCM_RCODE_PASS)
     {
-        if(mcm_lulib_show_msg != 0)
-        {
-            MCM_EMSG("call mcm_parse_base_rep() fail");
-        }
+        if(fret != MCM_RCODE_CONFIG_NOT_FIND_STORE)
+            if(mcm_lulib_show_msg != 0)
+            {
+                MCM_EMSG("call mcm_parse_base_rep() fail");
+            }
         goto FREE_01;
     }
     tmp_offset = this_lulib->pkt_offset;
@@ -1498,10 +1507,11 @@ int mcm_lulib_get_usable_key(
     fret = mcm_parse_base_rep(this_lulib, 0);
     if(fret < MCM_RCODE_PASS)
     {
-        if(mcm_lulib_show_msg != 0)
-        {
-            MCM_EMSG("call mcm_parse_base_rep() fail");
-        }
+        if(fret != MCM_RCODE_CONFIG_NOT_FIND_STORE)
+            if(mcm_lulib_show_msg != 0)
+            {
+                MCM_EMSG("call mcm_parse_base_rep() fail");
+            }
         goto FREE_01;
     }
     tmp_offset = this_lulib->pkt_offset;
@@ -2469,10 +2479,11 @@ int mcm_lulib_get_list_value(
     fret = mcm_parse_base_rep(this_lulib, 0);
     if(fret < MCM_RCODE_PASS)
     {
-        if(mcm_lulib_show_msg != 0)
-        {
-            MCM_EMSG("call mcm_parse_base_rep() fail");
-        }
+        if(fret != MCM_RCODE_CONFIG_NOT_FIND_STORE)
+            if(mcm_lulib_show_msg != 0)
+            {
+                MCM_EMSG("call mcm_parse_base_rep() fail");
+            }
         goto FREE_01;
     }
     tmp_offset = this_lulib->pkt_offset;
@@ -2599,10 +2610,11 @@ int mcm_lulib_set_any_type_alone(
     fret = mcm_parse_base_rep(this_lulib, 0);
     if(fret < MCM_RCODE_PASS)
     {
-        if(mcm_lulib_show_msg != 0)
-        {
-            MCM_EMSG("call mcm_parse_base_rep() fail");
-        }
+        if(fret != MCM_RCODE_CONFIG_NOT_FIND_STORE)
+            if(mcm_lulib_show_msg != 0)
+            {
+                MCM_EMSG("call mcm_parse_base_rep() fail");
+            }
         goto FREE_01;
     }
 
@@ -2697,10 +2709,11 @@ int mcm_lulib_get_with_type_alone(
     fret = mcm_parse_base_rep(this_lulib, 0);
     if(fret < MCM_RCODE_PASS)
     {
-        if(mcm_lulib_show_msg != 0)
-        {
-            MCM_EMSG("call mcm_parse_base_rep() fail");
-        }
+        if(fret != MCM_RCODE_CONFIG_NOT_FIND_STORE)
+            if(mcm_lulib_show_msg != 0)
+            {
+                MCM_EMSG("call mcm_parse_base_rep() fail");
+            }
         goto FREE_01;
     }
     tmp_offset = this_lulib->pkt_offset;
@@ -2775,7 +2788,10 @@ int mcm_lulib_do_get_alone(
     fret = mcm_lulib_get_alone(this_lulib, full_path, data_buf);
     if(fret < MCM_RCODE_PASS)
     {
-        MCM_EMSG("call mcm_lulib_get_alone() fail");
+        if(fret != MCM_RCODE_CONFIG_NOT_FIND_STORE)
+        {
+            MCM_EMSG("call mcm_lulib_get_alone() fail");
+        }
     }
 
     mcm_lulib_exit(this_lulib);
@@ -2802,7 +2818,10 @@ int mcm_lulib_do_set_alone(
     fret = mcm_lulib_set_alone(this_lulib, full_path, data_con, data_len);
     if(fret < MCM_RCODE_PASS)
     {
-        MCM_EMSG("call mcm_lulib_set_alone() fail");
+        if(fret != MCM_RCODE_CONFIG_NOT_FIND_STORE)
+        {
+            MCM_EMSG("call mcm_lulib_set_alone() fail");
+        }
     }
 
     mcm_lulib_exit(this_lulib);
@@ -2828,7 +2847,10 @@ int mcm_lulib_do_get_entry(
     fret = mcm_lulib_get_entry(this_lulib, full_path, data_buf);
     if(fret < MCM_RCODE_PASS)
     {
-        MCM_EMSG("call mcm_lulib_get_entry() fail");
+        if(fret != MCM_RCODE_CONFIG_NOT_FIND_STORE)
+        {
+            MCM_EMSG("call mcm_lulib_get_entry() fail");
+        }
     }
 
     mcm_lulib_exit(this_lulib);
@@ -2855,7 +2877,10 @@ int mcm_lulib_do_set_entry(
     fret = mcm_lulib_set_entry(this_lulib, full_path, data_con, data_len);
     if(fret < MCM_RCODE_PASS)
     {
-        MCM_EMSG("call mcm_lulib_set_entry() fail");
+        if(fret != MCM_RCODE_CONFIG_NOT_FIND_STORE)
+        {
+            MCM_EMSG("call mcm_lulib_set_entry() fail");
+        }
     }
 
     mcm_lulib_exit(this_lulib);
@@ -2883,7 +2908,10 @@ int mcm_lulib_do_add_entry(
     fret = mcm_lulib_add_entry(this_lulib, full_path, insert_path, data_con, data_len);
     if(fret < MCM_RCODE_PASS)
     {
-        MCM_EMSG("call mcm_lulib_add_entry() fail");
+        if(fret != MCM_RCODE_CONFIG_NOT_FIND_STORE)
+        {
+            MCM_EMSG("call mcm_lulib_add_entry() fail");
+        }
     }
 
     mcm_lulib_exit(this_lulib);
@@ -2908,7 +2936,10 @@ int mcm_lulib_do_del_entry(
     fret = mcm_lulib_del_entry(this_lulib, full_path);
     if(fret < MCM_RCODE_PASS)
     {
-        MCM_EMSG("call mcm_lulib_del_entry() fail");
+        if(fret != MCM_RCODE_CONFIG_NOT_FIND_STORE)
+        {
+            MCM_EMSG("call mcm_lulib_del_entry() fail");
+        }
     }
 
     mcm_lulib_exit(this_lulib);
@@ -2935,7 +2966,10 @@ int mcm_lulib_do_get_all_entry(
     fret = mcm_lulib_get_all_entry(this_lulib, mix_path, count_buf, data_buf);
     if(fret < MCM_RCODE_PASS)
     {
-        MCM_EMSG("call mcm_lulib_get_all_entry() fail");
+        if(fret != MCM_RCODE_CONFIG_NOT_FIND_STORE)
+        {
+            MCM_EMSG("call mcm_lulib_get_all_entry() fail");
+        }
     }
 
     mcm_lulib_exit(this_lulib);
@@ -2960,7 +2994,10 @@ int mcm_lulib_do_del_all_entry(
     fret = mcm_lulib_del_all_entry(this_lulib, mix_path);
     if(fret < MCM_RCODE_PASS)
     {
-        MCM_EMSG("call mcm_lulib_del_all_entry() fail");
+        if(fret != MCM_RCODE_CONFIG_NOT_FIND_STORE)
+        {
+            MCM_EMSG("call mcm_lulib_del_all_entry() fail");
+        }
     }
 
     mcm_lulib_exit(this_lulib);
@@ -3012,7 +3049,10 @@ int mcm_lulib_do_get_count(
     fret = mcm_lulib_get_count(this_lulib, mix_path, count_buf);
     if(fret < MCM_RCODE_PASS)
     {
-        MCM_EMSG("call mcm_lulib_get_count() fail");
+        if(fret != MCM_RCODE_CONFIG_NOT_FIND_STORE)
+        {
+            MCM_EMSG("call mcm_lulib_get_count() fail");
+        }
     }
 
     mcm_lulib_exit(this_lulib);
@@ -3038,7 +3078,10 @@ int mcm_lulib_do_get_usable_key(
     fret = mcm_lulib_get_usable_key(this_lulib, mix_path, key_buf);
     if(fret < MCM_RCODE_PASS)
     {
-        MCM_EMSG("call mcm_lulib_get_usable_key() fail");
+        if(fret != MCM_RCODE_CONFIG_NOT_FIND_STORE)
+        {
+            MCM_EMSG("call mcm_lulib_get_usable_key() fail");
+        }
     }
 
     mcm_lulib_exit(this_lulib);

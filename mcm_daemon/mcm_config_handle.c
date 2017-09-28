@@ -6335,7 +6335,10 @@ int mcm_config_get_alone_by_path(
                                   NULL, NULL, NULL, NULL, NULL);
     if(fret < MCM_RCODE_PASS)
     {
-        MCM_EMSG("call mcm_config_anysis_path() fail");
+        if(fret != MCM_RCODE_CONFIG_NOT_FIND_STORE)
+        {
+            MCM_EMSG("call mcm_config_anysis_path() fail");
+        }
         return fret;
     }
 
@@ -6617,7 +6620,10 @@ int mcm_config_set_alone_by_path(
                                   NULL, NULL, NULL, NULL, NULL);
     if(fret < MCM_RCODE_PASS)
     {
-        MCM_EMSG("call mcm_config_anysis_path() fail");
+        if(fret != MCM_RCODE_CONFIG_NOT_FIND_STORE)
+        {
+            MCM_EMSG("call mcm_config_anysis_path() fail");
+        }
         return fret;
     }
 
@@ -6732,7 +6738,10 @@ int mcm_config_get_entry_by_path(
                                   NULL, NULL, NULL, NULL, NULL);
     if(fret < MCM_RCODE_PASS)
     {
-        MCM_EMSG("call mcm_config_anysis_path() fail");
+        if(fret != MCM_RCODE_CONFIG_NOT_FIND_STORE)
+        {
+            MCM_EMSG("call mcm_config_anysis_path() fail");
+        }
         return fret;
     }
 
@@ -6885,7 +6894,10 @@ int mcm_config_set_entry_by_path(
                                   NULL, NULL, NULL, NULL, NULL);
     if(fret < MCM_RCODE_PASS)
     {
-        MCM_EMSG("call mcm_config_anysis_path() fail");
+        if(fret != MCM_RCODE_CONFIG_NOT_FIND_STORE)
+        {
+            MCM_EMSG("call mcm_config_anysis_path() fail");
+        }
         return fret;
     }
 
@@ -7092,7 +7104,10 @@ int mcm_config_add_entry_by_path(
                                   NULL, NULL, NULL, NULL, &parent_store);
     if(fret < MCM_RCODE_PASS)
     {
-        MCM_EMSG("call mcm_config_anysis_path() fail");
+        if(fret != MCM_RCODE_CONFIG_NOT_FIND_STORE)
+        {
+            MCM_EMSG("call mcm_config_anysis_path() fail");
+        }
         return fret;
     }
 
@@ -7253,7 +7268,10 @@ int mcm_config_del_entry_by_path(
                                   NULL, NULL, NULL, NULL, NULL);
     if(fret < MCM_RCODE_PASS)
     {
-        MCM_EMSG("call mcm_config_anysis_path() fail");
+        if(fret != MCM_RCODE_CONFIG_NOT_FIND_STORE)
+        {
+            MCM_EMSG("call mcm_config_anysis_path() fail");
+        }
         return fret;
     }
 
@@ -7444,7 +7462,10 @@ int mcm_config_get_all_entry_by_path(
                                   NULL, NULL, NULL, NULL, &parent_store);
     if(fret < MCM_RCODE_PASS)
     {
-        MCM_EMSG("call mcm_config_anysis_path() fail");
+        if(fret != MCM_RCODE_CONFIG_NOT_FIND_STORE)
+        {
+            MCM_EMSG("call mcm_config_anysis_path() fail");
+        }
         return fret;
     }
 
@@ -7639,7 +7660,10 @@ int mcm_config_del_all_entry_by_path(
                                   NULL, NULL, NULL, NULL, &parent_store);
     if(fret < MCM_RCODE_PASS)
     {
-        MCM_EMSG("call mcm_config_anysis_path() fail");
+        if(fret != MCM_RCODE_CONFIG_NOT_FIND_STORE)
+        {
+            MCM_EMSG("call mcm_config_anysis_path() fail");
+        }
         return fret;
     }
 
@@ -7826,7 +7850,10 @@ int mcm_config_get_count_by_path(
                                   NULL, NULL, NULL, NULL, &parent_store);
     if(fret < MCM_RCODE_PASS)
     {
-        MCM_EMSG("call mcm_config_anysis_path() fail");
+        if(fret != MCM_RCODE_CONFIG_NOT_FIND_STORE)
+        {
+            MCM_EMSG("call mcm_config_anysis_path() fail");
+        }
         return fret;
     }
 
@@ -7999,7 +8026,10 @@ int mcm_config_get_usable_key_by_path(
                                   NULL, NULL, NULL, NULL, &parent_store);
     if(fret < MCM_RCODE_PASS)
     {
-        MCM_EMSG("call mcm_config_anysis_path() fail");
+        if(fret != MCM_RCODE_CONFIG_NOT_FIND_STORE)
+        {
+            MCM_EMSG("call mcm_config_anysis_path() fail");
+        }
         return fret;
     }
 
@@ -8085,7 +8115,10 @@ int mcm_config_get_alone_status_by_path(
                                   NULL, NULL, NULL, NULL, NULL);
     if(fret < MCM_RCODE_PASS)
     {
-        MCM_EMSG("call mcm_config_anysis_path() fail");
+        if(fret != MCM_RCODE_CONFIG_NOT_FIND_STORE)
+        {
+            MCM_EMSG("call mcm_config_anysis_path() fail");
+        }
         return fret;
     }
 
@@ -8168,7 +8201,10 @@ int mcm_config_get_entry_self_status_by_path(
                                   NULL, NULL, NULL, NULL, NULL);
     if(fret < MCM_RCODE_PASS)
     {
-        MCM_EMSG("call mcm_config_anysis_path() fail");
+        if(fret != MCM_RCODE_CONFIG_NOT_FIND_STORE)
+        {
+            MCM_EMSG("call mcm_config_anysis_path() fail");
+        }
         return fret;
     }
 
@@ -8259,7 +8295,10 @@ int mcm_config_get_entry_all_status_by_path(
                                   NULL, NULL, NULL, NULL, NULL);
     if(fret < MCM_RCODE_PASS)
     {
-        MCM_EMSG("call mcm_config_anysis_path() fail");
+        if(fret != MCM_RCODE_CONFIG_NOT_FIND_STORE)
+        {
+            MCM_EMSG("call mcm_config_anysis_path() fail");
+        }
         return fret;
     }
 
