@@ -593,7 +593,7 @@ static int maam_clear_all(
         fret = maam_del_session(auth_sys_info, each_session);
         if(fret < MAAM_RCODE_PASS)
         {
-            MAAM_EMSG("call maam_del_session() fail");
+            MAAM_ECTMSG("call maam_del_session() fail");
             return fret;
         }
     }
@@ -641,7 +641,7 @@ static int maam_clear_idle(
             fret = maam_del_session(auth_sys_info, each_session);
             if(fret < MAAM_RCODE_PASS)
             {
-                MAAM_EMSG("call maam_del_session() fail");
+                MAAM_ECTMSG("call maam_del_session() fail");
                 return fret;
             }
         }
@@ -670,7 +670,7 @@ static int maam_check_multiple_user_active(
             fret = maam_clear_all(auth_sys_info);
             if(fret < MAAM_RCODE_PASS)
             {
-                MAAM_EMSG("call maam_clear_all() fail");
+                MAAM_ECTMSG("call maam_clear_all() fail");
                 return fret;
             }
         }
@@ -700,7 +700,7 @@ static int maam_check_multiple_user_active(
                         fret = maam_clear_all(auth_sys_info);
                         if(fret < MAAM_RCODE_PASS)
                         {
-                            MAAM_EMSG("call maam_clear_all() fail");
+                            MAAM_ECTMSG("call maam_clear_all() fail");
                             return fret;
                         }
                     }
@@ -726,7 +726,7 @@ static int maam_check_multiple_user_active(
                 fret = maam_clear_all(auth_sys_info);
                 if(fret < MAAM_RCODE_PASS)
                 {
-                    MAAM_EMSG("call maam_clear_all() fail");
+                    MAAM_ECTMSG("call maam_clear_all() fail");
                     return fret;
                 }
             }
@@ -764,7 +764,7 @@ static int maam_check_same_accout_multiple_active(
                 fret = maam_del_session(auth_sys_info, each_session);
                 if(fret < MAAM_RCODE_PASS)
                 {
-                    MAAM_EMSG("call maam_del_session() fail");
+                    MAAM_ECTMSG("call maam_del_session() fail");
                     return fret;
                 }
             }
@@ -788,7 +788,7 @@ static int maam_check_same_accout_multiple_active(
                         fret = maam_del_session(auth_sys_info, each_session);
                         if(fret < MAAM_RCODE_PASS)
                         {
-                            MAAM_EMSG("call maam_del_session() fail");
+                            MAAM_ECTMSG("call maam_del_session() fail");
                             return fret;
                         }
                     }
@@ -815,7 +815,7 @@ static int maam_check_same_accout_multiple_active(
                     fret = maam_del_session(auth_sys_info, each_session);
                     if(fret < MAAM_RCODE_PASS)
                     {
-                        MAAM_EMSG("call maam_del_session() fail");
+                        MAAM_ECTMSG("call maam_del_session() fail");
                         return fret;
                     }
                 }
@@ -1369,7 +1369,7 @@ static int maam_process_login(
     fret = maam_get_login_para(req_data_info, &login_data);
     if(fret < MAAM_RCODE_PASS)
     {
-        MAAM_EMSG("call maam_get_login_para() fail");
+        MAAM_ECTMSG("call maam_get_login_para() fail");
         goto FREE_01;
     }
 
@@ -1377,7 +1377,7 @@ static int maam_process_login(
     fret = maam_verify_account(&login_data, &cret);
     if(fret < MAAM_RCODE_PASS)
     {
-        MAAM_EMSG("call maam_verify_account() fail");
+        MAAM_ECTMSG("call maam_verify_account() fail");
         goto FREE_01;
     }
     if(cret < MAAM_RCODE_PASS)
@@ -1386,7 +1386,7 @@ static int maam_process_login(
     fret = maam_auth_sys_wait(sm_id, sm_mutex_path, &auth_sys_info, &auth_sys_mutex);
     if(fret < MAAM_RCODE_PASS)
     {
-        MAAM_EMSG("call maam_auth_sys_wait() fail");
+        MAAM_ECTMSG("call maam_auth_sys_wait() fail");
         goto FREE_01;
     }
 
@@ -1394,7 +1394,7 @@ static int maam_process_login(
     fret = maam_fill_session(auth_sys_info, &login_data, &session_data);
     if(fret < MAAM_RCODE_PASS)
     {
-        MAAM_EMSG("call maam_fill_session() fail");
+        MAAM_ECTMSG("call maam_fill_session() fail");
         goto FREE_02;
     }
 
@@ -1402,7 +1402,7 @@ static int maam_process_login(
     fret = maam_clear_idle(auth_sys_info);
     if(fret < MAAM_RCODE_PASS)
     {
-        MAAM_EMSG("call maam_clear_idle() fail");
+        MAAM_ECTMSG("call maam_clear_idle() fail");
         goto FREE_02;
     }
 
@@ -1412,7 +1412,7 @@ static int maam_process_login(
         fret = maam_check_multiple_user_active(auth_sys_info, &login_data, &cret);
         if(fret < MAAM_RCODE_PASS)
         {
-            MAAM_EMSG("call maam_check_multiple_user_active() fail");
+            MAAM_ECTMSG("call maam_check_multiple_user_active() fail");
             goto FREE_02;
         }
         if(cret < MAAM_RCODE_PASS)
@@ -1425,7 +1425,7 @@ static int maam_process_login(
         fret = maam_check_same_accout_multiple_active(auth_sys_info, &login_data, &cret);
         if(fret < MAAM_RCODE_PASS)
         {
-            MAAM_EMSG("call maam_check_same_accout_multiple_active() fail");
+            MAAM_ECTMSG("call maam_check_same_accout_multiple_active() fail");
             goto FREE_02;
         }
         if(cret < MAAM_RCODE_PASS)
@@ -1436,7 +1436,7 @@ static int maam_process_login(
     fret = maam_add_session(auth_sys_info, &session_data);
     if(fret < MAAM_RCODE_PASS)
     {
-        MAAM_EMSG("call maam_add_session() fail");
+        MAAM_ECTMSG("call maam_add_session() fail");
         goto FREE_02;
     }
 
@@ -1496,7 +1496,7 @@ static int maam_process_logout(
     cret = maam_get_cookie_para(req_data_info, &cookie_data);
     if(cret < MAAM_RCODE_PASS)
     {
-        MAAM_EMSG("call maam_get_cookie_para() fail");
+        MAAM_ECTMSG("call maam_get_cookie_para() fail");
         goto FREE_01;
     }
 
@@ -1511,7 +1511,7 @@ static int maam_process_logout(
     fret = maam_auth_sys_wait(sm_id, sm_mutex_path, &auth_sys_info, &auth_sys_mutex);
     if(fret < MAAM_RCODE_PASS)
     {
-        MAAM_EMSG("call maam_auth_sys_wait() fail");
+        MAAM_ECTMSG("call maam_auth_sys_wait() fail");
         goto FREE_01;
     }
 
@@ -1529,7 +1529,7 @@ static int maam_process_logout(
     fret = maam_del_session(auth_sys_info, each_session);
     if(fret < MAAM_RCODE_PASS)
     {
-        MAAM_EMSG("call maam_del_session() fail");
+        MAAM_ECTMSG("call maam_del_session() fail");
         goto FREE_02;
     }
 
@@ -1585,7 +1585,7 @@ static int maam_process_access(
     cret = maam_get_cookie_para(req_data_info, &cookie_data);
     if(cret < MAAM_RCODE_PASS)
     {
-        MAAM_EMSG("call maam_get_cookie_para() fail");
+        MAAM_ECTMSG("call maam_get_cookie_para() fail");
         goto FREE_01;
     }
 
@@ -1600,7 +1600,7 @@ static int maam_process_access(
     fret = maam_auth_sys_wait(sm_id, sm_mutex_path, &auth_sys_info, &auth_sys_mutex);
     if(fret < MAAM_RCODE_PASS)
     {
-        MAAM_EMSG("call maam_auth_sys_wait() fail");
+        MAAM_ECTMSG("call maam_auth_sys_wait() fail");
         goto FREE_01;
     }
 
@@ -1618,7 +1618,7 @@ static int maam_process_access(
     fret = maam_check_idle(auth_sys_info, each_session, &cret);
     if(fret < MAAM_RCODE_PASS)
     {
-        MAAM_EMSG("call maam_check_idle() fail");
+        MAAM_ECTMSG("call maam_check_idle() fail");
         goto FREE_03;
     }
     if(cret < MAAM_RCODE_PASS)
@@ -1631,7 +1631,7 @@ FREE_03:
         fret = maam_del_session(auth_sys_info, each_session);
         if(fret < MAAM_RCODE_PASS)
         {
-            MAAM_EMSG("call maam_del_session() fail");
+            MAAM_ECTMSG("call maam_del_session() fail");
             goto FREE_02;
         }
     }
@@ -1737,7 +1737,7 @@ int maam_init(
     fret = maam_auth_sys_wait(sm_id, sm_mutex_path, &auth_sys_info, &auth_sys_mutex);
     if(fret < MAAM_RCODE_PASS)
     {
-        MAAM_EMSG("call maam_auth_sys_wait() fail");
+        MAAM_ECTMSG("call maam_auth_sys_wait() fail");
         goto FREE_01;
     }
 
@@ -1807,7 +1807,7 @@ int maam_handle(
         fret = maam_process_login(sm_mutex_path, sm_id, req_data_info, rep_data_info);
         if(fret < MAAM_RCODE_PASS)
         {
-            MAAM_EMSG("call maam_process_login() fail");
+            MAAM_ECTMSG("call maam_process_login() fail");
             return fret;
         }
     }
@@ -1817,7 +1817,7 @@ int maam_handle(
         fret = maam_process_logout(sm_mutex_path, sm_id, req_data_info, rep_data_info);
         if(fret < MAAM_RCODE_PASS)
         {
-            MAAM_EMSG("call maam_process_logout() fail");
+            MAAM_ECTMSG("call maam_process_logout() fail");
             return fret;
         }
     }
@@ -1826,7 +1826,7 @@ int maam_handle(
         fret = maam_process_access(sm_mutex_path, sm_id, req_data_info, rep_data_info);
         if(fret < MAAM_RCODE_PASS)
         {
-            MAAM_EMSG("call maam_process_access() fail");
+            MAAM_ECTMSG("call maam_process_access() fail");
             return fret;
         }
     }

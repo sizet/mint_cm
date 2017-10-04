@@ -16,9 +16,20 @@ Some rights reserved. See README.
 
 
 
+// buildin error
 #define MAAM_EMSG(msg_fmt, msg_args...) \
     printf("%s(%04u): " msg_fmt "\n", __FILE__, __LINE__, ##msg_args)
 
+// buildin error (call trace for internal maam_... serial function)
+#define MAAM_ECTMODE 1
+#if MAAM_ECTMODE
+    #define MAAM_ECTMSG(msg_fmt, msg_args...) \
+        printf("%s(%04u): " msg_fmt "\n", __FILE__, __LINE__, ##msg_args)
+#else
+    #define MAAM_ECTMSG(msg_fmt, msg_args...)
+#endif
+
+// buildin debug
 #define MAAM_BDMODE 0
 #if MAAM_BDMODE
     #define MAAM_BDMSG(msg_fmt, msg_args...) \
@@ -27,6 +38,7 @@ Some rights reserved. See README.
     #define MAAM_BDMSG(msg_fmt, msg_args...)
 #endif
 
+// lib debug - user space
 #define MAAM_LUDMODE 0
 #if MAAM_LUDMODE
     #define MAAM_LUDMSG(msg_fmt, msg_args...) \

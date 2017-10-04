@@ -19,7 +19,7 @@ Some rights reserved. See README.
 
 
 
-// 是否使用 printf 顯示訊息 (MAAM_EMSG, MAAM_LUDMSG).
+// 是否使用 printf 顯示訊息 (MAAM_EMSG, MAAM_ECTMODE, MAAM_LUDMSG).
 // 1 : 是.
 // 0 : 否.
 // 如果輸出被重定向到其他非 console 裝置 (如 CGI),

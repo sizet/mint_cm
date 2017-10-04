@@ -968,7 +968,7 @@ int mcm_read_file(
             fret = mcm_realloc_buf_config(&tmp_buf, &tmp_size);
             if(fret < MCM_RCODE_PASS)
             {
-                MCM_EMSG("call mcm_realloc_buf_config() fail");
+                MCM_ECTMSG("call mcm_realloc_buf_config() fail");
                 return fret;
             }
             *data_buf_buf = tmp_buf;
@@ -1299,7 +1299,7 @@ int mcm_create_model(
         fret = mcm_read_file(file_fp, read_buf_buf, read_size_buf, &read_len, &read_eof);
         if(fret < MCM_RCODE_PASS)
         {
-            MCM_EMSG("call mcm_read_file() fail");
+            MCM_ECTMSG("call mcm_read_file() fail");
             goto FREE_01;
         }
         else
@@ -1431,7 +1431,7 @@ int mcm_create_model(
                                             &sub_model_group, &sub_model_member);
                     if(fret < MCM_RCODE_PASS)
                     {
-                        MCM_EMSG("call mcm_create_model()");
+                        MCM_ECTMSG("call mcm_create_model()");
                         goto FREE_01;
                     }
                 }
@@ -1483,7 +1483,7 @@ int mcm_create_model(
                 fret = mcm_assign_model_default(self_model_member, read_con);
                 if(fret < MCM_RCODE_PASS)
                 {
-                    MCM_EMSG("call mcm_assign_model_default() fail");
+                    MCM_ECTMSG("call mcm_assign_model_default() fail");
                     goto FREE_01;
                 }
             }
@@ -1613,14 +1613,14 @@ int mcm_config_load_model(
     fret = mcm_realloc_buf_config(&read_buf, &read_size);
     if(fret < MCM_RCODE_PASS)
     {
-        MCM_EMSG("call mcm_realloc_buf_config() fail");
+        MCM_ECTMSG("call mcm_realloc_buf_config() fail");
         goto FREE_02;
     }
 
     fret = mcm_read_file(file_fp, &read_buf, &read_size, &read_len, &read_eof);
     if(fret < MCM_RCODE_PASS)
     {
-        MCM_EMSG("call mcm_read_file() fail");
+        MCM_ECTMSG("call mcm_read_file() fail");
         goto FREE_03;
     }
     else
@@ -1635,7 +1635,7 @@ int mcm_config_load_model(
                             &mcm_config_root_model_group, NULL);
     if(fret < MCM_RCODE_PASS)
     {
-        MCM_EMSG("call mcm_create_model() fail");
+        MCM_ECTMSG("call mcm_create_model() fail");
         goto FREE_03;
     }
 
@@ -2147,8 +2147,8 @@ int mcm_create_store(
                                             default_key);
             if(fret < MCM_RCODE_PASS)
             {
-                MCM_EMSG("[%s.%c" MCM_DTYPE_EK_PF "] call mcm_assign_store_default() fail",
-                         this_model_group->group_name, MCM_SPROFILE_PATH_KEY_KEY, default_key);
+                MCM_ECTMSG("[%s.%c" MCM_DTYPE_EK_PF "] call mcm_assign_store_default() fail",
+                           this_model_group->group_name, MCM_SPROFILE_PATH_KEY_KEY, default_key);
                 goto FREE_02;
             }
         }
@@ -2342,9 +2342,9 @@ int mcm_create_store(
                                         NULL, 1, 0, 1, 1, NULL);
                 if(fret < MCM_RCODE_PASS)
                 {
-                    MCM_EMSG("[%s.%c" MCM_DTYPE_EK_PF "] call mcm_create_store() fail",
-                             this_model_group->group_name, MCM_SPROFILE_PATH_KEY_KEY,
-                             default_key);
+                    MCM_ECTMSG("[%s.%c" MCM_DTYPE_EK_PF "] call mcm_create_store() fail",
+                               this_model_group->group_name, MCM_SPROFILE_PATH_KEY_KEY,
+                               default_key);
                     goto FREE_03;
                 }
             }
@@ -2804,7 +2804,7 @@ int mcm_load_store_fill_store(
                                     &self_store);
             if(fret < MCM_RCODE_PASS)
             {
-                MCM_EMSG("call mcm_create_store() fail");
+                MCM_ECTMSG("call mcm_create_store() fail");
                 return fret;
             }
 
@@ -3794,7 +3794,7 @@ int mcm_load_store_fill_lose_store(
                                             &child_store);
                     if(fret < MCM_RCODE_PASS)
                     {
-                        MCM_EMSG("call mcm_create_store() fail");
+                        MCM_ECTMSG("call mcm_create_store() fail");
                         return fret;
                     }
 
@@ -3823,7 +3823,7 @@ int mcm_load_store_fill_lose_store(
                 fret = mcm_load_store_fill_lose_store(child_store);
                 if(fret < MCM_RCODE_PASS)
                 {
-                    MCM_EMSG("call mcm_load_store_fill_lose_store() fail");
+                    MCM_ECTMSG("call mcm_load_store_fill_lose_store() fail");
                     return fret;
                 }
             }
@@ -3930,7 +3930,7 @@ int mcm_load_store_fill_status(
                                                   file_source);
                 if(fret < MCM_RCODE_PASS)
                 {
-                    MCM_EMSG("call mcm_load_store_fill_status() fail");
+                    MCM_ECTMSG("call mcm_load_store_fill_status() fail");
                     return fret;
                 }
             }
@@ -4044,7 +4044,7 @@ int mcm_load_store_process(
     fret = mcm_create_store(mcm_config_root_model_group, NULL, NULL, 1, 0, 0, 0, new_store_buf);
     if(fret < MCM_RCODE_PASS)
     {
-        MCM_EMSG("call mcm_create_store() fail");
+        MCM_ECTMSG("call mcm_create_store() fail");
         goto FREE_01;
     }
     if(mcm_config_root_model_group->member_real_count > 0)
@@ -4065,7 +4065,7 @@ int mcm_load_store_process(
         fret = mcm_read_file(file_fp, read_buf_buf, read_size_buf, &read_len, &read_eof);
         if(fret < MCM_RCODE_PASS)
         {
-            MCM_EMSG("call mcm_read_file() fail");
+            MCM_ECTMSG("call mcm_read_file() fail");
             goto FREE_02;
         }
         else
@@ -4179,7 +4179,7 @@ int mcm_load_store_process(
             fret = mcm_load_store_fill_store(&store_level, &self_store);
             if(fret < MCM_RCODE_PASS)
             {
-                MCM_EMSG("call mcm_load_store_fill_store() fail");
+                MCM_ECTMSG("call mcm_load_store_fill_store() fail");
                 goto FREE_02;
             }
         }
@@ -4221,7 +4221,7 @@ int mcm_load_store_process(
                                             file_source, file_line);
         if(fret < MCM_RCODE_PASS)
         {
-            MCM_EMSG("call mcm_load_store_anysis_member() fail");
+            MCM_ECTMSG("call mcm_load_store_anysis_member() fail");
             goto FREE_02;
         }
     }
@@ -4229,14 +4229,14 @@ int mcm_load_store_process(
     fret = mcm_load_store_fill_lose_store(*new_store_buf);
     if(fret < MCM_RCODE_PASS)
     {
-        MCM_EMSG("call mcm_load_store_fill_lose_store() fail");
+        MCM_ECTMSG("call mcm_load_store_fill_lose_store() fail");
         goto FREE_02;
     }
 
     fret = mcm_load_store_fill_status(mcm_config_root_model_group, *new_store_buf, file_source);
     if(fret < MCM_RCODE_PASS)
     {
-        MCM_EMSG("call mcm_load_store_fill_status() fail");
+        MCM_ECTMSG("call mcm_load_store_fill_status() fail");
         goto FREE_02;
     }
 
@@ -4299,7 +4299,7 @@ int mcm_config_load_store(
     fret = mcm_realloc_buf_config(&read_buf, &read_size);
     if(fret < MCM_RCODE_PASS)
     {
-        MCM_EMSG("call mcm_realloc_buf_config() fail");
+        MCM_ECTMSG("call mcm_realloc_buf_config() fail");
         goto FREE_02;
     }
 
@@ -4307,7 +4307,7 @@ int mcm_config_load_store(
                                   &mcm_config_base_data, &mcm_config_root_store);
     if(fret < MCM_RCODE_PASS)
     {
-        MCM_EMSG("call mcm_load_store_process() fail");
+        MCM_ECTMSG("call mcm_load_store_process() fail");
         goto FREE_03;
     }
 
@@ -4315,7 +4315,7 @@ int mcm_config_load_store(
     fret = mcm_load_store_check_error(mcm_config_root_model_group, mcm_config_root_store);
     if(fret < MCM_RCODE_PASS)
     {
-        MCM_EMSG("call mcm_load_store_check_error() fail");
+        MCM_ECTMSG("call mcm_load_store_check_error() fail");
 
         // mcm_do_save :
         // 如果是 MCM_EHANDLE_MANUAL_HANDEL_INTERNAL / MCM_EHANDLE_MANUAL_HANDEL_EXTERNAL,
@@ -4720,7 +4720,7 @@ int mcm_config_store_profile_error_process(
                 fret = mcm_config_load_store();
                 if(fret < MCM_RCODE_PASS)
                 {
-                    MCM_EMSG("call mcm_config_load_store() fail");
+                    MCM_ECTMSG("call mcm_config_load_store() fail");
                     goto FREE_01;
                 }
             }
@@ -4736,7 +4736,7 @@ int mcm_config_store_profile_error_process(
 
                 if(mcm_action_reset_default_run() < MCM_RCODE_PASS)
                 {
-                    MCM_EMSG("call mcm_action_reset_default_run() fail");
+                    MCM_ECTMSG("call mcm_action_reset_default_run() fail");
                 }
 
                 *exit_buf = 1;
@@ -4764,7 +4764,7 @@ int mcm_config_store_profile_error_process(
                 fret = mcm_config_load_store();
                 if(fret < MCM_RCODE_PASS)
                 {
-                    MCM_EMSG("call mcm_config_load_store() fail");
+                    MCM_ECTMSG("call mcm_config_load_store() fail");
                     goto FREE_01;
                 }
             }
@@ -4788,7 +4788,7 @@ int mcm_config_store_profile_error_process(
 
                 if(mcm_action_reset_default_run() < MCM_RCODE_PASS)
                 {
-                    MCM_EMSG("call mcm_action_reset_default_run() fail");
+                    MCM_ECTMSG("call mcm_action_reset_default_run() fail");
                 }
 
                 *exit_buf = 1;
@@ -5080,7 +5080,7 @@ int mcm_adjust_child_data(
                                    modify_method, modify_object);
             if(fret < MCM_RCODE_PASS)
             {
-                MCM_EMSG("call mcm_adjust_data fail");
+                MCM_ECTMSG("call mcm_adjust_data fail");
                 return fret;
             }
         }
@@ -5097,7 +5097,7 @@ int mcm_adjust_child_data(
                                              modify_method, modify_object, 1);
                 if(fret < MCM_RCODE_PASS)
                 {
-                    MCM_EMSG("call mcm_adjust_child_data fail");
+                    MCM_ECTMSG("call mcm_adjust_child_data fail");
                     return fret;
                 }
             }
@@ -5275,7 +5275,7 @@ int mcm_config_save(
     fret = mcm_config_update(this_session, update_method);
     if(fret < MCM_RCODE_PASS)
     {
-        MCM_EMSG("call mcm_config_update() fail");
+        MCM_ECTMSG("call mcm_config_update() fail");
         return fret;
     }
 
@@ -5307,7 +5307,7 @@ int mcm_config_save(
             fret = mcm_config_save_store();
             if(fret < MCM_RCODE_PASS)
             {
-                MCM_EMSG("call mcm_config_save_store() fail");
+                MCM_ECTMSG("call mcm_config_save_store() fail");
                 return fret;
             }
         }
@@ -5883,7 +5883,7 @@ int mcm_config_find_group_by_mask(
                                   NULL, NULL, NULL, NULL, NULL);
     if(fret < MCM_RCODE_PASS)
     {
-        MCM_EMSG("call mcm_config_anysis_path() fail");
+        MCM_ECTMSG("call mcm_config_anysis_path() fail");
     }
 
     return fret;
@@ -5934,7 +5934,7 @@ int mcm_config_find_entry_by_mix(
     if(fret < MCM_RCODE_PASS)
         if(fret != MCM_RCODE_CONFIG_NOT_FIND_STORE)
         {
-            MCM_EMSG("call mcm_config_anysis_path() fail");
+            MCM_ECTMSG("call mcm_config_anysis_path() fail");
         }
 
     return fret;
@@ -5977,7 +5977,7 @@ int mcm_config_find_alone_by_full(
     if(fret < MCM_RCODE_PASS)
         if(fret != MCM_RCODE_CONFIG_NOT_FIND_STORE)
         {
-            MCM_EMSG("call mcm_config_anysis_path() fail");
+            MCM_ECTMSG("call mcm_config_anysis_path() fail");
         }
 
     return fret;
@@ -6017,7 +6017,7 @@ int mcm_config_find_entry_by_full(
     if(fret < MCM_RCODE_PASS)
         if(fret != MCM_RCODE_CONFIG_NOT_FIND_STORE)
         {
-            MCM_EMSG("call mcm_config_anysis_path() fail");
+            MCM_ECTMSG("call mcm_config_anysis_path() fail");
         }
 
     return fret;
@@ -6120,7 +6120,7 @@ int mcm_config_find_entry_by_ik(
     if(fret < MCM_RCODE_PASS)
         if(fret != MCM_RCODE_CONFIG_NOT_FIND_STORE)
         {
-            MCM_EMSG("call mcm_config_find_entry_use_ik() fail");
+            MCM_ECTMSG("call mcm_config_find_entry_use_ik() fail");
         }
 
     return fret;
@@ -6337,7 +6337,7 @@ int mcm_config_get_alone_by_path(
     {
         if(fret != MCM_RCODE_CONFIG_NOT_FIND_STORE)
         {
-            MCM_EMSG("call mcm_config_anysis_path() fail");
+            MCM_ECTMSG("call mcm_config_anysis_path() fail");
         }
         return fret;
     }
@@ -6346,7 +6346,7 @@ int mcm_config_get_alone_by_path(
                                         self_store, data_access, data_buf);
     if(fret < MCM_RCODE_PASS)
     {
-        MCM_EMSG("call mcm_config_get_alone_by_info() fail");
+        MCM_ECTMSG("call mcm_config_get_alone_by_info() fail");
     }
 
     return fret;
@@ -6460,7 +6460,7 @@ int mcm_config_set_alone_by_info(
                                MCM_DMODIFY_SET_NEW, MCM_MOBJECT_ALONE);
         if(fret < MCM_RCODE_PASS)
         {
-            MCM_EMSG("call mcm_adjust_data() fail");
+            MCM_ECTMSG("call mcm_adjust_data() fail");
             return fret;
         }
 
@@ -6622,7 +6622,7 @@ int mcm_config_set_alone_by_path(
     {
         if(fret != MCM_RCODE_CONFIG_NOT_FIND_STORE)
         {
-            MCM_EMSG("call mcm_config_anysis_path() fail");
+            MCM_ECTMSG("call mcm_config_anysis_path() fail");
         }
         return fret;
     }
@@ -6631,7 +6631,7 @@ int mcm_config_set_alone_by_path(
                                         self_store, data_access, data_con, data_len);
     if(fret < MCM_RCODE_PASS)
     {
-        MCM_EMSG("call mcm_config_set_alone_by_info() fail");
+        MCM_ECTMSG("call mcm_config_set_alone_by_info() fail");
     }
 
     return fret;
@@ -6740,7 +6740,7 @@ int mcm_config_get_entry_by_path(
     {
         if(fret != MCM_RCODE_CONFIG_NOT_FIND_STORE)
         {
-            MCM_EMSG("call mcm_config_anysis_path() fail");
+            MCM_ECTMSG("call mcm_config_anysis_path() fail");
         }
         return fret;
     }
@@ -6749,7 +6749,7 @@ int mcm_config_get_entry_by_path(
                                         data_buf);
     if(fret < MCM_RCODE_PASS)
     {
-        MCM_EMSG("call mcm_config_get_entry_by_info() fail");
+        MCM_ECTMSG("call mcm_config_get_entry_by_info() fail");
     }
 
     return fret;
@@ -6829,7 +6829,7 @@ int mcm_config_set_entry_by_info(
                                MCM_DMODIFY_SET_NEW, MCM_MOBJECT_ENTRY);
         if(fret < MCM_RCODE_PASS)
         {
-            MCM_EMSG("call mcm_adjust_data() fail");
+            MCM_ECTMSG("call mcm_adjust_data() fail");
             return fret;
         }
 
@@ -6896,7 +6896,7 @@ int mcm_config_set_entry_by_path(
     {
         if(fret != MCM_RCODE_CONFIG_NOT_FIND_STORE)
         {
-            MCM_EMSG("call mcm_config_anysis_path() fail");
+            MCM_ECTMSG("call mcm_config_anysis_path() fail");
         }
         return fret;
     }
@@ -6905,7 +6905,7 @@ int mcm_config_set_entry_by_path(
                                         data_con);
     if(fret < MCM_RCODE_PASS)
     {
-        MCM_EMSG("call mcm_config_set_entry_by_info() fail");
+        MCM_ECTMSG("call mcm_config_set_entry_by_info() fail");
     }
 
     return fret;
@@ -7020,7 +7020,7 @@ int mcm_config_add_entry_by_info(
                             data_con == NULL ? 1 : 0, this_key, 1, 0, &self_store);
     if(fret < MCM_RCODE_PASS)
     {
-        MCM_EMSG("call mcm_create_store() fail");
+        MCM_ECTMSG("call mcm_create_store() fail");
         return fret;
     }
 
@@ -7043,14 +7043,14 @@ int mcm_config_add_entry_by_info(
                                MCM_DMODIFY_ADD_NEW, MCM_MOBJECT_ENTRY);
         if(fret < MCM_RCODE_PASS)
         {
-            MCM_EMSG("call mcm_adjust_data() fail");
+            MCM_ECTMSG("call mcm_adjust_data() fail");
             return fret;
         }
         fret = mcm_adjust_child_data(this_model_group, NULL, self_store,
                                      MCM_DMODIFY_ADD_NEW, MCM_MOBJECT_ENTRY, 0);
         if(fret < MCM_RCODE_PASS)
         {
-            MCM_EMSG("call mcm_adjust_child_data() fail");
+            MCM_ECTMSG("call mcm_adjust_child_data() fail");
             return fret;
         }
     }
@@ -7106,7 +7106,7 @@ int mcm_config_add_entry_by_path(
     {
         if(fret != MCM_RCODE_CONFIG_NOT_FIND_STORE)
         {
-            MCM_EMSG("call mcm_config_anysis_path() fail");
+            MCM_ECTMSG("call mcm_config_anysis_path() fail");
         }
         return fret;
     }
@@ -7116,14 +7116,14 @@ int mcm_config_add_entry_by_path(
     if(fret < MCM_RCODE_PASS)
         if(fret != MCM_RCODE_CONFIG_NOT_FIND_STORE)
         {
-            MCM_EMSG("call mcm_config_find_entry_use_ik() fail");
+            MCM_ECTMSG("call mcm_config_find_entry_use_ik() fail");
         }
 
     fret = mcm_config_add_entry_by_info(this_session, self_model_group, parent_store, self_key,
                                         insert_store, data_access, data_con, NULL);
     if(fret < MCM_RCODE_PASS)
     {
-        MCM_EMSG("call mcm_config_add_entry_by_info() fail");
+        MCM_ECTMSG("call mcm_config_add_entry_by_info() fail");
     }
 
     return fret;
@@ -7218,14 +7218,14 @@ int mcm_config_del_entry_by_info(
                                MCM_DMODIFY_DEL_NEW, MCM_MOBJECT_ENTRY);
         if(fret < MCM_RCODE_PASS)
         {
-            MCM_EMSG("call mcm_adjust_data() fail");
+            MCM_ECTMSG("call mcm_adjust_data() fail");
             return fret;
         }
         fret = mcm_adjust_child_data(this_model_group, NULL, this_store,
                                      MCM_DMODIFY_DEL_NEW, MCM_MOBJECT_ENTRY, 0);
         if(fret < MCM_RCODE_PASS)
         {
-            MCM_EMSG("call mcm_adjust_child_data() fail");
+            MCM_ECTMSG("call mcm_adjust_child_data() fail");
             return fret;
         }
     }
@@ -7270,7 +7270,7 @@ int mcm_config_del_entry_by_path(
     {
         if(fret != MCM_RCODE_CONFIG_NOT_FIND_STORE)
         {
-            MCM_EMSG("call mcm_config_anysis_path() fail");
+            MCM_ECTMSG("call mcm_config_anysis_path() fail");
         }
         return fret;
     }
@@ -7278,7 +7278,7 @@ int mcm_config_del_entry_by_path(
     fret = mcm_config_del_entry_by_info(this_session, self_model_group, self_store, data_access);
     if(fret < MCM_RCODE_PASS)
     {
-        MCM_EMSG("call mcm_config_del_entry_by_info() fail");
+        MCM_ECTMSG("call mcm_config_del_entry_by_info() fail");
     }
 
     return fret;
@@ -7464,7 +7464,7 @@ int mcm_config_get_all_entry_by_path(
     {
         if(fret != MCM_RCODE_CONFIG_NOT_FIND_STORE)
         {
-            MCM_EMSG("call mcm_config_anysis_path() fail");
+            MCM_ECTMSG("call mcm_config_anysis_path() fail");
         }
         return fret;
     }
@@ -7473,7 +7473,7 @@ int mcm_config_get_all_entry_by_path(
                                             data_access, count_buf, data_buf);
     if(fret < MCM_RCODE_PASS)
     {
-        MCM_EMSG("call mcm_config_get_all_entry_by_info() fail");
+        MCM_ECTMSG("call mcm_config_get_all_entry_by_info() fail");
     }
 
     return fret;
@@ -7608,14 +7608,14 @@ int mcm_config_del_all_entry_by_info(
                                        MCM_DMODIFY_DEL_NEW, MCM_MOBJECT_ENTRY);
                 if(fret < MCM_RCODE_PASS)
                 {
-                    MCM_EMSG("call mcm_adjust_data() fail");
+                    MCM_ECTMSG("call mcm_adjust_data() fail");
                     return fret;
                 }
                 fret = mcm_adjust_child_data(this_model_group, NULL, each_store,
                                              MCM_DMODIFY_DEL_NEW, MCM_MOBJECT_ENTRY, 0);
                 if(fret < MCM_RCODE_PASS)
                 {
-                    MCM_EMSG("call mcm_adjust_child_data() fail");
+                    MCM_ECTMSG("call mcm_adjust_child_data() fail");
                     return fret;
                 }
             }
@@ -7662,7 +7662,7 @@ int mcm_config_del_all_entry_by_path(
     {
         if(fret != MCM_RCODE_CONFIG_NOT_FIND_STORE)
         {
-            MCM_EMSG("call mcm_config_anysis_path() fail");
+            MCM_ECTMSG("call mcm_config_anysis_path() fail");
         }
         return fret;
     }
@@ -7671,7 +7671,7 @@ int mcm_config_del_all_entry_by_path(
                                             data_access);
     if(fret < MCM_RCODE_PASS)
     {
-        MCM_EMSG("call mcm_config_del_all_entry_by_info() fail");
+        MCM_ECTMSG("call mcm_config_del_all_entry_by_info() fail");
     }
 
     return fret;
@@ -7726,14 +7726,14 @@ int mcm_config_get_max_count_by_path(
     fret = mcm_config_find_group_by_mask(this_session, mask_path, &self_model_group);
     if(fret < MCM_RCODE_PASS)
     {
-        MCM_EMSG("call mcm_config_find_group_by_mask() fail");
+        MCM_ECTMSG("call mcm_config_find_group_by_mask() fail");
         return fret;
     }
 
     fret = mcm_config_get_max_count_by_info(this_session, self_model_group, count_buf);
     if(fret < MCM_RCODE_PASS)
     {
-        MCM_EMSG("call mcm_config_get_max_count_by_info() fail");
+        MCM_ECTMSG("call mcm_config_get_max_count_by_info() fail");
     }
 
     return fret;
@@ -7852,7 +7852,7 @@ int mcm_config_get_count_by_path(
     {
         if(fret != MCM_RCODE_CONFIG_NOT_FIND_STORE)
         {
-            MCM_EMSG("call mcm_config_anysis_path() fail");
+            MCM_ECTMSG("call mcm_config_anysis_path() fail");
         }
         return fret;
     }
@@ -7860,7 +7860,7 @@ int mcm_config_get_count_by_path(
     fret = mcm_config_get_count_by_info(this_session, self_model_group, parent_store, count_buf);
     if(fret < MCM_RCODE_PASS)
     {
-        MCM_EMSG("call mcm_config_get_count_by_info() fail");
+        MCM_ECTMSG("call mcm_config_get_count_by_info() fail");
     }
 
     return fret;
@@ -8028,7 +8028,7 @@ int mcm_config_get_usable_key_by_path(
     {
         if(fret != MCM_RCODE_CONFIG_NOT_FIND_STORE)
         {
-            MCM_EMSG("call mcm_config_anysis_path() fail");
+            MCM_ECTMSG("call mcm_config_anysis_path() fail");
         }
         return fret;
     }
@@ -8036,7 +8036,7 @@ int mcm_config_get_usable_key_by_path(
     fret = mcm_config_get_usable_key_by_info(this_session, self_model_group, parent_store, key_buf);
     if(fret < MCM_RCODE_PASS)
     {
-        MCM_EMSG("call mcm_config_get_usable_key_by_info() fail");
+        MCM_ECTMSG("call mcm_config_get_usable_key_by_info() fail");
     }
 
     return fret;
@@ -8117,7 +8117,7 @@ int mcm_config_get_alone_status_by_path(
     {
         if(fret != MCM_RCODE_CONFIG_NOT_FIND_STORE)
         {
-            MCM_EMSG("call mcm_config_anysis_path() fail");
+            MCM_ECTMSG("call mcm_config_anysis_path() fail");
         }
         return fret;
     }
@@ -8126,7 +8126,7 @@ int mcm_config_get_alone_status_by_path(
                                                self_model_member, self_store, data_buf);
     if(fret < MCM_RCODE_PASS)
     {
-        MCM_EMSG("call mcm_config_get_alone_status_by_info() fail");
+        MCM_ECTMSG("call mcm_config_get_alone_status_by_info() fail");
     }
 
     return fret;
@@ -8203,7 +8203,7 @@ int mcm_config_get_entry_self_status_by_path(
     {
         if(fret != MCM_RCODE_CONFIG_NOT_FIND_STORE)
         {
-            MCM_EMSG("call mcm_config_anysis_path() fail");
+            MCM_ECTMSG("call mcm_config_anysis_path() fail");
         }
         return fret;
     }
@@ -8212,7 +8212,7 @@ int mcm_config_get_entry_self_status_by_path(
                                                     data_buf);
     if(fret < MCM_RCODE_PASS)
     {
-        MCM_EMSG("call mcm_config_get_entry_self_status_by_info() fail");
+        MCM_ECTMSG("call mcm_config_get_entry_self_status_by_info() fail");
     }
 
     return fret;
@@ -8297,7 +8297,7 @@ int mcm_config_get_entry_all_status_by_path(
     {
         if(fret != MCM_RCODE_CONFIG_NOT_FIND_STORE)
         {
-            MCM_EMSG("call mcm_config_anysis_path() fail");
+            MCM_ECTMSG("call mcm_config_anysis_path() fail");
         }
         return fret;
     }
@@ -8306,7 +8306,7 @@ int mcm_config_get_entry_all_status_by_path(
                                                    data_buf);
     if(fret < MCM_RCODE_PASS)
     {
-        MCM_EMSG("call mcm_config_get_entry_all_status_by_info() fail");
+        MCM_ECTMSG("call mcm_config_get_entry_all_status_by_info() fail");
     }
 
     return fret;
@@ -8578,7 +8578,7 @@ int mcm_config_check_store_file(
     fret = mcm_realloc_buf_config(&read_buf, &read_size);
     if(fret < MCM_RCODE_PASS)
     {
-        MCM_EMSG("call mcm_realloc_buf_config() fail");
+        MCM_ECTMSG("call mcm_realloc_buf_config() fail");
         goto FREE_02;
     }
 
@@ -8586,7 +8586,7 @@ int mcm_config_check_store_file(
                                   &self_store);
     if(fret < MCM_RCODE_PASS)
     {
-        MCM_EMSG("call mcm_load_store_process() fail");
+        MCM_ECTMSG("call mcm_load_store_process() fail");
         goto FREE_03;
     }
 
@@ -9123,7 +9123,7 @@ int mcm_config_set_any_type_alone_by_info(
                                MCM_DMODIFY_SET_NEW, MCM_MOBJECT_ALONE);
         if(fret < MCM_RCODE_PASS)
         {
-            MCM_EMSG("call mcm_adjust_data() fail");
+            MCM_ECTMSG("call mcm_adjust_data() fail");
             return fret;
         }
 

@@ -21,7 +21,7 @@
 
 
 
-#if MCM_CGIEMODE | MCM_CCDMODE
+#if MCM_CGIEMODE | MCM_CGIECTMODE | MCM_CCDMODE
     int dbg_tty_fd;
     char dbg_msg_buf[MCM_DBG_BUFFER_SIZE];
 #endif
@@ -31,6 +31,13 @@
         MCM_CGI_TTY_MSG(dbg_tty_fd, dbg_msg_buf, msg_fmt, ##msg_args)
 #else
     #define MCM_CEMSG(msg_fmt, msg_args...)
+#endif
+
+#if MCM_CGIECTMODE
+    #define MCM_CECTMSG(msg_fmt, msg_args...) \
+        MCM_CGI_TTY_MSG(dbg_tty_fd, dbg_msg_buf, msg_fmt, ##msg_args)
+#else
+    #define MCM_CECTMSG(msg_fmt, msg_args...)
 #endif
 
 #if MCM_CCDMODE
@@ -869,7 +876,7 @@ int mcm_check_push_command(
             fret = mcm_find_push_command_config_path(each_command);
             if(fret < MCM_RCODE_PASS)
             {
-                MCM_CEMSG("call mcm_find_push_command_config_path() fail");
+                MCM_CECTMSG("call mcm_find_push_command_config_path() fail");
                 return fret;
             }
 
@@ -881,7 +888,7 @@ int mcm_check_push_command(
                 fret = mcm_find_push_command_config_data_value(each_command);
                 if(fret < MCM_RCODE_PASS)
                 {
-                    MCM_CEMSG("call mcm_find_push_command_config_data_value() fail");
+                    MCM_CECTMSG("call mcm_find_push_command_config_data_value() fail");
                     return fret;
                 }
             }
@@ -1279,7 +1286,7 @@ int mcm_create_model(
                                 cache_path, self_model->child_model, self_model, NULL);
         if(fret < MCM_RCODE_PASS)
         {
-            MCM_CEMSG("call mcm_create_model() fail");
+            MCM_CECTMSG("call mcm_create_model() fail");
             return fret;
         }
     }
@@ -1586,7 +1593,7 @@ int mcm_create_store(
                                     self_store, NULL);
             if(fret < MCM_RCODE_PASS)
             {
-                MCM_CEMSG("call mcm_create_store() fail");
+                MCM_CECTMSG("call mcm_create_store() fail");
                 return fret;
             }
         }
@@ -2190,14 +2197,14 @@ int mcm_process_request(
     fret = mcm_split_command(post_con, post_len, &command_count_info, &command_list_info);
     if(fret < MCM_RCODE_PASS)
     {
-        MCM_CEMSG("call mcm_split_command() fail");
+        MCM_CECTMSG("call mcm_split_command() fail");
         goto FREE_01;
     }
 
     fret = mcm_check_action(request_info, &command_count_info);
     if(fret < MCM_RCODE_PASS)
     {
-        MCM_CEMSG("call mcm_check_action() fail");
+        MCM_CECTMSG("call mcm_check_action() fail");
         goto FREE_02;
     }
 
@@ -2206,7 +2213,7 @@ int mcm_process_request(
         fret = mcm_check_push_command(command_list_info, &command_count_info);
         if(fret < MCM_RCODE_PASS)
         {
-            MCM_CEMSG("call mcm_check_push_command() fail");
+            MCM_CECTMSG("call mcm_check_push_command() fail");
             goto FREE_02;
         }
     }
@@ -2216,7 +2223,7 @@ int mcm_process_request(
         fret = mcm_check_module_command(command_list_info, &command_count_info);
         if(fret < MCM_RCODE_PASS)
         {
-            MCM_CEMSG("call mcm_check_module_command() fail");
+            MCM_CECTMSG("call mcm_check_module_command() fail");
             goto FREE_02;
         }
     }
@@ -2239,7 +2246,7 @@ int mcm_process_request(
         fret = mcm_check_pull_command(&self_lulib, command_list_info, &command_count_info);
         if(fret < MCM_RCODE_PASS)
         {
-            MCM_CEMSG("call mcm_check_pull_command() fail");
+            MCM_CECTMSG("call mcm_check_pull_command() fail");
             goto FREE_03;
         }
 
@@ -2265,7 +2272,7 @@ int mcm_process_request(
         fret = mcm_create_pull_command(command_list_info, &command_count_info);
         if(fret < MCM_RCODE_PASS)
         {
-            MCM_CEMSG("call mcm_create_pull_command() fail");
+            MCM_CECTMSG("call mcm_create_pull_command() fail");
             goto FREE_04;
         }
 
@@ -2278,7 +2285,7 @@ int mcm_process_request(
                                         self_model, NULL, self_model == NULL ? &self_model : NULL);
                 if(fret < MCM_RCODE_PASS)
                 {
-                    MCM_CEMSG("call mcm_create_model() fail");
+                    MCM_CECTMSG("call mcm_create_model() fail");
                     goto FREE_05;
                 }
             }
@@ -2313,7 +2320,7 @@ int mcm_process_request(
                                             self_store == NULL ? &self_store : NULL);
                     if(fret < MCM_RCODE_PASS)
                     {
-                        MCM_CEMSG("call mcm_create_store() fail");
+                        MCM_CECTMSG("call mcm_create_store() fail");
                         goto FREE_06;
                     }
                     break;
@@ -2325,7 +2332,7 @@ int mcm_process_request(
                     fret = mcm_do_push_command(&self_lulib, each_command);
                     if(fret < MCM_RCODE_PASS)
                     {
-                        MCM_CEMSG("call mcm_do_push_command() fail");
+                        MCM_CECTMSG("call mcm_do_push_command() fail");
                         goto FREE_06;
                     }
                     do_update = 1;
@@ -2336,7 +2343,7 @@ int mcm_process_request(
                                                  &fill_report);
                     if(fret < MCM_RCODE_PASS)
                     {
-                        MCM_CEMSG("call mcm_do_module_command() fail");
+                        MCM_CECTMSG("call mcm_do_module_command() fail");
                         goto FREE_06;
                     }
                     do_update = 1;
@@ -2432,7 +2439,7 @@ int main(
     fret = mcm_parse_query(env_loc, strlen(env_loc), &request_info);
     if(fret < MCM_RCODE_PASS)
     {
-        MCM_CEMSG("call mcm_parse_query() fail");
+        MCM_CECTMSG("call mcm_parse_query() fail");
         goto FREE_01;
     }
 
@@ -2482,7 +2489,7 @@ int main(
     fret = mcm_process_request(post_buf, post_len, &request_info);
     if(fret < MCM_RCODE_PASS)
     {
-        MCM_CEMSG("call mcm_process_post() fail");
+        MCM_CECTMSG("call mcm_process_post() fail");
         goto FREE_02;
     }
 

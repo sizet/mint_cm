@@ -77,7 +77,7 @@ int mcm_action_boot_profile_run(
     fret = mcm_config_update(&self_session, MCM_DUPDATE_SYNC);
     if(fret < MCM_RCODE_PASS)
     {
-        MCM_EMSG("call mcm_config_update() fail");
+        MCM_ECTMSG("call mcm_config_update() fail");
         return fret;
     }
 
@@ -130,7 +130,7 @@ int mcm_action_boot_other_run(
     fret = mcm_config_save(&self_session, MCM_DUPDATE_SYNC, 1, 0);
     if(fret < MCM_RCODE_PASS)
     {
-        MCM_EMSG("call mcm_config_save() fail");
+        MCM_ECTMSG("call mcm_config_save() fail");
         return fret;
     }
 

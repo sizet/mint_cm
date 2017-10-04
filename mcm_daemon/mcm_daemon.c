@@ -307,35 +307,35 @@ int main(
     fret = mcm_daemon_init();
     if(fret < MCM_RCODE_PASS)
     {
-        MCM_EMSG("call mcm_daemon_init() fail");
+        MCM_ECTMSG("call mcm_daemon_init() fail");
         goto FREE_01;
     }
 
     fret = mcm_config_load_model(model_profile_path);
     if(fret < MCM_RCODE_PASS)
     {
-        MCM_EMSG("call mcm_load_config_model() fail");
+        MCM_ECTMSG("call mcm_load_config_model() fail");
         goto FREE_02;
     }
 
     fret = mcm_config_load_store();
     if(fret < MCM_RCODE_PASS)
     {
-        MCM_EMSG("call mcm_config_load_store() fail");
+        MCM_ECTMSG("call mcm_config_load_store() fail");
         goto FREE_03;
     }
 
     fret = mcm_config_load_module(module_path);
     if(fret < MCM_RCODE_PASS)
     {
-        MCM_EMSG("call mcm_config_load_module() fail");
+        MCM_ECTMSG("call mcm_config_load_module() fail");
         goto FREE_04;
     }
 
     fret = mcm_config_store_profile_error_process(&error_exit);
     if(fret < MCM_RCODE_PASS)
     {
-        MCM_EMSG("call mcm_config_store_profile_error_process() fail");
+        MCM_ECTMSG("call mcm_config_store_profile_error_process() fail");
         goto FREE_05;
     }
     if(error_exit != 0)
@@ -344,21 +344,21 @@ int main(
     fret = mcm_service_init(server_socket_path, max_session_count);
     if(fret < MCM_RCODE_PASS)
     {
-        MCM_EMSG("call mcm_service_init() fail");
+        MCM_ECTMSG("call mcm_service_init() fail");
         goto FREE_05;
     }
 
     fret = mcm_action_boot_other_run();
     if(fret < MCM_RCODE_PASS)
     {
-        MCM_EMSG("call mcm_action_boot_other_run() fail");
+        MCM_ECTMSG("call mcm_action_boot_other_run() fail");
         goto FREE_06;
     }
 
     fret = mcm_service_run_post();
     if(fret < MCM_RCODE_PASS)
     {
-        MCM_EMSG("call mcm_service_run_post() fail");
+        MCM_ECTMSG("call mcm_service_run_post() fail");
         goto FREE_06;
     }
 
@@ -387,7 +387,7 @@ int main(
     cret = mcm_service_shutdown();
     if(cret < MCM_RCODE_PASS)
     {
-        MCM_EMSG("call mcm_service_shutdown() fail");
+        MCM_ECTMSG("call mcm_service_shutdown() fail");
         fret = MCM_RCODE_DAEMON_INTERNAL_ERROR;
         goto FREE_06;
     }

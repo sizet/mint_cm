@@ -445,7 +445,7 @@ int mcm_build_fail_rep(
         fret = mcm_realloc_buf_service(this_session, MCM_RMEMORY_PACKET, this_session->pkt_len);
         if(fret < MCM_RCODE_PASS)
         {
-            MCM_EMSG("call mcm_realloc_buf_service() fail");
+            MCM_ECTMSG("call mcm_realloc_buf_service() fail");
             return fret;
         }
     }
@@ -516,7 +516,7 @@ int mcm_build_get_alone(
         fret = mcm_realloc_buf_service(this_session, MCM_RMEMORY_PACKET, this_session->pkt_len);
         if(fret < MCM_RCODE_PASS)
         {
-            MCM_EMSG("call mcm_realloc_buf_service() fail");
+            MCM_ECTMSG("call mcm_realloc_buf_service() fail");
             mcm_build_fail_rep(this_session, fret, 0);
             return fret;
         }
@@ -570,7 +570,7 @@ int mcm_req_get_alone(
     {
         if(fret != MCM_RCODE_CONFIG_NOT_FIND_STORE)
         {
-            MCM_EMSG("call mcm_config_anysis_path() fail");
+            MCM_ECTMSG("call mcm_config_anysis_path() fail");
         }
         goto FREE_01;
     }
@@ -581,7 +581,7 @@ int mcm_req_get_alone(
                                        self_model_member->member_size);
         if(fret < MCM_RCODE_PASS)
         {
-            MCM_EMSG("call mcm_realloc_buf_service() fail");
+            MCM_ECTMSG("call mcm_realloc_buf_service() fail");
             goto FREE_01;
         }
     }
@@ -590,7 +590,7 @@ int mcm_req_get_alone(
                                         self_store, MCM_DACCESS_AUTO, this_session->cache_buf);
     if(fret < MCM_RCODE_PASS)
     {
-        MCM_EMSG("call mcm_config_get_alone_by_info() fail");
+        MCM_ECTMSG("call mcm_config_get_alone_by_info() fail");
         goto FREE_01;
     }
 
@@ -708,7 +708,7 @@ int mcm_build_set_alone(
         fret = mcm_realloc_buf_service(this_session, MCM_RMEMORY_PACKET, this_session->pkt_len);
         if(fret < MCM_RCODE_PASS)
         {
-            MCM_EMSG("call mcm_realloc_buf_service() fail");
+            MCM_ECTMSG("call mcm_realloc_buf_service() fail");
             mcm_build_fail_rep(this_session, fret, 0);
             return fret;
         }
@@ -752,7 +752,7 @@ int mcm_req_set_alone(
     {
         if(fret != MCM_RCODE_CONFIG_NOT_FIND_STORE)
         {
-            MCM_EMSG("call mcm_config_anysis_path() fail");
+            MCM_ECTMSG("call mcm_config_anysis_path() fail");
         }
         goto FREE_01;
     }
@@ -815,7 +815,7 @@ int mcm_req_set_alone(
                                         this_session->req_data_len);
     if(fret < MCM_RCODE_PASS)
     {
-        MCM_EMSG("call mcm_config_set_alone_by_info() fail");
+        MCM_ECTMSG("call mcm_config_set_alone_by_info() fail");
         goto FREE_01;
     }
 
@@ -860,7 +860,7 @@ int mcm_build_get_entry(
         fret = mcm_realloc_buf_service(this_session, MCM_RMEMORY_PACKET, this_session->pkt_len);
         if(fret < MCM_RCODE_PASS)
         {
-            MCM_EMSG("call mcm_realloc_buf_service() fail");
+            MCM_ECTMSG("call mcm_realloc_buf_service() fail");
             mcm_build_fail_rep(this_session, fret, 0);
             return fret;
         }
@@ -911,7 +911,7 @@ int mcm_req_get_entry(
     {
         if(fret != MCM_RCODE_CONFIG_NOT_FIND_STORE)
         {
-            MCM_EMSG("call mcm_config_anysis_path() fail");
+            MCM_ECTMSG("call mcm_config_anysis_path() fail");
         }
         goto FREE_01;
     }
@@ -922,7 +922,7 @@ int mcm_req_get_entry(
                                        self_model_group->data_value_size);
         if(fret < MCM_RCODE_PASS)
         {
-            MCM_EMSG("call mcm_realloc_buf_service() fail");
+            MCM_ECTMSG("call mcm_realloc_buf_service() fail");
             goto FREE_01;
         }
     }
@@ -931,7 +931,7 @@ int mcm_req_get_entry(
                                         MCM_DACCESS_AUTO, this_session->cache_buf);
     if(fret < MCM_RCODE_PASS)
     {
-        MCM_EMSG("call mcm_config_get_entry_by_info() fail");
+        MCM_ECTMSG("call mcm_config_get_entry_by_info() fail");
         goto FREE_01;
     }
 
@@ -990,7 +990,7 @@ int mcm_build_set_entry(
         fret = mcm_realloc_buf_service(this_session, MCM_RMEMORY_PACKET, this_session->pkt_len);
         if(fret < MCM_RCODE_PASS)
         {
-            MCM_EMSG("call mcm_realloc_buf_service() fail");
+            MCM_ECTMSG("call mcm_realloc_buf_service() fail");
             mcm_build_fail_rep(this_session, fret, 0);
             return fret;
         }
@@ -1033,7 +1033,7 @@ int mcm_req_set_entry(
     {
         if(fret != MCM_RCODE_CONFIG_NOT_FIND_STORE)
         {
-            MCM_EMSG("call mcm_config_anysis_path() fail");
+            MCM_ECTMSG("call mcm_config_anysis_path() fail");
         }
         goto FREE_01;
     }
@@ -1042,7 +1042,7 @@ int mcm_req_set_entry(
                                         MCM_DACCESS_NEW, this_session->req_data_con);
     if(fret < MCM_RCODE_PASS)
     {
-        MCM_EMSG("call mcm_config_set_entry_by_info() fail");
+        MCM_ECTMSG("call mcm_config_set_entry_by_info() fail");
         goto FREE_01;
     }
 
@@ -1116,7 +1116,7 @@ int mcm_build_add_entry(
         fret = mcm_realloc_buf_service(this_session, MCM_RMEMORY_PACKET, this_session->pkt_len);
         if(fret < MCM_RCODE_PASS)
         {
-            MCM_EMSG("call mcm_realloc_buf_service() fail");
+            MCM_ECTMSG("call mcm_realloc_buf_service() fail");
             mcm_build_fail_rep(this_session, fret, 0);
             return fret;
         }
@@ -1162,7 +1162,7 @@ int mcm_req_add_entry(
     {
         if(fret != MCM_RCODE_CONFIG_NOT_FIND_STORE)
         {
-            MCM_EMSG("call mcm_config_anysis_path() fail");
+            MCM_ECTMSG("call mcm_config_anysis_path() fail");
         }
         goto FREE_01;
     }
@@ -1172,7 +1172,7 @@ int mcm_req_add_entry(
     if(fret < MCM_RCODE_PASS)
         if(fret != MCM_RCODE_CONFIG_NOT_FIND_STORE)
         {
-            MCM_EMSG("call mcm_config_find_entry_use_ik() fail");
+            MCM_ECTMSG("call mcm_config_find_entry_use_ik() fail");
             goto FREE_01;
         }
 
@@ -1181,7 +1181,7 @@ int mcm_req_add_entry(
                                         this_session->req_data_con, NULL);
     if(fret < MCM_RCODE_PASS)
     {
-        MCM_EMSG("call mcm_config_add_entry_by_info() fail");
+        MCM_ECTMSG("call mcm_config_add_entry_by_info() fail");
         goto FREE_01;
     }
 
@@ -1223,7 +1223,7 @@ int mcm_build_del_entry(
         fret = mcm_realloc_buf_service(this_session, MCM_RMEMORY_PACKET, this_session->pkt_len);
         if(fret < MCM_RCODE_PASS)
         {
-            MCM_EMSG("call mcm_realloc_buf_service() fail");
+            MCM_ECTMSG("call mcm_realloc_buf_service() fail");
             mcm_build_fail_rep(this_session, fret, 0);
             return fret;
         }
@@ -1268,7 +1268,7 @@ int mcm_req_del_entry(
     {
         if(fret != MCM_RCODE_CONFIG_NOT_FIND_STORE)
         {
-            MCM_EMSG("call mcm_config_anysis_path() fail");
+            MCM_ECTMSG("call mcm_config_anysis_path() fail");
         }
         goto FREE_01;
     }
@@ -1277,7 +1277,7 @@ int mcm_req_del_entry(
                                         MCM_DACCESS_NEW);
     if(fret < MCM_RCODE_PASS)
     {
-        MCM_EMSG("call mcm_config_del_entry_by_info() fail");
+        MCM_ECTMSG("call mcm_config_del_entry_by_info() fail");
         goto FREE_01;
     }
 
@@ -1324,7 +1324,7 @@ int mcm_build_get_all_entry(
         fret = mcm_realloc_buf_service(this_session, MCM_RMEMORY_PACKET, this_session->pkt_len);
         if(fret < MCM_RCODE_PASS)
         {
-            MCM_EMSG("call mcm_realloc_buf_service() fail");
+            MCM_ECTMSG("call mcm_realloc_buf_service() fail");
             mcm_build_fail_rep(this_session, fret, 0);
             return fret;
         }
@@ -1381,7 +1381,7 @@ int mcm_req_get_all_entry(
     {
         if(fret != MCM_RCODE_CONFIG_NOT_FIND_STORE)
         {
-            MCM_EMSG("call mcm_config_anysis_path() fail");
+            MCM_ECTMSG("call mcm_config_anysis_path() fail");
         }
         goto FREE_01;
     }
@@ -1389,7 +1389,7 @@ int mcm_req_get_all_entry(
     fret = mcm_config_get_count_by_info(this_session, self_model_group, parent_store, &self_count);
     if(fret < MCM_RCODE_PASS)
     {
-        MCM_EMSG("call mcm_config_get_count_by_info() fail");
+        MCM_ECTMSG("call mcm_config_get_count_by_info() fail");
         goto FREE_01;
     }
 
@@ -1399,7 +1399,7 @@ int mcm_req_get_all_entry(
         fret = mcm_realloc_buf_service(this_session, MCM_RMEMORY_CACHE, self_size);
         if(fret < MCM_RCODE_PASS)
         {
-            MCM_EMSG("call mcm_realloc_buf_service() fail");
+            MCM_ECTMSG("call mcm_realloc_buf_service() fail");
             goto FREE_01;
         }
     }
@@ -1409,7 +1409,7 @@ int mcm_req_get_all_entry(
                                             &this_session->cache_buf);
     if(fret < MCM_RCODE_PASS)
     {
-        MCM_EMSG("call mcm_config_get_all_entry_by_info() fail");
+        MCM_ECTMSG("call mcm_config_get_all_entry_by_info() fail");
         goto FREE_01;
     }
 
@@ -1453,7 +1453,7 @@ int mcm_build_del_all_entry(
         fret = mcm_realloc_buf_service(this_session, MCM_RMEMORY_PACKET, this_session->pkt_len);
         if(fret < MCM_RCODE_PASS)
         {
-            MCM_EMSG("call mcm_realloc_buf_service() fail");
+            MCM_ECTMSG("call mcm_realloc_buf_service() fail");
             mcm_build_fail_rep(this_session, fret, 0);
             return fret;
         }
@@ -1498,7 +1498,7 @@ int mcm_req_del_all_entry(
     {
         if(fret != MCM_RCODE_CONFIG_NOT_FIND_STORE)
         {
-            MCM_EMSG("call mcm_config_anysis_path() fail");
+            MCM_ECTMSG("call mcm_config_anysis_path() fail");
         }
         goto FREE_01;
     }
@@ -1507,7 +1507,7 @@ int mcm_req_del_all_entry(
                                             MCM_DACCESS_NEW);
     if(fret < MCM_RCODE_PASS)
     {
-        MCM_EMSG("call mcm_config_del_all_entry_by_info() fail");
+        MCM_ECTMSG("call mcm_config_del_all_entry_by_info() fail");
         goto FREE_01;
     }
 
@@ -1551,7 +1551,7 @@ int mcm_build_get_max_count(
         fret = mcm_realloc_buf_service(this_session, MCM_RMEMORY_PACKET, this_session->pkt_len);
         if(fret < MCM_RCODE_PASS)
         {
-            MCM_EMSG("call mcm_realloc_buf_service() fail");
+            MCM_ECTMSG("call mcm_realloc_buf_service() fail");
             mcm_build_fail_rep(this_session, fret, 0);
             return fret;
         }
@@ -1588,7 +1588,7 @@ int mcm_req_get_max_count(
     fret = mcm_config_get_max_count_by_path(this_session, this_session->req_path, &self_count);
     if(fret < MCM_RCODE_PASS)
     {
-        MCM_EMSG("call mcm_config_get_max_count_by_path() fail");
+        MCM_ECTMSG("call mcm_config_get_max_count_by_path() fail");
         goto FREE_01;
     }
 
@@ -1632,7 +1632,7 @@ int mcm_build_get_count(
         fret = mcm_realloc_buf_service(this_session, MCM_RMEMORY_PACKET, this_session->pkt_len);
         if(fret < MCM_RCODE_PASS)
         {
-            MCM_EMSG("call mcm_realloc_buf_service() fail");
+            MCM_ECTMSG("call mcm_realloc_buf_service() fail");
             mcm_build_fail_rep(this_session, fret, 0);
             return fret;
         }
@@ -1671,7 +1671,7 @@ int mcm_req_get_count(
     {
         if(fret != MCM_RCODE_CONFIG_NOT_FIND_STORE)
         {
-            MCM_EMSG("call mcm_config_get_count_by_path() fail");
+            MCM_ECTMSG("call mcm_config_get_count_by_path() fail");
         }
         goto FREE_01;
     }
@@ -1716,7 +1716,7 @@ int mcm_build_get_usable_key(
         fret = mcm_realloc_buf_service(this_session, MCM_RMEMORY_PACKET, this_session->pkt_len);
         if(fret < MCM_RCODE_PASS)
         {
-            MCM_EMSG("call mcm_realloc_buf_service() fail");
+            MCM_ECTMSG("call mcm_realloc_buf_service() fail");
             mcm_build_fail_rep(this_session, fret, 0);
             return fret;
         }
@@ -1755,7 +1755,7 @@ int mcm_req_get_usable_key(
     {
         if(fret != MCM_RCODE_CONFIG_NOT_FIND_STORE)
         {
-            MCM_EMSG("call mcm_config_get_usable_key_by_path() fail");
+            MCM_ECTMSG("call mcm_config_get_usable_key_by_path() fail");
         }
         goto FREE_01;
     }
@@ -1792,7 +1792,7 @@ int mcm_build_update(
         fret = mcm_realloc_buf_service(this_session, MCM_RMEMORY_PACKET, this_session->pkt_len);
         if(fret < MCM_RCODE_PASS)
         {
-            MCM_EMSG("call mcm_realloc_buf_service() fail");
+            MCM_ECTMSG("call mcm_realloc_buf_service() fail");
             mcm_build_fail_rep(this_session, fret, 0);
             return fret;
         }
@@ -1824,7 +1824,7 @@ int mcm_req_update(
     fret = mcm_config_update(this_session, MCM_DUPDATE_SYNC);
     if(fret < MCM_RCODE_PASS)
     {
-        MCM_EMSG("call mcm_config_update() fail");
+        MCM_ECTMSG("call mcm_config_update() fail");
         goto FREE_01;
     }
 
@@ -1866,7 +1866,7 @@ int mcm_build_save(
         fret = mcm_realloc_buf_service(this_session, MCM_RMEMORY_PACKET, this_session->pkt_len);
         if(fret < MCM_RCODE_PASS)
         {
-            MCM_EMSG("call mcm_realloc_buf_service() fail");
+            MCM_ECTMSG("call mcm_realloc_buf_service() fail");
             mcm_build_fail_rep(this_session, fret, 0);
             return fret;
         }
@@ -1901,7 +1901,7 @@ int mcm_req_save(
     fret = mcm_config_save(this_session, MCM_DUPDATE_SYNC, 0, tmp_force);
     if(fret < MCM_RCODE_PASS)
     {
-        MCM_EMSG("call mcm_config_save() fail");
+        MCM_ECTMSG("call mcm_config_save() fail");
         goto FREE_01;
     }
 
@@ -1955,7 +1955,7 @@ int mcm_build_run(
         fret = mcm_realloc_buf_service(this_session, MCM_RMEMORY_PACKET, this_session->pkt_len);
         if(fret < MCM_RCODE_PASS)
         {
-            MCM_EMSG("call mcm_realloc_buf_service() fail");
+            MCM_ECTMSG("call mcm_realloc_buf_service() fail");
             mcm_build_fail_rep(this_session, fret, 1);
             return fret;
         }
@@ -2041,7 +2041,7 @@ int mcm_build_shutdown(
         fret = mcm_realloc_buf_service(this_session, MCM_RMEMORY_PACKET, this_session->pkt_len);
         if(fret < MCM_RCODE_PASS)
         {
-            MCM_EMSG("call mcm_realloc_buf_service() fail");
+            MCM_ECTMSG("call mcm_realloc_buf_service() fail");
             mcm_build_fail_rep(this_session, fret, 0);
             return fret;
         }
@@ -2073,7 +2073,7 @@ int mcm_req_shutdown(
     fret = mcm_config_shutdown(this_session);
     if(fret < MCM_RCODE_PASS)
     {
-        MCM_EMSG("call mcm_config_shutdown() fail");
+        MCM_ECTMSG("call mcm_config_shutdown() fail");
         goto FREE_01;
     }
 
@@ -2120,7 +2120,7 @@ int mcm_build_check_store_file(
         fret = mcm_realloc_buf_service(this_session, MCM_RMEMORY_PACKET, this_session->pkt_len);
         if(fret < MCM_RCODE_PASS)
         {
-            MCM_EMSG("call mcm_realloc_buf_service() fail");
+            MCM_ECTMSG("call mcm_realloc_buf_service() fail");
             mcm_build_fail_rep(this_session, fret, 0);
             return fret;
         }
@@ -2171,7 +2171,7 @@ int mcm_req_check_store_file(
     vlen = strlen(store_version) + 1;
     if(fret < MCM_RCODE_PASS)
     {
-        MCM_EMSG("call mcm_config_check_store_file() fail");
+        MCM_ECTMSG("call mcm_config_check_store_file() fail");
         goto FREE_01;
     }
 
@@ -2213,7 +2213,7 @@ int mcm_build_check_mask_path(
         fret = mcm_realloc_buf_service(this_session, MCM_RMEMORY_PACKET, this_session->pkt_len);
         if(fret < MCM_RCODE_PASS)
         {
-            MCM_EMSG("call mcm_realloc_buf_service() fail");
+            MCM_ECTMSG("call mcm_realloc_buf_service() fail");
             mcm_build_fail_rep(this_session, fret, 0);
             return fret;
         }
@@ -2245,7 +2245,7 @@ int mcm_req_check_mask_path(
     fret = mcm_config_find_group_by_mask(this_session, this_session->req_path, NULL);
     if(fret < MCM_RCODE_PASS)
     {
-        MCM_EMSG("call mcm_config_find_group_by_mask() fail");
+        MCM_ECTMSG("call mcm_config_find_group_by_mask() fail");
         goto FREE_01;
     }
 
@@ -2283,7 +2283,7 @@ int mcm_build_get_path_max_length(
         fret = mcm_realloc_buf_service(this_session, MCM_RMEMORY_PACKET, this_session->pkt_len);
         if(fret < MCM_RCODE_PASS)
         {
-            MCM_EMSG("call mcm_realloc_buf_service() fail");
+            MCM_ECTMSG("call mcm_realloc_buf_service() fail");
             mcm_build_fail_rep(this_session, fret, 0);
             return fret;
         }
@@ -2320,7 +2320,7 @@ int mcm_req_get_path_max_length(
     fret = mcm_config_get_path_max_length(this_session, &max_len);
     if(fret < MCM_RCODE_PASS)
     {
-        MCM_EMSG("call mcm_config_get_path_max_length() fail");
+        MCM_ECTMSG("call mcm_config_get_path_max_length() fail");
         goto FREE_01;
     }
 
@@ -2386,7 +2386,7 @@ int mcm_layout_get_list_name(
         fret = mcm_realloc_buf_service(this_session, MCM_RMEMORY_PACKET, this_session->pkt_len);
         if(fret < MCM_RCODE_PASS)
         {
-            MCM_EMSG("call mcm_realloc_buf_service() fail");
+            MCM_ECTMSG("call mcm_realloc_buf_service() fail");
             return fret;
         }
     }
@@ -2431,28 +2431,28 @@ int mcm_req_get_list_name(
     fret = mcm_config_find_group_by_mask(this_session, this_session->req_path, &self_model_group);
     if(fret < MCM_RCODE_PASS)
     {
-        MCM_EMSG("call mcm_config_find_group_by_mask() fail");
+        MCM_ECTMSG("call mcm_config_find_group_by_mask() fail");
         goto FREE_01;
     }
 
     fret = mcm_config_get_list_name_size(this_session, self_model_group, &tmp_size);
     if(fret < MCM_RCODE_PASS)
     {
-        MCM_EMSG("call mcm_config_get_list_name_size() fail");
+        MCM_ECTMSG("call mcm_config_get_list_name_size() fail");
         goto FREE_01;
     }
 
     fret = mcm_layout_get_list_name(this_session, tmp_size, &tmp_buf);
     if(fret < MCM_RCODE_PASS)
     {
-        MCM_EMSG("call mcm_layout_get_list_name() fail");
+        MCM_ECTMSG("call mcm_layout_get_list_name() fail");
         goto FREE_01;
     }
 
     fret = mcm_config_get_list_name_data(this_session, self_model_group, tmp_buf);
     if(fret < MCM_RCODE_PASS)
     {
-        MCM_EMSG("call mcm_config_get_list_name_data() fail");
+        MCM_ECTMSG("call mcm_config_get_list_name_data() fail");
         goto FREE_01;
     }
 
@@ -2518,7 +2518,7 @@ int mcm_layout_get_list_type(
         fret = mcm_realloc_buf_service(this_session, MCM_RMEMORY_PACKET, this_session->pkt_len);
         if(fret < MCM_RCODE_PASS)
         {
-            MCM_EMSG("call mcm_realloc_buf_service() fail");
+            MCM_ECTMSG("call mcm_realloc_buf_service() fail");
             return fret;
         }
     }
@@ -2563,28 +2563,28 @@ int mcm_req_get_list_type(
     fret = mcm_config_find_group_by_mask(this_session, this_session->req_path, &self_model_group);
     if(fret < MCM_RCODE_PASS)
     {
-        MCM_EMSG("call mcm_config_find_group_by_mask() fail");
+        MCM_ECTMSG("call mcm_config_find_group_by_mask() fail");
         goto FREE_01;
     }
 
     fret = mcm_config_get_list_type_size(this_session, self_model_group, &tmp_size);
     if(fret < MCM_RCODE_PASS)
     {
-        MCM_EMSG("call mcm_config_get_list_type_size() fail");
+        MCM_ECTMSG("call mcm_config_get_list_type_size() fail");
         goto FREE_01;
     }
 
     fret = mcm_layout_get_list_type(this_session, tmp_size, &tmp_buf);
     if(fret < MCM_RCODE_PASS)
     {
-        MCM_EMSG("call mcm_layout_get_list_type() fail");
+        MCM_ECTMSG("call mcm_layout_get_list_type() fail");
         goto FREE_01;
     }
 
     fret = mcm_config_get_list_type_data(this_session, self_model_group, tmp_buf);
     if(fret < MCM_RCODE_PASS)
     {
-        MCM_EMSG("call mcm_config_get_list_type_data() fail");
+        MCM_ECTMSG("call mcm_config_get_list_type_data() fail");
         goto FREE_01;
     }
 
@@ -2650,7 +2650,7 @@ int mcm_layout_get_list_value(
         fret = mcm_realloc_buf_service(this_session, MCM_RMEMORY_PACKET, this_session->pkt_len);
         if(fret < MCM_RCODE_PASS)
         {
-            MCM_EMSG("call mcm_realloc_buf_service() fail");
+            MCM_ECTMSG("call mcm_realloc_buf_service() fail");
             return fret;
         }
     }
@@ -2705,7 +2705,7 @@ int mcm_req_get_list_value(
     {
         if(fret != MCM_RCODE_CONFIG_NOT_FIND_STORE)
         {
-            MCM_EMSG("call mcm_config_anysis_path() fail");
+            MCM_ECTMSG("call mcm_config_anysis_path() fail");
         }
         goto FREE_01;
     }
@@ -2713,21 +2713,21 @@ int mcm_req_get_list_value(
     fret = mcm_config_get_list_value_size(this_session, self_model_group, self_store, &tmp_size);
     if(fret < MCM_RCODE_PASS)
     {
-        MCM_EMSG("call mcm_config_get_list_value_size() fail");
+        MCM_ECTMSG("call mcm_config_get_list_value_size() fail");
         goto FREE_01;
     }
 
     fret = mcm_layout_get_list_value(this_session, tmp_size, &tmp_buf);
     if(fret < MCM_RCODE_PASS)
     {
-        MCM_EMSG("call mcm_layout_get_list_value() fail");
+        MCM_ECTMSG("call mcm_layout_get_list_value() fail");
         goto FREE_01;
     }
 
     fret = mcm_config_get_list_value_data(this_session, self_model_group, self_store, tmp_buf);
     if(fret < MCM_RCODE_PASS)
     {
-        MCM_EMSG("call mcm_config_get_list_value_data() fail");
+        MCM_ECTMSG("call mcm_config_get_list_value_data() fail");
         goto FREE_01;
     }
 
@@ -2791,7 +2791,7 @@ int mcm_build_set_any_type_alone(
         fret = mcm_realloc_buf_service(this_session, MCM_RMEMORY_PACKET, this_session->pkt_len);
         if(fret < MCM_RCODE_PASS)
         {
-            MCM_EMSG("call mcm_realloc_buf_service() fail");
+            MCM_ECTMSG("call mcm_realloc_buf_service() fail");
             mcm_build_fail_rep(this_session, fret, 0);
             return fret;
         }
@@ -2838,7 +2838,7 @@ int mcm_req_set_any_type_alone(
     {
         if(fret != MCM_RCODE_CONFIG_NOT_FIND_STORE)
         {
-            MCM_EMSG("call mcm_config_anysis_path() fail");
+            MCM_ECTMSG("call mcm_config_anysis_path() fail");
         }
         goto FREE_01;
     }
@@ -2850,7 +2850,7 @@ int mcm_req_set_any_type_alone(
                                                  this_session->req_data_len);
     if(fret < MCM_RCODE_PASS)
     {
-        MCM_EMSG("call mcm_config_set_any_type_alone_by_info() fail");
+        MCM_ECTMSG("call mcm_config_set_any_type_alone_by_info() fail");
         goto FREE_01;
     }
 
@@ -2897,7 +2897,7 @@ int mcm_build_get_with_type_alone(
         fret = mcm_realloc_buf_service(this_session, MCM_RMEMORY_PACKET, this_session->pkt_len);
         if(fret < MCM_RCODE_PASS)
         {
-            MCM_EMSG("call mcm_realloc_buf_service() fail");
+            MCM_ECTMSG("call mcm_realloc_buf_service() fail");
             mcm_build_fail_rep(this_session, fret, 0);
             return fret;
         }
@@ -2956,7 +2956,7 @@ int mcm_req_get_with_type_alone(
     {
         if(fret != MCM_RCODE_CONFIG_NOT_FIND_STORE)
         {
-            MCM_EMSG("call mcm_config_anysis_path() fail");
+            MCM_ECTMSG("call mcm_config_anysis_path() fail");
         }
         goto FREE_01;
     }
@@ -2967,7 +2967,7 @@ int mcm_req_get_with_type_alone(
                                        self_model_member->member_size);
         if(fret < MCM_RCODE_PASS)
         {
-            MCM_EMSG("call mcm_realloc_buf_service() fail");
+            MCM_ECTMSG("call mcm_realloc_buf_service() fail");
             goto FREE_01;
         }
     }
@@ -2976,7 +2976,7 @@ int mcm_req_get_with_type_alone(
                                         self_store, MCM_DACCESS_AUTO, this_session->cache_buf);
     if(fret < MCM_RCODE_PASS)
     {
-        MCM_EMSG("call mcm_config_get_alone_by_info() fail");
+        MCM_ECTMSG("call mcm_config_get_alone_by_info() fail");
         goto FREE_01;
     }
 
@@ -3073,8 +3073,8 @@ int mcm_req_handle(
         fret = mcm_req_cb_list[this_session->req_type].handle_cb(this_session);
         if(fret < MCM_RCODE_PASS)
         {
-            MCM_EMSG("call mcm_req_cb_list[" MCM_DTYPE_USIZE_PF "].handle_cb fail",
-                     this_session->req_type);
+            MCM_ECTMSG("call mcm_req_cb_list[" MCM_DTYPE_USIZE_PF "].handle_cb fail",
+                       this_session->req_type);
         }
     }
     else
@@ -3105,14 +3105,14 @@ int mcm_session_init(
     fret = mcm_realloc_buf_service(this_session, MCM_RMEMORY_CACHE, MCM_CACHE_BUFFER_SIZE);
     if(fret < MCM_RCODE_PASS)
     {
-        MCM_EMSG("call mcm_realloc_buf_service() fail <%lu>", this_session->thread_id);
+        MCM_ECTMSG("call mcm_realloc_buf_service() fail <%lu>", this_session->thread_id);
         goto FREE_02;
     }
 
     fret = mcm_realloc_buf_service(this_session, MCM_RMEMORY_PACKET, MCM_PACKET_BUFFER_SIZE);
     if(fret < MCM_RCODE_PASS)
     {
-        MCM_EMSG("call mcm_realloc_buf_service() fail <%lu>", this_session->thread_id);
+        MCM_ECTMSG("call mcm_realloc_buf_service() fail <%lu>", this_session->thread_id);
         goto FREE_03;
     }
 
@@ -3438,7 +3438,7 @@ void *mcm_session_thread_handle(
     fret = mcm_session_init(self_session);
     if(fret < MCM_RCODE_PASS)
     {
-        MCM_EMSG("call mcm_session_init() fail <%lu>", self_session->thread_id);
+        MCM_ECTMSG("call mcm_session_init() fail <%lu>", self_session->thread_id);
         goto FREE_01;
     }
 
@@ -3449,7 +3449,7 @@ void *mcm_session_thread_handle(
     fret = mcm_socket_send(self_session, &notify_usable, sizeof(notify_usable), &xlen);
     if(fret < MCM_RCODE_PASS)
     {
-        MCM_EMSG("call mcm_socket_send() fail <%lu>", self_session->thread_id);
+        MCM_ECTMSG("call mcm_socket_send() fail <%lu>", self_session->thread_id);
         goto FREE_02;
     }
 
@@ -3471,7 +3471,7 @@ void *mcm_session_thread_handle(
             fret = mcm_socket_recv(self_session, bloc, bsize, &xlen);
             if(fret < MCM_RCODE_PASS)
             {
-                MCM_EMSG("call mcm_socket_recv() fail <%lu>", self_session->thread_id);
+                MCM_ECTMSG("call mcm_socket_recv() fail <%lu>", self_session->thread_id);
                 goto EXIT_CONNECT;
             }
             // 對方關閉連接, 結束連接.
@@ -3497,8 +3497,8 @@ void *mcm_session_thread_handle(
                     fret = mcm_realloc_buf_service(self_session, MCM_RMEMORY_PACKET, tlen);
                     if(fret < MCM_RCODE_PASS)
                     {
-                        MCM_EMSG("call mcm_realloc_buf_service() fail <%lu>",
-                                 self_session->thread_id);
+                        MCM_ECTMSG("call mcm_realloc_buf_service() fail <%lu>",
+                                   self_session->thread_id);
                         goto EXIT_CONNECT;
                     }
                 }
@@ -3520,14 +3520,14 @@ void *mcm_session_thread_handle(
         cret = mcm_req_handle(self_session);
         if(cret < MCM_RCODE_PASS)
         {
-            MCM_EMSG("call mcm_req_handle() fail <%lu>", self_session->thread_id);
+            MCM_ECTMSG("call mcm_req_handle() fail <%lu>", self_session->thread_id);
         }
 
         // 傳送處理結果.
         fret = mcm_socket_send(self_session, self_session->pkt_buf, self_session->pkt_len, &xlen);
         if(fret < MCM_RCODE_PASS)
         {
-            MCM_EMSG("call mcm_socket_recv() fail <%lu>", self_session->thread_id);
+            MCM_ECTMSG("call mcm_socket_recv() fail <%lu>", self_session->thread_id);
             goto EXIT_CONNECT;
         }
 
@@ -3549,7 +3549,7 @@ EXIT_CONNECT:
         fret = mcm_config_save(self_session, update_method, 1, 0);
         if(fret < MCM_RCODE_PASS)
         {
-            MCM_EMSG("call mcm_config_save() fail <%lu>", self_session->thread_id);
+            MCM_ECTMSG("call mcm_config_save() fail <%lu>", self_session->thread_id);
             goto FREE_02;
         }
     }
@@ -3559,7 +3559,7 @@ EXIT_CONNECT:
         fret = mcm_daemon_shutdown();
         if(fret < MCM_RCODE_PASS)
         {
-            MCM_EMSG("call mcm_daemon_shutdown() fail <%lu>", self_session->thread_id);
+            MCM_ECTMSG("call mcm_daemon_shutdown() fail <%lu>", self_session->thread_id);
             goto FREE_02;
         }
     }
@@ -3597,7 +3597,7 @@ int mcm_session_create(
     fret = mcm_session_idle_dec(NULL);
     if(fret < MCM_RCODE_PASS)
     {
-        MCM_EMSG("call mcm_session_idle_dec() fail");
+        MCM_ECTMSG("call mcm_session_idle_dec() fail");
         goto FREE_01;
     }
 
@@ -3613,14 +3613,14 @@ int mcm_session_create(
     fret = mcm_socket_accept_new(mcm_service_socket, &each_session->socket_fd);
     if(fret < MCM_RCODE_PASS)
     {
-        MCM_EMSG("call mcm_socket_accept_new() fail");
+        MCM_ECTMSG("call mcm_socket_accept_new() fail");
         goto FREE_02;
     }
 
     fret = mcm_socket_recv(each_session, &connect_data, sizeof(struct mcm_connect_option_t), &xlen);
     if(fret < MCM_RCODE_PASS)
     {
-        MCM_EMSG("call mcm_socket_accept_new() fail");
+        MCM_ECTMSG("call mcm_socket_accept_new() fail");
         goto FREE_03;
     }
     if(xlen != sizeof(struct mcm_connect_option_t))
@@ -3644,7 +3644,7 @@ int mcm_session_create(
     fret = mcm_session_busy_inc(NULL);
     if(fret < MCM_RCODE_PASS)
     {
-        MCM_EMSG("call mcm_session_busy_inc() fail");
+        MCM_ECTMSG("call mcm_session_busy_inc() fail");
         goto FREE_03;
     }
 
@@ -3775,7 +3775,7 @@ void *mcm_service_thread_handle(
     fret = mcm_service_run_wait();
     if(fret < MCM_RCODE_PASS)
     {
-        MCM_EMSG("call mcm_service_run_wait() fail");
+        MCM_ECTMSG("call mcm_service_run_wait() fail");
         goto EXIT_ACCEPT;
     }
 
@@ -3786,14 +3786,14 @@ void *mcm_service_thread_handle(
         fret = mcm_socket_accept_check(mcm_service_socket);
         if(fret < MCM_RCODE_PASS)
         {
-            MCM_EMSG("call mcm_socket_accept_check() fail");
+            MCM_ECTMSG("call mcm_socket_accept_check() fail");
             goto EXIT_ACCEPT;
         }
 
         fret = mcm_session_create();
         if(fret < MCM_RCODE_PASS)
         {
-            MCM_EMSG("call mcm_session_create() fail");
+            MCM_ECTMSG("call mcm_session_create() fail");
             goto EXIT_ACCEPT;
         }
     }
@@ -3808,7 +3808,7 @@ EXIT_ACCEPT:
         fret = mcm_daemon_shutdown();
         if(fret < MCM_RCODE_PASS)
         {
-            MCM_EMSG("call mcm_daemon_shutdown() fail");
+            MCM_ECTMSG("call mcm_daemon_shutdown() fail");
         }
         // 等待確認結束執行.
         while(shutdown_flag == 0)
@@ -3823,7 +3823,7 @@ EXIT_ACCEPT:
     fret = mcm_session_shutdown();
     if(fret < MCM_RCODE_PASS)
     {
-        MCM_EMSG("call mcm_session_shutdown() fail");
+        MCM_ECTMSG("call mcm_session_shutdown() fail");
     }
 
     // 等待所有 session 結束.

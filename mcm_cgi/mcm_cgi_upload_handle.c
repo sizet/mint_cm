@@ -19,7 +19,7 @@
 
 
 
-#if MCM_CGIEMODE | MCM_CUHDMODE
+#if MCM_CGIEMODE | MCM_CGIECTMODE | MCM_CUHDMODE
     int dbg_tty_fd_h;
     char dbg_msg_buf_h[MCM_DBG_BUFFER_SIZE];
 #endif
@@ -29,6 +29,13 @@
         MCM_CGI_TTY_MSG(dbg_tty_fd_h, dbg_msg_buf_h, msg_fmt, ##msg_args)
 #else
     #define MCM_CEMSG(msg_fmt, msg_args...)
+#endif
+
+#if MCM_CGIECTMODE
+    #define MCM_CECTMSG(msg_fmt, msg_args...) \
+        MCM_CGI_TTY_MSG(dbg_tty_fd_h, dbg_msg_buf_h, msg_fmt, ##msg_args)
+#else
+    #define MCM_CECTMSG(msg_fmt, msg_args...)
 #endif
 
 #if MCM_CUHDMODE
@@ -320,7 +327,7 @@ int mcm_parse_disposition(
     fret = mcm_parse_parameter(&base_con, &base_len, MCM_NAME_KEY, MCM_NAME_LEN, &tmp_name);
     if(fret < MCM_RCODE_PASS)
     {
-        MCM_CEMSG("call mcm_parse_parameter(%s) fail", MCM_NAME_KEY);
+        MCM_CECTMSG("call mcm_parse_parameter(%s) fail", MCM_NAME_KEY);
         return fret;
     }
     MCM_CUHDMSG("[%s][%s]", MCM_NAME_KEY, tmp_name);
@@ -502,7 +509,7 @@ int mcm_find_part(
     fret = mcm_parse_disposition(read_con, read_len, &name_con, &filename_con);
     if(fret < MCM_RCODE_PASS)
     {
-        MCM_CEMSG("call mcm_parse_disposition() fail");
+        MCM_CECTMSG("call mcm_parse_disposition() fail");
         return fret;
     }
 
@@ -524,7 +531,7 @@ int mcm_find_part(
     fret = mcm_parse_data(&post_dcon, &post_dlen, &data_con, &data_len, last_part_buf);
     if(fret < MCM_RCODE_PASS)
     {
-        MCM_CEMSG("call mcm_parse_disposition() fail");
+        MCM_CECTMSG("call mcm_parse_disposition() fail");
         return fret;
     }
 
@@ -646,7 +653,7 @@ int mcm_find_multipart(
         fret = mcm_find_part(&post_con, &post_len, &last_part);
         if(fret < 0)
         {
-            MCM_CEMSG("call mcm_find_part() fail");
+            MCM_CECTMSG("call mcm_find_part() fail");
             return MCM_RCODE_CGI_UPLOAD_INTERNAL_ERROR;
         }
     }
@@ -667,7 +674,7 @@ int mcm_process_post(
     fret = mcm_find_multipart(post_con, post_len);
     if(fret < MCM_RCODE_PASS)
     {
-        MCM_CEMSG("call mcm_find_multipart() fail");
+        MCM_CECTMSG("call mcm_find_multipart() fail");
         goto FREE_01;
     }
 
@@ -762,7 +769,7 @@ int main(
     // 取出 boundary 資料.
     if(mcm_find_boundary(env_loc, strlen(env_loc)) < MCM_RCODE_PASS)
     {
-        MCM_CEMSG("call mcm_find_boundary() fail");
+        MCM_CECTMSG("call mcm_find_boundary() fail");
         goto FREE_01;
     }
     MCM_CUHDMSG("boundary[" MCM_DTYPE_USIZE_PF "][%s]", boundary_len, boundary_key);
@@ -811,7 +818,7 @@ int main(
 
     if(mcm_process_post(post_buf, post_len) < MCM_RCODE_PASS)
     {
-        MCM_CEMSG("call mcm_process_post() fail");
+        MCM_CECTMSG("call mcm_process_post() fail");
         goto FREE_01;
     }
 

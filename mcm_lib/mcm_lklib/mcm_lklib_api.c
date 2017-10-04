@@ -218,7 +218,7 @@ int mcm_recv_rep(
                 fret = mcm_realloc_buf_lib(this_lklib, tlen);
                 if(fret < MCM_RCODE_PASS)
                 {
-                    MCM_KEMSG("call mcm_realloc_buf_lib() fail");
+                    MCM_KECTMSG("call mcm_realloc_buf_lib() fail");
                     return fret;
                 }
             }
@@ -315,7 +315,7 @@ int mcm_lklib_init(
     fret = mcm_realloc_buf_lib(this_lklib, MCM_KERNEL_PACKET_BUFFER_SIZE);
     if(fret < MCM_RCODE_PASS)
     {
-        MCM_KEMSG("call mcm_realloc_buf_lib() fail");
+        MCM_KECTMSG("call mcm_realloc_buf_lib() fail");
         goto FREE_01;
     }
 
@@ -470,7 +470,7 @@ int mcm_lklib_get_alone(
         fret = mcm_realloc_buf_lib(this_lklib, this_lklib->pkt_len);
         if(fret < MCM_RCODE_PASS)
         {
-            MCM_KEMSG("call mcm_realloc_buf_lib() fail");
+            MCM_KECTMSG("call mcm_realloc_buf_lib() fail");
             goto FREE_01;
         }
     }
@@ -490,14 +490,14 @@ int mcm_lklib_get_alone(
     fret = mcm_send_req(this_lklib);
     if(fret < MCM_RCODE_PASS)
     {
-        MCM_KEMSG("call mcm_send_req() fail");
+        MCM_KECTMSG("call mcm_send_req() fail");
         goto FREE_01;
     }
 
     fret = mcm_recv_rep(this_lklib);
     if(fret < MCM_RCODE_PASS)
     {
-        MCM_KEMSG("call mcm_recv_rep() fail");
+        MCM_KECTMSG("call mcm_recv_rep() fail");
         goto FREE_01;
     }
 
@@ -518,7 +518,7 @@ int mcm_lklib_get_alone(
     {
         if(fret != MCM_RCODE_CONFIG_NOT_FIND_STORE)
         {
-            MCM_KEMSG("call mcm_parse_base_rep() fail");
+            MCM_KECTMSG("call mcm_parse_base_rep() fail");
         }
         goto FREE_01;
     }
@@ -562,7 +562,7 @@ int mcm_lklib_set_alone(
         fret = mcm_realloc_buf_lib(this_lklib, this_lklib->pkt_len);
         if(fret < MCM_RCODE_PASS)
         {
-            MCM_KEMSG("call mcm_realloc_buf_lib() fail");
+            MCM_KECTMSG("call mcm_realloc_buf_lib() fail");
             goto FREE_01;
         }
     }
@@ -596,14 +596,14 @@ int mcm_lklib_set_alone(
     fret = mcm_send_req(this_lklib);
     if(fret < MCM_RCODE_PASS)
     {
-        MCM_KEMSG("call mcm_send_req() fail");
+        MCM_KECTMSG("call mcm_send_req() fail");
         goto FREE_01;
     }
 
     fret = mcm_recv_rep(this_lklib);
     if(fret < MCM_RCODE_PASS)
     {
-        MCM_KEMSG("call mcm_recv_rep() fail");
+        MCM_KECTMSG("call mcm_recv_rep() fail");
         goto FREE_01;
     }
 
@@ -620,7 +620,7 @@ int mcm_lklib_set_alone(
     {
         if(fret != MCM_RCODE_CONFIG_NOT_FIND_STORE)
         {
-            MCM_KEMSG("call mcm_parse_base_rep() fail");
+            MCM_KECTMSG("call mcm_parse_base_rep() fail");
         }
         goto FREE_01;
     }
@@ -654,7 +654,7 @@ int mcm_lklib_get_entry(
         fret = mcm_realloc_buf_lib(this_lklib, this_lklib->pkt_len);
         if(fret < MCM_RCODE_PASS)
         {
-            MCM_KEMSG("call mcm_realloc_buf_lib() fail");
+            MCM_KECTMSG("call mcm_realloc_buf_lib() fail");
             goto FREE_01;
         }
     }
@@ -674,14 +674,14 @@ int mcm_lklib_get_entry(
     fret = mcm_send_req(this_lklib);
     if(fret < MCM_RCODE_PASS)
     {
-        MCM_KEMSG("call mcm_send_req() fail");
+        MCM_KECTMSG("call mcm_send_req() fail");
         goto FREE_01;
     }
 
     fret = mcm_recv_rep(this_lklib);
     if(fret < MCM_RCODE_PASS)
     {
-        MCM_KEMSG("call mcm_recv_rep() fail");
+        MCM_KECTMSG("call mcm_recv_rep() fail");
         goto FREE_01;
     }
 
@@ -702,7 +702,7 @@ int mcm_lklib_get_entry(
     {
         if(fret != MCM_RCODE_CONFIG_NOT_FIND_STORE)
         {
-            MCM_KEMSG("call mcm_parse_base_rep() fail");
+            MCM_KECTMSG("call mcm_parse_base_rep() fail");
         }
         goto FREE_01;
     }
@@ -746,7 +746,7 @@ int mcm_lklib_set_entry(
         fret = mcm_realloc_buf_lib(this_lklib, this_lklib->pkt_len);
         if(fret < MCM_RCODE_PASS)
         {
-            MCM_KEMSG("call mcm_realloc_buf_lib() fail");
+            MCM_KECTMSG("call mcm_realloc_buf_lib() fail");
             goto FREE_01;
         }
     }
@@ -772,14 +772,14 @@ int mcm_lklib_set_entry(
     fret = mcm_send_req(this_lklib);
     if(fret < MCM_RCODE_PASS)
     {
-        MCM_KEMSG("call mcm_send_req() fail");
+        MCM_KECTMSG("call mcm_send_req() fail");
         goto FREE_01;
     }
 
     fret = mcm_recv_rep(this_lklib);
     if(fret < MCM_RCODE_PASS)
     {
-        MCM_KEMSG("call mcm_recv_rep() fail");
+        MCM_KECTMSG("call mcm_recv_rep() fail");
         goto FREE_01;
     }
 
@@ -796,7 +796,7 @@ int mcm_lklib_set_entry(
     {
         if(fret != MCM_RCODE_CONFIG_NOT_FIND_STORE)
         {
-            MCM_KEMSG("call mcm_parse_base_rep() fail");
+            MCM_KECTMSG("call mcm_parse_base_rep() fail");
         }
         goto FREE_01;
     }
@@ -835,7 +835,7 @@ int mcm_lklib_add_entry(
         fret = mcm_realloc_buf_lib(this_lklib, this_lklib->pkt_len);
         if(fret < MCM_RCODE_PASS)
         {
-            MCM_KEMSG("call mcm_realloc_buf_lib() fail");
+            MCM_KECTMSG("call mcm_realloc_buf_lib() fail");
             goto FREE_01;
         }
     }
@@ -880,14 +880,14 @@ int mcm_lklib_add_entry(
     fret = mcm_send_req(this_lklib);
     if(fret < MCM_RCODE_PASS)
     {
-        MCM_KEMSG("call mcm_send_req() fail");
+        MCM_KECTMSG("call mcm_send_req() fail");
         goto FREE_01;
     }
 
     fret = mcm_recv_rep(this_lklib);
     if(fret < MCM_RCODE_PASS)
     {
-        MCM_KEMSG("call mcm_recv_rep() fail");
+        MCM_KECTMSG("call mcm_recv_rep() fail");
         goto FREE_01;
     }
 
@@ -904,7 +904,7 @@ int mcm_lklib_add_entry(
     {
         if(fret != MCM_RCODE_CONFIG_NOT_FIND_STORE)
         {
-            MCM_KEMSG("call mcm_parse_base_rep() fail");
+            MCM_KECTMSG("call mcm_parse_base_rep() fail");
         }
         goto FREE_01;
     }
@@ -937,7 +937,7 @@ int mcm_lklib_del_entry(
         fret = mcm_realloc_buf_lib(this_lklib, this_lklib->pkt_len);
         if(fret < MCM_RCODE_PASS)
         {
-            MCM_KEMSG("call mcm_realloc_buf_lib() fail");
+            MCM_KECTMSG("call mcm_realloc_buf_lib() fail");
             goto FREE_01;
         }
     }
@@ -957,14 +957,14 @@ int mcm_lklib_del_entry(
     fret = mcm_send_req(this_lklib);
     if(fret < MCM_RCODE_PASS)
     {
-        MCM_KEMSG("call mcm_send_req() fail");
+        MCM_KECTMSG("call mcm_send_req() fail");
         goto FREE_01;
     }
 
     fret = mcm_recv_rep(this_lklib);
     if(fret < MCM_RCODE_PASS)
     {
-        MCM_KEMSG("call mcm_recv_rep() fail");
+        MCM_KECTMSG("call mcm_recv_rep() fail");
         goto FREE_01;
     }
 
@@ -981,7 +981,7 @@ int mcm_lklib_del_entry(
     {
         if(fret != MCM_RCODE_CONFIG_NOT_FIND_STORE)
         {
-            MCM_KEMSG("call mcm_parse_base_rep() fail");
+            MCM_KECTMSG("call mcm_parse_base_rep() fail");
         }
         goto FREE_01;
     }
@@ -1019,7 +1019,7 @@ int mcm_lklib_get_all_entry(
         fret = mcm_realloc_buf_lib(this_lklib, this_lklib->pkt_len);
         if(fret < MCM_RCODE_PASS)
         {
-            MCM_KEMSG("call mcm_realloc_buf_lib() fail");
+            MCM_KECTMSG("call mcm_realloc_buf_lib() fail");
             goto FREE_01;
         }
     }
@@ -1039,14 +1039,14 @@ int mcm_lklib_get_all_entry(
     fret = mcm_send_req(this_lklib);
     if(fret < MCM_RCODE_PASS)
     {
-        MCM_KEMSG("call mcm_send_req() fail");
+        MCM_KECTMSG("call mcm_send_req() fail");
         goto FREE_01;
     }
 
     fret = mcm_recv_rep(this_lklib);
     if(fret < MCM_RCODE_PASS)
     {
-        MCM_KEMSG("call mcm_recv_rep() fail");
+        MCM_KECTMSG("call mcm_recv_rep() fail");
         goto FREE_01;
     }
 
@@ -1069,7 +1069,7 @@ int mcm_lklib_get_all_entry(
     {
         if(fret != MCM_RCODE_CONFIG_NOT_FIND_STORE)
         {
-            MCM_KEMSG("call mcm_parse_base_rep() fail");
+            MCM_KECTMSG("call mcm_parse_base_rep() fail");
         }
         goto FREE_01;
     }
@@ -1130,7 +1130,7 @@ int mcm_lklib_del_all_entry(
         fret = mcm_realloc_buf_lib(this_lklib, this_lklib->pkt_len);
         if(fret < MCM_RCODE_PASS)
         {
-            MCM_KEMSG("call mcm_realloc_buf_lib() fail");
+            MCM_KECTMSG("call mcm_realloc_buf_lib() fail");
             goto FREE_01;
         }
     }
@@ -1150,14 +1150,14 @@ int mcm_lklib_del_all_entry(
     fret = mcm_send_req(this_lklib);
     if(fret < MCM_RCODE_PASS)
     {
-        MCM_KEMSG("call mcm_send_req() fail");
+        MCM_KECTMSG("call mcm_send_req() fail");
         goto FREE_01;
     }
 
     fret = mcm_recv_rep(this_lklib);
     if(fret < MCM_RCODE_PASS)
     {
-        MCM_KEMSG("call mcm_recv_rep() fail");
+        MCM_KECTMSG("call mcm_recv_rep() fail");
         goto FREE_01;
     }
 
@@ -1174,7 +1174,7 @@ int mcm_lklib_del_all_entry(
     {
         if(fret != MCM_RCODE_CONFIG_NOT_FIND_STORE)
         {
-            MCM_KEMSG("call mcm_parse_base_rep() fail");
+            MCM_KECTMSG("call mcm_parse_base_rep() fail");
         }
         goto FREE_01;
     }
@@ -1208,7 +1208,7 @@ int mcm_lklib_get_max_count(
         fret = mcm_realloc_buf_lib(this_lklib, this_lklib->pkt_len);
         if(fret < MCM_RCODE_PASS)
         {
-            MCM_KEMSG("call mcm_realloc_buf_lib() fail");
+            MCM_KECTMSG("call mcm_realloc_buf_lib() fail");
             goto FREE_01;
         }
     }
@@ -1228,14 +1228,14 @@ int mcm_lklib_get_max_count(
     fret = mcm_send_req(this_lklib);
     if(fret < MCM_RCODE_PASS)
     {
-        MCM_KEMSG("call mcm_send_req() fail");
+        MCM_KECTMSG("call mcm_send_req() fail");
         goto FREE_01;
     }
 
     fret = mcm_recv_rep(this_lklib);
     if(fret < MCM_RCODE_PASS)
     {
-        MCM_KEMSG("call mcm_recv_rep() fail");
+        MCM_KECTMSG("call mcm_recv_rep() fail");
         goto FREE_01;
     }
 
@@ -1252,7 +1252,7 @@ int mcm_lklib_get_max_count(
     fret = mcm_parse_base_rep(this_lklib, 0);
     if(fret < MCM_RCODE_PASS)
     {
-        MCM_KEMSG("call mcm_parse_base_rep() fail");
+        MCM_KECTMSG("call mcm_parse_base_rep() fail");
         goto FREE_01;
     }
     tmp_offset = this_lklib->pkt_offset;
@@ -1289,7 +1289,7 @@ int mcm_lklib_get_count(
         fret = mcm_realloc_buf_lib(this_lklib, this_lklib->pkt_len);
         if(fret < MCM_RCODE_PASS)
         {
-            MCM_KEMSG("call mcm_realloc_buf_lib() fail");
+            MCM_KECTMSG("call mcm_realloc_buf_lib() fail");
             goto FREE_01;
         }
     }
@@ -1309,14 +1309,14 @@ int mcm_lklib_get_count(
     fret = mcm_send_req(this_lklib);
     if(fret < MCM_RCODE_PASS)
     {
-        MCM_KEMSG("call mcm_send_req() fail");
+        MCM_KECTMSG("call mcm_send_req() fail");
         goto FREE_01;
     }
 
     fret = mcm_recv_rep(this_lklib);
     if(fret < MCM_RCODE_PASS)
     {
-        MCM_KEMSG("call mcm_recv_rep() fail");
+        MCM_KECTMSG("call mcm_recv_rep() fail");
         goto FREE_01;
     }
 
@@ -1335,7 +1335,7 @@ int mcm_lklib_get_count(
     {
         if(fret != MCM_RCODE_CONFIG_NOT_FIND_STORE)
         {
-            MCM_KEMSG("call mcm_parse_base_rep() fail");
+            MCM_KECTMSG("call mcm_parse_base_rep() fail");
         }
         goto FREE_01;
     }
@@ -1373,7 +1373,7 @@ int mcm_lklib_get_usable_key(
         fret = mcm_realloc_buf_lib(this_lklib, this_lklib->pkt_len);
         if(fret < MCM_RCODE_PASS)
         {
-            MCM_KEMSG("call mcm_realloc_buf_lib() fail");
+            MCM_KECTMSG("call mcm_realloc_buf_lib() fail");
             goto FREE_01;
         }
     }
@@ -1393,14 +1393,14 @@ int mcm_lklib_get_usable_key(
     fret = mcm_send_req(this_lklib);
     if(fret < MCM_RCODE_PASS)
     {
-        MCM_KEMSG("call mcm_send_req() fail");
+        MCM_KECTMSG("call mcm_send_req() fail");
         goto FREE_01;
     }
 
     fret = mcm_recv_rep(this_lklib);
     if(fret < MCM_RCODE_PASS)
     {
-        MCM_KEMSG("call mcm_recv_rep() fail");
+        MCM_KECTMSG("call mcm_recv_rep() fail");
         goto FREE_01;
     }
 
@@ -1419,7 +1419,7 @@ int mcm_lklib_get_usable_key(
     {
         if(fret != MCM_RCODE_CONFIG_NOT_FIND_STORE)
         {
-            MCM_KEMSG("call mcm_parse_base_rep() fail");
+            MCM_KECTMSG("call mcm_parse_base_rep() fail");
         }
         goto FREE_01;
     }
@@ -1452,7 +1452,7 @@ int mcm_lklib_update(
         fret = mcm_realloc_buf_lib(this_lklib, this_lklib->pkt_len);
         if(fret < MCM_RCODE_PASS)
         {
-            MCM_KEMSG("call mcm_realloc_buf_lib() fail");
+            MCM_KECTMSG("call mcm_realloc_buf_lib() fail");
             goto FREE_01;
         }
     }
@@ -1470,14 +1470,14 @@ int mcm_lklib_update(
     fret = mcm_send_req(this_lklib);
     if(fret < MCM_RCODE_PASS)
     {
-        MCM_KEMSG("call mcm_send_req() fail");
+        MCM_KECTMSG("call mcm_send_req() fail");
         goto FREE_01;
     }
 
     fret = mcm_recv_rep(this_lklib);
     if(fret < MCM_RCODE_PASS)
     {
-        MCM_KEMSG("call mcm_recv_rep() fail");
+        MCM_KECTMSG("call mcm_recv_rep() fail");
         goto FREE_01;
     }
 
@@ -1492,7 +1492,7 @@ int mcm_lklib_update(
     fret = mcm_parse_base_rep(this_lklib, 0);
     if(fret < MCM_RCODE_PASS)
     {
-        MCM_KEMSG("call mcm_parse_base_rep() fail");
+        MCM_KECTMSG("call mcm_parse_base_rep() fail");
         goto FREE_01;
     }
 
@@ -1522,7 +1522,7 @@ int mcm_lklib_save(
         fret = mcm_realloc_buf_lib(this_lklib, this_lklib->pkt_len);
         if(fret < MCM_RCODE_PASS)
         {
-            MCM_KEMSG("call mcm_realloc_buf_lib() fail");
+            MCM_KECTMSG("call mcm_realloc_buf_lib() fail");
             goto FREE_01;
         }
     }
@@ -1544,14 +1544,14 @@ int mcm_lklib_save(
     fret = mcm_send_req(this_lklib);
     if(fret < MCM_RCODE_PASS)
     {
-        MCM_KEMSG("call mcm_send_req() fail");
+        MCM_KECTMSG("call mcm_send_req() fail");
         goto FREE_01;
     }
 
     fret = mcm_recv_rep(this_lklib);
     if(fret < MCM_RCODE_PASS)
     {
-        MCM_KEMSG("call mcm_recv_rep() fail");
+        MCM_KECTMSG("call mcm_recv_rep() fail");
         goto FREE_01;
     }
 
@@ -1566,7 +1566,7 @@ int mcm_lklib_save(
     fret = mcm_parse_base_rep(this_lklib, 0);
     if(fret < MCM_RCODE_PASS)
     {
-        MCM_KEMSG("call mcm_parse_base_rep() fail");
+        MCM_KECTMSG("call mcm_parse_base_rep() fail");
         goto FREE_01;
     }
 
@@ -1598,7 +1598,7 @@ int mcm_lklib_run(
         fret = mcm_realloc_buf_lib(this_lklib, this_lklib->pkt_len);
         if(fret < MCM_RCODE_PASS)
         {
-            MCM_KEMSG("call mcm_realloc_buf_lib() fail");
+            MCM_KECTMSG("call mcm_realloc_buf_lib() fail");
             goto FREE_01;
         }
     }
@@ -1618,14 +1618,14 @@ int mcm_lklib_run(
     fret = mcm_send_req(this_lklib);
     if(fret < MCM_RCODE_PASS)
     {
-        MCM_KEMSG("call mcm_send_req() fail");
+        MCM_KECTMSG("call mcm_send_req() fail");
         goto FREE_01;
     }
 
     fret = mcm_recv_rep(this_lklib);
     if(fret < MCM_RCODE_PASS)
     {
-        MCM_KEMSG("call mcm_recv_rep() fail");
+        MCM_KECTMSG("call mcm_recv_rep() fail");
         goto FREE_01;
     }
 
@@ -1644,7 +1644,7 @@ int mcm_lklib_run(
     fret = mcm_parse_base_rep(this_lklib, 1);
     if(fret < MCM_RCODE_PASS)
     {
-        MCM_KEMSG("call mcm_parse_base_rep() fail");
+        MCM_KECTMSG("call mcm_parse_base_rep() fail");
         goto FREE_01;
     }
 
@@ -1672,7 +1672,7 @@ int mcm_lklib_shutdown(
         fret = mcm_realloc_buf_lib(this_lklib, this_lklib->pkt_len);
         if(fret < MCM_RCODE_PASS)
         {
-            MCM_KEMSG("call mcm_realloc_buf_lib() fail");
+            MCM_KECTMSG("call mcm_realloc_buf_lib() fail");
             goto FREE_01;
         }
     }
@@ -1690,14 +1690,14 @@ int mcm_lklib_shutdown(
     fret = mcm_send_req(this_lklib);
     if(fret < MCM_RCODE_PASS)
     {
-        MCM_KEMSG("call mcm_send_req() fail");
+        MCM_KECTMSG("call mcm_send_req() fail");
         goto FREE_01;
     }
 
     fret = mcm_recv_rep(this_lklib);
     if(fret < MCM_RCODE_PASS)
     {
-        MCM_KEMSG("call mcm_recv_rep() fail");
+        MCM_KECTMSG("call mcm_recv_rep() fail");
         goto FREE_01;
     }
 
@@ -1712,7 +1712,7 @@ int mcm_lklib_shutdown(
     fret = mcm_parse_base_rep(this_lklib, 0);
     if(fret < MCM_RCODE_PASS)
     {
-        MCM_KEMSG("call mcm_parse_base_rep() fail");
+        MCM_KECTMSG("call mcm_parse_base_rep() fail");
         goto FREE_01;
     }
 
@@ -1747,7 +1747,7 @@ int mcm_lklib_check_store_file(
         fret = mcm_realloc_buf_lib(this_lklib, this_lklib->pkt_len);
         if(fret < MCM_RCODE_PASS)
         {
-            MCM_KEMSG("call mcm_realloc_buf_lib() fail");
+            MCM_KECTMSG("call mcm_realloc_buf_lib() fail");
             goto FREE_01;
         }
     }
@@ -1767,14 +1767,14 @@ int mcm_lklib_check_store_file(
     fret = mcm_send_req(this_lklib);
     if(fret < MCM_RCODE_PASS)
     {
-        MCM_KEMSG("call mcm_send_req() fail");
+        MCM_KECTMSG("call mcm_send_req() fail");
         goto FREE_01;
     }
 
     fret = mcm_recv_rep(this_lklib);
     if(fret < MCM_RCODE_PASS)
     {
-        MCM_KEMSG("call mcm_recv_rep() fail");
+        MCM_KECTMSG("call mcm_recv_rep() fail");
         goto FREE_01;
     }
 
@@ -1795,7 +1795,7 @@ int mcm_lklib_check_store_file(
     fret = mcm_parse_base_rep(this_lklib, 0);
     if(fret < MCM_RCODE_PASS)
     {
-        MCM_KEMSG("call mcm_parse_base_rep() fail");
+        MCM_KECTMSG("call mcm_parse_base_rep() fail");
         goto FREE_01;
     }
     tmp_offset = this_lklib->pkt_offset;
@@ -1834,7 +1834,7 @@ int mcm_lklib_do_get_alone(
     fret = mcm_lklib_init(this_lklib);
     if(fret < MCM_RCODE_PASS)
     {
-        MCM_KEMSG("call mcm_lklib_init() fail");
+        MCM_KECTMSG("call mcm_lklib_init() fail");
         return fret;
     }
 
@@ -1843,7 +1843,7 @@ int mcm_lklib_do_get_alone(
     {
         if(fret != MCM_RCODE_CONFIG_NOT_FIND_STORE)
         {
-            MCM_KEMSG("call mcm_lklib_get_alone() fail");
+            MCM_KECTMSG("call mcm_lklib_get_alone() fail");
         }
     }
 
@@ -1865,7 +1865,7 @@ int mcm_lklib_do_set_alone(
     fret = mcm_lklib_init(this_lklib);
     if(fret < MCM_RCODE_PASS)
     {
-        MCM_KEMSG("call mcm_lklib_init() fail");
+        MCM_KECTMSG("call mcm_lklib_init() fail");
         return fret;
     }
 
@@ -1874,7 +1874,7 @@ int mcm_lklib_do_set_alone(
     {
         if(fret != MCM_RCODE_CONFIG_NOT_FIND_STORE)
         {
-            MCM_KEMSG("call mcm_lklib_set_alone() fail");
+            MCM_KECTMSG("call mcm_lklib_set_alone() fail");
         }
     }
 
@@ -1895,7 +1895,7 @@ int mcm_lklib_do_get_entry(
     fret = mcm_lklib_init(this_lklib);
     if(fret < MCM_RCODE_PASS)
     {
-        MCM_KEMSG("call mcm_lklib_init() fail");
+        MCM_KECTMSG("call mcm_lklib_init() fail");
         return fret;
     }
 
@@ -1904,7 +1904,7 @@ int mcm_lklib_do_get_entry(
     {
         if(fret != MCM_RCODE_CONFIG_NOT_FIND_STORE)
         {
-            MCM_KEMSG("call mcm_lklib_get_entry() fail");
+            MCM_KECTMSG("call mcm_lklib_get_entry() fail");
         }
     }
 
@@ -1926,7 +1926,7 @@ int mcm_lklib_do_set_entry(
     fret = mcm_lklib_init(this_lklib);
     if(fret < MCM_RCODE_PASS)
     {
-        MCM_KEMSG("call mcm_lklib_init() fail");
+        MCM_KECTMSG("call mcm_lklib_init() fail");
         return fret;
     }
 
@@ -1935,7 +1935,7 @@ int mcm_lklib_do_set_entry(
     {
         if(fret != MCM_RCODE_CONFIG_NOT_FIND_STORE)
         {
-            MCM_KEMSG("call mcm_lklib_set_entry() fail");
+            MCM_KECTMSG("call mcm_lklib_set_entry() fail");
         }
     }
 
@@ -1958,7 +1958,7 @@ int mcm_lklib_do_add_entry(
     fret = mcm_lklib_init(this_lklib);
     if(fret < MCM_RCODE_PASS)
     {
-        MCM_KEMSG("call mcm_lklib_init() fail");
+        MCM_KECTMSG("call mcm_lklib_init() fail");
         return fret;
     }
 
@@ -1967,7 +1967,7 @@ int mcm_lklib_do_add_entry(
     {
         if(fret != MCM_RCODE_CONFIG_NOT_FIND_STORE)
         {
-            MCM_KEMSG("call mcm_lklib_add_entry() fail");
+            MCM_KECTMSG("call mcm_lklib_add_entry() fail");
         }
     }
 
@@ -1987,7 +1987,7 @@ int mcm_lklib_do_del_entry(
     fret = mcm_lklib_init(this_lklib);
     if(fret < MCM_RCODE_PASS)
     {
-        MCM_KEMSG("call mcm_lklib_init() fail");
+        MCM_KECTMSG("call mcm_lklib_init() fail");
         return fret;
     }
 
@@ -1996,7 +1996,7 @@ int mcm_lklib_do_del_entry(
     {
         if(fret != MCM_RCODE_CONFIG_NOT_FIND_STORE)
         {
-            MCM_KEMSG("call mcm_lklib_del_entry() fail");
+            MCM_KECTMSG("call mcm_lklib_del_entry() fail");
         }
     }
 
@@ -2018,7 +2018,7 @@ int mcm_lklib_do_get_all_entry(
     fret = mcm_lklib_init(this_lklib);
     if(fret < MCM_RCODE_PASS)
     {
-        MCM_KEMSG("call mcm_lklib_init() fail");
+        MCM_KECTMSG("call mcm_lklib_init() fail");
         return fret;
     }
 
@@ -2027,7 +2027,7 @@ int mcm_lklib_do_get_all_entry(
     {
         if(fret != MCM_RCODE_CONFIG_NOT_FIND_STORE)
         {
-            MCM_KEMSG("call mcm_lklib_get_all_entry() fail");
+            MCM_KECTMSG("call mcm_lklib_get_all_entry() fail");
         }
     }
 
@@ -2047,7 +2047,7 @@ int mcm_lklib_do_del_all_entry(
     fret = mcm_lklib_init(this_lklib);
     if(fret < MCM_RCODE_PASS)
     {
-        MCM_KEMSG("call mcm_lklib_init() fail");
+        MCM_KECTMSG("call mcm_lklib_init() fail");
         return fret;
     }
 
@@ -2056,7 +2056,7 @@ int mcm_lklib_do_del_all_entry(
     {
         if(fret != MCM_RCODE_CONFIG_NOT_FIND_STORE)
         {
-            MCM_KEMSG("call mcm_lklib_del_all_entry() fail");
+            MCM_KECTMSG("call mcm_lklib_del_all_entry() fail");
         }
     }
 
@@ -2077,14 +2077,14 @@ int mcm_lklib_do_get_max_count(
     fret = mcm_lklib_init(this_lklib);
     if(fret < MCM_RCODE_PASS)
     {
-        MCM_KEMSG("call mcm_lklib_init() fail");
+        MCM_KECTMSG("call mcm_lklib_init() fail");
         return fret;
     }
 
     fret = mcm_lklib_get_max_count(this_lklib, mask_path, count_buf);
     if(fret < MCM_RCODE_PASS)
     {
-        MCM_KEMSG("call mcm_lklib_get_max_count() fail");
+        MCM_KECTMSG("call mcm_lklib_get_max_count() fail");
     }
 
     mcm_lklib_exit(this_lklib);
@@ -2104,7 +2104,7 @@ int mcm_lklib_do_get_count(
     fret = mcm_lklib_init(this_lklib);
     if(fret < MCM_RCODE_PASS)
     {
-        MCM_KEMSG("call mcm_lklib_init() fail");
+        MCM_KECTMSG("call mcm_lklib_init() fail");
         return fret;
     }
 
@@ -2113,7 +2113,7 @@ int mcm_lklib_do_get_count(
     {
         if(fret != MCM_RCODE_CONFIG_NOT_FIND_STORE)
         {
-            MCM_KEMSG("call mcm_lklib_get_count() fail");
+            MCM_KECTMSG("call mcm_lklib_get_count() fail");
         }
     }
 
@@ -2134,7 +2134,7 @@ int mcm_lklib_do_get_usable_key(
     fret = mcm_lklib_init(this_lklib);
     if(fret < MCM_RCODE_PASS)
     {
-        MCM_KEMSG("call mcm_lklib_init() fail");
+        MCM_KECTMSG("call mcm_lklib_init() fail");
         return fret;
     }
 
@@ -2143,7 +2143,7 @@ int mcm_lklib_do_get_usable_key(
     {
         if(fret != MCM_RCODE_CONFIG_NOT_FIND_STORE)
         {
-            MCM_KEMSG("call mcm_lklib_get_usable_key() fail");
+            MCM_KECTMSG("call mcm_lklib_get_usable_key() fail");
         }
     }
 
@@ -2162,14 +2162,14 @@ int mcm_lklib_do_update(
     fret = mcm_lklib_init(this_lklib);
     if(fret < MCM_RCODE_PASS)
     {
-        MCM_KEMSG("call mcm_lklib_init() fail");
+        MCM_KECTMSG("call mcm_lklib_init() fail");
         return fret;
     }
 
     fret = mcm_lklib_update(this_lklib);
     if(fret < MCM_RCODE_PASS)
     {
-        MCM_KEMSG("call mcm_lklib_update() fail");
+        MCM_KECTMSG("call mcm_lklib_update() fail");
     }
 
     mcm_lklib_exit(this_lklib);
@@ -2188,14 +2188,14 @@ int mcm_lklib_do_save(
     fret = mcm_lklib_init(this_lklib);
     if(fret < MCM_RCODE_PASS)
     {
-        MCM_KEMSG("call mcm_lklib_init() fail");
+        MCM_KECTMSG("call mcm_lklib_init() fail");
         return fret;
     }
 
     fret = mcm_lklib_save(this_lklib, force_save);
     if(fret < MCM_RCODE_PASS)
     {
-        MCM_KEMSG("call mcm_lklib_save() fail");
+        MCM_KECTMSG("call mcm_lklib_save() fail");
     }
 
     mcm_lklib_exit(this_lklib);
@@ -2214,14 +2214,14 @@ int mcm_lklib_do_run(
     fret = mcm_lklib_init(this_lklib);
     if(fret < MCM_RCODE_PASS)
     {
-        MCM_KEMSG("call mcm_lklib_init() fail");
+        MCM_KECTMSG("call mcm_lklib_init() fail");
         return fret;
     }
 
     fret = mcm_lklib_run(this_lklib, module_function);
     if(fret < MCM_RCODE_PASS)
     {
-        MCM_KEMSG("call mcm_lklib_run() fail");
+        MCM_KECTMSG("call mcm_lklib_run() fail");
     }
 
     mcm_lklib_exit(this_lklib);
@@ -2239,14 +2239,14 @@ int mcm_lklib_do_shutdown(
     fret = mcm_lklib_init(this_lklib);
     if(fret < MCM_RCODE_PASS)
     {
-        MCM_KEMSG("call mcm_lklib_init() fail");
+        MCM_KECTMSG("call mcm_lklib_init() fail");
         return fret;
     }
 
     fret = mcm_lklib_shutdown(this_lklib);
     if(fret < MCM_RCODE_PASS)
     {
-        MCM_KEMSG("call mcm_lklib_shutdown() fail");
+        MCM_KECTMSG("call mcm_lklib_shutdown() fail");
     }
 
     mcm_lklib_exit(this_lklib);
@@ -2268,7 +2268,7 @@ int mcm_lklib_do_check_store_file(
     fret = mcm_lklib_init(this_lklib);
     if(fret < MCM_RCODE_PASS)
     {
-        MCM_KEMSG("call mcm_lklib_init() fail");
+        MCM_KECTMSG("call mcm_lklib_init() fail");
         return fret;
     }
 
@@ -2276,7 +2276,7 @@ int mcm_lklib_do_check_store_file(
                                       store_version_buf, store_version_size);
     if(fret < MCM_RCODE_PASS)
     {
-        MCM_KEMSG("call mcm_lklib_check_store_file() fail");
+        MCM_KECTMSG("call mcm_lklib_check_store_file() fail");
     }
 
     mcm_lklib_exit(this_lklib);

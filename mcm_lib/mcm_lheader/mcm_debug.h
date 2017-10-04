@@ -19,6 +19,15 @@
 #define MCM_EMSG(msg_fmt, msg_args...) \
     printf("%s(%04u): " msg_fmt "\n", __FILE__, __LINE__, ##msg_args)
 
+// daemon error (call trace for internal mcm_... serial function)
+#define MCM_ECTMODE 1
+#if MCM_ECTMODE
+    #define MCM_ECTMSG(msg_fmt, msg_args...) \
+        printf("%s(%04u): " msg_fmt "\n", __FILE__, __LINE__, ##msg_args)
+#else
+    #define MCM_ECTMSG(msg_fmt, msg_args...)
+#endif
+
 // daemon debug - daemon
 #define MCM_DMDMODE 0
 #if MCM_DMDMODE
@@ -69,6 +78,15 @@
 #define MCM_KEMSG(msg_fmt, msg_args...) \
     printk(KERN_ERR "%s(%04u): " msg_fmt "\n", K_FILE_NAME, __LINE__, ##msg_args)
 
+// lib error - kernel space (call trace for internal mcm_... serial function)
+#define MCM_LKECTMODE 1
+#if MCM_LKECTMODE
+    #define MCM_KECTMSG(msg_fmt, msg_args...) \
+        printk(KERN_ERR "%s(%04u): " msg_fmt "\n", K_FILE_NAME, __LINE__, ##msg_args)
+#else
+    #define MCM_KECTMSG(msg_fmt, msg_args...)
+#endif
+
 // lib debug - kernel space
 #define MCM_LKDMODE 0
 #if MCM_LKDMODE
@@ -80,6 +98,9 @@
 
 // cgi error
 #define MCM_CGIEMODE 1
+
+// cgi error (call trace for internal mcm_... serial function)
+#define MCM_CGIECTMODE 1
 
 // cgi debug - config
 #define MCM_CCDMODE 0

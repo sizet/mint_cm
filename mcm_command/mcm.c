@@ -412,25 +412,25 @@ int mcm_parse_command(
 
         if(mcm_find_command_operate(each_command) < MCM_RCODE_PASS)
         {
-            MCM_EMSG("call mcm_find_command_operate() fail");
+            MCM_ECTMSG("call mcm_find_command_operate() fail");
             goto FREE_02;
         }
 
         if(mcm_find_command_path(each_command) < MCM_RCODE_PASS)
         {
-            MCM_EMSG("call mcm_find_command_path() fail");
+            MCM_ECTMSG("call mcm_find_command_path() fail");
             goto FREE_02;
         }
 
         if(mcm_find_command_data(each_command) < MCM_RCODE_PASS)
         {
-            MCM_EMSG("call mcm_find_command_data() fail");
+            MCM_ECTMSG("call mcm_find_command_data() fail");
             goto FREE_02;
         }
 
         if(mcm_check_command(each_command) < MCM_RCODE_PASS)
         {
-            MCM_EMSG("call mcm_check_command() fail");
+            MCM_ECTMSG("call mcm_check_command() fail");
             goto FREE_02;
         }
     }
@@ -819,7 +819,7 @@ int main(
     // 分析指令.
     if(mcm_parse_command(argv + cidx, ccnt, &command_list) < MCM_RCODE_PASS)
     {
-        MCM_EMSG("call mcm_parse_command() fail");
+        MCM_ECTMSG("call mcm_parse_command() fail");
         goto FREE_01;
     }
 
