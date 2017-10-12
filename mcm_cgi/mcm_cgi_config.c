@@ -1073,7 +1073,7 @@ FREE_01:
 }
 
 // 填充處理資料的路徑.
-int mcm_fill_path(
+void mcm_fill_path(
     struct mcm_command_list_t *command_list_info,
     MCM_DTYPE_USIZE_TD part_level,
     MCM_DTYPE_LIST_TD fill_type,
@@ -1162,8 +1162,6 @@ int mcm_fill_path(
             }
         }
     }
-
-    return MCM_RCODE_PASS;
 }
 
 // 釋放.
@@ -1672,7 +1670,7 @@ int mcm_convert_utf8_to_unicode(
 }
 
 // 輸出 max count 的 json 資料.
-int mcm_output_max_count_json(
+void mcm_output_max_count_json(
     struct mcm_model_t *this_model,
     MCM_DTYPE_BOOL_TD internal_flag)
 {
@@ -1704,12 +1702,10 @@ int mcm_output_max_count_json(
 
     if(internal_flag == 0)
         printf("}");
-
-    return MCM_RCODE_PASS;
 }
 
 // 輸出資料內容的 json 資料 (資料內容部分).
-int mcm_output_data_json_data(
+void mcm_output_data_json_data(
     struct mcm_model_t *this_model,
     struct mcm_store_t *this_store,
     struct mcm_request_para_t *request_info)
@@ -1875,12 +1871,10 @@ int mcm_output_data_json_data(
             if(this_model->child_model != NULL)
                 printf(",");
     }
-
-    return MCM_RCODE_PASS;
 }
 
 // 輸出資料內容的 json 資料 (資料架構部分).
-int mcm_output_data_json_tree(
+void mcm_output_data_json_tree(
     struct mcm_model_t *this_model,
     struct mcm_store_t *this_store,
     struct mcm_request_para_t *request_info,
@@ -1965,66 +1959,6 @@ int mcm_output_data_json_tree(
 
     if(internal_flag == 0)
         printf("}");
-
-    return MCM_RCODE_PASS;
-}
-
-// 將 XX 的字串轉為字元 (例如 20 = 0x20).
-int mcm_hex_to_char(
-    char *data_con,
-    char *char_buf)
-{
-    MCM_DTYPE_USIZE_TD didx, tmp_hex, tmp_sum = 0;
-
-
-    for(didx = 0; didx < 2; didx++)
-    {
-        tmp_hex = 0;
-        if(('0' <= data_con[didx]) && (data_con[didx] <= '9'))
-            tmp_hex = data_con[didx] - '0';
-        else
-        if(('A' <= data_con[didx]) && (data_con[didx] <= 'F'))
-            tmp_hex = (data_con[didx] - 'A') + 10;
-        else
-        if(('a' <= data_con[didx]) && (data_con[didx] <= 'f'))
-            tmp_hex = (data_con[didx] - 'a') + 10;
-        tmp_hex *= didx == 0 ? 16 : 1;
-
-        tmp_sum += tmp_hex;
-    }
-
-    *char_buf = tmp_sum;
-
-    return MCM_RCODE_PASS;
-}
-
-// 將 XX 的字串轉為數值 (例如 FF = 0xFF).
-int mcm_hex_to_hex(
-    char *data_con,
-    unsigned char *hex_buf)
-{
-    MCM_DTYPE_USIZE_TD didx, tmp_hex, tmp_sum = 0;
-
-
-    for(didx = 0; didx < 2; didx++)
-    {
-        tmp_hex = 0;
-        if(('0' <= data_con[didx]) && (data_con[didx] <= '9'))
-            tmp_hex = data_con[didx] - '0';
-        else
-        if(('A' <= data_con[didx]) && (data_con[didx] <= 'F'))
-            tmp_hex = (data_con[didx] - 'A') + 10;
-        else
-        if(('a' <= data_con[didx]) && (data_con[didx] <= 'f'))
-            tmp_hex = (data_con[didx] - 'a') + 10;
-        tmp_hex *= didx == 0 ? 16 : 1;
-
-        tmp_sum += tmp_hex;
-    }
-
-    *hex_buf = tmp_sum;
-
-    return MCM_RCODE_PASS;
 }
 
 // 處理 push 類型的指令.
@@ -2105,7 +2039,7 @@ int mcm_do_push_command(
 }
 
 // 填充執行 MCM_RACTION_SUBMIT_CONFIG 行為後要回應給網頁的訊息.
-int mcm_fill_submit_response(
+void mcm_fill_submit_response(
     struct mcm_command_list_t *command_list_info,
     struct mcm_request_para_t *request_info,
     int call_ret,
@@ -2136,8 +2070,6 @@ int mcm_fill_submit_response(
             }
         }
     }
-
-    return MCM_RCODE_PASS;
 }
 
 // 處理 module 類型的指令.
@@ -2395,7 +2327,7 @@ int main(
     struct mcm_request_para_t request_info;
 
 
-#if MCM_CGIEMODE | MCM_CCDMODE
+#if MCM_CGIEMODE | MCM_CGIECTMODE | MCM_CCDMODE
     dbg_tty_fd = open(MCM_DBG_DEV_TTY, O_WRONLY);
     if(dbg_tty_fd == -1)
     {
@@ -2498,7 +2430,7 @@ FREE_02:
     MCM_CCDMSG("free post_buf[%p]", post_buf);
     free(post_buf);
 FREE_01:
-#if MCM_CGIEMODE | MCM_CCDMODE
+#if MCM_CGIEMODE | MCM_CGIECTMODE | MCM_CCDMODE
     if(dbg_tty_fd != -1)
         close(dbg_tty_fd);
 #endif

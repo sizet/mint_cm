@@ -722,7 +722,7 @@ int main(
     ssize_t rlen;
 
 
-#if MCM_CGIEMODE | MCM_CUHDMODE
+#if MCM_CGIEMODE | MCM_CGIECTMODE | MCM_CUHDMODE
     dbg_tty_fd_h = open(MCM_DBG_DEV_TTY, O_WRONLY);
     if(dbg_tty_fd_h == -1)
     {
@@ -825,7 +825,7 @@ int main(
     MCM_CUHDMSG("free post_buf[%p]", post_buf);
     free(post_buf);
 FREE_01:
-#if MCM_CGIEMODE | MCM_CUHDMODE
+#if MCM_CGIEMODE | MCM_CGIECTMODE | MCM_CUHDMODE
     if(dbg_tty_fd_h != -1)
         close(dbg_tty_fd_h);
 #endif
