@@ -924,6 +924,110 @@ FREE_01:
     return fret;
 }
 
+int case_get_all_key(
+    struct mcm_lulib_lib_t *this_lulib)
+{
+    int fret = -1;
+    char *path1, path2[MCM_PATH_MAX_LENGTH];
+    struct mcm_dv_device_vap_t vap_v;
+    struct mcm_dv_device_vap_extra_t extra_v;
+    struct mcm_dv_device_vap_station_t station_v;
+    struct mcm_dv_device_limit_t limit_v;
+    MCM_DTYPE_EK_TD vap_count, station_count, limit_count, i, j,
+        *vap_key_array, *station_key_array, *limit_key_array;
+
+
+    DMSG("get all key test :");
+
+    // 讀出 device.vap.*
+    path1 = "device.vap.*";
+    if(mcm_lulib_get_all_key(this_lulib, path1, &vap_count, (MCM_DTYPE_EK_TD **) &vap_key_array)
+                             < MCM_RCODE_PASS)
+    {
+        DMSG("call mcm_lulib_get_all_key(%s) fail", path1);
+        goto FREE_01;
+    }
+    DMSG("[count] %s = " MCM_DTYPE_EK_PF, path1, vap_count);
+    for(i = 0; i < vap_count; i++)
+    {
+        snprintf(path2, sizeof(path2), "device.vap.#%u", vap_key_array[i]);
+        if(mcm_lulib_get_entry(this_lulib, path2, &vap_v) < MCM_RCODE_PASS)
+        {
+            DMSG("call mcm_lulib_get_entry(%s) fail", path2);
+            goto FREE_01;
+        }
+        DMSG("[get-entry] %s.ssid = " MCM_DTYPE_S_PF, path2, vap_v.ssid);
+        DMSG("[get-entry] %s.channel = " MCM_DTYPE_IUI_PF, path2, vap_v.channel);
+    }
+
+    // 讀出 device.vap.extra.*
+    for(i = 0; i < vap_count; i++)
+    {
+        snprintf(path2, sizeof(path2), "device.vap.#%u.extra", vap_key_array[i]);
+        if(mcm_lulib_get_entry(this_lulib, path2, &extra_v) < MCM_RCODE_PASS)
+        {
+            DMSG("call mcm_lulib_get_entry(%s) fail", path2);
+            goto FREE_02;
+        }
+        DMSG("[get-entry] %s.hidden = " MCM_DTYPE_ISC_PF, path2, extra_v.hidden);
+        DMSG("[get-entry] %s.tx_power = " MCM_DTYPE_ISS_PF, path2, extra_v.tx_power);
+    }
+
+    // 讀出 device.vap.*.station.*
+    for(i = 0; i < vap_count; i++)
+    {
+        snprintf(path2, sizeof(path2), "device.vap.#%u.station.*", vap_key_array[i]);
+        if(mcm_lulib_get_all_key(this_lulib, path2, &station_count,
+                                 (MCM_DTYPE_EK_TD **) &station_key_array) < MCM_RCODE_PASS)
+        {
+            DMSG("call mcm_lulib_get_all_key(%s) fail", path2);
+            goto FREE_01;
+        }
+        DMSG("[count] %s = " MCM_DTYPE_EK_PF, path2, station_count);
+        for(j = 0; j < station_count; j++)
+        {
+            snprintf(path2, sizeof(path2), "device.vap.#%u.station.#%u",
+                     vap_key_array[i], station_key_array[j]);
+            if(mcm_lulib_get_entry(this_lulib, path2, &station_v) < MCM_RCODE_PASS)
+            {
+                DMSG("call mcm_lulib_get_entry(%s) fail", path2);
+                goto FREE_01;
+            }
+            DMSG("[get-entry] %s.mac_addr = " MCM_DTYPE_S_PF, path2, station_v.mac_addr);
+            DMSG("[get-entry] %s.rule = " MCM_DTYPE_RK_PF, path2, station_v.rule);
+        }
+        free(station_key_array);
+    }
+
+    // 讀出 device.limit.*
+    path1 = "device.limit.*";
+    if(mcm_lulib_get_all_key(this_lulib, path1, &limit_count,
+                             (MCM_DTYPE_EK_TD **) &limit_key_array) < MCM_RCODE_PASS)
+    {
+        DMSG("call mcm_lulib_get_all_key(%s) fail", path1);
+        goto FREE_01;
+    }
+    DMSG("[count] %s = " MCM_DTYPE_EK_PF, path1, limit_count);
+    for(i = 0; i < limit_count; i++)
+    {
+        snprintf(path2, sizeof(path2), "device.limit.#%u", limit_key_array[i]);
+        if(mcm_lulib_get_entry(this_lulib, path2, &limit_v) < MCM_RCODE_PASS)
+        {
+            DMSG("call mcm_lulib_get_entry(%s) fail", path2);
+            goto FREE_01;
+        }
+        DMSG("[get-entry] %s.name = " MCM_DTYPE_S_PF, path1, limit_v.name);
+        DMSG("[get-entry] %s.priority = " MCM_DTYPE_ISI_PF, path1, limit_v.priority);
+    }
+    free(limit_key_array);
+
+    fret = 0;
+FREE_02:
+    free(vap_key_array);
+FREE_01:
+    return fret;
+}
+
 int case_get_all_entry(
     struct mcm_lulib_lib_t *this_lulib)
 {
@@ -1234,6 +1338,7 @@ struct operate_cb_t operate_cb_list[] =
     {"set-entry",     "set entry test",     case_set_entry,     MCM_SPERMISSION_RW, 0},
     {"add-entry",     "add entry test",     case_add_entry,     MCM_SPERMISSION_RW, 0},
     {"del-entry",     "del entry test",     case_del_entry,     MCM_SPERMISSION_RW, 0},
+    {"get-all-key",   "get all key test",   case_get_all_key,   MCM_SPERMISSION_RO, 0},
     {"get-all-entry", "get all entry test", case_get_all_entry, MCM_SPERMISSION_RO, 0},
     {"del-all-entry", "del all entry test", case_del_all_entry, MCM_SPERMISSION_RW, 0},
     {"run",           "run test",           case_run,           MCM_SPERMISSION_RW, 1048576},

@@ -375,31 +375,35 @@ FREE_01:
     return fret;
 }
 
-int mcm_module_get_entry(
+int mcm_module_get_key_entry(
     struct mcm_service_session_t *this_session)
 {
     int fret = MCM_RCODE_MODULE_INTERNAL_ERROR;
     char *path1, path2[MCM_PATH_MAX_LENGTH];
-    MCM_DTYPE_EK_TD count, i;
+    MCM_DTYPE_EK_TD count, *key_array, i;
     MCM_DTYPE_DS_TD tmp_status;
     struct mcm_dv_device_vap_t vap_v;
 
 
+    DMSG("get-all-key test :");
     DMSG("get-entry test :");
 
-    // device.vap.* 的資料筆數.
+    // device.vap.* 的所有 key.
     path1 = "device.vap.*";
-    if(mcm_config_get_count_by_path(this_session, path1, &count) < MCM_RCODE_PASS)
+    key_array = NULL;
+    if(mcm_config_get_all_key_by_path(this_session, path1, &count,
+                                      (MCM_DTYPE_EK_TD **) &key_array) < MCM_RCODE_PASS)
     {
-        DMSG("call mcm_config_get_count_by_path(%s) fail", path1);
+        DMSG("call mcm_config_add_entry_by_path(%s) fail", path1);
         goto FREE_01;
     }
+    DMSG("[count] %s = " MCM_DTYPE_EK_PF, path1, count);
 
     // 目標 : device.vap.*
     for(i = 0; i < count; i++)
     {
         // 填充路徑.
-        snprintf(path2, sizeof(path2), "device.vap.@%u", i + 1);
+        snprintf(path2, sizeof(path2), "device.vap.#%u", key_array[i]);
 
         // 取得狀態.
         if(mcm_config_get_entry_self_status_by_path(this_session, path2, &tmp_status)
@@ -481,6 +485,7 @@ int mcm_module_get_entry(
             DMSG("[get-entry][SYS] %s.channel = " MCM_DTYPE_IUI_PF, path2, vap_v.channel);
         }
     }
+    free(key_array);
 
     fret = MCM_RCODE_PASS;
 FREE_01:

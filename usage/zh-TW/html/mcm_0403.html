@@ -3236,6 +3236,297 @@ FREE_01:
     </table>
     <br>
 
+
+
+    <div class="css_div_hook" id="hook_0403_mcm_config_get_all_key_by_path_01"></div>
+    <table class="css_table_box">
+      <tr>
+        <td class="css_td_box">
+          <font class="css_font_b2">mcm_config_get_all_key_by_path</font><br>
+          讀出所有 entry 的 key 值.<br>
+          <table class="css_table_list2">
+            <tr>
+              <td class="css_td_list2_t1">參數</td>
+              <td class="css_td_list2_t1">說明</td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l1">
+                <font class="css_font_r1">struct mcm_service_session_t *</font><br>
+                <font class="css_font_g1">this_session</font>
+              </td>
+              <td class="css_td_list2_r1">
+                請求端的連線資訊
+              </td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l1">
+                <font class="css_font_r1">char *</font><br>
+                <font class="css_font_g1">mix_path</font><br>
+              </td>
+              <td class="css_td_list2_r1">
+                目標的路徑 <a href="#hook_0403_mix_path_01">[詳細]</a><br>
+                <font class="css_font_p1">[index / key 模式]</font>
+              </td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l1">
+                <font class="css_font_r1">MCM_DTYPE_EK_TD *</font><br>
+                <font class="css_font_g1">count_buf</font>
+              </td>
+              <td class="css_td_list2_r1">
+                紀錄資料筆數的緩衝
+              </td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l1">
+                <font class="css_font_r1">MCM_DTYPE_EK_TD **</font><br>
+                <font class="css_font_g1">key_buf</font>
+              </td>
+              <td class="css_td_list2_r1">
+                紀錄 key 列表的變數的緩衝<br>
+                <font class="css_font_p1">參數帶入函式前必須先將值設為 NULL</font><br>
+                <font class="css_font_r1">
+                內部函式會配置記憶體空間並放入資料, 使用完需要釋放,
+                傳入參數需要做強制轉型 (MCM_DTYPE_EK_TD **)
+                </font>
+              </td>
+            </tr>
+          </table>
+          <table class="css_table_list2">
+            <tr>
+              <td class="css_td_list2_t1">回傳</td>
+              <td class="css_td_list2_t1">說明</td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l2">&gt;= MCM_RCODE_PASS</td>
+              <td class="css_td_list2_r1">成功</td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l2">&nbsp;&lt; MCM_RCODE_PASS<br>(MCM_RCODE_CONFIG_NOT_FIND_STORE)</td>
+              <td class="css_td_list2_r1">錯誤, 目標 entry 不存在</td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l2">&nbsp;&lt; MCM_RCODE_PASS<br>(other)</td>
+              <td class="css_td_list2_r1">錯誤, 其他錯誤</td>
+            </tr>
+          </table>
+          <br>
+          注意事項 :<br>
+          <table class="css_table_list1">
+            <tr>
+              <td class="css_td_list1_l">01.&nbsp;</td>
+              <td class="css_td_list1_r">
+                外部程式或網頁程式的資料存取模式 (session_permission) 可以是唯讀或讀寫.
+              </td>
+            </tr>
+            <tr>
+              <td class="css_td_list1_l">02.&nbsp;</td>
+              <td class="css_td_list1_r">
+                使用 index 模式和 key 模式的資料搜索的速度 :<br>
+                <table class="css_table_list1">
+                  <tr>
+                    <td class="css_td_list1_l">A.&nbsp;</td>
+                    <td class="css_td_list1_r">
+                      知道所有 entry 的 key 值, 使用 key 模式的路徑.
+                    </td>
+                  </tr>
+                  <tr>
+                    <td class="css_td_list1_l">B.&nbsp;</td>
+                    <td class="css_td_list1_r">
+                      不知道所有 entry 的 key 值, 先使用此函式取得所有 entry 的 key 值, 再使用 key 模式的路徑.
+                    </td>
+                  </tr>
+                  <tr>
+                    <td class="css_td_list1_l">C.&nbsp;</td>
+                    <td class="css_td_list1_r">
+                      不知道所有 entry 的 key 值, 使用 index 模式的路徑.
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+          </table>
+          <br>
+          範例 :<br>
+<pre class="css_pre_code">
+外部程式部分
+
+#include &lt;time.h&gt;
+#include &lt;errno.h&gt;
+#include &lt;stdio.h&gt;
+#include &lt;string.h&gt;
+#include &lt;stdlib.h&gt;
+#include "mcm_lheader/mcm_type.h"
+#include "mcm_lheader/mcm_size.h"
+#include "mcm_lheader/mcm_connect.h"
+#include "mcm_lheader/mcm_return.h"
+#include "mcm_lheader/mcm_data_exinfo_auto.h"
+#include "mcm_lulib/mcm_lulib_api.h"
+
+#define DMSG(msg_fmt, msgs...) printf("%s(%04u): " msg_fmt "\n", __FILE__, __LINE__, ##msgs)
+
+int main(int argc, char **argv)
+{
+    char *path1;
+    struct mcm_lulib_lib_t self_lulib;
+
+    srand(time(NULL));
+
+    memset(&self_lulib, 0, sizeof(struct mcm_lulib_lib_t));
+    self_lulib.socket_path = "@mintcm";
+    self_lulib.call_from = MCM_CFROM_USER;
+    self_lulib.session_permission = MCM_SPERMISSION_RW;
+    self_lulib.session_stack_size = 0;
+    if(mcm_lulib_init(&self_lulib) < MCM_RCODE_PASS)
+    {
+        DMSG("call mcm_lulib_init() fail");
+        goto FREE_01;
+    }
+
+    // 呼叫內部模組.
+    path1 = "mcm_module_get_all_key_value_test";
+    DMSG("[run] %s", path1);
+    if(mcm_lulib_run(&self_lulib, path1) < MCM_RCODE_PASS)
+    {
+        DMSG("call mcm_lulib_run(%s) fail", path1);
+        goto FREE_02;
+    }
+
+FREE_02:
+    mcm_lulib_exit(&self_lulib);
+FREE_01:
+    return 0;
+}
+</pre>
+<pre class="css_pre_code">
+內部模組部分
+
+#include &lt;time.h&gt;
+#include &lt;errno.h&gt;
+#include &lt;stdio.h&gt;
+#include &lt;string.h&gt;
+#include &lt;stdlib.h&gt;
+#include "../../mcm_lib/mcm_lheader/mcm_type.h"
+#include "../../mcm_lib/mcm_lheader/mcm_size.h"
+#include "../../mcm_lib/mcm_lheader/mcm_control.h"
+#include "../../mcm_lib/mcm_lheader/mcm_connect.h"
+#include "../../mcm_lib/mcm_lheader/mcm_return.h"
+#include "../../mcm_lib/mcm_lheader/mcm_debug.h"
+#include "../../mcm_lib/mcm_lheader/mcm_data_exinfo_auto.h"
+#include "../mcm_service_handle_extern.h"
+#include "../mcm_config_handle_extern.h"
+
+#define DMSG(msg_fmt, msgs...) printf("%s(%04u): " msg_fmt "\n", __FILE__, __LINE__, ##msgs)
+
+int mcm_module_get_all_key_value_test(
+    struct mcm_service_session_t *this_session)
+{
+    int fret = MCM_RCODE_MODULE_INTERNAL_ERROR;
+    char *path1, path2[MCM_PATH_MAX_LENGTH], *source;
+    struct mcm_dv_device_vap_t vap_v;
+    struct mcm_dv_device_vap_station_t station_v;
+    MCM_DTYPE_EK_TD i, count, *key_array;
+
+
+    // 範例-01 : 取得 device.vap.* 的所有 key.
+    path1 = "device.vap.*";
+    key_array = NULL;
+    if(mcm_config_get_all_key_by_path(this_session, path1, &count,
+                                      (MCM_DTYPE_EK_TD **) &key_array) < MCM_RCODE_PASS)
+    {
+        DMSG("call mcm_config_add_entry_by_path(%s) fail", path1);
+        goto FREE_01;
+    }
+    DMSG("[count] %s = " MCM_DTYPE_EK_PF, path1, count);
+    // 接著使用 key 值取得所有的 device.vap.*
+    for(i = 0; i < count; i++)
+    {
+        snprintf(path2, sizeof(path2), "device.vap.#%u", key_array[i]);
+        fret = mcm_config_get_entry_by_path(this_session, path2, MCM_DACCESS_AUTO, &vap_v);
+        if(fret < MCM_RCODE_PASS)
+        {
+            DMSG("call mcm_config_get_entry_by_path(%s) fail", path2);
+            goto FREE_01;
+        }
+        source = fret == MCM_DACCESS_SYS ? "SYS" : "NEW";
+        DMSG("[get-entry][AUTO] %s.ssid = " MCM_DTYPE_S_PF " [%s]", path2, vap_v.ssid, source);
+        DMSG("[get-entry][AUTO] %s.channel = " MCM_DTYPE_IUI_PF " [%s]",
+             path2, vap_v.channel, source);
+    }
+    free(key_array);
+
+    // 範例-02 : 取得 device.vap.@1.station.* 所有的 key.
+    path1 = "device.vap.@1.station.*";
+    key_array = NULL;
+    if(mcm_config_get_all_key_by_path(this_session, path1, &count,
+                                      (MCM_DTYPE_EK_TD **) &key_array) < MCM_RCODE_PASS)
+    {
+        DMSG("call mcm_config_add_entry_by_path(%s) fail", path1);
+        goto FREE_01;
+    }
+    DMSG("[count] %s = " MCM_DTYPE_EK_PF, path1, count);
+    // 接著使用 key 值取得所有的 device.vap.@1.station.*
+    for(i = 0; i < count; i++)
+    {
+        snprintf(path2, sizeof(path2), "device.vap.@1.station.#%u", key_array[i]);
+        if(mcm_config_get_entry_by_path(this_session, path2, MCM_DACCESS_AUTO, &station_v)
+                                        < MCM_RCODE_PASS)
+        {
+            DMSG("call mcm_config_get_entry_by_path(%s) fail", path2);
+            goto FREE_01;
+        }
+        source = fret == MCM_DACCESS_SYS ? "SYS" : "NEW";
+        DMSG("[get-entry][AUTO] %s.ekey = " MCM_DTYPE_EK_PF " [%s]",
+             path2, station_v.ekey, source);
+        DMSG("[get-entry][AUTO] %s.mac_addr = " MCM_DTYPE_S_PF " [%s]",
+             path2, station_v.mac_addr, source);
+        DMSG("[get-entry][AUTO] %s.rule = " MCM_DTYPE_RK_PF " [%s]",
+             path2, station_v.rule, source);
+    }
+    free(key_array);
+
+    // 範例-03 : 取得 device.vap.#2.station.* 所有的 key.
+    path1 = "device.vap.#2.station.*";
+    key_array = NULL;
+    if(mcm_config_get_all_key_by_path(this_session, path1, &count,
+                                      (MCM_DTYPE_EK_TD **) &key_array) < MCM_RCODE_PASS)
+    {
+        DMSG("call mcm_config_add_entry_by_path(%s) fail", path1);
+        goto FREE_01;
+    }
+    DMSG("[count] %s = " MCM_DTYPE_EK_PF, path1, count);
+    // 接著使用 key 值取得所有的 device.vap.@1.station.*
+    for(i = 0; i < count; i++)
+    {
+        snprintf(path2, sizeof(path2), "device.vap.#2.station.#%u", key_array[i]);
+        if(mcm_config_get_entry_by_path(this_session, path2, MCM_DACCESS_AUTO, &station_v)
+                                        < MCM_RCODE_PASS)
+        {
+            DMSG("call mcm_config_get_entry_by_path(%s) fail", path2);
+            goto FREE_01;
+        }
+        source = fret == MCM_DACCESS_SYS ? "SYS" : "NEW";
+        DMSG("[get-entry][AUTO] %s.ekey = " MCM_DTYPE_EK_PF " [%s]",
+             path2, station_v.ekey, source);
+        DMSG("[get-entry][AUTO] %s.mac_addr = " MCM_DTYPE_S_PF " [%s]",
+             path2, station_v.mac_addr, source);
+        DMSG("[get-entry][AUTO] %s.rule = " MCM_DTYPE_RK_PF " [%s]",
+             path2, station_v.rule, source);
+    }
+    free(key_array);
+
+    fret = MCM_RCODE_PASS;
+FREE_01:
+    return fret;
+}
+</pre>
+        </td>
+      </tr>
+    </table>
+    <br>
+
+
+
     <div class="css_div_hook" id="hook_0403_mcm_config_del_all_entry_by_path_01"></div>
     <table class="css_table_box">
       <tr>
@@ -3689,6 +3980,7 @@ FREE_01:
               <td class="css_td_list2_l2">case-04</td>
               <td class="css_td_list2_r1">
                 測試項目<br>
+                mcm_config_get_all_key_by_path<br>
                 mcm_config_get_entry_by_path
               </td>
             </tr>

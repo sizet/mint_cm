@@ -160,6 +160,9 @@ int mcm_req_add_entry(
 int mcm_req_del_entry(
     struct mcm_service_session_t *this_session);
 
+int mcm_req_get_all_key(
+    struct mcm_service_session_t *this_session);
+
 int mcm_req_get_all_entry(
     struct mcm_service_session_t *this_session);
 
@@ -227,6 +230,7 @@ struct mcm_req_cb_t mcm_req_cb_list[] =
     {mcm_req_set_entry},
     {mcm_req_add_entry},
     {mcm_req_del_entry},
+    {mcm_req_get_all_key},
     {mcm_req_get_all_entry},
     {mcm_req_del_all_entry},
     {mcm_req_get_max_count},
@@ -1283,6 +1287,140 @@ int mcm_req_del_entry(
 
 FREE_01:
     cret = mcm_build_del_entry(this_session, fret);
+    return fret < MCM_RCODE_PASS ? fret : cret;
+}
+
+void mcm_parse_get_all_key(
+    struct mcm_service_session_t *this_session)
+{
+    // 封包格式 :
+    // | T | REQ | PC |.
+    // T   [MCM_DTYPE_USIZE_TD].
+    //     紀錄封包的總長度, 內容 = T + REQ + PC.
+    // REQ [MCM_DTYPE_LIST_TD].
+    //     紀錄請求類型.
+    // PC  [binary].
+    //     紀錄請求的路徑.
+
+    // PC.
+    this_session->req_path = (char *) this_session->pkt_offset;
+    MCM_SVDMSG("req_path[%s]", this_session->req_path);
+}
+
+int mcm_build_get_all_key(
+    struct mcm_service_session_t *this_session,
+    MCM_DTYPE_LIST_TD rep_code,
+    MCM_DTYPE_EK_TD rep_count,
+    void *rep_data_con,
+    MCM_DTYPE_USIZE_TD rep_data_len)
+{
+    int fret;
+    void *tmp_offset;
+
+
+    this_session->pkt_len = sizeof(MCM_DTYPE_USIZE_TD) +
+                            sizeof(MCM_DTYPE_LIST_TD) +
+                            sizeof(MCM_DTYPE_EK_TD) +
+                            sizeof(MCM_DTYPE_USIZE_TD) + rep_data_len;
+
+    if(this_session->pkt_len > this_session->pkt_size)
+    {
+        fret = mcm_realloc_buf_service(this_session, MCM_RMEMORY_PACKET, this_session->pkt_len);
+        if(fret < MCM_RCODE_PASS)
+        {
+            MCM_ECTMSG("call mcm_realloc_buf_service() fail");
+            mcm_build_fail_rep(this_session, fret, 0);
+            return fret;
+        }
+    }
+
+    // 封包格式 :
+    // | T | REP | EC | DL | DC |.
+    // T   [MCM_DTYPE_USIZE_TD].
+    //     紀錄封包的總長度, 內容 = T + REP + EC + DL + DC.
+    // REP [MCM_DTYPE_LIST_TD].
+    //     紀錄回應的類型.
+    // EC  [MCM_DTYPE_EK_TD].
+    //     紀錄回應的資料 (資料筆數).
+    // DL  [MCM_DTYPE_USIZE_TD].
+    //     紀錄回應的資料的長度.
+    // DC  [binary].
+    //     紀錄回應的資料 (資料內容).
+
+    // T + REP.
+    MCM_BUILD_BASE_REP_01(tmp_offset, this_session, rep_code);
+    // EC.
+    *((MCM_DTYPE_EK_TD *) tmp_offset) = rep_count;
+    tmp_offset += sizeof(MCM_DTYPE_EK_TD);
+    // DL.
+    *((MCM_DTYPE_USIZE_TD *) tmp_offset) = rep_data_len;
+    tmp_offset += sizeof(MCM_DTYPE_USIZE_TD);
+    // DC.
+    memcpy(tmp_offset, rep_data_con, rep_data_len);
+
+    return MCM_RCODE_PASS;
+}
+
+int mcm_req_get_all_key(
+    struct mcm_service_session_t *this_session)
+{
+    int fret, cret;
+    struct mcm_config_model_group_t *self_model_group;
+    struct mcm_config_store_t *parent_store;
+    MCM_DTYPE_EK_TD self_count = 0, self_size = 0;
+
+
+    MCM_SVDMSG("=> %s", __FUNCTION__);
+
+    mcm_parse_get_all_key(this_session);
+
+    fret = mcm_config_anysis_path(this_session, MCM_APATH_ENTRY_MIX,
+                                  this_session->req_path, 0,
+                                  0, 0, NULL,
+                                  MCM_PLIMIT_BOTH, 0, -1,
+                                  &self_model_group, NULL,
+                                  NULL, NULL,
+                                  NULL, NULL, NULL, NULL, &parent_store);
+    if(fret < MCM_RCODE_PASS)
+    {
+        if(fret != MCM_RCODE_CONFIG_NOT_FIND_STORE)
+        {
+            MCM_ECTMSG("call mcm_config_anysis_path() fail");
+        }
+        goto FREE_01;
+    }
+
+    fret = mcm_config_get_count_by_info(this_session, self_model_group, parent_store, &self_count);
+    if(fret < MCM_RCODE_PASS)
+    {
+        MCM_ECTMSG("call mcm_config_get_count_by_info() fail");
+        goto FREE_01;
+    }
+
+    self_size = sizeof(MCM_DTYPE_EK_TD) * self_count;
+    if(self_size > this_session->cache_size)
+    {
+        fret = mcm_realloc_buf_service(this_session, MCM_RMEMORY_CACHE, self_size);
+        if(fret < MCM_RCODE_PASS)
+        {
+            MCM_ECTMSG("call mcm_realloc_buf_service() fail");
+            goto FREE_01;
+        }
+    }
+
+    fret = mcm_config_get_all_key_by_info(this_session, self_model_group, parent_store,
+                                          &self_count,
+                                          (MCM_DTYPE_EK_TD **) &this_session->cache_buf);
+    if(fret < MCM_RCODE_PASS)
+    {
+        MCM_ECTMSG("call mcm_config_get_all_key_by_info() fail");
+        goto FREE_01;
+    }
+
+FREE_01:
+    cret = mcm_build_get_all_key(this_session, fret,
+                                 fret < MCM_RCODE_PASS ? 0 : self_count, this_session->cache_buf,
+                                 fret < MCM_RCODE_PASS ? 0 : self_size);
     return fret < MCM_RCODE_PASS ? fret : cret;
 }
 

@@ -7284,6 +7284,165 @@ int mcm_config_del_entry_by_path(
     return fret;
 }
 
+// 取得 group 的全部 entry 的 key (進階模式).
+// this_session (I) :
+//   session 資料.
+// this_model_group (I) :
+//   目標 model group.
+// parent_store (I) :
+//   目標 store 的 parent.
+// count_buf (O) :
+//   儲存筆數的緩衝.
+// key_buf (O) :
+//   紀錄 key 的緩衝.
+//     == NULL : 表示由內部配置紀錄 key 的緩衝.
+//     != NULL : 表示由外部指定紀錄 key 的緩衝.
+// return :
+//   >= MCM_RCODE_PASS : 成功.
+//   <  MCM_RCODE_PASS : 錯誤.
+int mcm_config_get_all_key_by_info(
+    struct mcm_service_session_t *this_session,
+    struct mcm_config_model_group_t *this_model_group,
+    struct mcm_config_store_t *parent_store,
+    MCM_DTYPE_EK_TD *count_buf,
+    MCM_DTYPE_EK_TD **key_buf)
+{
+    int fret = MCM_RCODE_PASS;
+    struct mcm_config_store_t **store_head_in_parent = NULL, *list_store, *each_store;
+    MCM_DTYPE_EK_TD *store_count_in_parent, self_count = 0, each_key, *tmp_buf;
+    MCM_DTYPE_USIZE_TD dlen;
+    void *data_loc;
+
+
+    MCM_CFDMSG("=> %s", __FUNCTION__);
+
+    if(parent_store == NULL)
+    {
+        list_store = mcm_config_root_store;
+
+        for(each_store = list_store; each_store != NULL; each_store = each_store->next_store)
+            self_count++;
+    }
+    else
+    {
+        store_head_in_parent = parent_store->child_store_list_head_array +
+                               this_model_group->store_index_in_parent;
+        list_store = *store_head_in_parent;
+
+        store_count_in_parent = parent_store->child_store_count_array +
+                                this_model_group->store_index_in_parent;
+        self_count = *store_count_in_parent;
+    }
+
+#if MCM_CFDMODE
+    MCM_CFDMSG("[%s] [%p(%p)][" MCM_DTYPE_EK_PF "]",
+               this_model_group->group_name, store_head_in_parent, list_store, self_count);
+#endif
+
+    if(list_store != NULL)
+    {
+        dlen = sizeof(MCM_DTYPE_EK_TD) * self_count;
+
+        if(*key_buf != NULL)
+        {
+            tmp_buf = *key_buf;
+        }
+        else
+        {
+            tmp_buf = (MCM_DTYPE_EK_TD *) malloc(dlen);
+            if(tmp_buf == NULL)
+            {
+                MCM_EMSG("call malloc() fail [%s]", strerror(errno));
+                fret = MCM_RCODE_CONFIG_ALLOC_FAIL;
+                goto FREE_01;
+            }
+        }
+        MCM_CFDMSG("%s key_buf[" MCM_DTYPE_USIZE_PF "][%p]",
+                   *key_buf != NULL ? "self" : "alloc", dlen, tmp_buf);
+
+        *count_buf = self_count;
+        if(*key_buf == NULL)
+            *key_buf = tmp_buf;
+
+        for(each_store = list_store; each_store != NULL; each_store = each_store->next_store)
+        {
+            data_loc = each_store->data_value_new != NULL ?
+                       each_store->data_value_new : each_store->data_value_sys;
+            data_loc += each_store->link_model_group->entry_key_offset_value;
+            each_key = *((MCM_DTYPE_EK_TD *) data_loc);
+#if MCM_CFDMODE
+            MCM_CFDMSG("[%s.%c" MCM_DTYPE_EK_PF "]",
+                       this_model_group->group_name, MCM_SPROFILE_PATH_KEY_KEY, each_key);
+#endif
+
+            *tmp_buf = each_key;
+            tmp_buf++;
+        }
+    }
+    else
+    {
+        *count_buf = 0;
+    }
+
+FREE_01:
+    return fret;
+}
+
+// 取得 group 的全部 entry 的 key (基本模式).
+// this_session (I) :
+//   session 資料.
+// mix_path (I) :
+//   目標路徑.
+// count_buf (O) :
+//   儲存筆數的緩衝.
+// key_buf (O) :
+//   紀錄 key 的緩衝.
+//     == NULL : 表示由內部配置紀錄 key 的緩衝.
+//     != NULL : 表示由外部指定紀錄 key 的緩衝.
+// return :
+//   >= MCM_RCODE_PASS : 成功.
+//   <  MCM_RCODE_PASS : 錯誤.
+int mcm_config_get_all_key_by_path(
+    struct mcm_service_session_t *this_session,
+    char *mix_path,
+    MCM_DTYPE_EK_TD *count_buf,
+    MCM_DTYPE_EK_TD **key_buf)
+{
+    int fret;
+    struct mcm_config_model_group_t *self_model_group;
+    struct mcm_config_store_t *parent_store;
+
+
+    MCM_CFDMSG("=> %s", __FUNCTION__);
+
+    MCM_CFDMSG("[%s]", mix_path);
+
+    fret = mcm_config_anysis_path(this_session, MCM_APATH_ENTRY_MIX,
+                                  mix_path, 0,
+                                  0, 0, NULL,
+                                  MCM_PLIMIT_BOTH, 0, -1,
+                                  &self_model_group, NULL,
+                                  NULL, NULL,
+                                  NULL, NULL, NULL, NULL, &parent_store);
+    if(fret < MCM_RCODE_PASS)
+    {
+        if(fret != MCM_RCODE_CONFIG_NOT_FIND_STORE)
+        {
+            MCM_ECTMSG("call mcm_config_anysis_path() fail");
+        }
+        return fret;
+    }
+
+    fret = mcm_config_get_all_key_by_info(this_session, self_model_group, parent_store,
+                                          count_buf, key_buf);
+    if(fret < MCM_RCODE_PASS)
+    {
+        MCM_ECTMSG("call mcm_config_get_all_key_by_info() fail");
+    }
+
+    return fret;
+}
+
 // 取得 group 的全部 entry 的資料數值 (進階模式).
 // this_session (I) :
 //   session 資料.
@@ -8744,8 +8903,7 @@ int mcm_config_get_list_type_size(
 // data_buf (O) :
 //   儲存 member 的 data_type 的緩衝.
 // return :
-//   MCM_RCODE_PASS : 成功.
-//   other        : 錯誤.
+//   MCM_RCODE_PASS.
 int mcm_config_get_list_type_data(
     struct mcm_service_session_t *this_session,
     struct mcm_config_model_group_t *this_model_group,
