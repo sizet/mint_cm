@@ -1588,7 +1588,8 @@ int mcm_create_store(
     }
 
     // 填充每個 store 需要的資料.
-    for(; self_store != NULL; self_store = self_store->next_store)
+    for(; (self_store != NULL) && (self_store->link_model == self_model);
+        self_store = self_store->next_store)
     {
         MCM_CCDMSG("[%s.%c" MCM_DTYPE_EK_PF "] do",
                    self_model->group_name, MCM_SPROFILE_PATH_KEY_KEY, self_store->entry_key);
