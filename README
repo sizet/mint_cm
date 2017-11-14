@@ -17,8 +17,8 @@ mint_cm/mcm_lib/mcm_jslib/* (不包含 jquery_main.js, json3.js, jquery_form.js)
 MintCM 使用 GNU Lesser General Public License version 3.0 (LGPLv3) 授權.
 
 下列項目不在 LGPLv3 的授權範圍 :
-mint_cm/mcm_daemon/module/*
-mint_cm/mcm_cgi/mcm_cgi_upload_custom.*
+mint_cm/mcm_daemon/mcm_module/*
+mint_cm/mcm_cgi/mcm_cgi_upload_module/*
 這些檔案屬於客製化的私有項目, 不受 MintCM 使用的 LGPLv3 授權感染.
 
 

@@ -60,7 +60,7 @@ Some rights reserved. See README.
     <div class="css_div_block">
       <font class="css_font_g1">
       &lt;form id="<font class="css_font_r1">$(form_id)</font>"&gt;<br>
-      &nbsp;&nbsp;&lt;input type="hidden" name="<font class="css_font_r1">callback</font>" value="<font class="css_font_r1">$(function_keyword)</font>"&gt;<br>
+      &nbsp;&nbsp;&lt;input type="hidden" name="<font class="css_font_r1">callback</font>" value="<font class="css_font_r1">$(function_name)</font>"&gt;<br>
       &nbsp;&nbsp;&lt;input type="file" name="<font class="css_font_r1">$(element_name)</font>"&gt;<br>
       &lt;/form&gt;
       </font>
@@ -73,12 +73,12 @@ Some rights reserved. See README.
     <br><br>
 
     <div class="css_div_hook" id="hook_0901_callback_01"></div>
-    <font class="css_font_b1">&lt;input type="hidden" name="<font class="css_font_r1">callback</font>" value="<font class="css_font_r1">$(function_keyword)</font>"&gt;</font><br>
-    需要在 CGI 端撰寫對應的的處理函式, 需要指定使用此函式的關鍵字.<br>
+    <font class="css_font_b1">&lt;input type="hidden" name="<font class="css_font_r1">callback</font>" value="<font class="css_font_r1">$(function_name)</font>"&gt;</font><br>
+    需要在 CGI 端撰寫對應的的處理函式, 需要指定處理的函式.<br>
     <font class="css_font_b1">callback</font><br>
     固定的元素名稱, 表示此元素用來指定關鍵字.<br>
-    <font class="css_font_b1">$(function_keyword)</font><br>
-    指定使用的處理函式的關鍵字.
+    <font class="css_font_b1">$(function_name)</font><br>
+    指定處理的處理函式的名稱.
     <br><br>
 
     <div class="css_div_hook" id="hook_0901_element_name_01"></div>
@@ -202,7 +202,7 @@ function upload_file()
 {
     var self_upload_jslib, rep_ret;
 
-    if($("#input_file_custom").val() != "")
+    if($("#input_file_upload").val() != "")
     {
         self_upload_jslib = new mcm_upload_jslib_t();
         self_upload_jslib.form_id_string = "form_custom";
@@ -222,8 +222,8 @@ function upload_file()
 &lt;/head&gt;
 &lt;body&gt;
   &lt;form id="form_custom"&gt;
-    &lt;input type="hidden" name="callback" value="custom_upload"&gt;
-    &lt;input type="file" name="input_file_custom" id="input_file_custom"&gt;
+    &lt;input type="hidden" name="callback" value="upload_handle"&gt;
+    &lt;input type="file" name="input_file_upload" id="input_file_upload"&gt;
   &lt;/form&gt;
   &lt;button type="button" onclick="upload_file()"&gt;upload&lt;/button&gt;
 &lt;/body&gt;
@@ -246,10 +246,28 @@ function upload_file()
     檔案上傳後, 網頁伺服器會呼叫 CGI 處理, 需要在 CGI 端加入自訂的處理函式.
     <br><br>
 
-    處理檔案上傳的 CGI 檔案在 <font class="css_font_b1">mint_cm/mcm_cgi/mcm_cgi_upload_custom.c</font>
+    處理檔案上傳的程式要放在 <font class="css_font_b1">mint_cm/mcm_cgi/mcm_cgi_upload_module</font><br>
+    沒有限制函式的放置方式, 可以依據不同的功能將各種函式分類放在不同的檔案.
     <br><br><br>
 
-    步驟-01 : 加入處函式.<br>
+    步驟-01 : 加入基本的標頭檔 :<br>
+    <font class="css_font_p1">#include &lt;stdio.h&gt;</font><br>
+    <font class="css_font_p1">#include "../../mcm_lib/mcm_lheader/mcm_return.h"</font><br>
+    <font class="css_font_p1">#include "../mcm_cgi_common_extern.h"</font><br>
+    <font class="css_font_p1">#include "mcm_cgi_module_debug.h"</font><br>
+    如果需要使用 MintCM 函式則改加入 (以及在 Makefile 中加入鏈結 MintCM 的函式庫) :<br>
+    <font class="css_font_p1">#include &lt;stdio.h&gt;</font><br>
+    <font class="css_font_p1">#include "../../mcm_lib/mcm_lheader/mcm_type.h"</font><br>
+    <font class="css_font_p1">#include "../../mcm_lib/mcm_lheader/mcm_size.h"</font><br>
+    <font class="css_font_p1">#include "../../mcm_lib/mcm_lheader/mcm_connect.h"</font><br>
+    <font class="css_font_p1">#include "../../mcm_lib/mcm_lheader/mcm_return.h"</font><br>
+    <font class="css_font_p1">#include "../../mcm_lib/mcm_lheader/mcm_data_exinfo_auto.h"</font><br>
+    <font class="css_font_p1">#include "../../mcm_lib/mcm_lulib/mcm_lulib_api.h"</font><br>
+    <font class="css_font_p1">#include "../mcm_cgi_common_extern.h"</font><br>
+    <font class="css_font_p1">#include "mcm_cgi_module_debug.h"</font>
+    <br><br>
+
+    步驟-02 : 加入處函式.<br>
     函式格式 :<br>
     <div class="css_div_block">
       <font class="css_font_g1">
@@ -348,40 +366,7 @@ function upload_file()
     </table>
     <br><br>
 
-    步驟-02 : 把自定義的函式加入到檔案處理列表.<br>
-    格式 :<br>
-    <div class="css_div_block">
-      <font class="css_font_g1">
-        struct mcm_cgi_upload_callback_t mcm_upload_callback_list[] =<br>
-        {<br>
-        &nbsp;&nbsp;&nbsp;&nbsp;{"", NULL}<br>
-        };<br>
-      </font>
-    </div>
-    <br>
-
-    <font class="css_font_b1">[char *cb_name]</font><br>
-    填入使用此函式的關鍵字, 也就是在網頁端的 $(function_keyword). <a href="#hook_0901_callback_01">[詳細]</a>
-    <br><br>
-
-    <font class="css_font_b1">[void (*cb_function)(struct part_info_t *part_list)]</font><br>
-    填入自定義的處理函式名稱. <a href="#hook_0901_callback_function_01">[詳細]</a>
-    <br><br>
-
-    注意事項 :<br>
-    <table class="css_table_list1">
-      <tr>
-        <td class="css_td_list1_l">01.&nbsp;</td>
-        <td class="css_td_list1_r">自定義函式在程式碼內的位置必須放在檔案處理列表之前.</td>
-      </tr>
-      <tr>
-        <td class="css_td_list1_l">02.&nbsp;</td>
-        <td class="css_td_list1_r">檔案處理列表的最後一組必須是 {"", NULL}.</td>
-      </tr>
-    </table>
-    <br><br>
-
-    步驟-03 : 回應處理結果給瀏覽器.<br>
+    步驟-03 : 在處理的函式內將處理結果回應給瀏覽器.<br>
     函式 :<br>
 
     <div class="css_div_hook" id="hook_0901_mcm_cgi_fill_response_header_01"></div>
@@ -458,16 +443,36 @@ function upload_file()
     </table>
     <br><br>
 
-    其他-01 : 在 console 顯示除錯訊息.<br>
+    其他 : 在 console 顯示除錯訊息.<br>
     在 CGI 使用 printf() 會被網頁伺服器導向輸出給瀏覽器, 訊息要寫入 tty 設備才能顯示.
     <br><br>
 
-    <font class="css_font_b1">[MCM_CGIEMODE]</font><br>
+    在處理函式的開頭加入打開 tty 設備 :<br>
+    <div class="css_div_block">
+      <font class="css_font_g1">
+      #if MCM_CUMEMODE | MCM_CUMDMODE<br>
+      &nbsp;&nbsp;&nbsp;dbg_tty_fd = open(MCM_DBG_DEV_TTY, O_WRONLY);<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;if(dbg_tty_fd == -1)<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;return;<br>
+      #endif
+      </font>
+    </div>
+    在離開處理函式時加入關閉 tty 設備 :<br>
+    <div class="css_div_block">
+      <font class="css_font_g1">
+      #if MCM_CUMEMODE | MCM_CUMDMODE<br>
+      &nbsp;&nbsp;&nbsp;close(dbg_tty_fd);<br>
+      #endif
+      </font>
+    </div>
+    <br>
+
+    <font class="css_font_b1">[MCM_CUMEMODE]</font><br>
     定義, 是否要顯示錯誤訊息.<br>
     開關的值的定義在 <font class="css_font_b1">mint_cm/mcm_lib/mcm_lheader/mcm_debug.h</font>.
     <br><br>
 
-    <font class="css_font_b1">[MCM_CUCDMODE]</font><br>
+    <font class="css_font_b1">[MCM_CUMDMODE]</font><br>
     定義, 是否要顯示除錯訊息.<br>
     開關的值的定義在 <font class="css_font_b1">mint_cm/mcm_lib/mcm_lheader/mcm_debug.h</font>.
     <br><br>
@@ -477,45 +482,47 @@ function upload_file()
     路徑的值定義在 <font class="css_font_b1">mint_cm/mcm_lib/mcm_lheader/mcm_debug.h</font>.
     <br><br>
 
-    <font class="css_font_b1">[int dbg_tty_fd_c]</font><br>
-    變數, 紀錄開啟的設備的檔案編號.
+    <font class="css_font_b1">[int dbg_tty_fd]</font><br>
+    變數, 紀錄開啟的設備的檔案編號.<br>
+    變數的宣告定義在 <font class="css_font_b1">mcm_cgi_module_debug.h</font>.
     <br><br>
 
-    <font class="css_font_b1">[char dbg_msg_buf_c[MCM_DBG_BUFFER_SIZE]]</font><br>
-    變數, 儲存訊息的緩衝.
+    <font class="css_font_b1">[char dbg_msg_buf[MCM_DBG_BUFFER_SIZE]]</font><br>
+    變數, 儲存訊息的緩衝.<br>
+    變數的宣告定義在 <font class="css_font_b1">mcm_cgi_module_debug.h</font>.<br>
     緩衝大小的定義在 <font class="css_font_b1">mint_cm/mcm_lib/mcm_lheader/mcm_debug.h</font>.
     <br><br>
 
-    <font class="css_font_b1">[open()]</font><br>
-    系統函式, 開啟 console 設備, 使用前要先開啟.<br>
-    直接使用 <font class="css_font_b1">open(MCM_DBG_DEV_TTY, O_WRONLY)</font>.
+    <div class="css_div_hook" id="hook_0901_MCM_CUMEMSG_01"></div>
+    <font class="css_font_b1">[MCM_CUMEMSG(msg_fmt, msg_args...)]</font><br>
+    巨集, 顯示訊息 (錯誤類), 用法同 <font class="css_font_b1">printf()</font>.<br>
+    巨集的定義在 <font class="css_font_b1">mcm_cgi_module_debug.h</font>.
     <br><br>
 
-    <font class="css_font_b1">[close()]</font><br>
-    系統函式, 關閉開啟的設備, 使用完要關閉.
-    <br><br>
-
-    <div class="css_div_hook" id="hook_0901_MCM_CEMSG_01"></div>
-    <font class="css_font_b1">[MCM_CEMSG(msg_fmt, msg_args...)]</font><br>
-    巨集, 顯示訊息 (錯誤類), 用法同 <font class="css_font_b1">printf()</font>.
-    <br><br>
-
-    <div class="css_div_hook" id="hook_0901_MCM_CUCDMSG_01"></div>
-    <font class="css_font_b1">[MCM_CUCDMSG(msg_fmt, msg_args...)]</font><br>
-    巨集, 顯示訊息 (除錯類), 用法同 <font class="css_font_b1">printf()</font>.
+    <div class="css_div_hook" id="hook_0901_MCM_CUMDMSG_01"></div>
+    <font class="css_font_b1">[MCM_CUMDMSG(msg_fmt, msg_args...)]</font><br>
+    巨集, 顯示訊息 (除錯類), 用法同 <font class="css_font_b1">printf()</font>.<br>
+    巨集的定義在 <font class="css_font_b1">mcm_cgi_module_debug.h</font>.
     <br><br><br>
 
     範例 :
 <pre class="css_pre_code">
-void custom_handle(
+#include &lt;errno.h&gt;
+#include &lt;stdio.h&gt;
+#include &lt;string.h&gt;
+#include "../../mcm_lib/mcm_lheader/mcm_return.h"
+#include "../mcm_cgi_common_extern.h"
+#include "mcm_cgi_module_debug.h"
+
+void upload_handle(
     struct part_info_t *part_list)
 {
     struct part_info_t *tmp_part;
 
-#if MCM_CGIEMODE | MCM_CUCDMODE
-    dbg_tty_fd_c = open(MCM_DBG_DEV_TTY, O_WRONLY);
-    if(dbg_tty_fd_c == -1)
-        goto FREE_01;
+#if MCM_CUMEMODE | MCM_CUMDMODE
+    dbg_tty_fd = open(MCM_DBG_DEV_TTY, O_WRONLY);
+    if(dbg_tty_fd == -1)
+        return;
 #endif
 
     mcm_cgi_fill_response_header(1, 1, MCM_RCODE_PASS);
@@ -523,9 +530,9 @@ void custom_handle(
     printf("alert(");
     for(tmp_part = part_list; tmp_part != NULL; tmp_part = tmp_part->next_part)
     {
-        MCM_CUCDMSG("name = %s", tmp_part->name_tag);
-        MCM_CUCDMSG("filename = %s", tmp_part->filename_tag);
-        MCM_CUCDMSG("data = [" MCM_DTYPE_USIZE_PF "][%p]",
+        MCM_CUMDMSG("name = %s", tmp_part->name_tag);
+        MCM_CUMDMSG("filename = %s", tmp_part->filename_tag);
+        MCM_CUMDMSG("data = [" MCM_DTYPE_USIZE_PF "][%p]",
                     tmp_part->data_len, tmp_part->data_con);
 
         printf("\"name = %s\\n\" + ", tmp_part->name_tag);
@@ -537,18 +544,11 @@ void custom_handle(
     }
     printf(");\n");
 
-#if MCM_CGIEMODE | MCM_CUCDMODE
-    close(dbg_tty_fd_c);
-FREE_01:
+#if MCM_CUMEMODE | MCM_CUMDMODE
+    close(dbg_tty_fd);
 #endif
     return;
 }
-
-struct mcm_cgi_upload_callback_t mcm_upload_callback_list[] =
-{
-    {"custom_upload", custom_handle},
-    {"", NULL}
-};
 </pre>
     <br>
 

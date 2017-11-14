@@ -26,7 +26,7 @@
 **`mcm_cgi_upload.cgi`**  
 處理網頁程式的檔案上傳, 使用上傳 form 處理, 支援使用 multipart/form-data 同時上傳 form 內的多個元素或檔案.  
 **`[custom upload handle]`**  
-自訂的檔案處理函式, 處理網頁程式上傳的檔案, 此部分和 mcm_cgi_upload.cgi 編譯在一起.
+自訂的檔案處理函式, 處理網頁程式上傳的檔案, 此部分會編譯成動態連結函式檔給 mcm_cgi_upload.cgi 使用.
 
 **`mcm_jslib_api.js`**  
 提供介面給網頁程式做資料的存取和檔案的上傳, 資料存取部分使用 AJAX + JSON 機制, 檔案上傳部分使用 form 機制.
