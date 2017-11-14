@@ -2,28 +2,30 @@
 // This file is part of the MintCM.
 // Some rights reserved. See README.
 
-#include <fcntl.h>
 #include <errno.h>
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
-#include <unistd.h>
-#include <sys/stat.h>
 #include "../mcm_lib/mcm_lheader/mcm_type.h"
 #include "../mcm_lib/mcm_lheader/mcm_keyword.h"
 #include "../mcm_lib/mcm_lheader/mcm_connect.h"
 #include "../mcm_lib/mcm_lheader/mcm_return.h"
 #include "../mcm_lib/mcm_lheader/mcm_limit.h"
-#include "../mcm_lib/mcm_lheader/mcm_debug.h"
 #include "../mcm_lib/mcm_lulib/mcm_lulib_api.h"
-#include "mcm_cgi_common.h"
+#include "mcm_cgi_common_extern.h"
+
+#if MCM_CGIEMODE | MCM_CGIECTMODE | MCM_CCDMODE
+    #include <fcntl.h>
+    #include <unistd.h>
+    #include <sys/stat.h>
+#endif
 
 
 
 
 #if MCM_CGIEMODE | MCM_CGIECTMODE | MCM_CCDMODE
-    int dbg_tty_fd;
-    char dbg_msg_buf[MCM_DBG_BUFFER_SIZE];
+int dbg_tty_fd;
+char dbg_msg_buf[MCM_DBG_BUFFER_SIZE];
 #endif
 
 #if MCM_CGIEMODE
@@ -570,8 +572,7 @@ int mcm_split_command(
     if(tmp_command_list == NULL)
     {
         MCM_CEMSG("call malloc() fail [%s]", strerror(errno));
-        MCM_CGI_AEMSG(MCM_RCODE_CGI_CONFIG_INTERNAL_ERROR, 0,
-                      "call malloc() fail\\n[%s]", strerror(errno));
+        MCM_CGI_AEMSG(fret, 0, "call malloc() fail\\n[%s]", strerror(errno));
         goto FREE_01;
     }
     MCM_CCDMSG("alloc command_list[" MCM_DTYPE_USIZE_PF "][%p]", cmd_cnt, tmp_command_list);
@@ -603,8 +604,7 @@ int mcm_split_command(
         if(tmp_raw[tidx] == '\0')
         {
             MCM_CEMSG("invalid, empty operate_type [%s]", tmp_raw);
-            MCM_CGI_AEMSG(MCM_RCODE_CGI_CONFIG_INTERNAL_ERROR, 0,
-                          "invalid, empty operate_type\\n[%s]", tmp_raw);
+            MCM_CGI_AEMSG(fret, 0, "invalid, empty operate_type\\n[%s]", tmp_raw);
             goto FREE_02;
         }
         tmp_raw[tidx] = '\0';
@@ -616,8 +616,7 @@ int mcm_split_command(
         if(mcm_operate_type_map_info[oidx].operate_key == NULL)
         {
             MCM_CEMSG("invalid, unknown operate_type [%s]", tmp_raw);
-            MCM_CGI_AEMSG(MCM_RCODE_CGI_CONFIG_INTERNAL_ERROR, 0,
-                          "invalid, unknown operate_type\\n[%s]", tmp_raw);
+            MCM_CGI_AEMSG(fret, 0, "invalid, unknown operate_type\\n[%s]", tmp_raw);
             goto FREE_02;
         }
 
@@ -783,8 +782,7 @@ int mcm_check_pull_command(
             {
                 MCM_CEMSG("call mcm_lulib_check_mask_path(%s) fail",
                           each_command1->pull_config_path);
-                MCM_CGI_AEMSG(MCM_RCODE_CGI_CONFIG_INTERNAL_ERROR, 0,
-                              "call mcm_lulib_check_mask_path() fail\\n[%s]",
+                MCM_CGI_AEMSG(fret, 0, "call mcm_lulib_check_mask_path() fail\\n[%s]",
                               each_command1->pull_config_path);
                 return fret;
             }
@@ -1241,8 +1239,7 @@ int mcm_create_model(
         if(self_model == NULL)
         {
             MCM_CEMSG("call calloc() fail [%s]", strerror(errno));
-            MCM_CGI_AEMSG(MCM_RCODE_CGI_CONFIG_INTERNAL_ERROR, 0,
-                          "call calloc() fail\\n[%s]", strerror(errno));
+            MCM_CGI_AEMSG(fret, 0, "call calloc() fail\\n[%s]", strerror(errno));
             return fret;
         }
         MCM_CCDMSG("alloc model[%p]", self_model);
@@ -1451,10 +1448,9 @@ int mcm_create_store(
             key_list = calloc(entry_count, sizeof(MCM_DTYPE_EK_TD));
             if(key_list == NULL)
             {
-                MCM_CEMSG("call calloc() fail [%s]", strerror(errno));
-                MCM_CGI_AEMSG(MCM_RCODE_CGI_CONFIG_INTERNAL_ERROR, 0,
-                              "call calloc() fail\\n[%s]", strerror(errno));
                 fret = MCM_RCODE_CGI_CONFIG_INTERNAL_ERROR;
+                MCM_CEMSG("call calloc() fail [%s]", strerror(errno));
+                MCM_CGI_AEMSG(fret, 0, "call calloc() fail\\n[%s]", strerror(errno));
                 goto FREE_01;
             }
         }
@@ -1485,10 +1481,9 @@ int mcm_create_store(
             self_store = (struct mcm_store_t *) calloc(1, sizeof(struct mcm_store_t));
             if(self_store == NULL)
             {
-                MCM_CEMSG("call calloc() fail [%s]", strerror(errno));
-                MCM_CGI_AEMSG(MCM_RCODE_CGI_CONFIG_INTERNAL_ERROR, 0,
-                              "call calloc() fail\\n[%s]", strerror(errno));
                 fret = MCM_RCODE_CGI_CONFIG_INTERNAL_ERROR;
+                MCM_CEMSG("call calloc() fail [%s]", strerror(errno));
+                MCM_CGI_AEMSG(fret, 0, "call calloc() fail\\n[%s]", strerror(errno));
                 goto FREE_02;
             }
             MCM_CCDMSG("[%s.%c" MCM_DTYPE_EK_PF "] alloc store[%p]",
@@ -2203,17 +2198,16 @@ int mcm_process_request(
         if(fret < MCM_RCODE_PASS)
         {
             MCM_CEMSG("call mcm_lulib_get_path_max_length() fail");
-            MCM_CGI_AEMSG(MCM_RCODE_CGI_CONFIG_INTERNAL_ERROR, 0,
-                          "call mcm_lulib_get_path_max_length() fail");
+            MCM_CGI_AEMSG(fret, 0, "call mcm_lulib_get_path_max_length() fail");
             goto FREE_03;
         }
 
         cache_path = (char *) malloc(path_max_len);
         if(cache_path == NULL)
         {
+            fret = MCM_RCODE_CGI_CONFIG_INTERNAL_ERROR;
             MCM_CEMSG("call malloc() fail [%s]", strerror(errno));
-            MCM_CGI_AEMSG(MCM_RCODE_CGI_CONFIG_INTERNAL_ERROR, 0,
-                          "call malloc() fail\\n[%s]", strerror(errno));
+            MCM_CGI_AEMSG(fret, 0, "call malloc() fail\\n[%s]", strerror(errno));
             goto FREE_03;
         }
         MCM_CCDMSG("alloc cache_path[" MCM_DTYPE_USIZE_PF "][%p]", path_max_len, cache_path);
@@ -2309,7 +2303,6 @@ int mcm_process_request(
     }
 
     fret = MCM_RCODE_PASS;
-
 FREE_06:
     if(self_store != NULL)
         mcm_destory_store(self_store);
@@ -2346,7 +2339,7 @@ int main(
     if(dbg_tty_fd == -1)
     {
         MCM_CGI_AEMSG(MCM_RCODE_CGI_CONFIG_INTERNAL_ERROR, 0,
-                      "call open() fail [%s]\\n[%s]", strerror(errno), MCM_DBG_DEV_TTY);
+                      "call open() fail\\n[%s]\\n[%s]", MCM_DBG_DEV_TTY, strerror(errno));
         goto FREE_01;
     }
 #endif

@@ -6,7 +6,7 @@
 #include <stdarg.h>
 #include "../mcm_lib/mcm_lheader/mcm_type.h"
 #include "../mcm_lib/mcm_lheader/mcm_return.h"
-#include "mcm_cgi_common.h"
+#include "mcm_cgi_common_extern.h"
 
 
 

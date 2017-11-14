@@ -64,6 +64,24 @@
     #define MCM_ATDMSG(msg_fmt, msg_args...)
 #endif
 
+// module error
+#define MCM_MEMODE 1
+#if MCM_MEMODE
+    #define MCM_MEMSG(msg_fmt, msg_args...) \
+        printf("%s(%04u): " msg_fmt "\n", __FILE__, __LINE__, ##msg_args)
+#else
+    #define MCM_MEMSG(msg_fmt, msg_args...)
+#endif
+
+// module debug
+#define MCM_MDMODE 0
+#if MCM_MDMODE
+    #define MCM_MDMSG(msg_fmt, msg_args...) \
+        printf("%s(%04u): " msg_fmt "\n", __FILE__, __LINE__, ##msg_args)
+#else
+    #define MCM_MDMSG(msg_fmt, msg_args...)
+#endif
+
 // lib debug - user space
 #define MCM_LUDMODE 0
 #if MCM_LUDMODE
@@ -96,21 +114,6 @@
     #define MCM_LKDMSG(msg_fmt, msg_args...)
 #endif
 
-// cgi error
-#define MCM_CGIEMODE 1
-
-// cgi error (call trace for internal mcm_... serial function)
-#define MCM_CGIECTMODE 1
-
-// cgi debug - config
-#define MCM_CCDMODE 0
-
-// cgi debug - upload handle
-#define MCM_CUHDMODE 0
-
-// cgi debug - upload custom
-#define MCM_CUCDMODE 0
-
 // command debug
 #define MCM_CMDMODE 0
 #if MCM_CMDMODE
@@ -120,23 +123,23 @@
     #define MCM_CMDMSG(msg_fmt, msg_args...)
 #endif
 
-// module error
-#define MCM_MEMODE 1
-#if MCM_MEMODE
-    #define MCM_MEMSG(msg_fmt, msg_args...) \
-        printf("%s(%04u): " msg_fmt "\n", __FILE__, __LINE__, ##msg_args)
-#else
-    #define MCM_MEMSG(msg_fmt, msg_args...)
-#endif
+// cgi error
+#define MCM_CGIEMODE 1
 
-// module debug
-#define MCM_MDMODE 0
-#if MCM_MDMODE
-    #define MCM_MDMSG(msg_fmt, msg_args...) \
-        printf("%s(%04u): " msg_fmt "\n", __FILE__, __LINE__, ##msg_args)
-#else
-    #define MCM_MDMSG(msg_fmt, msg_args...)
-#endif
+// cgi error (call trace for internal mcm_... serial function)
+#define MCM_CGIECTMODE 1
+
+// cgi debug - config
+#define MCM_CCDMODE 0
+
+// cgi debug - upload
+#define MCM_CUDMODE 0
+
+// cgi error - upload module
+#define MCM_CUMEMODE 1
+
+// cgi debug - upload module
+#define MCM_CUMDMODE 0
 
 
 #define MCM_DBG_DEV_TTY "/dev/tty"
