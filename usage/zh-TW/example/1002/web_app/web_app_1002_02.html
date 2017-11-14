@@ -21,7 +21,7 @@ Some rights reserved. See README.
 <script type="text/javascript">
 function body_init()
 {
-    $("#custom_file").val("");
+    $("#show_box").html("");
 }
 
 function upload_file()
@@ -35,7 +35,7 @@ function upload_file()
         return;
     }
 
-    $("#custom_file").val("");
+    $("#show_box").html("");
 
     // 上傳.
     self_upload_jslib = new mcm_upload_jslib_t();
@@ -81,7 +81,7 @@ function upload_file()
   <div>[upload]</div>
 
   <form id="form_upload">
-    <input type="hidden" name="callback" value="custom_upload_01">
+    <input type="hidden" name="callback" value="upload_handle_01">
     <table class="css_table1">
       <tr>
         <td class="css_td1">file</td>

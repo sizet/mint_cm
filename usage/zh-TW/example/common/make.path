@@ -2,26 +2,29 @@
 # This file is part of the MintCM.
 # Some rights reserved. See README.
 
-CLEAN_MCM_MODULE_PATH   = ../common/clean/mcm_module
-CLEAN_MCM_CGI_PATH      = ../common/clean/mcm_cgi
-CLEAN_MINI_HTTPD_PATH   = ../common/clean/mini_httpd
-CLEAN_MAAM_BUILDIN_PATH = ../common/clean/maam_buildin
+CLEAN_MCM_MODULE_PATH            = ../common/clean/mcm_module
+CLEAN_MCM_CGI_UPLOAD_MODULE_PATH = ../common/clean/mcm_cgi_upload_module
+CLEAN_MINI_HTTPD_PATH            = ../common/clean/mini_httpd
+CLEAN_MAAM_BUILDIN_PATH          = ../common/clean/maam_buildin
 
-EXAMPLE_PROFILE_PATH      = profile
-EXAMPLE_MODULE_PATH       = module
-EXAMPLE_CGI_PATH          = cgi
-EXAMPLE_WEB_APP_PATH      = web_app
-EXAMPLE_MINI_HTTPD_PATH   = mini_httpd
-EXAMPLE_MAAM_BUILDIN_PATH = maam_buildin
-
-EXAMPLE_MODULE_SOURCE_FILE1 = $(wildcard $(EXAMPLE_MODULE_PATH)/*.*)
-EXAMPLE_MODULE_SOURCE_FILE2 = $(notdir $(EXAMPLE_MODULE_SOURCE_FILE1))
+EXAMPLE_PROFILE_PATH           = profile
+EXAMPLE_MODULE_PATH            = module
+EXAMPLE_CGI_UPLOAD_MODULE_PATH = cgi_upload_module
+EXAMPLE_WEB_APP_PATH           = web_app
+EXAMPLE_MINI_HTTPD_PATH        = mini_httpd
+EXAMPLE_MAAM_BUILDIN_PATH      = maam_buildin
 
 EXAMPLE_MODULE_MAKE_FILE1 = $(wildcard $(EXAMPLE_MODULE_PATH)/Makefile)
 EXAMPLE_MODULE_MAKE_FILE2 = $(wildcard $(CLEAN_MCM_MODULE_PATH)/Makefile)
 
-EXAMPLE_CGI_SOURCE_FILE1 = $(wildcard $(EXAMPLE_CGI_PATH)/*.*)
-EXAMPLE_CGI_SOURCE_FILE2 = $(wildcard $(CLEAN_MCM_CGI_PATH)/*.*)
+EXAMPLE_MODULE_SOURCE_FILE1 = $(wildcard $(EXAMPLE_MODULE_PATH)/*.*)
+EXAMPLE_MODULE_SOURCE_FILE2 = $(notdir $(EXAMPLE_MODULE_SOURCE_FILE1))
+
+EXAMPLE_CGI_UPLOAD_MODULE_MAKE_FILE1 = $(wildcard $(EXAMPLE_CGI_UPLOAD_MODULE_PATH)/Makefile)
+EXAMPLE_CGI_UPLOAD_MODULE_MAKE_FILE2 = $(wildcard $(CLEAN_MCM_CGI_UPLOAD_MODULE_PATH)/Makefile)
+
+EXAMPLE_CGI_UPLOAD_MODULE_SOURCE_FILE1 = $(wildcard $(EXAMPLE_CGI_UPLOAD_MODULE_PATH)/*.*)
+EXAMPLE_CGI_UPLOAD_MODULE_SOURCE_FILE2 = $(notdir $(EXAMPLE_CGI_UPLOAD_MODULE_SOURCE_FILE1))
 
 EXAMPLE_WEB_APP_SOURCE_FILE1 = $(wildcard $(EXAMPLE_WEB_APP_PATH)/*.*)
 EXAMPLE_WEB_APP_SOURCE_FILE2 = $(notdir $(EXAMPLE_WEB_APP_SOURCE_FILE1))
@@ -32,11 +35,11 @@ EXAMPLE_MINI_HTTPD_MAKE_FILE2 = $(wildcard $(CLEAN_MINI_HTTPD_PATH)/Makefile)
 EXAMPLE_MAAM_BUILDIN_SOURCE_FILE1 = $(wildcard $(EXAMPLE_MAAM_BUILDIN_PATH)/*.*)
 EXAMPLE_MAAM_BUILDIN_SOURCE_FILE2 = $(wildcard $(CLEAN_MAAM_BUILDIN_PATH)/*.*)
 
-MCM_BUILD_PATH    = ../../../../mcm_build
-MCM_MODULE_PATH   = ../../../../mcm_daemon/mcm_module
-MCM_CGI_PATH      = ../../../../mcm_cgi
-MINI_HTTPD_PATH   = ../../../../http_server/mini_httpd/last
-MAAM_BUILDIN_PATH = ../../../../http_server/mini_httpd/last/mint_aam/maam_buildin
+MCM_BUILD_PATH             = ../../../../mcm_build
+MCM_MODULE_PATH            = ../../../../mcm_daemon/mcm_module
+MCM_CGI_UPLOAD_MODULE_PATH = ../../../../mcm_cgi/mcm_cgi_upload_module
+MINI_HTTPD_PATH            = ../../../../http_server/mini_httpd/last
+MAAM_BUILDIN_PATH          = ../../../../http_server/mini_httpd/last/mint_aam/maam_buildin
 
 DATA_PROFILE          = mcm_data_profile.xml
 STORE_DEFAULT_PROFILE = mcm_store_profile_default.txt
