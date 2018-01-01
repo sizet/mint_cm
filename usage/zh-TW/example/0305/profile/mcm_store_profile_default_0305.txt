@@ -1,0 +1,71 @@
+; Copyright © 2017, Che-Wei Hsu <cwxhsu@gmail.com>
+; This file is part of the MintCM.
+; Some rights reserved. See README.
+
+$version 1.0
+
+; device
+device descript:Wireless%20Device serial_number:0022E5A1CC9F
+
+; device.system
+device.system date:2015/06/07 ip_addr:192.168.10.254 uptime:0 loading:45.678
+
+; device.vap.*
+device.vap.#5 ssid:garden-open-5G channel:7
+device.vap.#8 ssid:parlor-psk-2.4G channel:44
+device.vap.#13 ssid:balcony-eap-2.4G channel:11
+device.vap.#22 ssid:greenhouse-psk-5G channel:48
+device.vap.#34 ssid:studio-wep-5G channel:136
+device.vap.#37 ssid:park-open-2.4G channel:3
+
+; device.vap.*.extra
+device.vap.#5.extra hidden:0 tx_power:30
+device.vap.#8.extra hidden:0 tx_power:9
+device.vap.#13.extra hidden:1 tx_power:16
+device.vap.#22.extra hidden:0 tx_power:21
+device.vap.#34.extra hidden:1 tx_power:5
+device.vap.#37.extra hidden:0 tx_power:27
+
+; device.vap.*.station.*
+device.vap.#5.station.#1 mac_addr:a8:26:d9:10:d5:f9 rule:1
+device.vap.#5.station.#2 mac_addr:38:2c:4a:a1:9f:0a rule:2
+device.vap.#5.station.#9 mac_addr:b0:65:bd:7c:22:c0 rule:1
+device.vap.#8.station.#2 mac_addr:00:1d:40:66:d2:3e rule:4
+device.vap.#8.station.#8 mac_addr:00:e0:4c:bc:01:5a rule:3
+device.vap.#8.station.#17 mac_addr:18:a9:9b:46:c9:8d rule:2
+device.vap.#8.station.#23 mac_addr:b0:65:bd:14:cd:a5 rule:1
+device.vap.#22.station.#1 mac_addr:00:1d:40:cf:05:0d rule:6
+device.vap.#22.station.#7 mac_addr:00:e0:4c:d1:60:61 rule:5
+device.vap.#22.station.#9 mac_addr:b0:65:bd:11:a9:4f rule:1
+device.vap.#34.station.#15 mac_addr:38:2c:4a:34:cb:24 rule:6
+device.vap.#34.station.#32 mac_addr:18:a9:9b:cc:1e:9d rule:3
+device.vap.#37.station.#6 mac_addr:00:e0:4c:fe:15:4c rule:7
+
+; device.vap.*.station.*.user.*
+device.vap.#5.station.#1.user.#3 name:bob gender:0
+device.vap.#5.station.#2.user.#1 name:alice gender:1
+device.vap.#5.station.#2.user.#2 name:tom gender:0
+device.vap.#5.station.#9.user.#8 name:eve gender:1
+device.vap.#8.station.#2.user.#11 name:ivy gender:1
+device.vap.#8.station.#2.user.#14 name:janey gender:1
+device.vap.#8.station.#2.user.#26 name:nick gender:0
+device.vap.#8.station.#8.user.#9 name:rob gender:0
+device.vap.#8.station.#8.user.#13 name:ted gender:0
+device.vap.#8.station.#17.user.#1 name:helen gender:1
+device.vap.#22.station.#1.user.#1 name:lee gender:0
+device.vap.#22.station.#9.user.#37 name:ellie gender:1
+device.vap.#22.station.#9.user.#45 name:ada gender:1
+device.vap.#34.station.#15.user.#235 name:mary gender:1
+device.vap.#34.station.#32.user.#81 name:sue gender:1
+
+; device.limit.*
+device.limit.#1 name:phone priority:11
+device.limit.#2 name:mobile priority:2
+device.limit.#3 name:geme priority:16
+device.limit.#4 name:stream priority:5
+device.limit.#5 name:remote priority:8
+device.limit.#6 name:control priority:13
+device.limit.#7 name:security priority:18
+
+; device.filter
+

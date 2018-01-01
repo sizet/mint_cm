@@ -1,0 +1,83 @@
+<!--
+Copyright © 2017, Che-Wei Hsu <cwxhsu@gmail.com>
+This file is part of the MintCM.
+Some rights reserved. See README.
+-->
+
+<html>
+
+<head>
+
+<meta http-equiv="cache-control" content="no-cache">
+<meta http-equiv="content-type" content="text/html; charset=utf-8">
+<script type="text/javascript" src="jquery_main.js"></script>
+<script type="text/javascript" src="json3.js"></script>
+<script type="text/javascript" src="mcm_jslib_api.js"></script>
+<script type="text/javascript" src="mcm_jslib_data_info_auto.js"></script>
+<script type="text/javascript" src="web_app_0305_script.js"></script>
+<link rel="stylesheet" href="web_app_0305_style.css">
+
+<script type="text/javascript">
+function config_get()
+{
+    var self_jslib, req_cmd, rep_ret, mcm_dv, data_array, tmp_html = "", i;
+
+
+    // 指定要讀出的資料.
+    req_cmd = "&get.device.vap.*=find_5g_vap";
+
+    // 送出讀出資料請求.
+    self_jslib = new mcm_jslib_lib_t();
+    self_jslib.socket_path = "@mintcm";
+    self_jslib.session_permission = mcm_session_permission.ro;
+    self_jslib.session_stack_size = 0;
+    self_jslib.request_command = req_cmd;
+    self_jslib.other_query = "";
+    rep_ret = mcm_jslib_obtain_config(self_jslib);
+    if(rep_ret.rep_code < mcm_return_code.pass)
+    {
+        alert("call mcm_jslib_obtain_max_count() fail" +
+              "[" + rep_ret.rep_code + "]");
+        mcm_jslib_run_script(rep_ret.rep_data);
+        return;
+    }
+    // 處理資料格式.
+    mcm_dv = JSON.parse(rep_ret.rep_data);
+
+    // 顯示 device.vap.*
+    data_array = new Array(4);
+    data_array[0] = new Array();
+    data_array[1] = new Array();
+    data_array[2] = new Array();
+    data_array[3] = new Array();
+    data_array[0].push("");
+    data_array[1].push("ekey");
+    data_array[2].push("ssid");
+    data_array[3].push("channel");
+    for(i = 0; i < mcm_dv.device.vap.length; i++)
+    {
+        data_array[0].push("device.vap.@" + (i + 1));
+        data_array[1].push(mcm_dv.device.vap[i].ekey);
+        data_array[2].push(mcm_jslib_convert_html_str(mcm_dv.device.vap[i].ssid));
+        data_array[3].push(mcm_dv.device.vap[i].channel);
+    }
+    tmp_html += jsapi_make_table("css_table1", "css_td1", data_array);
+
+    $("#show_box").html(tmp_html);
+}
+</script>
+
+</head>
+
+<body>
+
+  <div>[find 5g vap]</div>
+
+  <button type="button" onclick="config_get()">get</button>
+  <br><br>
+
+  <div id="show_box"></div>
+
+</body>
+
+</html>
