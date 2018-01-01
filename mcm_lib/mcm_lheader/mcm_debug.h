@@ -135,6 +135,12 @@
 // cgi debug - upload
 #define MCM_CUDMODE 0
 
+// cgi error - config module
+#define MCM_CCMEMODE 1
+
+// cgi debug - config module
+#define MCM_CCMDMODE 0
+
 // cgi error - upload module
 #define MCM_CUMEMODE 1
 

@@ -3,6 +3,7 @@
 // Some rights reserved. See README.
 
 #include <errno.h>
+#include <dlfcn.h>
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -16,6 +17,8 @@
 
 #if MCM_CGIEMODE | MCM_CGIECTMODE | MCM_CCDMODE
     #include <fcntl.h>
+    #include <stdio.h>
+    #include <string.h>
     #include <unistd.h>
     #include <sys/stat.h>
 #endif
@@ -48,6 +51,8 @@ char dbg_msg_buf[MCM_DBG_BUFFER_SIZE];
 #else
     #define MCM_CCDMSG(msg_fmt, msg_args...)
 #endif
+
+#define MCM_CONFIG_MODULE_PATH "./mcm_cgi_config_module.lib"
 
 #define MCM_MAX_COUNT_KEY       "$max_count"
 #define MCM_MIN_PRINTABLE_KEY   0x20
@@ -271,6 +276,8 @@ struct mcm_command_list_t
     MCM_DTYPE_LIST_TD *pull_config_part_type;
     // pull 類型的指令中每一層路徑的 key.
     MCM_DTYPE_EK_TD *pull_config_part_key;
+    // pull 類型的指令的模組的路徑.
+    char *pull_config_module_path;
 
     // push 類型的指令的路徑.
     char *push_config_path;
@@ -729,72 +736,10 @@ int mcm_check_action(
     return MCM_RCODE_PASS;
 }
 
-// 檢查 pull 類型的指令是否正確.
-int mcm_check_pull_command(
-    struct mcm_lulib_lib_t *this_lulib,
-    struct mcm_command_list_t *command_list_info,
-    struct mcm_command_count_t *command_count_info)
-{
-    int fret;
-    struct mcm_command_list_t *each_command1, *each_command2;
-    MCM_DTYPE_USIZE_TD tidx1, tidx2;
-
-
-    MCM_CCDMSG("=> %s", __FUNCTION__);
-
-    // 紀錄路徑部分.
-    for(tidx1 = 0; tidx1 < command_count_info->total_count; tidx1++)
-    {
-        each_command1 = command_list_info + tidx1;
-        if(each_command1->operate_type == MCM_CONFIG_GET_INDEX)
-            each_command1->pull_config_path = each_command1->raw_content;
-    }
-
-    // 檢查指令的路徑是否有重複.
-    for(tidx1 = 0; tidx1 < command_count_info->total_count; tidx1++)
-    {
-        each_command1 = command_list_info + tidx1;
-        if(each_command1->operate_type == MCM_CONFIG_GET_INDEX)
-            for(tidx2 = tidx1 + 1; tidx2 < command_count_info->total_count; tidx2++)
-            {
-                each_command2 = command_list_info + tidx2;
-                if(each_command2->operate_type == MCM_CONFIG_GET_INDEX)
-                    if(strcmp(each_command1->pull_config_path,
-                              each_command2->pull_config_path) == 0)
-                    {
-                        MCM_CEMSG("invalid, duplic command [%s]", each_command1->pull_config_path);
-                        MCM_CGI_AEMSG(MCM_RCODE_CGI_CONFIG_INTERNAL_ERROR, 0,
-                                      "invalid, duplic command\\n[%s]",
-                                      each_command1->pull_config_path);
-                        return MCM_RCODE_CGI_CONFIG_INTERNAL_ERROR;
-                    }
-            }
-    }
-
-    // 檢查指令的路徑是否正確.
-    for(tidx1 = 0; tidx1 < command_count_info->total_count; tidx1++)
-    {
-        each_command1 = command_list_info + tidx1;
-        if(each_command1->operate_type == MCM_CONFIG_GET_INDEX)
-        {
-            fret = mcm_lulib_check_mask_path(this_lulib, each_command1->pull_config_path);
-            if(fret < MCM_RCODE_PASS)
-            {
-                MCM_CEMSG("call mcm_lulib_check_mask_path(%s) fail",
-                          each_command1->pull_config_path);
-                MCM_CGI_AEMSG(fret, 0, "call mcm_lulib_check_mask_path() fail\\n[%s]",
-                              each_command1->pull_config_path);
-                return fret;
-            }
-        }
-    }
-
-    return MCM_RCODE_PASS;
-}
-
-// 找出 push 類型的指令的路徑部分.
-int mcm_find_push_command_config_path(
-    struct mcm_command_list_t *command_list_info)
+// 找出指令的路徑部分.
+int mcm_find_config_path(
+    struct mcm_command_list_t *this_command,
+    MCM_DTYPE_BOOL_TD *extra_flag_buf)
 {
     char *tmp_raw;
     MCM_DTYPE_USIZE_TD sidx;
@@ -802,7 +747,7 @@ int mcm_find_push_command_config_path(
 
     MCM_CCDMSG("=> %s", __FUNCTION__);
 
-    tmp_raw = command_list_info->raw_content;
+    tmp_raw = this_command->raw_content;
 
     // 找到 "=", 分離路徑.
     for(sidx = 0; tmp_raw[sidx] != '\0'; sidx++)
@@ -817,6 +762,7 @@ int mcm_find_push_command_config_path(
             return MCM_RCODE_CGI_CONFIG_INTERNAL_ERROR;
         }
     if(tmp_raw[sidx] == MCM_VALUE_SPLIT_KEY)
+    {
         if(sidx == 0)
         {
             MCM_CEMSG("invalid, empty config_path [%s]", tmp_raw);
@@ -824,32 +770,102 @@ int mcm_find_push_command_config_path(
                           "invalid, empty config_path\\n[%s]", tmp_raw);
             return MCM_RCODE_CGI_CONFIG_INTERNAL_ERROR;
         }
+        *extra_flag_buf = 1;
+    }
 
     // 紀錄路徑.
-    command_list_info->push_config_path = tmp_raw;
+    if(this_command->operate_type == MCM_CONFIG_GET_INDEX)
+        this_command->pull_config_path = tmp_raw;
+    else
+        this_command->push_config_path = tmp_raw;
 
     // 將指令的內容往後移動, 跳過路徑部分.
-    command_list_info->raw_content += sidx + (tmp_raw[sidx] == '\0' ? 0 : 1);
+    this_command->raw_content += sidx + (tmp_raw[sidx] == '\0' ? 0 : 1);
 
     tmp_raw[sidx] = '\0';
 
     return MCM_RCODE_PASS;
 }
 
-// 找出 push 類型的 set 指令的資料內容部分.
-int mcm_find_push_command_config_data_value(
-    struct mcm_command_list_t *command_list_info)
+// 找出指令的路徑的後面部分 (pull 類型的指令的模組, push 類型的 set / add 指令的資料內容)
+void mcm_find_config_extra(
+    struct mcm_command_list_t *this_command)
 {
     MCM_CCDMSG("=> %s", __FUNCTION__);
 
-    // 紀錄資料內容.
-    command_list_info->push_config_data_value = command_list_info->raw_content;
+    if(this_command->operate_type == MCM_CONFIG_GET_INDEX)
+    {
+        if(this_command->raw_content[0] != '\0')
+            this_command->pull_config_module_path = this_command->raw_content;
+    }
+    else
+    {
+        this_command->push_config_data_value = this_command->raw_content;
+    }
+}
+
+// 分析 pull 類型的指令.
+int mcm_analysis_pull_command(
+    struct mcm_command_list_t *this_command)
+{
+    int fret;
+    MCM_DTYPE_BOOL_TD have_extra = 0;
+
+
+    MCM_CCDMSG("=> %s", __FUNCTION__);
+
+    // 找出指令的路徑部分.
+    fret = mcm_find_config_path(this_command, &have_extra);
+    if(fret < MCM_RCODE_PASS)
+    {
+        MCM_CECTMSG("call mcm_find_config_path() fail");
+        return fret;
+    }
+
+    // 找出指令的模組部分.
+    if(have_extra != 0)
+        mcm_find_config_extra(this_command);
 
     return MCM_RCODE_PASS;
 }
 
-// 檢查 push 類型的指令是否正確.
-int mcm_check_push_command(
+// 檢查 pull 類型的指令的路徑是否重複.
+int mcm_check_pull_command_duplic(
+    struct mcm_command_list_t *command_list_info,
+    struct mcm_command_count_t *command_count_info)
+{
+    struct mcm_command_list_t *each_command1, *each_command2;
+    MCM_DTYPE_USIZE_TD cidx1, cidx2;
+
+
+    MCM_CCDMSG("=> %s", __FUNCTION__);
+
+    for(cidx1 = 0; cidx1 < command_count_info->total_count; cidx1++)
+    {
+        each_command1 = command_list_info + cidx1;
+        if(each_command1->operate_type == MCM_CONFIG_GET_INDEX)
+            for(cidx2 = cidx1 + 1; cidx2 < command_count_info->total_count; cidx2++)
+            {
+                each_command2 = command_list_info + cidx2;
+                if(each_command2->operate_type == MCM_CONFIG_GET_INDEX)
+                    if(strcmp(each_command1->pull_config_path,
+                              each_command2->pull_config_path) == 0)
+                    {
+                        MCM_CEMSG("invalid, duplic command [%s]", each_command1->pull_config_path);
+                        MCM_CGI_AEMSG(MCM_RCODE_CGI_CONFIG_INTERNAL_ERROR, 0,
+                                      "invalid, duplic command\\n[%s]",
+                                      each_command1->pull_config_path);
+                        return MCM_RCODE_CGI_CONFIG_INTERNAL_ERROR;
+                    }
+            }
+    }
+
+    return MCM_RCODE_PASS;
+}
+
+// 檢查 pull 類型的指令的路徑是否有效.
+int mcm_check_pull_command_valid(
+    struct mcm_lulib_lib_t *this_lulib,
     struct mcm_command_list_t *command_list_info,
     struct mcm_command_count_t *command_count_info)
 {
@@ -860,33 +876,21 @@ int mcm_check_push_command(
 
     MCM_CCDMSG("=> %s", __FUNCTION__);
 
+    // 檢查指令的路徑是否正確.
     for(cidx = 0; cidx < command_count_info->total_count; cidx++)
     {
         each_command = command_list_info + cidx;
-        if((each_command->operate_type == MCM_CONFIG_SET_INDEX) ||
-           (each_command->operate_type == MCM_CONFIG_ADD_INDEX) ||
-           (each_command->operate_type == MCM_CONFIG_DEL_INDEX) ||
-           (each_command->operate_type == MCM_CONFIG_DEL_ALL_INDEX))
+        if(each_command->operate_type == MCM_CONFIG_GET_INDEX)
         {
-            // 找出指令的路徑部分.
-            fret = mcm_find_push_command_config_path(each_command);
+            fret = mcm_lulib_check_mask_path(this_lulib, each_command->pull_config_path);
             if(fret < MCM_RCODE_PASS)
             {
-                MCM_CECTMSG("call mcm_find_push_command_config_path() fail");
+                MCM_CEMSG("call mcm_lulib_check_mask_path(%s) fail",
+                          each_command->pull_config_path);
+                MCM_CGI_AEMSG(MCM_RCODE_CGI_CONFIG_INTERNAL_ERROR, 0,
+                              "call mcm_lulib_check_mask_path() fail\\n[%s]",
+                              each_command->pull_config_path);
                 return fret;
-            }
-
-            // 檢查 set 指令的資料內容部分.
-            if((each_command->operate_type == MCM_CONFIG_SET_INDEX) ||
-               (each_command->operate_type == MCM_CONFIG_ADD_INDEX))
-            {
-                // 找出指令的資料內容部分.
-                fret = mcm_find_push_command_config_data_value(each_command);
-                if(fret < MCM_RCODE_PASS)
-                {
-                    MCM_CECTMSG("call mcm_find_push_command_config_data_value() fail");
-                    return fret;
-                }
             }
         }
     }
@@ -894,29 +898,69 @@ int mcm_check_push_command(
     return MCM_RCODE_PASS;
 }
 
-// 檢查 module 類型的指令是否正確.
-int mcm_check_module_command(
+// 分析 push 類型的指令.
+int mcm_analysis_push_command(
+    struct mcm_command_list_t *this_command)
+{
+    int fret;
+    MCM_DTYPE_BOOL_TD have_extra = 0;
+
+
+    MCM_CCDMSG("=> %s", __FUNCTION__);
+
+    // 找出指令的路徑部分.
+    fret = mcm_find_config_path(this_command, &have_extra);
+    if(fret < MCM_RCODE_PASS)
+    {
+        MCM_CECTMSG("call mcm_find_config_path() fail");
+        return fret;
+    }
+
+    // 找出指令的資料內容部分.
+    if(have_extra != 0)
+        if((this_command->operate_type == MCM_CONFIG_SET_INDEX) ||
+           (this_command->operate_type == MCM_CONFIG_ADD_INDEX))
+        {
+            mcm_find_config_extra(this_command);
+        }
+
+    return MCM_RCODE_PASS;
+}
+
+// 分析 module 類型的指令.
+int mcm_analysis_module_command(
+    struct mcm_command_list_t *this_command)
+{
+    MCM_CCDMSG("=> %s", __FUNCTION__);
+
+    // 紀錄路徑部分.
+    this_command->module_path = this_command->raw_content;
+
+    return MCM_RCODE_PASS;
+}
+
+// 標記最最後一個 module 類型的指令.
+void mcm_mark_last_module_command(
     struct mcm_command_list_t *command_list_info,
     struct mcm_command_count_t *command_count_info)
 {
-    struct mcm_command_list_t *each_command = NULL;
+    struct mcm_command_list_t *each_command;
     MCM_DTYPE_USIZE_TD cidx;
 
 
     MCM_CCDMSG("=> %s", __FUNCTION__);
 
-    // 紀錄路徑部分.
-    for(cidx = 0; cidx < command_count_info->total_count; cidx++)
+    cidx = command_count_info->total_count - 1;
+    do
     {
         each_command = command_list_info + cidx;
         if(each_command->operate_type == MCM_MODULE_RUN_INDEX)
-            each_command->module_path = each_command->raw_content;
+        {
+            each_command->module_last = 1;
+            break;
+        }
     }
-
-    // 標記最最後一個 run 指令.
-    each_command->module_last = 1;
-
-    return MCM_RCODE_PASS;
+    while(cidx > 0);
 }
 
 // 釋放.
@@ -972,7 +1016,8 @@ int mcm_create_pull_command(
             path_con = each_command->pull_config_path;
             path_len = strlen(path_con);
 
-            MCM_CCDMSG("cmd [%s][%s]", MCM_CONFIG_GET_KEY, path_con);
+            MCM_CCDMSG("cmd [%s][%s][%s]",
+                       MCM_CONFIG_GET_KEY, path_con, each_command->pull_config_module_path);
 
             // 計算路徑的層數.
             // 範例 :
@@ -1369,8 +1414,9 @@ int mcm_destory_store(
 
 // 建立 store tree.
 int mcm_create_store(
+    void *this_module_fp,
     struct mcm_lulib_lib_t *this_lulib,
-    struct mcm_command_list_t *command_list_info,
+    struct mcm_command_list_t *this_command,
     MCM_DTYPE_USIZE_TD part_level,
     char *cache_path,
     struct mcm_model_t *this_model,
@@ -1382,30 +1428,32 @@ int mcm_create_store(
     struct mcm_model_t *self_model;
     struct mcm_store_t *self_store = NULL, *prev_other_store = NULL, *tail_store = NULL,
         *head_store = NULL;
-    MCM_DTYPE_EK_TD entry_count, *key_list = NULL, eidx;
+    MCM_DTYPE_EK_TD kidx, key_count = 0, *key_list = NULL;
+    char *dl_err;
+    int (*module_cb)(struct mcm_lulib_lib_t *this_lulib,
+                     MCM_DTYPE_USIZE_TD part_level,
+                     MCM_DTYPE_EK_TD *part_key,
+                     MCM_DTYPE_EK_TD **key_list_buf,
+                     MCM_DTYPE_EK_TD *key_count_buf);
 
 
     MCM_CCDMSG("=> %s", __FUNCTION__);
 
-    // 清除上一次指令處理的內容.
-    command_list_info->pull_config_part_key[part_level] = 0;
+    // 進入遞迴處理時, 清除上一次指令處理的內容.
+    this_command->pull_config_part_key[part_level] = 0;
 
 #if MCM_CCDMODE
-    mcm_fill_path(command_list_info, command_list_info->pull_config_level - 1, MCM_FPATH_MIX,
-                  cache_path);
+    mcm_fill_path(this_command, this_command->pull_config_level - 1, MCM_FPATH_MIX, cache_path);
 
     MCM_CCDMSG("create store[%s][%s][" MCM_DTYPE_USIZE_PF "/" MCM_DTYPE_USIZE_PF "]",
-               cache_path, command_list_info->pull_config_part_name[part_level],
-               part_level + 1, command_list_info->pull_config_level);
+               cache_path, this_command->pull_config_part_name[part_level],
+               part_level + 1, this_command->pull_config_level);
 #endif
 
     // 尋找使用的 model.
     for(self_model = this_model; self_model != NULL; self_model = self_model->next_model)
-        if(strcmp(self_model->group_name,
-                  command_list_info->pull_config_part_name[part_level]) == 0)
-        {
+        if(strcmp(self_model->group_name, this_command->pull_config_part_name[part_level]) == 0)
             break;
-        }
     MCM_CCDMSG("use model[%s]", self_model->group_name);
 
     // 檢查此 store 是否已存在.
@@ -1435,17 +1483,17 @@ int mcm_create_store(
             break;
     }
     MCM_CCDMSG("search store[%s][%p]",
-               command_list_info->pull_config_part_name[part_level], self_store);
+               this_command->pull_config_part_name[part_level], self_store);
 
     // 不存在, 建立.
     if(self_store == NULL)
     {
         // 取得該層的 entry 數目和所有的 key.
-        if(command_list_info->pull_config_part_type[part_level] == MCM_DTYPE_GS_INDEX)
+        if(this_command->pull_config_part_type[part_level] == MCM_DTYPE_GS_INDEX)
         {
             // gs 類型固定只有 1 個 entry.
-            entry_count = 1;
-            key_list = calloc(entry_count, sizeof(MCM_DTYPE_EK_TD));
+            key_count = 1;
+            key_list = calloc(key_count, sizeof(MCM_DTYPE_EK_TD));
             if(key_list == NULL)
             {
                 fret = MCM_RCODE_CGI_CONFIG_INTERNAL_ERROR;
@@ -1456,27 +1504,56 @@ int mcm_create_store(
         }
         else
         {
-            // 填充 mix 類型的路徑用來取得 entry 的數目和所有的 key.
-            // 其他層的 pull_config_part_key 會在其他層的 mcm_create_store() 遞迴呼叫中填入.
-            mcm_fill_path(command_list_info, part_level, MCM_FPATH_MIX, cache_path);
-
-            // 取得 entry 數目和所有的 key.
-            fret = mcm_lulib_get_all_key(this_lulib, cache_path, &entry_count,
-                                         (MCM_DTYPE_EK_TD **) &key_list);
-            if(fret < MCM_RCODE_PASS)
+            if(this_command->pull_config_module_path != NULL)
             {
-                MCM_CEMSG("call mcm_lulib_get_all_key(%s) fail", cache_path);
-                MCM_CGI_AEMSG(fret, 0, "call mcm_lulib_get_all_key() fail\\n[%s]", cache_path);
-                goto FREE_01;
+                // 執行模組取得 key 列表.
+                module_cb = dlsym(this_module_fp, this_command->pull_config_module_path);
+                dl_err = dlerror();
+                if(dl_err != NULL)
+                {
+                    fret = MCM_RCODE_CGI_CONFIG_INTERNAL_ERROR;
+                    MCM_CEMSG("call dlsym(%s) fail [%s]",
+                              this_command->pull_config_module_path, dl_err);
+                    MCM_CGI_AEMSG(fret, 0, "call dlsym() fail\\n[%s]\\n[%s]",
+                                  this_command->pull_config_module_path, dl_err);
+                    goto FREE_01;
+                }
+
+                fret = module_cb(this_lulib, part_level + 1, this_command->pull_config_part_key,
+                                 &key_list, &key_count);
+                if(fret < MCM_RCODE_PASS)
+                {
+                    MCM_CEMSG("call module(%s) fail",
+                              this_command->pull_config_module_path);
+                    MCM_CGI_AEMSG(fret, 0, "call module() fail\\n[%s]",
+                                  this_command->pull_config_module_path);
+                    goto FREE_01;
+                }
+            }
+            else
+            {
+                // 填充 mix 類型的路徑用來取得 key 列表.
+                // 其他層的 pull_config_part_key 會在其他層的 mcm_create_store() 遞迴呼叫中填入.
+                mcm_fill_path(this_command, part_level, MCM_FPATH_MIX, cache_path);
+
+                // 取得 key 列表.
+                fret = mcm_lulib_get_all_key(this_lulib, cache_path, &key_count,
+                                             (MCM_DTYPE_EK_TD **) &key_list);
+                if(fret < MCM_RCODE_PASS)
+                {
+                    MCM_CEMSG("call mcm_lulib_get_all_key(%s) fail", cache_path);
+                    MCM_CGI_AEMSG(fret, 0, "call mcm_lulib_get_all_key() fail\\n[%s]", cache_path);
+                    goto FREE_01;
+                }
             }
         }
-        MCM_CCDMSG("alloc key_list[" MCM_DTYPE_EK_PF "][%p] [%s]",
-                   entry_count, key_list, 
-                   command_list_info->pull_config_part_type[part_level] == MCM_DTYPE_GS_INDEX ?
+        MCM_CCDMSG("key_list[" MCM_DTYPE_EK_PF "][%p] [%s]",
+                   key_count, key_list, 
+                   this_command->pull_config_part_type[part_level] == MCM_DTYPE_GS_INDEX ?
                    MCM_DTYPE_GS_KEY : MCM_DTYPE_GD_KEY);
 
         // 每個 entry 建立一個 store.
-        for(eidx = 0; eidx < entry_count; eidx++)
+        for(kidx = 0; kidx < key_count; kidx++)
         {
             self_store = (struct mcm_store_t *) calloc(1, sizeof(struct mcm_store_t));
             if(self_store == NULL)
@@ -1488,9 +1565,9 @@ int mcm_create_store(
             }
             MCM_CCDMSG("[%s.%c" MCM_DTYPE_EK_PF "] alloc store[%p]",
                        self_model->group_name, MCM_SPROFILE_PATH_KEY_KEY,
-                       key_list[eidx], self_store);
+                       key_list[kidx], self_store);
 
-            self_store->entry_key = key_list[eidx];
+            self_store->entry_key = key_list[kidx];
 
             // 鍊結使用的 model.
             self_store->link_model = self_model;
@@ -1551,7 +1628,7 @@ int mcm_create_store(
             tail_store = self_store;
         }
 
-        if(entry_count > 0)
+        if(key_count > 0)
         {
             MCM_CCDMSG("[%s.%c" MCM_DTYPE_EK_PF "] tail",
                        self_model->group_name, MCM_SPROFILE_PATH_KEY_KEY, self_store->entry_key);
@@ -1589,14 +1666,14 @@ int mcm_create_store(
         MCM_CCDMSG("[%s.%c" MCM_DTYPE_EK_PF "] do",
                    self_model->group_name, MCM_SPROFILE_PATH_KEY_KEY, self_store->entry_key);
 
-        command_list_info->pull_config_part_key[part_level] = self_store->entry_key;
+        this_command->pull_config_part_key[part_level] = self_store->entry_key;
 
-        if((part_level + 1) < command_list_info->pull_config_level)
+        if((part_level + 1) < this_command->pull_config_level)
         {
             // 處理下一層 store.
-            fret = mcm_create_store(this_lulib, command_list_info, part_level + 1, cache_path,
-                                    self_model->child_model, self_store->child_store_head,
-                                    self_store, NULL);
+            fret = mcm_create_store(this_module_fp, this_lulib, this_command, part_level + 1,
+                                    cache_path, self_model->child_model,
+                                    self_store->child_store_head, self_store, NULL);
             if(fret < MCM_RCODE_PASS)
             {
                 MCM_CECTMSG("call mcm_create_store() fail");
@@ -1606,7 +1683,7 @@ int mcm_create_store(
         else
         {
             // 填充 full 類型的路徑用來取得資料內容
-            mcm_fill_path(command_list_info, part_level, MCM_FPATH_FULL, cache_path);
+            mcm_fill_path(this_command, part_level, MCM_FPATH_FULL, cache_path);
 
             MCM_CCDMSG("[%s.%c" MCM_DTYPE_EK_PF "] entry_info_value[%s]",
                        self_store->link_model->group_name, MCM_SPROFILE_PATH_KEY_KEY,
@@ -1976,73 +2053,69 @@ void mcm_output_data_json_tree(
 // 處理 push 類型的指令.
 int mcm_do_push_command(
     struct mcm_lulib_lib_t *this_lulib,
-    struct mcm_command_list_t *command_list_info)
+    struct mcm_command_list_t *this_command)
 {
     int fret;
 
 
     MCM_CCDMSG("=> %s", __FUNCTION__);
 
-    if(command_list_info->operate_type == MCM_CONFIG_SET_INDEX)
+    if(this_command->operate_type == MCM_CONFIG_SET_INDEX)
     {
         MCM_CCDMSG("cmd [%s][%s][%s]",
-                   MCM_CONFIG_SET_KEY, command_list_info->push_config_path,
-                   command_list_info->push_config_data_value);
-        fret = mcm_lulib_set_any_type_alone(this_lulib, command_list_info->push_config_path,
-                                            command_list_info->push_config_data_value);
+                   MCM_CONFIG_SET_KEY, this_command->push_config_path,
+                   this_command->push_config_data_value);
+        fret = mcm_lulib_set_any_type_alone(this_lulib, this_command->push_config_path,
+                                            this_command->push_config_data_value);
         if(fret < MCM_RCODE_PASS)
         {
             MCM_CEMSG("call mcm_lulib_set_any_type_alone([%s][%s]) fail",
-                      command_list_info->push_config_path,
-                      command_list_info->push_config_data_value);
+                      this_command->push_config_path, this_command->push_config_data_value);
             MCM_CGI_AEMSG(fret, 0, "call mcm_lulib_set_any_type_alone() fail\\n[%s][%s]",
-                          command_list_info->push_config_path,
-                          command_list_info->push_config_data_value);
+                          this_command->push_config_path, this_command->push_config_data_value);
             return fret;
         }
     }
     else
-    if(command_list_info->operate_type == MCM_CONFIG_ADD_INDEX)
+    if(this_command->operate_type == MCM_CONFIG_ADD_INDEX)
     {
         MCM_CCDMSG("cmd [%s][%s][%s]",
-                   MCM_CONFIG_ADD_KEY, command_list_info->push_config_path,
-                   command_list_info->push_config_data_value);
-        fret = mcm_lulib_add_entry(this_lulib, command_list_info->push_config_path,
-                                   command_list_info->push_config_data_value, NULL, 0);
+                   MCM_CONFIG_ADD_KEY, this_command->push_config_path,
+                   this_command->push_config_data_value);
+        fret = mcm_lulib_add_entry(this_lulib, this_command->push_config_path,
+                                   this_command->push_config_data_value, NULL, 0);
         if(fret < MCM_RCODE_PASS)
         {
             MCM_CEMSG("call mcm_lulib_add_entry([%s][%s]) fail",
-                      command_list_info->push_config_path,
-                      command_list_info->push_config_data_value);
+                      this_command->push_config_path, this_command->push_config_data_value);
             MCM_CGI_AEMSG(fret, 0, "call mcm_lulib_add_entry() fail\\n[%s][%s]",
-                          command_list_info->push_config_path,
-                          command_list_info->push_config_data_value);
+                          this_command->push_config_path, this_command->push_config_data_value);
             return fret;
         }
     }
     else
-    if(command_list_info->operate_type == MCM_CONFIG_DEL_INDEX)
+    if(this_command->operate_type == MCM_CONFIG_DEL_INDEX)
     {
-        MCM_CCDMSG("cmd [%s][%s]", MCM_CONFIG_DEL_KEY, command_list_info->push_config_path);
-        fret = mcm_lulib_del_entry(this_lulib, command_list_info->push_config_path);
+        MCM_CCDMSG("cmd [%s][%s]", MCM_CONFIG_DEL_KEY, this_command->push_config_path);
+        fret = mcm_lulib_del_entry(this_lulib, this_command->push_config_path);
         if(fret < MCM_RCODE_PASS)
         {
-            MCM_CEMSG("call mcm_lulib_del_entry(%s) fail", command_list_info->push_config_path);
+            MCM_CEMSG("call mcm_lulib_del_entry(%s) fail", this_command->push_config_path);
             MCM_CGI_AEMSG(fret, 0, "call mcm_lulib_del_entry() fail\\n[%s]",
-                          command_list_info->push_config_path);
+                          this_command->push_config_path);
             return fret;
         }
     }
     else
-    if(command_list_info->operate_type == MCM_CONFIG_DEL_ALL_INDEX)
+    if(this_command->operate_type == MCM_CONFIG_DEL_ALL_INDEX)
     {
-        MCM_CCDMSG("cmd [%s][%s]", MCM_CONFIG_DEL_ALL_KEY, command_list_info->push_config_path);
-        fret = mcm_lulib_del_all_entry(this_lulib, command_list_info->push_config_path);
+        MCM_CCDMSG("cmd [%s][%s]", MCM_CONFIG_DEL_ALL_KEY, this_command->push_config_path);
+        fret = mcm_lulib_del_all_entry(this_lulib, this_command->push_config_path);
         if(fret < MCM_RCODE_PASS)
         {
-            MCM_CEMSG("call mcm_lulib_del_all_entry(%s) fail", command_list_info->push_config_path);
+            MCM_CEMSG("call mcm_lulib_del_all_entry(%s) fail", this_command->push_config_path);
             MCM_CGI_AEMSG(fret, 0, "call mcm_lulib_del_all_entry() fail\\n[%s]",
-                          command_list_info->push_config_path);
+                          this_command->push_config_path);
             return fret;
         }
     }
@@ -2052,7 +2125,7 @@ int mcm_do_push_command(
 
 // 填充執行 MCM_RACTION_SUBMIT_CONFIG 行為後要回應給網頁的訊息.
 void mcm_fill_submit_response(
-    struct mcm_command_list_t *command_list_info,
+    struct mcm_command_list_t *this_command,
     struct mcm_request_para_t *request_info,
     int call_ret,
     char *rep_msg)
@@ -2068,7 +2141,7 @@ void mcm_fill_submit_response(
     {
         if(call_ret < MCM_RCODE_PASS)
         {
-            printf("alert(\"call mcm_lulib_run() fail\\n[%s]\");", command_list_info->module_path);
+            printf("alert(\"call mcm_lulib_run() fail\\n[%s]\");", this_command->module_path);
         }
         else
         {
@@ -2087,7 +2160,7 @@ void mcm_fill_submit_response(
 // 處理 module 類型的指令.
 int mcm_do_module_command(
     struct mcm_lulib_lib_t *this_lulib,
-    struct mcm_command_list_t *command_list_info,
+    struct mcm_command_list_t *this_command,
     struct mcm_request_para_t *request_info,
     MCM_DTYPE_BOOL_TD *fill_report_buf)
 {
@@ -2096,21 +2169,20 @@ int mcm_do_module_command(
 
     MCM_CCDMSG("=> %s", __FUNCTION__);
 
-    MCM_CCDMSG("cmd [%s][%s]", MCM_MODULE_RUN_KEY, command_list_info->module_path);
-    fret = mcm_lulib_run(this_lulib, command_list_info->module_path);
+    MCM_CCDMSG("cmd [%s][%s]", MCM_MODULE_RUN_KEY, this_command->module_path);
+    fret = mcm_lulib_run(this_lulib, this_command->module_path);
     if(fret < MCM_RCODE_PASS)
     {
-        MCM_CEMSG("call mcm_lulib_run(%s) fail", command_list_info->module_path);
-        mcm_fill_submit_response(command_list_info, request_info, fret, this_lulib->rep_msg_con);
+        MCM_CEMSG("call mcm_lulib_run(%s) fail", this_command->module_path);
+        mcm_fill_submit_response(this_command, request_info, fret, this_lulib->rep_msg_con);
         return fret;
     }
     else
     {
         // 只有最後一個 run 指令所執行的 module 所產生的自訂訊息會傳送到網頁.
-        if(command_list_info->module_last != 0)
+        if(this_command->module_last != 0)
         {
-            mcm_fill_submit_response(command_list_info, request_info, fret,
-                                     this_lulib->rep_msg_con);
+            mcm_fill_submit_response(this_command, request_info, fret, this_lulib->rep_msg_con);
             *fill_report_buf = 1;
         }
     }
@@ -2124,7 +2196,8 @@ int mcm_process_request(
     MCM_DTYPE_USIZE_TD post_len,
     struct mcm_request_para_t *request_info)
 {
-    int fret = MCM_RCODE_CGI_CONFIG_INTERNAL_ERROR;
+    int fret;
+    void *pull_module_fp = NULL;
     struct mcm_lulib_lib_t self_lulib;
     struct mcm_command_list_t *command_list_info, *each_command;
     struct mcm_command_count_t command_count_info;
@@ -2132,7 +2205,7 @@ int mcm_process_request(
     struct mcm_store_t *self_store = NULL;
     MCM_DTYPE_USIZE_TD path_max_len, cidx;
     char *cache_path = NULL;
-    MCM_DTYPE_BOOL_TD do_update = 0, fill_report = 0;
+    MCM_DTYPE_BOOL_TD need_pull_module = 0, do_update = 0, fill_report = 0;
 
 
     MCM_CCDMSG("=> %s", __FUNCTION__);
@@ -2152,24 +2225,72 @@ int mcm_process_request(
         goto FREE_02;
     }
 
-    if(command_count_info.push_count > 0)
+    for(cidx = 0; cidx < command_count_info.total_count; cidx++)
     {
-        fret = mcm_check_push_command(command_list_info, &command_count_info);
+        each_command = command_list_info + cidx;
+        switch(each_command->operate_type)
+        {
+            case MCM_CONFIG_GET_INDEX:
+                fret = mcm_analysis_pull_command(each_command);
+                if(fret < MCM_RCODE_PASS)
+                {
+                    MCM_CECTMSG("call mcm_analysis_pull_command() fail");
+                    goto FREE_02;
+                }
+
+                if(each_command->pull_config_module_path != NULL)
+                    need_pull_module = 1;
+
+                break;
+
+            case MCM_CONFIG_SET_INDEX:
+            case MCM_CONFIG_ADD_INDEX:
+            case MCM_CONFIG_DEL_INDEX:
+            case MCM_CONFIG_DEL_ALL_INDEX:
+                fret = mcm_analysis_push_command(each_command);
+                if(fret < MCM_RCODE_PASS)
+                {
+                    MCM_CECTMSG("call mcm_analysis_push_command() fail");
+                    goto FREE_02;
+                }
+                break;
+
+            case MCM_MODULE_RUN_INDEX:
+                fret = mcm_analysis_module_command(each_command);
+                if(fret < MCM_RCODE_PASS)
+                {
+                    MCM_CECTMSG("call mcm_analysis_module_command() fail");
+                    goto FREE_02;
+                }
+                break;
+        }
+    }
+
+    if(command_count_info.pull_count > 0)
+    {
+        fret = mcm_check_pull_command_duplic(command_list_info, &command_count_info);
         if(fret < MCM_RCODE_PASS)
         {
-            MCM_CECTMSG("call mcm_check_push_command() fail");
+            MCM_CECTMSG("call mcm_check_pull_command_duplic() fail");
             goto FREE_02;
         }
     }
 
     if(command_count_info.module_count > 0)
+        mcm_mark_last_module_command(command_list_info, &command_count_info);
+
+    if(need_pull_module != 0)
     {
-        fret = mcm_check_module_command(command_list_info, &command_count_info);
-        if(fret < MCM_RCODE_PASS)
+        pull_module_fp = dlopen(MCM_CONFIG_MODULE_PATH, RTLD_LAZY);
+        if(pull_module_fp == NULL)
         {
-            MCM_CECTMSG("call mcm_check_module_command() fail");
+            fret = MCM_RCODE_CGI_CONFIG_INTERNAL_ERROR;
+            MCM_CEMSG("call dlopen(%s) fail [%s]", MCM_CONFIG_MODULE_PATH, dlerror());
+            MCM_CGI_AEMSG(fret, 0, "call dlopen(%s) fail\\n[%s]",
+                          MCM_CONFIG_MODULE_PATH, dlerror());
             goto FREE_02;
         }
+        MCM_CCDMSG("dlopen %s[%p]", MCM_CONFIG_MODULE_PATH, pull_module_fp);
     }
 
     memset(&self_lulib, 0, sizeof(struct mcm_lulib_lib_t));
@@ -2182,16 +2303,16 @@ int mcm_process_request(
     {
         MCM_CEMSG("call mcm_lulib_init() fail");
         MCM_CGI_AEMSG(fret, 0, "call mcm_lulib_init() fail");
-        goto FREE_02;
+        goto FREE_03;
     }
 
     if(command_count_info.pull_count > 0)
     {
-        fret = mcm_check_pull_command(&self_lulib, command_list_info, &command_count_info);
+        fret = mcm_check_pull_command_valid(&self_lulib, command_list_info, &command_count_info);
         if(fret < MCM_RCODE_PASS)
         {
-            MCM_CECTMSG("call mcm_check_pull_command() fail");
-            goto FREE_03;
+            MCM_CECTMSG("call mcm_check_pull_command_valid() fail");
+            goto FREE_04;
         }
 
         fret = mcm_lulib_get_path_max_length(&self_lulib, &path_max_len);
@@ -2199,7 +2320,7 @@ int mcm_process_request(
         {
             MCM_CEMSG("call mcm_lulib_get_path_max_length() fail");
             MCM_CGI_AEMSG(fret, 0, "call mcm_lulib_get_path_max_length() fail");
-            goto FREE_03;
+            goto FREE_04;
         }
 
         cache_path = (char *) malloc(path_max_len);
@@ -2208,7 +2329,7 @@ int mcm_process_request(
             fret = MCM_RCODE_CGI_CONFIG_INTERNAL_ERROR;
             MCM_CEMSG("call malloc() fail [%s]", strerror(errno));
             MCM_CGI_AEMSG(fret, 0, "call malloc() fail\\n[%s]", strerror(errno));
-            goto FREE_03;
+            goto FREE_04;
         }
         MCM_CCDMSG("alloc cache_path[" MCM_DTYPE_USIZE_PF "][%p]", path_max_len, cache_path);
 
@@ -2216,7 +2337,7 @@ int mcm_process_request(
         if(fret < MCM_RCODE_PASS)
         {
             MCM_CECTMSG("call mcm_create_pull_command() fail");
-            goto FREE_04;
+            goto FREE_05;
         }
 
         for(cidx = 0; cidx < command_count_info.total_count; cidx++)
@@ -2229,7 +2350,7 @@ int mcm_process_request(
                 if(fret < MCM_RCODE_PASS)
                 {
                     MCM_CECTMSG("call mcm_create_model() fail");
-                    goto FREE_05;
+                    goto FREE_06;
                 }
             }
         }
@@ -2253,18 +2374,18 @@ int mcm_process_request(
                         if(fret < MCM_RCODE_PASS)
                         {
                             MCM_CEMSG("call mcm_lulib_update() fail");
-                            goto FREE_06;
+                            goto FREE_07;
                         }
                         do_update = 0;
                     }
 
-                    fret = mcm_create_store(&self_lulib, each_command, 0, cache_path,
-                                            self_model, self_store, NULL,
+                    fret = mcm_create_store(pull_module_fp, &self_lulib, each_command, 0,
+                                            cache_path, self_model, self_store, NULL,
                                             self_store == NULL ? &self_store : NULL);
                     if(fret < MCM_RCODE_PASS)
                     {
                         MCM_CECTMSG("call mcm_create_store() fail");
-                        goto FREE_06;
+                        goto FREE_07;
                     }
                     break;
 
@@ -2276,7 +2397,7 @@ int mcm_process_request(
                     if(fret < MCM_RCODE_PASS)
                     {
                         MCM_CECTMSG("call mcm_do_push_command() fail");
-                        goto FREE_06;
+                        goto FREE_07;
                     }
                     do_update = 1;
                     break;
@@ -2287,7 +2408,7 @@ int mcm_process_request(
                     if(fret < MCM_RCODE_PASS)
                     {
                         MCM_CECTMSG("call mcm_do_module_command() fail");
-                        goto FREE_06;
+                        goto FREE_07;
                     }
                     do_update = 1;
                     break;
@@ -2303,19 +2424,25 @@ int mcm_process_request(
     }
 
     fret = MCM_RCODE_PASS;
-FREE_06:
+FREE_07:
     if(self_store != NULL)
         mcm_destory_store(self_store);
-FREE_05:
+FREE_06:
     if(self_model != NULL)
         mcm_destory_model(self_model);
     if(command_count_info.pull_count > 0)
         mcm_destory_pull_command(command_list_info, &command_count_info);
-FREE_04:
+FREE_05:
     MCM_CCDMSG("free cache_path[%p]", cache_path);
     free(cache_path);
-FREE_03:
+FREE_04:
     mcm_lulib_exit(&self_lulib);
+FREE_03:
+    if(need_pull_module != 0)
+    {
+        MCM_CCDMSG("dlclose pull_module_fp[%p]", pull_module_fp);
+        dlclose(pull_module_fp);
+    }
 FREE_02:
     MCM_CCDMSG("free command_list_info[%p]", command_list_info);
     free(command_list_info);

@@ -15,7 +15,7 @@
 
 
 #if MCM_CGIEMODE | MCM_CGIECTMODE | \
-    MCM_CCDMODE | \
+    MCM_CCDMODE | MCM_CCMEMODE | MCM_CCMDMODE | \
     MCM_CUDMODE | MCM_CUMEMODE | MCM_CUMDMODE
     #define MCM_CGI_TTY_MSG(tty_fd, msg_buf, msg_fmt, msg_args...) \
         do                                                                \

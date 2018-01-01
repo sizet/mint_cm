@@ -27,11 +27,19 @@ CGI_CONFIG_TARGET_FILE = mcm_cgi_config.cgi
 CGI_UPLOAD_OBJECT_FILE = mcm_cgi_upload.o mcm_cgi_common.o
 CGI_UPLOAD_TARGET_FILE = mcm_cgi_upload.cgi
 
+CGI_CONFIG_MODULE_PATH = ./mcm_cgi_config_module
+
 CGI_UPLOAD_MODULE_PATH = ./mcm_cgi_upload_module
 
 
-binary : $(CGI_CONFIG_TARGET_FILE) $(CGI_UPLOAD_TARGET_FILE) upload_module_flag
+binary : $(CGI_CONFIG_TARGET_FILE) $(CGI_UPLOAD_TARGET_FILE) config_module_flag upload_module_flag
 
+
+config_module_flag :
+	@make -C $(CGI_CONFIG_MODULE_PATH) binary
+
+upload_module_flag :
+	@make -C $(CGI_UPLOAD_MODULE_PATH) binary
 
 $(CGI_CONFIG_TARGET_FILE) : $(CGI_CONFIG_OBJECT_FILE)
 	$(CC) $(LD_FLAGS) $(LIBRARY_PATH) $^ $(CGI_CONFIG_LIBRARY_FILE) -o $@
@@ -40,9 +48,6 @@ $(CGI_CONFIG_TARGET_FILE) : $(CGI_CONFIG_OBJECT_FILE)
 $(CGI_UPLOAD_TARGET_FILE) : $(CGI_UPLOAD_OBJECT_FILE)
 	$(CC) $(LD_FLAGS) $(LIBRARY_PATH) $^ $(CGI_UPLOAD_LIBRARY_FILE) -o $@
 	$(STRIP) $@
-
-upload_module_flag :
-	@make -C $(CGI_UPLOAD_MODULE_PATH) binary
 
 %.o : %.c
 	$(CC) $(CC_FLAGS) $(INCLUDE_PATH) -c $< -o $@
@@ -56,10 +61,12 @@ upload_module_flag :
 -include $(SOURCE_FILE:.c=.d)
 
 install :
+	@make -C $(CGI_CONFIG_MODULE_PATH) install
 	@make -C $(CGI_UPLOAD_MODULE_PATH) install
 	cp -f $(CGI_CONFIG_TARGET_FILE) $(CGI_UPLOAD_TARGET_FILE) $(MCM_RUN_CGI_PATH)
 
 clean :
+	@make -C $(CGI_CONFIG_MODULE_PATH) clean
 	@make -C $(CGI_UPLOAD_MODULE_PATH) clean
 	rm -f *.d *.d* *.o *.cgi
 	cd $(MCM_RUN_CGI_PATH); rm -f $(CGI_CONFIG_TARGET_FILE) $(CGI_UPLOAD_TARGET_FILE)
