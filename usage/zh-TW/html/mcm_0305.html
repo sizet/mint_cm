@@ -1,0 +1,1461 @@
+<!--
+Copyright © 2017, Che-Wei Hsu <cwxhsu@gmail.com>
+This file is part of the MintCM.
+Some rights reserved. See README.
+-->
+
+<html>
+
+<head>
+<meta http-equiv="content-type" content="text/html; charset=utf-8">
+<link rel="stylesheet" href="../css/mcm_style.css">
+</head>
+
+<body class="css_body">
+
+<div class="css_div_box_frame_full">
+  <div class="css_div_box_title">chapter 03-05</div>
+  <div class="css_div_box_content">
+  </div>
+</div>
+<br>
+
+<div class="css_div_box_frame_full">
+  <div class="css_div_box_title">資料的存取 (網頁端程式-進階)</div>
+  <div class="css_div_box_content">
+    <br>
+
+    使用基本模式的 <a href="mcm_0304.html#hook_0304_get_01">get</a> 取得資料時,
+    對於 gd 類型的資料會一次取出全部, 無法指定只要取出某幾筆資料, 使用進階模式可以指定只取出某幾筆資料.
+    <br><br><br>
+
+    此部分除了網頁端之外還需要撰寫 CGI 模組處理要取出哪幾筆資料.
+    <br><br><br>
+
+    分成 [網頁端] 和 [CGI 端] 說明.
+    <br><br><br>
+
+    使用的資料模型範例如下 :<br>
+    <div class="css_div_block">
+      &lt;?xml version="1.0"?&gt;<br><br>
+      &lt;base version="1.0"&gt;<br>
+      &lt;device type="gs" max="1" save="1"&gt;<br>
+      &nbsp;&nbsp;&lt;ekey type="ek"&gt;0&lt;/ekey&gt;<br>
+      &nbsp;&nbsp;&lt;descript type="s:256"&gt;Network-Device&lt;/descript&gt;<br>
+      &nbsp;&nbsp;&lt;serial_number type="b:10"&gt;0022E5A1CC9F&lt;/serial_number&gt;<br><br>
+      &nbsp;&nbsp;&lt;system type="gs" max="1" save="1"&gt;<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&lt;ekey type="ek"&gt;0&lt;/ekey&gt;<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&lt;date type="s:12"&gt;2015/01/01&lt;/date&gt;<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&lt;ip_addr type="s:46"&gt;192.168.1.1&lt;/ip_addr&gt;<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&lt;uptime type="iull"&gt;0&lt;/uptime&gt;<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&lt;loading type="fd"&gt;0&lt;/loading&gt;<br>
+      &nbsp;&nbsp;&lt;/system&gt;<br><br>
+      &nbsp;&nbsp;&lt;vap type="gd" max="16" save="1"&gt;<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&lt;ekey type="ek"&gt;0&lt;/ekey&gt;<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&lt;ssid type="s:64"&gt;&lt;/ssid&gt;<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&lt;channel type="iui"&gt;0&lt;/channel&gt;<br><br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&lt;extra type="gs" max="1" save="1"&gt;<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;ekey type="ek"&gt;0&lt;/ekey&gt;<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;hidden type="isc"&gt;0&lt;/hidden&gt;<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;tx_power type="iss"&gt;0&lt;/tx_power&gt;<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&lt;/extra&gt;<br><br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&lt;station type="gd" max="32" save="1"&gt;<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;ekey type="ek"&gt;0&lt;/ekey&gt;<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;mac_addr type="s:18"&gt;00:00:00:00:00:00&lt;/mac_addr&gt;<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;rule type="rk"&gt;0&lt;/rule&gt;<br><br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;user type="gd" max="8" save="1"&gt;<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;ekey type="ek"&gt;0&lt;/ekey&gt;<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;name type="s:32"&gt;&lt;/name&gt;<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;gender type="iuc"&gt;0&lt;/gender&gt;<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;/user&gt;<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&lt;/station&gt;<br>
+      &nbsp;&nbsp;&lt;/vap&gt;<br><br>
+      &nbsp;&nbsp;&lt;limit type="gd" max="64" save="1"&gt;<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&lt;ekey type="ek"&gt;0&lt;/ekey&gt;<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&lt;name type="s:32"&gt;&lt;/name&gt;<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&lt;priority type="isi"&gt;-1&lt;/priority&gt;<br>
+      &nbsp;&nbsp;&lt;/limit&gt;<br><br>
+      &nbsp;&nbsp;&lt;filter type="gs" max="1" save="0"&gt;<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&lt;ekey type="ek"&gt;0&lt;/ekey&gt;<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&lt;rule1 type="isi"&gt;0&lt;/rule1&gt;<br>
+      &nbsp;&nbsp;&lt;/filter&gt;<br>
+      &lt;/device&gt;<br>
+      &lt;/base&gt;
+    </div>
+    <br>
+
+  </div>
+</div>
+<br>
+
+<div class="css_div_box_frame_full">
+  <div class="css_div_box_title">網頁端</div>
+  <div class="css_div_box_content">
+    <br>
+
+    進階模式的 get 指令格式.
+    <br><br>
+
+    <div class="css_div_hook" id="hook_0305_get_01"></div>
+    <table class="css_table_box">
+      <tr>
+        <td class="css_td_box">
+          <font class="css_font_b2">讀出資料 (get)</font>
+          <br><br>
+          格式 :<br>
+          <div class="css_div_block">
+            <font class="css_font_g1">"&get.$(mask_path)=$(function_name)"</font>
+          </div>
+          <br>
+          <table class="css_table_list2">
+            <tr>
+              <td class="css_td_list2_l2">$(mask_path)</td>
+              <td class="css_td_list2_r1">
+                目標的路徑 <a href="mcm_0304.html#hook_0304_mask_path_01">[詳細]</a>
+              </td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l2">$(function_name)</td>
+              <td class="css_td_list2_r1">
+                需要在 CGI 模組撰寫對應的的處理函式, 需要指定處理的函式
+              </td>
+            </tr>
+          </table>
+          <br>
+          注意事項 :<br>
+          <table class="css_table_list1">
+            <tr>
+              <td class="css_td_list1_l">01.&nbsp;</td>
+              <td class="css_td_list1_r">
+                資料存取模式可以是 mcm_session_permission.ro 或 mcm_session_permission.rw.
+              </td>
+            </tr>
+            <tr>
+              <td class="css_td_list1_l">02.&nbsp;</td>
+              <td class="css_td_list1_r">
+                CGI 端的處理函式的資料存取模式會繼承網頁端指定的模式.
+              </td>
+            </tr>
+            <tr>
+              <td class="css_td_list1_l">03.&nbsp;</td>
+              <td class="css_td_list1_r">
+                只有含有任意一個 gd 類型資料的路徑會執行指定的 CGI 端的處理函式.
+                <a href="#hook_0305_note_01">[備註-01]</a>
+              </td>
+            </tr>
+            <tr>
+              <td class="css_td_list1_l">04.&nbsp;</td>
+              <td class="css_td_list1_r">
+                如果同時設定了多個 get 指令, 而且指令之間有階層關係, 則需要注意指令的順序.
+                <a href="#hook_0305_note_02a">[備註-02a]</a>
+                <a href="#hook_0305_note_02b">[備註-02b]</a>
+              </td>
+            </tr>
+            <tr>
+              <td class="css_td_list1_l">05.&nbsp;</td>
+              <td class="css_td_list1_r">
+                只會讀出目標本身的資料, 不會讀出 child-group 的資料.
+              </td>
+            </tr>
+            <tr>
+              <td class="css_td_list1_l">06.&nbsp;</td>
+              <td class="css_td_list1_r">
+                得到的資料是 JSON 格式.
+              </td>
+            </tr>
+          </table>
+          <br>
+          範例 :<br>
+<pre class="css_pre_code">
+"&get.device.vap.*=find_5g_vap"
+取出 vap 資料時, 執行 CGI 模組的 find_5g_vap() 函式, 指定只取出需要哪幾筆資料.
+
+"&get.device.vap.*.station.*=find_mobile_station"
+取出 station 資料時, 執行 CGI 模組的 find_idle_station() 函式, 指定只取出需要哪幾筆資料.
+</pre>
+<br>
+<div class="css_div_hook" id="hook_0305_note_01"></div>
+備註-01 (只有含有任意一個 gd 類型資料的路徑會執行指定的 CGI 端的處理函式) :
+<pre class="css_pre_code">
+"&get.device=update_device"
+device 是 gs 類型, update_device() 不會被執行.
+
+"&get.device.system=get_load"
+device 和 system 都是 gs 類型, get_load() 不會被執行.
+
+"&get.device.vap.*=find_5g_vap"
+device 是 gs 類型, vap 是 gd 類型, find_5g_vap() 會被執行.
+
+"&get.device.vap.*.extra=find_hidden_vap"
+device 是 gs 類型, vap 是 gd 類型, extra 是 ds 類型, find_hidden_vap() 會被執行.
+</pre>
+<br>
+<div class="css_div_hook" id="hook_0305_note_02a"></div>
+備註-02a (如果同時設定了多個 get 指令, 而且指令之間有階層關係, 則需要注意指令的順序) :
+<pre class="css_pre_code">
+CGI 端在處理 get 指令時, 會依照路徑的階層由上到下處理.
+01. 對於路徑上非最後一層, 檢查是否已經處理過 (多條 get 指令的情況).
+    01. 沒處理過, 取出資料的索引.
+    02. 有處理過, 跳過不處理.
+02. 對於路徑上的最後一層, 檢查是否已經處理過 (多條 get 指令的情況).
+    01. 沒處理過, 取出資料的索引和內容.
+    02. 有處理過, 因為不允許有重複的指令, 所以實際上會是在其他 get 指令的非最後一層被處理,
+        也就是在其他地方已經取出資料的索引, 補上這些資料的內容.
+
+例如-01 (單條 get 指令) :
+req_cmd += "&get.device.vap.*.station.*";
+device  => 取出資料索引.
+vap     => 取出每個 device 之下的 vap 的資料索引.
+station => 取出每個 vap 之下的 station 的資料索引和內容.
+
+例如-02 (多條 get 指令) :
+req_cmd += "&get.device.vap.*" +
+           "&get.device.vap.*.station.*";
+處理 "&get.device.vap.*"
+device => 取出資料索引.
+vap    => 取出每個 device 之下的 vap 的資料索引和內容.
+處理 "&get.device.vap.*.station"
+device  => 已經處理過, 跳過.
+vap     => 已經處理過, 跳過.
+station => 取出每個 vap 之下的 station 的資料索引和內容.
+
+例如-03 (多條 get 指令) :
+req_cmd += "&get.device.vap.*.station.*" +
+           "&get.device.vap.*";
+處理 "&get.device.vap.*.station"
+device  => 取出資料索引.
+vap     => 取出每個 device 之下的 vap 的資料索引.
+station => 取出每個 vap 之下的 station 的資料索引和內容.
+處理 "&get.device.vap.*"
+device  => 已經處理過, 跳過.
+vap     => 已經處理過 (只有資料索引), 補上這些資料的內容.
+
+在一般模式的情況下多個 get 指令可以不用照順序排列 (範例 02 和 03).
+</pre>
+        </td>
+      </tr>
+    </table>
+    <br>
+
+  </div>
+</div>
+<br>
+
+<div class="css_div_box_frame_full">
+  <div class="css_div_box_title">CGI 端</div>
+  <div class="css_div_box_content">
+    <br>
+
+    模組程式要放在 <font class="css_font_b1">mint_cm/mcm_cgi/mcm_cgi_config_module</font><br>
+    沒有限制函式的放置方式, 可以依據不同的功能將各種函式分類放在不同的檔案.
+    <br><br><br>
+
+    步驟-01 : 加入基本的標頭檔 :<br>
+    <font class="css_font_p1">#include &lt;stdlib.h&gt;</font><br>
+    <font class="css_font_p1">#include "../../mcm_lib/mcm_lheader/mcm_type.h"</font><br>
+    <font class="css_font_p1">#include "../../mcm_lib/mcm_lheader/mcm_size.h"</font><br>
+    <font class="css_font_p1">#include "../../mcm_lib/mcm_lheader/mcm_connect.h"</font><br>
+    <font class="css_font_p1">#include "../../mcm_lib/mcm_lheader/mcm_return.h"</font><br>
+    <font class="css_font_p1">#include "../../mcm_lib/mcm_lheader/mcm_data_exinfo_auto.h"</font><br>
+    <font class="css_font_p1">#include "../../mcm_lib/mcm_lulib/mcm_lulib_api.h"</font><br>
+    <font class="css_font_p1">#include "mcm_cgi_module_debug.h"</font>
+    <br><br><br>
+
+    步驟-02 : 加入處函式.<br>
+    函式格式 :<br>
+    <div class="css_div_block">
+      <font class="css_font_g1">
+      int <font class="css_font_r1">$(function_name)</font>(<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;struct mcm_lulib_lib_t *this_lulib,<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;MCM_DTYPE_EK_TD part_level,<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;MCM_DTYPE_EK_TD *part_key,<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;MCM_DTYPE_EK_TD **key_list_buf,<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;MCM_DTYPE_EK_TD *key_count_buf)<br>
+      {<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;...<br>
+      }<br>
+      </font>
+    </div>
+    <br>
+
+    <font class="css_font_b1">$(function_name)</font><br>
+    自定義的函式名稱.
+    <br><br>
+
+    參數的用途 :<br>
+    <table class="css_table_list2">
+      <tr>
+        <td class="css_td_list2_t1">參數</td>
+        <td class="css_td_list2_t1">說明</td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l1">
+          <font class="css_font_r1">struct mcm_lulib_lib_t *</font><br>
+          <font class="css_font_g1">this_lulib</font>
+        </td>
+        <td class="css_td_list2_r1">
+          紀錄 mcm_lulib_api 的資料 <a href="mcm_0302.html#hook_0302_lulib_01">[詳細]</a>
+          <br><br>
+          注意事項 :<br>
+          <table class="css_table_list1">
+            <tr>
+              <td class="css_td_list1_l">01.&nbsp;</td>
+              <td class="css_td_list1_r">
+                CGI 會處理釋放使用權的動作, 不可在模組函式內對 this_lulib 使用 mcm_lulib_exit()
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l1">
+          <font class="css_font_r1">MCM_DTYPE_EK_TD</font><br>
+          <font class="css_font_g1">part_level</font>
+        </td>
+        <td class="css_td_list2_r1">
+          紀錄目前是要處理第幾層路徑 <font class="css_font_p1">(1 ~ N)</font>
+          <br><br>
+          CGI 處理路徑時會逐層處理, 如果該層路徑是 gd 類型就會呼叫模組函式, 並指出現在是第幾層路徑,
+          如果路徑上有多個 gd 類型則會呼叫多次模組函式
+          <br><br>
+          例如 :
+<pre class="css_pre_code">
+"&get.device.vap.*=find_5g_vap"
+device 是第 1 層, vap 是第 2 層,
+處理 vap 時因為是 gd 類型所以會呼叫模組函式, part_level = 2.
+
+"&get.device.vap.*.extra=find_hidden_vap"
+處理 vap 時因為是 gd 類型所以會呼叫模組函式, part_level = 2,
+處理 extra 時因為是 gs 類型所以不會呼叫模組函式.
+
+"&get.device.vap.*.station=find_mobile_station"
+處理 vap 時因為是 gd 類型所以會呼叫模組函式, part_level = 2,
+處理 station 時因為是 gd 類型所以會呼叫模組函式, part_level = 3.
+</pre>
+        </td>
+      </tr>
+
+      <tr>
+        <td class="css_td_list2_l1">
+          <font class="css_font_r1">MCM_DTYPE_EK_TD *</font><br>
+          <font class="css_font_g1">part_key</font>
+        </td>
+        <td class="css_td_list2_r1">
+          紀錄目前處理的目標的上面幾層的 key 值
+          <br><br>
+          如果目標的上層是 gd 類型, 則 CGI 在處理目標層時會根據上層的資料筆數呼叫多次模組函式,
+          每次呼叫會指出上層的資料的 key 值
+          <br><br>
+          注意事項 :<br>
+          <table class="css_table_list1">
+            <tr>
+              <td class="css_td_list1_l">01.&nbsp;</td>
+              <td class="css_td_list1_r">
+                part_key 是一維陣列, 元素數目等於 part_level, 每個元素的 key 值依據該層的類型而不同,<br>
+                如果是最後一個元素, 則是 0,<br>
+                如果不是最後一個元素, 而該層是 gs 類型, 則是 0,<br>
+                如果不是最後一個元素, 而該層是 gd 類型, 則是該層目前處理的 key 值<br>
+              </td>
+            </tr>
+          </table>
+          <br>
+          例如 :
+<pre class="css_pre_code">
+"&get.device.vap.*=find_5g_vap"
+# 處理 vap 時呼叫模組函式,
+  vap 的上層 device 是 gs 類型固定只有一筆資料, 所以只會呼叫一次 find_5g_vap(),
+- 第 1 次呼叫 find_5g_vap() :
+  part_level 是 2, part_key 的陣列大小是 2, 內容 :
+  part_key[0] 表示 device 的 key 值, 因為 device 是 gs 類型所以是 0,
+  part_key[1] 是最後一個元素, 固定是 0.
+
+"&get.device.vap.*.station.*=find_mobile_station"
+# 處理 vap 時呼叫模組函式,
+  vap 的上層 device 是 gs 類型固定只有一筆資料, 所以只會呼叫一次 find_mobile_station(),
+- 處理 vap 時第 1 次呼叫 find_mobile_station() :
+  part_level = 2, part_key[] = 2 :
+  part_key[0] = 0,
+  # 處理 station 時呼叫模組函式,
+    station 的上層 vap 是 gd 類型有多筆資料, 這時會根據 vap 的資料筆數呼叫多次 find_mobile_station(),
+    假設 vap 有 3 筆資料, key 值分別是 8, 15, 23,
+  = 處理  station 時第 1 次呼叫 find_mobile_station() (device.vap.#8) :
+    part_level = 3, part_key[] = 3 :
+    part_key[0] = 0,
+    part_key[1] = 8,
+  = 處理  station 時第 2 次呼叫 find_mobile_station() (device.vap.#15) :
+    part_level = 3, part_key[] = 3 :
+    part_key[0] = 0,
+    part_key[1] = 15,
+  = 處理  station 時第 3 次呼叫 find_mobile_station() (device.vap.#23) :
+    part_level = 3, part_key[] = 3 :
+    part_key[0] = 0,
+    part_key[1] = 23.
+
+"&get.device.vap.*.station.*.user.*=find_online_user"
+假設資料庫內有這幾筆資料 :
+device.vap.#8
+device.vap.#8.station.#11
+device.vap.#8.station.#13
+device.vap.#15
+device.vap.#15.station.#24
+device.vap.#23
+呼叫模組函式的流程 :
+# 處理 vap, 呼叫 1 次 find_online_user(),
+- 處理 vap 時第 1 次呼叫 find_online_user(),
+  part_level = 2, part_key[] = 2 :
+  part_key[0] = 0,
+  # 處理 station, 呼叫 3 次 find_online_user(),
+  = 處理 station 時第 1 次呼叫 find_online_user() (device.vap.#8),
+    part_level = 3, part_key[] = 3 :
+    part_key[0] = 0,
+    part_key[1] = 8,
+    # 處理 user, 呼叫 2 次 find_online_user(),
+    + 處理 user 時第 1 次呼叫 find_online_user() (device.vap.#8.station.#11),
+      part_level = 4, part_key[] = 4 :
+      part_key[0] = 0,
+      part_key[1] = 8,
+      part_key[2] = 11,
+    + 處理 user 時第 2 次呼叫 find_online_user() (device.vap.#8.station.#13),
+      part_level = 4, part_key[] = 4 :
+      part_key[0] = 0,
+      part_key[1] = 8,
+      part_key[2] = 13,
+  = 處理 station 時第 2 次呼叫 find_online_user() (device.vap.#15),
+    part_level = 3, part_key[] = 3 :
+    part_key[0] = 0,
+    part_key[1] = 15,
+    # 處理 user, 呼叫 1 次 find_online_user(),
+    + 處理 user 時第 1 次呼叫 find_online_user() (device.vap.#15.station.#24),
+      part_level = 4, part_key[] = 4 :
+      part_key[0] = 0,
+      part_key[1] = 15,
+      part_key[2] = 24,
+  = 處理 station 時第 3 次呼叫 find_online_user() (device.vap.#23),
+    part_level = 3, part_key[] = 3 :
+    part_key[0] = 0,
+    part_key[1] = 23,
+    # 處理 user, 呼叫 0 次 find_online_user()
+</pre>
+        </td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l1">
+          <font class="css_font_r1">MCM_DTYPE_EK_TD **</font><br>
+          <font class="css_font_g1">key_list_buf</font>
+        </td>
+        <td class="css_td_list2_r1">
+          資料緩衝, 回報要取出的資料的 key 值
+        </td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l1">
+          <font class="css_font_r1">MCM_DTYPE_EK_TD *</font><br>
+          <font class="css_font_g1">key_count_buf</font>
+        </td>
+        <td class="css_td_list2_r1">
+          資料緩衝, 回報要取出的資料筆數
+        </td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l1">
+          <font class="css_font_r1"></font><br>
+          <font class="css_font_g1"></font>
+        </td>
+        <td class="css_td_list2_r1">
+          key_list_buf 和 key_count_buf 的注意事項 :<br>
+          <table class="css_table_list1">
+            <tr>
+              <td class="css_td_list1_l">01.&nbsp;</td>
+              <td class="css_td_list1_r">
+                需要在模組函式內手動配置一維陣列的空間給 key_list_buf, 每個元素紀錄要取出的資料的 key 值,
+                CGI 處理完後會釋放此空間
+              </td>
+            </tr>
+            <tr>
+              <td class="css_td_list1_l">02.&nbsp;</td>
+              <td class="css_td_list1_r">
+                CGI 端要輸出的資料筆數會以 key_count_buf 為準,
+                配置給 key_list_buf 的元素大小空間可以大於 key_count_buf
+              </td>
+            </tr>
+            <tr>
+              <td class="css_td_list1_l">03.&nbsp;</td>
+              <td class="css_td_list1_r">
+                key_list_buf 內每個元素紀錄的 key 值不可重複
+              </td>
+            </tr>
+            <tr>
+              <td class="css_td_list1_l">04.&nbsp;</td>
+              <td class="css_td_list1_r">
+                允許 key_list_buf != NULL 而 key_count_buf = 0 的情況
+              </td>
+            </tr>
+            <tr>
+              <td class="css_td_list1_l">05.&nbsp;</td>
+              <td class="css_td_list1_r">
+                如果要回報的資料筆數是 0, 則不用設定 key_count_buf 和 key_list_buf
+              </td>
+            </tr>
+          </table>
+          <br>
+          例如 :
+<pre class="css_pre_code">
+// 假設 vap 有 #8, #15, #23, #45 這幾筆資料, 現在要回報 CGI 取出前 3 筆資料.
+int find_5g_vap(
+    struct mcm_lulib_lib_t *this_lulib,
+    MCM_DTYPE_EK_TD part_level,
+    MCM_DTYPE_EK_TD *part_key,
+    MCM_DTYPE_EK_TD **key_list_buf,
+    MCM_DTYPE_EK_TD *key_count_buf)
+{
+    MCM_DTYPE_EK_TD rep_count, *rep_list;
+
+    rep_count = 3;
+
+    rep_list = malloc(sizeof(MCM_DTYPE_EK_TD) * rep_count);
+    rep_list[0] = 8;
+    rep_list[1] = 15;
+    rep_list[2] = 23;
+
+    *key_list_buf = rep_list;
+    *key_count_buf = rep_count;
+
+    return MCM_CCODE_PASS;
+}
+
+// 如果要回報 0 筆資料.
+int find_5g_vap(
+    struct mcm_lulib_lib_t *this_lulib,
+    MCM_DTYPE_EK_TD part_level,
+    MCM_DTYPE_EK_TD *part_key,
+    MCM_DTYPE_EK_TD **key_list_buf,
+    MCM_DTYPE_EK_TD *key_count_buf)
+{
+    // 不用設定 key_list_buf 和 key_count_buf.
+
+    return MCM_CCODE_PASS;
+}
+</pre>
+        </td>
+      </tr>
+    </table>
+    <br>
+
+    模組函式的回傳值 :<br>
+    <table class="css_table_list2">
+      <tr>
+        <td class="css_td_list2_t1">回傳</td>
+        <td class="css_td_list2_t1">說明</td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l2">= MCM_RCODE_PASS</td>
+        <td class="css_td_list2_r1">成功</td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l2">&lt; MCM_RCODE_PASS</td>
+        <td class="css_td_list2_r1">錯誤</td>
+      </tr>
+    </table>
+    <br><br>
+
+    其他 : 在 console 顯示除錯訊息.<br>
+    在 CGI 使用 printf() 會被網頁伺服器導向輸出給瀏覽器, 訊息要寫入 tty 設備才能顯示.
+    <br><br>
+
+    在模組函式的開頭加入打開 tty 設備 :<br>
+    <div class="css_div_block">
+      <font class="css_font_g1">
+      #if MCM_CCMEMODE | MCM_CCMDMODE<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;dbg_tty_fd = open(MCM_DBG_DEV_TTY, O_WRONLY);<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;if(dbg_tty_fd == -1)<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;return MCM_RCODE_CGI_CONFIG_INTERNAL_ERROR;<br>
+      #endif
+      </font>
+    </div>
+    在離開模組函式時加入關閉 tty 設備 :<br>
+    <div class="css_div_block">
+      <font class="css_font_g1">
+      #if MCM_CCMEMODE | MCM_CCMDMODE<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;close(dbg_tty_fd);<br>
+      #endif
+      </font>
+    </div>
+    <br>
+
+    <font class="css_font_b1">[MCM_CCMEMODE]</font><br>
+    定義, 是否要顯示錯誤訊息.<br>
+    開關的值的定義在 <font class="css_font_b1">mint_cm/mcm_lib/mcm_lheader/mcm_debug.h</font>.
+    <br><br>
+
+    <font class="css_font_b1">[MCM_CCMDMODE]</font><br>
+    定義, 是否要顯示除錯訊息.<br>
+    開關的值的定義在 <font class="css_font_b1">mint_cm/mcm_lib/mcm_lheader/mcm_debug.h</font>.
+    <br><br>
+
+    <font class="css_font_b1">[MCM_DBG_DEV_TTY]</font><br>
+    定義, console 設備的路徑.<br>
+    路徑的值定義在 <font class="css_font_b1">mint_cm/mcm_lib/mcm_lheader/mcm_debug.h</font>.
+    <br><br>
+
+    <font class="css_font_b1">[int dbg_tty_fd]</font><br>
+    變數, 紀錄開啟的設備的檔案編號.<br>
+    變數的宣告定義在 <font class="css_font_b1">mcm_cgi_module_debug.h</font>.
+    <br><br>
+
+    <font class="css_font_b1">[char dbg_msg_buf[MCM_DBG_BUFFER_SIZE]]</font><br>
+    變數, 儲存訊息的緩衝.<br>
+    變數的宣告定義在 <font class="css_font_b1">mcm_cgi_module_debug.h</font>.<br>
+    緩衝大小的定義在 <font class="css_font_b1">mint_cm/mcm_lib/mcm_lheader/mcm_debug.h</font>.
+    <br><br>
+
+    <div class="css_div_hook" id="hook_0305_MCM_CCMEMSG_01"></div>
+    <font class="css_font_b1">[MCM_CCMEMSG(msg_fmt, msg_args...)]</font><br>
+    巨集, 顯示訊息 (錯誤類), 用法同 <font class="css_font_b1">printf()</font>.<br>
+    巨集的定義在 <font class="css_font_b1">mcm_cgi_module_debug.h</font>.
+    <br><br>
+
+    <div class="css_div_hook" id="hook_0305_MCM_CCMDMSG_01"></div>
+    <font class="css_font_b1">[MCM_CCMDMSG(msg_fmt, msg_args...)]</font><br>
+    巨集, 顯示訊息 (除錯類), 用法同 <font class="css_font_b1">printf()</font>.<br>
+    巨集的定義在 <font class="css_font_b1">mcm_cgi_module_debug.h</font>.
+    <br><br><br>
+
+    範例-01 :
+<pre class="css_pre_code">
+網頁端
+
+&lt;html&gt;
+&lt;head&gt;
+&lt;meta http-equiv="cache-control" content="no-cache"&gt;
+&lt;meta http-equiv="content-type" content="text/html; charset=utf-8"&gt;
+&lt;script type="text/javascript" src="jquery_main.js"&gt;&lt;/script&gt;
+&lt;script type="text/javascript" src="json3.js"&gt;&lt;/script&gt;
+&lt;script type="text/javascript" src="mcm_jslib_api.js"&gt;&lt;/script&gt;
+&lt;script type="text/javascript" src="mcm_jslib_data_info_auto.js"&gt;&lt;/script&gt;
+&lt;script type="text/javascript"&gt;
+function main_init()
+{
+    var self_jslib, req_cmd, rep_ret, mcm_dv, i;
+
+    // 找出使用 5G 設定的 vap.
+    req_cmd = "&get.device.vap.*=find_5g_vap";
+
+    self_jslib = new mcm_jslib_lib_t();
+    self_jslib.socket_path = "@mintcm";
+    self_jslib.session_permission = mcm_session_permission.ro;
+    self_jslib.session_stack_size = 0;
+    self_jslib.request_command = req_cmd;
+    self_jslib.data_format = mcm_data_format.all_default;
+    self_jslib.other_query = "";
+    rep_ret = mcm_jslib_obtain_config(self_jslib);
+    if(rep_ret.rep_code < mcm_return_code.pass)
+    {
+        alert("call mcm_jslib_obtain_config() fail" +
+              "[" + rep_ret.rep_code + "]");
+        mcm_jslib_run_script(rep_ret.rep_data);
+        return;
+    }
+    mcm_dv = JSON.parse(rep_ret.rep_data);
+
+    for(i = 0; i < mcm_dv.device.vap.length; i++)
+    {
+        console.log("device.vap.@" + (i + 1) + ".ekey = " +
+                    mcm_dv.device.vap[i].ekey);
+        console.log("device.vap.@" + (i + 1) + ".ssid = " +
+                    mcm_dv.device.vap[i].ssid);
+        console.log("device.vap.@" + (i + 1) + ".channel = " +
+                    mcm_dv.device.vap[i].channel);
+    }
+}
+&lt;/script&gt;
+&lt;/head&gt;
+&lt;body&gt;
+  &lt;button type="button" onclick="main_init()"&gt;test&lt;/button&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+</pre>
+<pre class="css_pre_code">
+CGI 端 (模組函式)
+
+#include &lt;errno.h&gt;
+#include &lt;stdlib.h&gt;
+#include "../../mcm_lib/mcm_lheader/mcm_type.h"
+#include "../../mcm_lib/mcm_lheader/mcm_size.h"
+#include "../../mcm_lib/mcm_lheader/mcm_connect.h"
+#include "../../mcm_lib/mcm_lheader/mcm_return.h"
+#include "../../mcm_lib/mcm_lheader/mcm_data_exinfo_auto.h"
+#include "../../mcm_lib/mcm_lulib/mcm_lulib_api.h"
+#include "mcm_cgi_module_debug.h"
+
+int find_5g_vap(
+    struct mcm_lulib_lib_t *this_lulib,
+    MCM_DTYPE_USIZE_TD part_level,
+    MCM_DTYPE_EK_TD *part_key,
+    MCM_DTYPE_EK_TD **key_list_buf,
+    MCM_DTYPE_EK_TD *key_count_buf)
+{
+    int fret;
+    char *path1, path2[MCM_PATH_MAX_LENGTH];
+    struct mcm_dv_device_vap_t *vap_v;
+    MCM_DTYPE_EK_TD vap_idx, vap_count, *rep_list = NULL, rep_count = 0;
+
+#if MCM_CCMEMODE | MCM_CCMDMODE
+    dbg_tty_fd = open(MCM_DBG_DEV_TTY, O_WRONLY);
+    if(dbg_tty_fd == -1)
+        return MCM_RCODE_CGI_CONFIG_INTERNAL_ERROR;
+#endif
+
+    MCM_CCMDMSG("part_level = %u", part_level);
+
+    // 讀出所有的 device.vap.*
+    path1 = "device.vap.*";
+    fret = mcm_lulib_get_all_entry(this_lulib, path1, &vap_count, (void **) &vap_v);
+    if(fret < MCM_RCODE_PASS)
+    {
+        MCM_CCMEMSG("call mcm_lulib_get_all_entry(%s) fail", path1);
+        goto FREE_01;
+    }
+
+    if(vap_count > 0)
+    {
+        // 配置空間放置 key (為了方便操作直接配置 vap_count 的數目).
+        rep_list = (MCM_DTYPE_EK_TD *) malloc(sizeof(MCM_DTYPE_EK_TD) * vap_count);
+        if(rep_list == NULL)
+        {
+            MCM_CCMEMSG("call malloc() fail [%s]", strerror(errno));
+            goto FREE_02;
+        }
+
+        for(vap_idx = 0; vap_idx < vap_count; vap_idx++)
+        {
+            snprintf(path2, sizeof(path2), "device.vap.#%u", vap_v[vap_idx].ekey);
+            MCM_CCMDMSG("%s.ssid = " MCM_DTYPE_S_PF, path2, vap_v[vap_idx].ssid);
+            MCM_CCMDMSG("%s.channel = " MCM_DTYPE_IUI_PF, path2, vap_v[vap_idx].channel);
+
+            // 檢查是否符合, 是的話把 key 加入到 rep_list.
+            if(vap_v[vap_idx].channel >= 36)
+            {
+                MCM_CCMDMSG("this vap is match");
+                rep_list[rep_count] = vap_v[vap_idx].ekey;
+                rep_count++;
+            }
+            else
+            {
+                MCM_CCMDMSG("this vap is not match");
+            }
+        }
+    }
+
+    *key_list_buf = rep_list;
+    *key_count_buf = rep_count;
+
+FREE_02:
+    free(vap_v);
+FREE_01:
+#if MCM_CCMEMODE | MCM_CCMDMODE
+    close(dbg_tty_fd);
+#endif
+    return fret;
+}
+</pre>
+    <br>
+
+    範例-02 :
+<pre class="css_pre_code">
+網頁端
+
+&lt;html&gt;
+&lt;head&gt;
+&lt;meta http-equiv="cache-control" content="no-cache"&gt;
+&lt;meta http-equiv="content-type" content="text/html; charset=utf-8"&gt;
+&lt;script type="text/javascript" src="jquery_main.js"&gt;&lt;/script&gt;
+&lt;script type="text/javascript" src="json3.js"&gt;&lt;/script&gt;
+&lt;script type="text/javascript" src="mcm_jslib_api.js"&gt;&lt;/script&gt;
+&lt;script type="text/javascript" src="mcm_jslib_data_info_auto.js"&gt;&lt;/script&gt;
+&lt;script type="text/javascript"&gt;
+function main_init()
+{
+    var self_jslib, req_cmd = "", rep_ret, mcm_dv, i, j;
+
+    // 把要過濾的規則寫入到資料庫, 之後 CGI 端模組函式再從資料庫讀出過濾規則.
+    req_cmd += "&set.device.filter.rule1=" +
+               $("#rule_select").val();
+
+    // 找出顯示或隱藏的 vap 以及之下的 extra 資料和 station 資料.
+    req_cmd += "&get.device.vap.*=find_visible_or_hidden_vap" +
+               // extra 和 station 路徑和 vap 路徑有階層關係, 需要注意順序,
+               // 因為是要找出指定的 vap 資料以及之下的 station 資料,
+               // 所以 extra 和 station 指令必須在 vap 指令之後.
+               "&get.device.vap.*.extra" +
+               "&get.device.vap.*.station.*";
+
+    self_jslib = new mcm_jslib_lib_t();
+    self_jslib.socket_path = "@mintcm";
+    self_jslib.session_permission = mcm_session_permission.rw;
+    self_jslib.session_stack_size = 0;
+    self_jslib.request_command = req_cmd;
+    self_jslib.data_format = mcm_data_format.all_default;
+    self_jslib.other_query = "";
+    rep_ret = mcm_jslib_obtain_config(self_jslib);
+    if(rep_ret.rep_code < mcm_return_code.pass)
+    {
+        alert("call mcm_jslib_obtain_config() fail" +
+              "[" + rep_ret.rep_code + "]");
+        mcm_jslib_run_script(rep_ret.rep_data);
+        return;
+    }
+    mcm_dv = JSON.parse(rep_ret.rep_data);
+
+    for(i = 0; i < mcm_dv.device.vap.length; i++)
+    {
+        console.log("device.vap.@" + (i + 1) + ".ekey = " +
+                    mcm_dv.device.vap[i].ekey);
+        console.log("device.vap.@" + (i + 1) + ".ssid = " +
+                    mcm_dv.device.vap[i].ssid);
+        console.log("device.vap.@" + (i + 1) + ".channel = " +
+                    mcm_dv.device.vap[i].channel);
+
+        // 只會取得符合規則的 vap 的 extra.
+        console.log("device.vap.@" + (i + 1) + ".extra.hidden = " +
+                    mcm_dv.device.vap[i].extra.hidden);
+        console.log("device.vap.@" + (i + 1) + ".extra.tx_power = " +
+                    mcm_dv.device.vap[i].extra.tx_power);
+
+        // 只會取得符合規則的 vap 的 station.
+        for(j = 0; j < mcm_dv.device.vap[i].station.length; j++)
+        {
+            console.log("device.vap.@" + (i + 1) + ".station.@" + (j + 1) + ".ekey = " +
+                        mcm_dv.device.vap[i].station[j].ekey);
+            console.log("device.vap.@" + (i + 1) + ".station.@" + (j + 1) + ".mac_addr = " +
+                        mcm_dv.device.vap[i].station[j].mac_addr);
+            console.log("device.vap.@" + (i + 1) + ".station.@" + (j + 1) + ".rule = " +
+                        mcm_dv.device.vap[i].station[j].rule);
+        }
+    }
+}
+&lt;/script&gt;
+&lt;/head&gt;
+&lt;body&gt;
+  &lt;select id="rule_select"&gt;
+    &lt;option value="0"&gt;list visible vap&lt;/option&gt;
+    &lt;option value="1"&gt;list hidden vap&lt;/option&gt;
+  &lt;/select&gt;
+  &lt;br&gt;
+  &lt;button type="button" onclick="main_init()"&gt;test&lt;/button&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+</pre>
+<pre class="css_pre_code">
+CGI 端 (模組函式)
+
+#include &lt;errno.h&gt;
+#include &lt;stdlib.h&gt;
+#include "../../mcm_lib/mcm_lheader/mcm_type.h"
+#include "../../mcm_lib/mcm_lheader/mcm_size.h"
+#include "../../mcm_lib/mcm_lheader/mcm_connect.h"
+#include "../../mcm_lib/mcm_lheader/mcm_return.h"
+#include "../../mcm_lib/mcm_lheader/mcm_data_exinfo_auto.h"
+#include "../../mcm_lib/mcm_lulib/mcm_lulib_api.h"
+#include "mcm_cgi_module_debug.h"
+
+int find_visible_or_hidden_vap(
+    struct mcm_lulib_lib_t *this_lulib,
+    MCM_DTYPE_USIZE_TD part_level,
+    MCM_DTYPE_EK_TD *part_key,
+    MCM_DTYPE_EK_TD **key_list_buf,
+    MCM_DTYPE_EK_TD *key_count_buf)
+{
+    int fret;
+    char *path1, path2[MCM_PATH_MAX_LENGTH];
+    struct mcm_dv_device_vap_extra_t extra_v;
+    MCM_DTYPE_ISI_TD get_hidden;
+    MCM_DTYPE_EK_TD vap_idx, vap_count, *vap_key, *rep_list = NULL, rep_count = 0;
+
+#if MCM_CCMEMODE | MCM_CCMDMODE
+    dbg_tty_fd = open(MCM_DBG_DEV_TTY, O_WRONLY);
+    if(dbg_tty_fd == -1)
+        return MCM_RCODE_CGI_CONFIG_INTERNAL_ERROR;
+#endif
+
+    MCM_CCMDMSG("part_level = %u", part_level);
+
+    // 讀出規則.
+    path1 = "device.filter.rule1";
+    fret = mcm_lulib_get_alone(this_lulib, path1, &get_hidden);
+    if(fret < MCM_RCODE_PASS)
+    {
+        MCM_CCMEMSG("call mcm_lulib_get_alone(%s) fail", path1);
+        goto FREE_01;
+    }
+    MCM_CCMDMSG("find %s vap", get_hidden == 0 ? "visible" : "hidden");
+
+    //  讀出 device.vap.* 所有的 key, 再逐一讀出 device.vap.*.extra
+    path1 = "device.vap.*";
+    fret = mcm_lulib_get_all_key(this_lulib, path1, &vap_count, (MCM_DTYPE_EK_TD **) &vap_key);
+    if(fret < MCM_RCODE_PASS)
+    {
+        MCM_CCMEMSG("call mcm_lulib_get_all_key(%s) fail", path1);
+        goto FREE_01;
+    }
+
+    if(vap_count > 0)
+    {
+        // 配置空間放置 key.
+        rep_list = (MCM_DTYPE_EK_TD *) malloc(sizeof(MCM_DTYPE_EK_TD) * vap_count);
+        if(rep_list == NULL)
+        {
+            MCM_CCMEMSG("call malloc() fail [%s]", strerror(errno));
+            goto FREE_02;
+        }
+
+        for(vap_idx = 0; vap_idx < vap_count; vap_idx++)
+        {
+            // 逐一讀出 device.vap.*.extra
+            snprintf(path2, sizeof(path2), "device.vap.#%u.extra", vap_key[vap_idx]);
+            fret = mcm_lulib_get_entry(this_lulib, path2, &extra_v);
+            if(fret < MCM_RCODE_PASS)
+            {
+                MCM_CCMEMSG("call mcm_lulib_get_entry(%s) fail", path2);
+                goto FREE_02;
+            }
+
+            MCM_CCMDMSG("%s.hidden = " MCM_DTYPE_ISC_PF, path2, extra_v.hidden);
+            MCM_CCMDMSG("%s.tx_power = " MCM_DTYPE_ISS_PF, path2, extra_v.tx_power);
+
+            // 檢查是否符合.
+            if(get_hidden == extra_v.hidden)
+            {
+                MCM_CCMDMSG("this vap is match");
+                rep_list[rep_count] = vap_key[vap_idx];
+                rep_count++;
+            }
+            else
+            {
+                MCM_CCMDMSG("this vap is not match");
+            }
+        }
+    }
+
+    *key_list_buf = rep_list;
+    *key_count_buf = rep_count;
+
+FREE_02:
+    free(vap_key);
+FREE_01:
+#if MCM_CCMEMODE | MCM_CCMDMODE
+    close(dbg_tty_fd);
+#endif
+    return fret;
+}
+</pre>
+    <br>
+
+    範例-03 :
+<pre class="css_pre_code">
+網頁端
+
+&lt;html&gt;
+&lt;head&gt;
+&lt;meta http-equiv="cache-control" content="no-cache"&gt;
+&lt;meta http-equiv="content-type" content="text/html; charset=utf-8"&gt;
+&lt;script type="text/javascript" src="jquery_main.js"&gt;&lt;/script&gt;
+&lt;script type="text/javascript" src="json3.js"&gt;&lt;/script&gt;
+&lt;script type="text/javascript" src="mcm_jslib_api.js"&gt;&lt;/script&gt;
+&lt;script type="text/javascript" src="mcm_jslib_data_info_auto.js"&gt;&lt;/script&gt;
+&lt;script type="text/javascript"&gt;
+function main_init()
+{
+    var self_jslib, req_cmd = "", rep_ret, mcm_dv, i, j;
+
+    // 把要過濾的規則寫入到資料庫, 之後 CGI 端模組函式再從資料庫讀出過濾規則.
+    req_cmd += "&set.device.filter.rule1=" +
+               $("#rule_select").val();
+
+    // 找出符合規則類型的 station 以及所屬的 vap.
+    req_cmd += "&get.device.vap.*.station.*=find_match_rule_station" +
+               // vap 指令必須在 station 指令後面,
+               // 這樣 vap 部分才會只取出符合規則的 station 所屬的 vap.
+               "&get.device.vap.*";
+
+    self_jslib = new mcm_jslib_lib_t();
+    self_jslib.socket_path = "@mintcm";
+    self_jslib.session_permission = mcm_session_permission.rw;
+    self_jslib.session_stack_size = 0;
+    self_jslib.request_command = req_cmd;
+    self_jslib.data_format = mcm_data_format.all_default;
+    self_jslib.other_query = "";
+    rep_ret = mcm_jslib_obtain_config(self_jslib);
+    if(rep_ret.rep_code < mcm_return_code.pass)
+    {
+        alert("call mcm_jslib_obtain_config() fail" +
+              "[" + rep_ret.rep_code + "]");
+        mcm_jslib_run_script(rep_ret.rep_data);
+        return;
+    }
+    mcm_dv = JSON.parse(rep_ret.rep_data);
+
+    for(i = 0; i < mcm_dv.device.vap.length; i++)
+    {
+        console.log("device.vap.@" + (i + 1) + ".ekey = " +
+                    mcm_dv.device.vap[i].ekey);
+        console.log("device.vap.@" + (i + 1) + ".ssid = " +
+                    mcm_dv.device.vap[i].ssid);
+        console.log("device.vap.@" + (i + 1) + ".channel = " +
+                    mcm_dv.device.vap[i].channel);
+
+        for(j = 0; j < mcm_dv.device.vap[i].station.length; j++)
+        {
+            console.log("device.vap.@" + (i + 1) + ".station.@" + (j + 1) + ".ekey = " +
+                        mcm_dv.device.vap[i].station[j].ekey);
+            console.log("device.vap.@" + (i + 1) + ".station.@" + (j + 1) + ".mac_addr = " +
+                        mcm_dv.device.vap[i].station[j].mac_addr);
+            console.log("device.vap.@" + (i + 1) + ".station.@" + (j + 1) + ".rule = " +
+                        mcm_dv.device.vap[i].station[j].rule);
+        }
+    }
+}
+&lt;/script&gt;
+&lt;/head&gt;
+&lt;body&gt;
+  &lt;select id="rule_select"&gt;
+    &lt;option value="1"&gt;find phone (rule = 1) station&lt;/option&gt;
+    &lt;option value="2"&gt;find mobile (rule = 2) station&lt;/option&gt;
+    &lt;option value="3"&gt;find geme (rule = 3) station&lt;/option&gt;
+    &lt;option value="4"&gt;find stream (rule = 4) station&lt;/option&gt;
+    &lt;option value="5"&gt;find remote (rule = 5) station&lt;/option&gt;
+    &lt;option value="6"&gt;find control (rule = 6) station&lt;/option&gt;
+    &lt;option value="7"&gt;find security (rule = 7) station&lt;/option&gt;
+  &lt;/select&gt;
+  &lt;br&gt;
+  &lt;button type="button" onclick="main_init()"&gt;test&lt;/button&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+</pre>
+<pre class="css_pre_code">
+CGI 端 (模組函式)
+
+#include &lt;errno.h&gt;
+#include &lt;stdlib.h&gt;
+#include "../../mcm_lib/mcm_lheader/mcm_type.h"
+#include "../../mcm_lib/mcm_lheader/mcm_size.h"
+#include "../../mcm_lib/mcm_lheader/mcm_connect.h"
+#include "../../mcm_lib/mcm_lheader/mcm_return.h"
+#include "../../mcm_lib/mcm_lheader/mcm_data_exinfo_auto.h"
+#include "../../mcm_lib/mcm_lulib/mcm_lulib_api.h"
+#include "mcm_cgi_module_debug.h"
+
+int find_match_rule_station(
+    struct mcm_lulib_lib_t *this_lulib,
+    MCM_DTYPE_USIZE_TD part_level,
+    MCM_DTYPE_EK_TD *part_key,
+    MCM_DTYPE_EK_TD **key_list_buf,
+    MCM_DTYPE_EK_TD *key_count_buf)
+{
+    int fret;
+    char *path1, path2[MCM_PATH_MAX_LENGTH];
+    struct mcm_dv_device_vap_station_t *station_v;
+    MCM_DTYPE_ISI_TD target_rule;
+    MCM_DTYPE_EK_TD vap_idx, vap_count, *vap_key = NULL, target_vap, station_idx, station_count,
+        rep_idx, *rep_list = NULL, rep_count = 0;
+
+#if MCM_CCMEMODE | MCM_CCMDMODE
+    dbg_tty_fd = open(MCM_DBG_DEV_TTY, O_WRONLY);
+    if(dbg_tty_fd == -1)
+        return MCM_RCODE_CGI_CONFIG_INTERNAL_ERROR;
+#endif
+
+    MCM_CCMDMSG("part_level = %u", part_level);
+
+    // 讀出規則.
+    path1 = "device.filter.rule1";
+    fret = mcm_lulib_get_alone(this_lulib, path1, &target_rule);
+    if(fret < MCM_RCODE_PASS)
+    {
+        MCM_CCMEMSG("call mcm_lulib_get_alone(%s) fail", path1);
+        goto FREE_01;
+    }
+    MCM_CCMDMSG("find rule (" MCM_DTYPE_ISI_PF ") station", target_rule);
+
+    // 處理 device.vap.*.station.* 的 vap 部分,
+    // 回報符合規則的 station 所屬的 vap.
+    if(part_level == 2)
+    {
+        MCM_CCMDMSG("process vap part");
+
+        //  讀出 device.vap.* 所有的 key, 再逐一讀出 device.vap.*.station.*
+        path1 = "device.vap.*";
+        fret = mcm_lulib_get_all_key(this_lulib, path1, &vap_count, (MCM_DTYPE_EK_TD **) &vap_key);
+        if(fret < MCM_RCODE_PASS)
+        {
+            MCM_CCMEMSG("call mcm_lulib_get_all_key(%s) fail", path1);
+            goto FREE_01;
+        }
+
+        if(vap_count > 0)
+        {
+            // 配置空間放置 key.
+            rep_list = (MCM_DTYPE_EK_TD *) malloc(sizeof(MCM_DTYPE_EK_TD) * vap_count);
+            if(rep_list == NULL)
+            {
+                MCM_CCMEMSG("call malloc() fail [%s]", strerror(errno));
+                goto FREE_02;
+            }
+
+            for(vap_idx = 0; vap_idx < vap_count; vap_idx++)
+            {
+                // 讀出 device.vap.#{vap_key[i]}.station.*
+                snprintf(path2, sizeof(path2), "device.vap.#%u.station.*", vap_key[vap_idx]);
+                fret = mcm_lulib_get_all_entry(this_lulib, path2, &station_count,
+                                               (void **) &station_v);
+                if(fret < MCM_RCODE_PASS)
+                {
+                    MCM_CCMEMSG("call mcm_lulib_get_all_entry(%s) fail", path2);
+                    goto FREE_03;
+                }
+
+                for(station_idx = 0; station_idx < station_count; station_idx++)
+                {
+                    snprintf(path2, sizeof(path2), "device.vap.#%u.station.#%u",
+                             vap_key[vap_idx], station_v[station_idx].ekey);
+                    MCM_CCMDMSG("%s.mac_addr = " MCM_DTYPE_S_PF,
+                                path2, station_v[station_idx].mac_addr);
+                    MCM_CCMDMSG("%s.rule = " MCM_DTYPE_RK_PF,
+                                path2, station_v[station_idx].rule);
+
+                    //檢查是否符合.
+                    if(target_rule == station_v[station_idx].rule)
+                    {
+                        MCM_CCMDMSG("this vap is match");
+                        // 檢查是否已經在表內, 沒有才加入.
+                        for(rep_idx = 0; rep_idx < rep_count; rep_idx++)
+                            if(rep_list[rep_idx] == vap_key[vap_idx])
+                                break;
+                        if(rep_idx == rep_count)
+                        {
+                            rep_list[rep_count] = vap_key[vap_idx];
+                            rep_count++;
+                        }
+                    }
+                    else
+                    {
+                        MCM_CCMDMSG("this vap is not match");
+                    }
+                }
+
+                free(station_v);
+            }
+        }
+    }
+    else
+    // 處理 device.vap.*.station.* 的 station 部分.
+    // 回報處理的 vap 內有哪些 station 符合.
+    if(part_level == 3)
+    {
+        MCM_CCMDMSG("process station part");
+        MCM_CCMDMSG("device.vap.#%u.station.*", part_key[1]);
+
+        target_vap = part_key[1];
+
+        // 讀出 device.vap.#{target_vap}.station.*
+        snprintf(path2, sizeof(path2), "device.vap.#%u.station.*", target_vap);
+        fret = mcm_lulib_get_all_entry(this_lulib, path2, &station_count, (void **) &station_v);
+        if(fret < MCM_RCODE_PASS)
+        {
+            MCM_CCMEMSG("call mcm_lulib_get_all_entry(%s) fail", path2);
+            goto FREE_01;
+        }
+
+        if(vap_count > 0)
+        {
+            // 配置空間放置 key.
+            rep_list = (MCM_DTYPE_EK_TD *) malloc(sizeof(MCM_DTYPE_EK_TD) * vap_count);
+            if(rep_list == NULL)
+            {
+                MCM_CCMEMSG("call malloc() fail [%s]", strerror(errno));
+                goto FREE_02;
+            }
+
+            //檢查是否符合.
+            for(station_idx = 0; station_idx < station_count; station_idx++)
+            {
+                snprintf(path2, sizeof(path2), "device.vap.#%u.station.#%u",
+                         target_vap, station_v[station_idx].ekey);
+                MCM_CCMDMSG("%s.mac_addr = " MCM_DTYPE_S_PF,
+                            path2, station_v[station_idx].mac_addr);
+                MCM_CCMDMSG("%s.rule = " MCM_DTYPE_RK_PF,
+                            path2, station_v[station_idx].rule);
+
+                if(target_rule == station_v[station_idx].rule)
+                {
+                    MCM_CCMDMSG("this station is match");
+                    rep_list[rep_count] = station_v[station_idx].ekey;
+                    rep_count++;
+                }
+                else
+                {
+                    MCM_CCMDMSG("this station is not match");
+                }
+            }
+        }
+    }
+
+    *key_list_buf = rep_list;
+    *key_count_buf = rep_count;
+
+FREE_03:
+    if(fret < MCM_RCODE_PASS)
+        if(part_level == 2)
+            free(rep_list);
+FREE_02:
+    if(part_level == 2)
+        free(vap_key);
+    else
+    if(part_level == 3)
+        free(station_v);
+FREE_01:
+#if MCM_CCMEMODE | MCM_CCMDMODE
+    close(dbg_tty_fd);
+#endif
+    return fret;
+}
+</pre>
+    <br>
+
+<div class="css_div_hook" id="hook_0305_note_02b"></div>
+備註-02b (如果同時設定了多個 get 指令, 而且指令之間有階層關係, 則需要注意指令的順序) :
+<pre class="css_pre_code">
+以上述的 [範例-03] 為例 :
+
+找出符合規則類型的 station 以及所屬的 vap.
+
+
+req_cmd += "&get.device.vap.*" +
+           "&get.device.vap.*.station.*=find_match_rule_station";
+錯誤用法.
+
+處理 "&get.device.vap.*"
+device => 取出資料索引.
+vap    => 取出每個 device 之下的 vap 的資料索引.
+
+處理 "&get.device.vap.*.station.*=find_match_rule_station"
+device  => 已經處理過, 跳過.
+vap     => 已經處理過, 跳過, 不執行 find_match_rule_station(part_level == 2).
+station => 依據 vap 的資料筆數多次執行 find_match_rule_station(part_level == 3),
+           取出每個 vap 之下符合的 station 的資料索引和內容.
+
+應該是要先找出符合的 vap, 在依據符合的 vap 去處理符合的 station.
+
+
+req_cmd += "&get.device.vap.*.station.*=find_match_rule_station" +
+           "&get.device.vap.*";
+正確用法.
+
+處理 "&get.device.vap.*.station.*=find_match_rule_station"
+device  => 取出資料索引.
+vap     => 依據 device 的資料筆數多次執行 find_match_rule_station(part_level == 2),
+           先找出符合的 vap (不含資料內容).
+station => 依據符合的 vap 的資料筆數多次執行 find_match_rule_station(part_level == 3),
+           取出符合的 vap 之下符合的 station 的資料索引和內容.
+處理 "&get.device.vap.*"
+device => 已經處理過, 跳過.
+vap    => 已經處理過 (只有資料索引), 補上這些資料的內容.
+</pre>
+    <br>
+
+  </div>
+</div>
+<br>
+
+<div class="css_div_box_frame_full">
+  <div class="css_div_box_title">範例程式的使用</div>
+  <div class="css_div_box_content">
+    <br>
+
+    <table class="css_table_list1">
+      <tr>
+        <td class="css_td_list1_l">01.&nbsp;</td>
+        <td class="css_td_list1_r">
+          範例程式目錄在 <font class="css_font_b1">mint_cm/usage/example/0305</font>.
+        </td>
+      </tr>
+    </table>
+    <br><br>
+
+    <table class="css_table_list1">
+      <tr>
+        <td class="css_td_list1_l">02.&nbsp;</td>
+        <td class="css_td_list1_r">
+          下面關於 <font class="css_font_p1">make</font> 的操作沒有特別註明的話都是在
+          <font class="css_font_b1">mint_cm</font> 目錄.
+        </td>
+      </tr>
+    </table>
+    <br><br>
+
+    <table class="css_table_list1">
+      <tr>
+        <td class="css_td_list1_l">03.&nbsp;</td>
+        <td class="css_td_list1_r">
+          先修改 mini_httpd 讀取網頁的路徑.<br>
+          修改 <font class="css_font_b1">mint_cm/http_server/mini_httpd/last/mini_httpd.conf</font>,<br>
+          裡面的 <font class="css_font_g1">dir=/mint_cm/run</font> 必須改成
+          <font class="css_font_b1">mint_cm/run</font> 資料夾實際的路徑.
+        </td>
+      </tr>
+    </table>
+    <br><br>
+
+    <table class="css_table_list1">
+      <tr>
+        <td class="css_td_list1_l">04.&nbsp;</td>
+        <td class="css_td_list1_r">
+          第一次使用, 使用 <font class="css_font_p1">make example_add KEY=0305</font>
+          載入範例並編譯.
+        </td>
+      </tr>
+    </table>
+    <br><br>
+
+    <table class="css_table_list1">
+      <tr>
+        <td class="css_td_list1_l">05.&nbsp;</td>
+        <td class="css_td_list1_r">
+          <font class="css_font_b1">web_app</font> 是範例程式.<br><br>
+          範例項目 :<br>
+          <table class="css_table_list2">
+            <tr>
+              <td class="css_td_list2_l2">case-01</td>
+              <td class="css_td_list2_r1">
+                簡單範例
+              </font>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l2">case-02</td>
+              <td class="css_td_list2_r1">
+                指令路徑有階層關係
+              </font>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l2">case-03</td>
+              <td class="css_td_list2_r1">
+                將過濾規則寫入資料庫
+              </font>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l2">case-04</td>
+              <td class="css_td_list2_r1">
+                將過濾規則寫入資料庫<br>
+                指令路徑有階層關係<br>
+                執行多個 CGI 模組
+              </font>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l2">case-05</td>
+              <td class="css_td_list2_r1">
+                將過濾規則寫入資料庫<br>
+                指令路徑有階層關係<br>
+                執行多個 CGI 模組
+              </font>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+    <br><br>
+
+
+    <table class="css_table_list1">
+      <tr>
+        <td class="css_td_list1_l">06.&nbsp;</td>
+        <td class="css_td_list1_r">
+          mini_httpd 執行方法, 進入 <font class="css_font_b1">mint_cm/run</font> 目錄,
+          指令 :<br>
+          <font class="css_font_p1">./mini_httpd -C mini_httpd.conf</font>
+        </td>
+      </tr>
+    </table>
+    <br><br>
+
+    <table class="css_table_list1">
+      <tr>
+        <td class="css_td_list1_l">07.&nbsp;</td>
+        <td class="css_td_list1_r">
+          先執行 mcm_daemon 和 mini_httpd 才可測試.
+        </td>
+      </tr>
+    </table>
+    <br><br>
+
+    <table class="css_table_list1">
+      <tr>
+        <td class="css_td_list1_l">08.&nbsp;</td>
+        <td class="css_td_list1_r">
+          瀏覽器連至 <font class="css_font_b1">http://&lt;server-address&gt;/web_app_0305_index.html</font>
+          就可以看到範例頁面.
+        </td>
+      </tr>
+    </table>
+    <br><br>
+
+    <table class="css_table_list1">
+      <tr>
+        <td class="css_td_list1_l">09.&nbsp;</td>
+        <td class="css_td_list1_r">
+          測試完畢不使用後, 使用 <font class="css_font_p1">make example_del KEY=0305</font>
+          將範例移除.
+        </td>
+      </tr>
+    </table>
+    <br><br>
+
+    <table class="css_table_list1">
+      <tr>
+        <td class="css_td_list1_l">10.&nbsp;</td>
+        <td class="css_td_list1_r">
+          範例程式目錄下的檔案在做完 <font class="css_font_p1">make example_add</font>
+          後會複製到真正使用的位置, 要修改做測試的話要改在複製後的.<br>
+          <table class="css_table_list2">
+            <tr>
+              <td class="css_td_list2_r1">
+                來源 <font class="css_font_b1">profile/mcm_data_profile_0305.xml</font><br>
+                目地 <font class="css_font_b1">mint_cm/mcm_build/mcm_data_profile.xml</font><br>
+                資料模型範例<br>
+                有修改要使用 <font class="css_font_p1">make all</font> 重新編譯
+              </td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_r1">
+                來源 <font class="css_font_b1">profile/mcm_store_profile_default_0305.txt</font><br>
+                目地 <font class="css_font_b1">mint_cm/mcm_build/mcm_store_profile_default.txt</font><br>
+                資料預設值範例<br>
+                使用 <font class="css_font_p1">make all</font> 後會再複製到 <font class="css_font_b1">mint_cm/run</font>
+              </td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_r1">
+                來源 <font class="css_font_b1">web_app</font><br>
+                目地 <font class="css_font_b1">mint_cm/run/web</font><br>
+                網頁程式範例
+              </td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_r1">
+                來源 <font class="css_font_b1">module/mcm_module_0305.c</font><br>
+                目地 <font class="css_font_b1">mint_cm/mcm_daemon/mcm_module</font><br>
+                搭配 run 使用的內部模組範例<br>
+                有修改要使用 <font class="css_font_p1">make all</font> 重新編譯
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+    <br>
+
+  </div>
+</div>
+<br>
+
+</body>
+
+</html>

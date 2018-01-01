@@ -76,7 +76,11 @@ Some rights reserved. See README.
     處理網頁程式的資料存取, 此程式會自動處理網頁端的資料存取, 不需要針對每個資料表手動撰寫存取程式.
     對於取得資料, 網頁端會使用 AJAX POST 告知要哪些資料表的資料, 此程式會和 mcm_daemon
     溝通取出指定的資料並組合成 JSON 格式回傳給網頁. 對於修改資料, 網頁端會使用 AJAX POST
-    告知要修改哪些資料, 此程式再通知 mcm_daemon 要修改哪些資料.<br><br>
+    告知要修改哪些資料, 此程式再通知 mcm_daemon 要修改哪些資料.<br>
+    <font class="css_font_p2">[custom config handle]</font><br>
+    自訂的資料過濾函式, 一般情況下讀取資料表的資料時會讀出資料表內全部的資料,
+    使用自訂的過濾函式可以指定只讀取資料表內的某幾筆資料,
+    此部分會編譯成動態連結函式檔給 mcm_cgi_config.cgi 使用.<br><br>
     <font class="css_font_r2">mcm_cgi_upload.cgi</font><br>
     處理網頁程式的檔案上傳, 使用上傳 form 處理, 支援使用 multipart/form-data 同時上傳 form 內的多個元素或檔案.<br>
     <font class="css_font_p2">[custom upload handle]</font><br>

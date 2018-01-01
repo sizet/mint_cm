@@ -76,6 +76,10 @@ Some rights reserved. See README.
           編譯 <font class="css_font_r1">mcm_cgi_upload.cgi</font><br>
           處理網頁端程式做資料的存取和檔案的上傳, 有網頁端程式需要就必須複製到目標平台上.
           <br>
+          <font class="css_font_b1">mint_cm/mcm_cgi/mcm_cgi_config_module</font><br>
+          編譯 <font class="css_font_r1">mcm_cgi_config_module.lib</font><br>
+          處理網頁端程式進階模式的資料讀取, 有網頁端程式需要就必須複製到目標平台上.
+          <br>
           <font class="css_font_b1">mint_cm/mcm_cgi/mcm_cgi_upload_module</font><br>
           編譯 <font class="css_font_r1">mcm_cgi_upload_module.lib</font><br>
           處理網頁端程式上傳的檔案, 有網頁端程式需要就必須複製到目標平台上.
@@ -121,12 +125,24 @@ Some rights reserved. See README.
     </table>
     <br>
 
-    為了測試方便, 預設所有使用到 mcm_lulib_api 和 maam_lulib_api 的程式都使用靜態連結,
+    為了測試方便, 預設所有使用到 mcm_lulib_api 的程式都使用靜態連結,
     在實際使用上可以改為動態連結.<br>
     <div class="css_div_block">
-    在 Makefile 中使用到如下設定的都改為 <font class="css_font_r1">NO</font><br>
-    <font class="css_font_p1">USE_STATIC_MCM_LIB = YES</font><br>
-    <font class="css_font_p1">USE_STATIC_MAAM_LIB = YES</font><br>
+      在 Makefile 中使用到如下設定改為 <font class="css_font_r1">NO</font><br>
+      <font class="css_font_p1">USE_STATIC_MCM_LIB = YES</font>
+      <br><br>
+      預設有使用到的部分 :<br>
+      <font class="css_font_b1">mint_cm/mcm_cgi/Makefile</font><br>
+      <font class="css_font_b1">mint_cm/mcm_cgi/mcm_cgi_config_module/Makefile</font><br>
+      <font class="css_font_b1">mint_cm/mcm_command/Makefile</font><br>
+    </div>
+    <br>
+
+    為了測試方便, 預設所有使用到 maam_lulib_api 的程式都使用靜態連結,
+    在實際使用上可以改為動態連結.<br>
+    <div class="css_div_block">
+      在 Makefile 中使用到如下設定改為 <font class="css_font_r1">NO</font><br>
+      <font class="css_font_p1">USE_STATIC_MAAM_LIB = YES</font>
     </div>
     <br>
 
