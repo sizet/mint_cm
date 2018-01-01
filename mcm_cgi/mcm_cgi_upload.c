@@ -13,6 +13,8 @@
 
 #if MCM_CGIEMODE | MCM_CGIECTMODE | MCM_CUDMODE
     #include <fcntl.h>
+    #include <stdio.h>
+    #include <string.h>
     #include <unistd.h>
     #include <sys/stat.h>
 #endif
