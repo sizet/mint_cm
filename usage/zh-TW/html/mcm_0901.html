@@ -74,7 +74,7 @@ Some rights reserved. See README.
 
     <div class="css_div_hook" id="hook_0901_callback_01"></div>
     <font class="css_font_b1">&lt;input type="hidden" name="<font class="css_font_r1">callback</font>" value="<font class="css_font_r1">$(function_name)</font>"&gt;</font><br>
-    需要在 CGI 端撰寫對應的的處理函式, 需要指定處理的函式.<br>
+    需要在 CGI 模組撰寫對應的的處理函式, 需要指定處理的函式.<br>
     <font class="css_font_b1">callback</font><br>
     固定的元素名稱, 表示此元素用來指定關鍵字.<br>
     <font class="css_font_b1">$(function_name)</font><br>
@@ -235,9 +235,6 @@ function upload_file()
 </div>
 <br>
 
-
-
-
 <div class="css_div_box_frame_full">
   <div class="css_div_box_title">CGI 端</div>
   <div class="css_div_box_content">
@@ -246,7 +243,7 @@ function upload_file()
     檔案上傳後, 網頁伺服器會呼叫 CGI 處理, 需要在 CGI 端加入自訂的處理函式.
     <br><br>
 
-    處理檔案上傳的程式要放在 <font class="css_font_b1">mint_cm/mcm_cgi/mcm_cgi_upload_module</font><br>
+    程式要放在 <font class="css_font_b1">mint_cm/mcm_cgi/mcm_cgi_upload_module</font><br>
     沒有限制函式的放置方式, 可以依據不同的功能將各種函式分類放在不同的檔案.
     <br><br><br>
 
@@ -265,23 +262,22 @@ function upload_file()
     <font class="css_font_p1">#include "../../mcm_lib/mcm_lulib/mcm_lulib_api.h"</font><br>
     <font class="css_font_p1">#include "../mcm_cgi_common_extern.h"</font><br>
     <font class="css_font_p1">#include "mcm_cgi_module_debug.h"</font>
-    <br><br>
+    <br><br><br>
 
     步驟-02 : 加入處函式.<br>
     函式格式 :<br>
     <div class="css_div_block">
       <font class="css_font_g1">
-      void <font class="css_font_r1">$(callback_function)</font>(<br>
+      void <font class="css_font_r1">$(function_name)</font>(<br>
       &nbsp;&nbsp;&nbsp;&nbsp;struct part_info_t *part_list)<br>
       {<br>
-      &nbsp;&nbsp;&nbsp;&nbsp;return;<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;...<br>
       }<br>
       </font>
     </div>
     <br>
 
-    <div class="css_div_hook" id="hook_0901_callback_function_01"></div>
-    <font class="css_font_b1">$(callback_function)</font><br>
+    <font class="css_font_b1">$(function_name)</font><br>
     自定義的函式名稱.
     <br><br>
 
@@ -451,7 +447,7 @@ function upload_file()
     <div class="css_div_block">
       <font class="css_font_g1">
       #if MCM_CUMEMODE | MCM_CUMDMODE<br>
-      &nbsp;&nbsp;&nbsp;dbg_tty_fd = open(MCM_DBG_DEV_TTY, O_WRONLY);<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;dbg_tty_fd = open(MCM_DBG_DEV_TTY, O_WRONLY);<br>
       &nbsp;&nbsp;&nbsp;&nbsp;if(dbg_tty_fd == -1)<br>
       &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;return;<br>
       #endif
@@ -461,7 +457,7 @@ function upload_file()
     <div class="css_div_block">
       <font class="css_font_g1">
       #if MCM_CUMEMODE | MCM_CUMDMODE<br>
-      &nbsp;&nbsp;&nbsp;close(dbg_tty_fd);<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;close(dbg_tty_fd);<br>
       #endif
       </font>
     </div>
