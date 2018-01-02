@@ -154,13 +154,13 @@ function do_test()
             <tr>
               <td class="css_td_list1_l">03.&nbsp;</td>
               <td class="css_td_list1_r">
-                使用內部模組設定訊息時, 格式沒有限制.
+                使用內部模組設定錯誤訊息時, 格式沒有限制.
               </td>
             </tr>
             <tr>
               <td class="css_td_list1_l">04.&nbsp;</td>
               <td class="css_td_list1_r">
-                如果使用 run 執行多個內部模組, 只會得到最後一個被執行的內部模組的訊息.
+                如果使用 run 執行多個內部模組, 只會得到最後一個被執行的內部模所組設定的錯誤訊息.
               </td>
             </tr>
           </table>
@@ -313,7 +313,7 @@ function do_test()
 {
     var self_jslib, req_cmd, rep_ret, mcm_dv;
 
-    // 執行多個內部模組, 只會得到最後一個被執行的內部模組的訊息,
+    // 執行多個內部模組, 只會得到最後一個被執行的內部模組所設定的錯誤訊息,
     // mcm_module_obtain_multiple_test_01() 設定錯誤會馬上返回不會繼續處理指令,
     // 所以 mcm_module_obtain_multiple_test_02() 不會被執行到.
     req_cmd = "&run.mcm_module_obtain_multiple_test_01" +

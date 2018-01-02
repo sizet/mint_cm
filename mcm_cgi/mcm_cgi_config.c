@@ -959,6 +959,7 @@ void mcm_mark_last_module_command(
             each_command->module_last = 1;
             break;
         }
+        cidx--;
     }
     while(cidx > 0);
 }
@@ -2180,11 +2181,13 @@ int mcm_do_module_command(
     else
     {
         // 只有最後一個 run 指令所執行的 module 所產生的自訂訊息會傳送到網頁.
-        if(this_command->module_last != 0)
-        {
-            mcm_fill_submit_response(this_command, request_info, fret, this_lulib->rep_msg_con);
-            *fill_report_buf = 1;
-        }
+        if(request_info->request_action == MCM_RACTION_SUBMIT_CONFIG)
+            if(this_command->module_last != 0)
+            {
+                mcm_fill_submit_response(this_command, request_info, fret,
+                                         this_lulib->rep_msg_con);
+                *fill_report_buf = 1;
+            }
     }
 
     return MCM_RCODE_PASS;
