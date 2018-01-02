@@ -297,7 +297,7 @@ int mcm_socket_accept_check(
     fd_set fdset_fd;
 
 
-    do
+    while(1)
     {
         FD_ZERO(&fdset_fd);
         FD_SET(socket_fd, &fdset_fd);
@@ -312,8 +312,8 @@ int mcm_socket_accept_check(
             }
             return MCM_RCODE_SERVICE_INTERNAL_ERROR;
         }
+        break;
     }
-    while(0);
 
     if(FD_ISSET(socket_fd, &fdset_fd) == 0)
     {
@@ -334,7 +334,7 @@ int mcm_socket_accept_new(
     int tmp_socket;
 
 
-    do
+    while(1)
     {
         tmp_socket = accept(socket_fd, (struct sockaddr *) &sock_addr, &addr_len);
         if(tmp_socket == -1)
@@ -351,8 +351,8 @@ int mcm_socket_accept_new(
         {
             *socket_cfd_buf = tmp_socket;
         }
+        break;
     }
-    while(0);
 
     return MCM_RCODE_PASS;
 }
@@ -367,7 +367,7 @@ int mcm_socket_send(
     ssize_t tmp_len;
 
 
-    do
+    while(1)
     {
         tmp_len = send(this_session->socket_fd, data_con, data_len, 0);
         if(tmp_len == -1)
@@ -384,8 +384,8 @@ int mcm_socket_send(
         {
            *send_len_buf = tmp_len;
         }
+        break;
     }
-    while(0);
 
     return MCM_RCODE_PASS;
 }
@@ -400,7 +400,7 @@ int mcm_socket_recv(
     ssize_t tmp_len;
 
 
-    do
+    while(1)
     {
         tmp_len = recv(this_session->socket_fd, data_buf, data_size, 0);
         if(tmp_len == -1)
@@ -417,8 +417,8 @@ int mcm_socket_recv(
         {
             *recv_len_buf = tmp_len;
         }
+        break;
     }
-    while(0);
 
     return MCM_RCODE_PASS;
 }
@@ -3254,7 +3254,7 @@ int mcm_session_init(
         goto FREE_03;
     }
 
-    do
+    while(1)
     {
         if(sem_wait(&mcm_session_mutex_list) == -1)
         {
@@ -3267,8 +3267,8 @@ int mcm_session_init(
             fret = MCM_RCODE_SERVICE_INTERNAL_ERROR;
             goto FREE_04;
         }
+        break;
     }
-    while(0);
 
     if(mcm_session_head == NULL)
     {
@@ -3332,7 +3332,7 @@ int mcm_session_init(
             }
 
             // 等待使用完畢的 session 喚醒.
-            do
+            while(1)
             {
                 if(sem_wait(&this_session->access_mutex) == -1)
                 {
@@ -3342,8 +3342,8 @@ int mcm_session_init(
                         continue;
                     goto FREE_04;
                 }
+                break;
             }
-            while(0);
 
             // 取得使用權.
             MCM_SVDMSG("access, wait[get][wake][%s] <%lu>",
@@ -3379,7 +3379,7 @@ int mcm_session_exit(
 
     MCM_SVDMSG("=> %s <%lu>", __FUNCTION__, this_session->thread_id);
 
-    do
+    while(1)
     {
         if(sem_wait(&mcm_session_mutex_list) == -1)
         {
@@ -3387,8 +3387,8 @@ int mcm_session_exit(
             if(errno == EINTR)
                 continue;
         }
+        break;
     }
-    while(0);
 
     // 使用的 session 數減少.
     mcm_session_access_use--;
@@ -3491,7 +3491,7 @@ int mcm_session_idle_dec(
     MCM_SVDMSG("=> %s <%lu>", __FUNCTION__, this_session == NULL ? 0 : this_session->thread_id);
 
     if(mcm_session_limit_count != 0)
-        do
+        while(1)
         {
             if(sem_wait(&mcm_session_idle_pool) == -1)
             {
@@ -3504,8 +3504,8 @@ int mcm_session_idle_dec(
                 }
                 return MCM_RCODE_SERVICE_INTERNAL_ERROR;
             }
+            break;
         }
-        while(0);
 
     return MCM_RCODE_PASS;
 }
@@ -3530,7 +3530,7 @@ int mcm_session_busy_dec(
 {
     MCM_SVDMSG("=> %s <%lu>", __FUNCTION__, this_session == NULL ? 0 : this_session->thread_id);
 
-    do
+    while(1)
     {
         if(sem_wait(&mcm_session_busy_pool) == -1)
         {
@@ -3540,8 +3540,8 @@ int mcm_session_busy_dec(
                 continue;
             return MCM_RCODE_SERVICE_INTERNAL_ERROR;
         }
+        break;
     }
-    while(0);
 
     return MCM_RCODE_PASS;
 }
@@ -3843,7 +3843,7 @@ int mcm_session_shutdown(
 
     MCM_SVDMSG("=> %s", __FUNCTION__);
 
-    do
+    while(1)
     {
         if(sem_wait(&mcm_session_mutex_list) == -1)
         {
@@ -3851,8 +3851,8 @@ int mcm_session_shutdown(
             if(errno == EINTR)
                 continue;
         }
+        break;
     }
-    while(0);
 
     for(each_session = mcm_session_head; each_session != NULL;
         each_session = each_session->next_session)
@@ -4166,7 +4166,7 @@ int mcm_service_run_wait(
 {
     MCM_SVDMSG("=> %s", __FUNCTION__);
 
-    do
+    while(1)
     {
         if(sem_wait(&mcm_service_mutex_run) == -1)
         {
@@ -4175,8 +4175,8 @@ int mcm_service_run_wait(
                 continue;
             return MCM_RCODE_SERVICE_INTERNAL_ERROR;
         }
+        break;
     }
-    while(0);
 
     return MCM_RCODE_PASS;
 }

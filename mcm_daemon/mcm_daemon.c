@@ -158,7 +158,7 @@ int mcm_daemon_exit(
 void mcm_daemon_set_shutdown(
     MCM_DTYPE_BOOL_TD shutdown_con)
 {
-    do
+    while(1)
     {
         if(sem_wait(&mcm_daemon_mutex_quit) == -1)
         {
@@ -166,8 +166,8 @@ void mcm_daemon_set_shutdown(
             if(errno == EINTR)
                 continue;
         }
+        break;
     }
-    while(0);
 
     mcm_daemon_quit = shutdown_con;
 
@@ -180,7 +180,7 @@ void mcm_daemon_set_shutdown(
 void mcm_daemon_get_shutdown(
     MCM_DTYPE_BOOL_TD *shutdown_buf)
 {
-    do
+    while(1)
     {
         if(sem_wait(&mcm_daemon_mutex_quit) == -1)
         {
@@ -188,8 +188,8 @@ void mcm_daemon_get_shutdown(
             if(errno == EINTR)
                 continue;
         }
+        break;
     }
-    while(0);
 
     *shutdown_buf = mcm_daemon_quit;
 

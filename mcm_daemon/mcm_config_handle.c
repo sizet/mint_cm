@@ -4633,7 +4633,7 @@ int mcm_config_save_store(
 
     mcm_do_save = 0;
 
-    do
+    while(1)
     {
         if(fclose(file_fp) == EOF)
         {
@@ -4643,8 +4643,8 @@ int mcm_config_save_store(
             fret = MCM_RCODE_CONFIG_INTERNAL_ERROR;
             goto FREE_01;
         }
+        break;
     }
-    while(0);
 
 FREE_01:
     return fret;
