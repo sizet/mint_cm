@@ -1192,15 +1192,11 @@ int mcm_lklib_get_all_entry(
     tmp_offset = this_lklib->pkt_offset;
     // EC.
     tmp_count = *((MCM_DTYPE_EK_TD *) tmp_offset);
-#if MCM_LUDMODE
     MCM_LKDMSG("count[" MCM_DTYPE_EK_PF "]", tmp_count);
-#endif
     tmp_offset += sizeof(MCM_DTYPE_EK_TD);
     // DL.
     xlen = *((MCM_DTYPE_USIZE_TD *) tmp_offset);
-#if MCM_LUDMODE
     MCM_LKDMSG("data_len[" MCM_DTYPE_USIZE_PF "]", xlen);
-#endif
     tmp_offset += sizeof(MCM_DTYPE_USIZE_TD);
     // DC.
     if(xlen > 0)
