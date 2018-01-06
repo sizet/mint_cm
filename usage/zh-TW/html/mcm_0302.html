@@ -2454,15 +2454,6 @@ FREE_01:
             </tr>
             <tr>
               <td class="css_td_list2_l1">
-                <font class="css_font_r1">MCM_DTYPE_EK_TD *</font><br>
-                <font class="css_font_g1">count_buf</font>
-              </td>
-              <td class="css_td_list2_r1">
-                紀錄資料筆數的緩衝
-              </td>
-            </tr>
-            <tr>
-              <td class="css_td_list2_l1">
                 <font class="css_font_r1">MCM_DTYPE_EK_TD **</font><br>
                 <font class="css_font_g1">key_buf</font>
               </td>
@@ -2472,6 +2463,15 @@ FREE_01:
                 內部函式會配置記憶體空間並放入資料, 使用完需要釋放,
                 傳入參數需要做強制轉型 (MCM_DTYPE_EK_TD **)
                 </font>
+              </td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l1">
+                <font class="css_font_r1">MCM_DTYPE_EK_TD *</font><br>
+                <font class="css_font_g1">count_buf</font>
+              </td>
+              <td class="css_td_list2_r1">
+                紀錄資料筆數的緩衝
               </td>
             </tr>
           </table>
@@ -2569,7 +2569,7 @@ int main(int argc, char **argv)
     // 範例 : 讀出 device.vap.* 所有的 key.
     // 路徑 : "device.vap.*"
     path1 = "device.vap.*";
-    if(mcm_lulib_get_all_key(&self_lulib, path1, &count, (MCM_DTYPE_EK_TD **) &key_array)
+    if(mcm_lulib_get_all_key(&self_lulib, path1, (MCM_DTYPE_EK_TD **) &key_array, &count)
                              < MCM_RCODE_PASS)
     {
         DMSG("call mcm_lulib_get_all_key(%s) fail", path1);
@@ -2598,7 +2598,7 @@ int main(int argc, char **argv)
     // 範例 : 讀出 device.vap.@1.station.* 所有的 key.
     // 路徑 : "device.vap.@1.station.*"
     path1 = "device.vap.@1.station.*";
-    if(mcm_lulib_get_all_key(&self_lulib, path1, &count, (MCM_DTYPE_EK_TD **) &key_array)
+    if(mcm_lulib_get_all_key(&self_lulib, path1, (MCM_DTYPE_EK_TD **) &key_array, &count)
                              < MCM_RCODE_PASS)
     {
         DMSG("call mcm_lulib_get_all_key(%s) fail", path1);
@@ -2627,7 +2627,7 @@ int main(int argc, char **argv)
     // 範例 : 讀出 device.vap.#15.station.* 所有的 key.
     // 路徑 : "device.vap.#15.station.*"
     path1 = "device.vap.#15.station.*";
-    if(mcm_lulib_get_all_key(&self_lulib, path1, &count, (MCM_DTYPE_EK_TD **) &key_array)
+    if(mcm_lulib_get_all_key(&self_lulib, path1, (MCM_DTYPE_EK_TD **) &key_array, &count)
                              < MCM_RCODE_PASS)
     {
         DMSG("call mcm_lulib_get_all_key(%s) fail", path1);
@@ -2696,21 +2696,21 @@ FREE_01:
             </tr>
             <tr>
               <td class="css_td_list2_l1">
-                <font class="css_font_r1">MCM_DTYPE_EK_TD *</font><br>
-                <font class="css_font_g1">count_buf</font>
-              </td>
-              <td class="css_td_list2_r1">
-                紀錄資料筆數的緩衝
-              </td>
-            </tr>
-            <tr>
-              <td class="css_td_list2_l1">
                 <font class="css_font_r1">void **</font><br>
                 <font class="css_font_g1">data_buf</font><br>
               </td>
               <td class="css_td_list2_r1">
                 紀錄資料的變數的緩衝 (變數的資料型態 <a href="#hook_0302_typedef_01">[詳細]</a>)<br>
                 <font class="css_font_r1">內部函式會配置記憶體空間並放入資料, 使用完需要釋放, 傳入參數需要做強制轉型 (void **)</font><br>
+              </td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l1">
+                <font class="css_font_r1">MCM_DTYPE_EK_TD *</font><br>
+                <font class="css_font_g1">count_buf</font>
+              </td>
+              <td class="css_td_list2_r1">
+                紀錄資料筆數的緩衝
               </td>
             </tr>
           </table>
@@ -2785,7 +2785,7 @@ int main(int argc, char **argv)
     // 範例 : 讀出 device
     // 路徑 : "device"
     path1 = "device";
-    if(mcm_lulib_get_all_entry(&self_lulib, path1, &count, (void **) &device_v) < MCM_RCODE_PASS)
+    if(mcm_lulib_get_all_entry(&self_lulib, path1, (void **) &device_v, &count) < MCM_RCODE_PASS)
     {
         DMSG("call mcm_lulib_get_all_entry(%s) fail", path1);
         goto FREE_02;
@@ -2806,7 +2806,7 @@ int main(int argc, char **argv)
     // 範例 : 讀出 device.vap.*
     // 路徑 : "device.vap.*"
     path1 = "device.vap.*";
-    if(mcm_lulib_get_all_entry(&self_lulib, path1, &count, (void **) &vap_v) < MCM_RCODE_PASS)
+    if(mcm_lulib_get_all_entry(&self_lulib, path1, (void **) &vap_v, &count) < MCM_RCODE_PASS)
     {
         DMSG("call mcm_lulib_get_all_entry(%s) fail", path1);
         goto FREE_02;
@@ -2824,7 +2824,7 @@ int main(int argc, char **argv)
     // 範例 : 讀出 device.vap.@2.extra
     // 路徑 : "device.vap.@2.extra"
     path1 = "device.vap.@2.extra";
-    if(mcm_lulib_get_all_entry(&self_lulib, path1, &count, (void **) &extra_v) < MCM_RCODE_PASS)
+    if(mcm_lulib_get_all_entry(&self_lulib, path1, (void **) &extra_v, &count) < MCM_RCODE_PASS)
     {
         DMSG("call mcm_lulib_get_all_entry(%s) fail", path1);
         goto FREE_02;
@@ -2837,7 +2837,7 @@ int main(int argc, char **argv)
     // 範例 : 讀出 device.vap.#15.station.*
     // 路徑 : "device.vap.#15.station.*"
     path1 = "device.vap.#15.station.*";
-    if(mcm_lulib_get_all_entry(&self_lulib, path1, &count, (void **) &station_v) < MCM_RCODE_PASS)
+    if(mcm_lulib_get_all_entry(&self_lulib, path1, (void **) &station_v, &count) < MCM_RCODE_PASS)
     {
         DMSG("call mcm_lulib_get_all_entry(%s) fail", path1);
         goto FREE_02;
@@ -3758,7 +3758,7 @@ mcm_lulib_get_alone(&self_lulib, path1, &loading);
 path1 = "mcm_module_get_client";
 mcm_lulib_run(&self_lulib, path1);
 path1 = device.client.*;
-mcm_lulib_get_all_entry(&self_lulib, path1, &count, &client_v);
+mcm_lulib_get_all_entry(&self_lulib, path1, &client_v, &count);
 
 ...
 </pre>

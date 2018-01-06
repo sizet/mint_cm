@@ -1538,8 +1538,8 @@ int mcm_create_store(
                 mcm_fill_path(this_command, part_level, MCM_FPATH_MIX, cache_path);
 
                 // 取得 key 列表.
-                fret = mcm_lulib_get_all_key(this_lulib, cache_path, &key_count,
-                                             (MCM_DTYPE_EK_TD **) &key_list);
+                fret = mcm_lulib_get_all_key(this_lulib, cache_path,
+                                             (MCM_DTYPE_EK_TD **) &key_list, &key_count);
                 if(fret < MCM_RCODE_PASS)
                 {
                     MCM_CEMSG("call mcm_lulib_get_all_key(%s) fail", cache_path);

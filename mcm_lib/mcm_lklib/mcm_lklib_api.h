@@ -74,14 +74,14 @@ int mcm_lklib_del_entry(
 int mcm_lklib_get_all_key(
     struct mcm_lklib_lib_t *this_lklib,
     char *mix_path,
-    MCM_DTYPE_EK_TD *count_buf,
-    MCM_DTYPE_EK_TD **key_buf);
+    MCM_DTYPE_EK_TD **key_buf,
+    MCM_DTYPE_EK_TD *count_buf);
 
 int mcm_lklib_get_all_entry(
     struct mcm_lklib_lib_t *this_lklib,
     char *mix_path,
-    MCM_DTYPE_EK_TD *count_buf,
-    void **data_buf);
+    void **data_buf,
+    MCM_DTYPE_EK_TD *count_buf);
 
 int mcm_lklib_del_all_entry(
     struct mcm_lklib_lib_t *this_lklib,
@@ -159,14 +159,14 @@ int mcm_lklib_do_del_entry(
 int mcm_lklib_do_get_all_key(
     struct mcm_lklib_lib_t *this_lklib,
     char *mix_path,
-    MCM_DTYPE_EK_TD *count_buf,
-    MCM_DTYPE_EK_TD **key_buf);
+    MCM_DTYPE_EK_TD **key_buf,
+    MCM_DTYPE_EK_TD *count_buf);
 
 int mcm_lklib_do_get_all_entry(
     struct mcm_lklib_lib_t *this_lklib,
     char *mix_path,
-    MCM_DTYPE_EK_TD *count_buf,
-    void **data_buf);
+    void **data_buf,
+    MCM_DTYPE_EK_TD *count_buf);
 
 int mcm_lklib_do_del_all_entry(
     struct mcm_lklib_lib_t *this_lklib,

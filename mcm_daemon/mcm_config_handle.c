@@ -7393,20 +7393,20 @@ FREE_01:
 //   session 資料.
 // mix_path (I) :
 //   目標路徑.
-// count_buf (O) :
-//   儲存筆數的緩衝.
 // key_buf (O) :
 //   紀錄 key 的緩衝.
 //     == NULL : 表示由內部配置紀錄 key 的緩衝.
 //     != NULL : 表示由外部指定紀錄 key 的緩衝.
+// count_buf (O) :
+//   儲存筆數的緩衝.
 // return :
 //   >= MCM_RCODE_PASS : 成功.
 //   <  MCM_RCODE_PASS : 錯誤.
 int mcm_config_get_all_key_by_path(
     struct mcm_service_session_t *this_session,
     char *mix_path,
-    MCM_DTYPE_EK_TD *count_buf,
-    MCM_DTYPE_EK_TD **key_buf)
+    MCM_DTYPE_EK_TD **key_buf,
+    MCM_DTYPE_EK_TD *count_buf)
 {
     int fret;
     struct mcm_config_model_group_t *self_model_group;

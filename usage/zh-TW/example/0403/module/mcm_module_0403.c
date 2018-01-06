@@ -391,8 +391,8 @@ int mcm_module_get_key_entry(
     // device.vap.* 的所有 key.
     path1 = "device.vap.*";
     key_array = NULL;
-    if(mcm_config_get_all_key_by_path(this_session, path1, &count,
-                                      (MCM_DTYPE_EK_TD **) &key_array) < MCM_RCODE_PASS)
+    if(mcm_config_get_all_key_by_path(this_session, path1, (MCM_DTYPE_EK_TD **) &key_array,
+                                      &count) < MCM_RCODE_PASS)
     {
         DMSG("call mcm_config_add_entry_by_path(%s) fail", path1);
         goto FREE_01;

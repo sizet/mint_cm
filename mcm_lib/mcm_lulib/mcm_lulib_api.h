@@ -79,14 +79,14 @@ int mcm_lulib_del_entry(
 int mcm_lulib_get_all_key(
     struct mcm_lulib_lib_t *this_lulib,
     char *mix_path,
-    MCM_DTYPE_EK_TD *count_buf,
-    MCM_DTYPE_EK_TD **key_buf);
+    MCM_DTYPE_EK_TD **key_buf,
+    MCM_DTYPE_EK_TD *count_buf);
 
 int mcm_lulib_get_all_entry(
     struct mcm_lulib_lib_t *this_lulib,
     char *mix_path,
-    MCM_DTYPE_EK_TD *count_buf,
-    void **data_buf);
+    void **data_buf,
+    MCM_DTYPE_EK_TD *count_buf);
 
 int mcm_lulib_del_all_entry(
     struct mcm_lulib_lib_t *this_lulib,
@@ -202,14 +202,14 @@ int mcm_lulib_do_del_entry(
 int mcm_lulib_do_get_all_key(
     struct mcm_lulib_lib_t *this_lulib,
     char *mix_path,
-    MCM_DTYPE_EK_TD *count_buf,
-    MCM_DTYPE_EK_TD **key_buf);
+    MCM_DTYPE_EK_TD **key_buf,
+    MCM_DTYPE_EK_TD *count_buf);
 
 int mcm_lulib_do_get_all_entry(
     struct mcm_lulib_lib_t *this_lulib,
     char *mix_path,
-    MCM_DTYPE_EK_TD *count_buf,
-    void **data_buf);
+    void **data_buf,
+    MCM_DTYPE_EK_TD *count_buf);
 
 int mcm_lulib_do_del_all_entry(
     struct mcm_lulib_lib_t *this_lulib,

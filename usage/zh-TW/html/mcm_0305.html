@@ -709,7 +709,7 @@ int find_5g_vap(
 
     // 讀出所有的 device.vap.*
     path1 = "device.vap.*";
-    fret = mcm_lulib_get_all_entry(this_lulib, path1, &vap_count, (void **) &vap_v);
+    fret = mcm_lulib_get_all_entry(this_lulib, path1, (void **) &vap_v, &vap_count);
     if(fret < MCM_RCODE_PASS)
     {
         MCM_CCMEMSG("call mcm_lulib_get_all_entry(%s) fail", path1);
@@ -891,7 +891,7 @@ int find_visible_or_hidden_vap(
 
     //  讀出 device.vap.* 所有的 key, 再逐一讀出 device.vap.*.extra
     path1 = "device.vap.*";
-    fret = mcm_lulib_get_all_key(this_lulib, path1, &vap_count, (MCM_DTYPE_EK_TD **) &vap_key);
+    fret = mcm_lulib_get_all_key(this_lulib, path1, (MCM_DTYPE_EK_TD **) &vap_key, &vap_count);
     if(fret < MCM_RCODE_PASS)
     {
         MCM_CCMEMSG("call mcm_lulib_get_all_key(%s) fail", path1);
@@ -1084,7 +1084,7 @@ int find_match_rule_station(
 
         //  讀出 device.vap.* 所有的 key, 再逐一讀出 device.vap.*.station.*
         path1 = "device.vap.*";
-        fret = mcm_lulib_get_all_key(this_lulib, path1, &vap_count, (MCM_DTYPE_EK_TD **) &vap_key);
+        fret = mcm_lulib_get_all_key(this_lulib, path1, (MCM_DTYPE_EK_TD **) &vap_key, &vap_count);
         if(fret < MCM_RCODE_PASS)
         {
             MCM_CCMEMSG("call mcm_lulib_get_all_key(%s) fail", path1);
@@ -1105,8 +1105,8 @@ int find_match_rule_station(
             {
                 // 讀出 device.vap.#{vap_key[i]}.station.*
                 snprintf(path2, sizeof(path2), "device.vap.#%u.station.*", vap_key[vap_idx]);
-                fret = mcm_lulib_get_all_entry(this_lulib, path2, &station_count,
-                                               (void **) &station_v);
+                fret = mcm_lulib_get_all_entry(this_lulib, path2, (void **) &station_v,
+                                               &station_count);
                 if(fret < MCM_RCODE_PASS)
                 {
                     MCM_CCMEMSG("call mcm_lulib_get_all_entry(%s) fail", path2);
@@ -1158,7 +1158,7 @@ int find_match_rule_station(
 
         // 讀出 device.vap.#{target_vap}.station.*
         snprintf(path2, sizeof(path2), "device.vap.#%u.station.*", target_vap);
-        fret = mcm_lulib_get_all_entry(this_lulib, path2, &station_count, (void **) &station_v);
+        fret = mcm_lulib_get_all_entry(this_lulib, path2, (void **) &station_v, &station_count);
         if(fret < MCM_RCODE_PASS)
         {
             MCM_CCMEMSG("call mcm_lulib_get_all_entry(%s) fail", path2);

@@ -995,8 +995,8 @@ EXPORT_SYMBOL(mcm_lklib_del_entry);
 int mcm_lklib_get_all_key(
     struct mcm_lklib_lib_t *this_lklib,
     char *mix_path,
-    MCM_DTYPE_EK_TD *count_buf,
-    MCM_DTYPE_EK_TD **key_buf)
+    MCM_DTYPE_EK_TD **key_buf,
+    MCM_DTYPE_EK_TD *count_buf)
 {
     int fret;
     MCM_DTYPE_EK_TD tmp_count;
@@ -1099,8 +1099,8 @@ int mcm_lklib_get_all_key(
         memcpy(tmp_buf, tmp_offset, xlen);
     }
 
-    *count_buf = tmp_count;
     *key_buf = tmp_buf;
+    *count_buf = tmp_count;
 
 FREE_01:
     this_lklib->rep_code = fret;
@@ -1111,8 +1111,8 @@ EXPORT_SYMBOL(mcm_lklib_get_all_key);
 int mcm_lklib_get_all_entry(
     struct mcm_lklib_lib_t *this_lklib,
     char *mix_path,
-    MCM_DTYPE_EK_TD *count_buf,
-    void **data_buf)
+    void **data_buf,
+    MCM_DTYPE_EK_TD *count_buf)
 {
     int fret;
     MCM_DTYPE_EK_TD tmp_count;
@@ -1215,8 +1215,8 @@ int mcm_lklib_get_all_entry(
         memcpy(tmp_buf, tmp_offset, xlen);
     }
 
-    *count_buf = tmp_count;
     *data_buf = tmp_buf;
+    *count_buf = tmp_count;
 
 FREE_01:
     this_lklib->rep_code = fret;
@@ -2125,8 +2125,8 @@ EXPORT_SYMBOL(mcm_lklib_do_del_entry);
 int mcm_lklib_do_get_all_key(
     struct mcm_lklib_lib_t *this_lklib,
     char *mix_path,
-    MCM_DTYPE_EK_TD *count_buf,
-    MCM_DTYPE_EK_TD **key_buf)
+    MCM_DTYPE_EK_TD **key_buf,
+    MCM_DTYPE_EK_TD *count_buf)
 {
     int fret;
 
@@ -2138,7 +2138,7 @@ int mcm_lklib_do_get_all_key(
         return fret;
     }
 
-    fret = mcm_lklib_get_all_key(this_lklib, mix_path, count_buf, key_buf);
+    fret = mcm_lklib_get_all_key(this_lklib, mix_path, key_buf, count_buf);
     if(fret < MCM_RCODE_PASS)
     {
         if(fret != MCM_RCODE_CONFIG_NOT_FIND_STORE)
@@ -2156,8 +2156,8 @@ EXPORT_SYMBOL(mcm_lklib_do_get_all_key);
 int mcm_lklib_do_get_all_entry(
     struct mcm_lklib_lib_t *this_lklib,
     char *mix_path,
-    MCM_DTYPE_EK_TD *count_buf,
-    void **data_buf)
+    void **data_buf,
+    MCM_DTYPE_EK_TD *count_buf)
 {
     int fret;
 
@@ -2169,7 +2169,7 @@ int mcm_lklib_do_get_all_entry(
         return fret;
     }
 
-    fret = mcm_lklib_get_all_entry(this_lklib, mix_path, count_buf, data_buf);
+    fret = mcm_lklib_get_all_entry(this_lklib, mix_path, data_buf, count_buf);
     if(fret < MCM_RCODE_PASS)
     {
         if(fret != MCM_RCODE_CONFIG_NOT_FIND_STORE)

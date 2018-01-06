@@ -3270,15 +3270,6 @@ FREE_01:
             </tr>
             <tr>
               <td class="css_td_list2_l1">
-                <font class="css_font_r1">MCM_DTYPE_EK_TD *</font><br>
-                <font class="css_font_g1">count_buf</font>
-              </td>
-              <td class="css_td_list2_r1">
-                紀錄資料筆數的緩衝
-              </td>
-            </tr>
-            <tr>
-              <td class="css_td_list2_l1">
                 <font class="css_font_r1">MCM_DTYPE_EK_TD **</font><br>
                 <font class="css_font_g1">key_buf</font>
               </td>
@@ -3289,6 +3280,15 @@ FREE_01:
                 內部函式會配置記憶體空間並放入資料, 使用完需要釋放,
                 傳入參數需要做強制轉型 (MCM_DTYPE_EK_TD **)
                 </font>
+              </td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l1">
+                <font class="css_font_r1">MCM_DTYPE_EK_TD *</font><br>
+                <font class="css_font_g1">count_buf</font>
+              </td>
+              <td class="css_td_list2_r1">
+                紀錄資料筆數的緩衝
               </td>
             </tr>
           </table>
@@ -3431,8 +3431,8 @@ int mcm_module_get_all_key_value_test(
     // 範例-01 : 取得 device.vap.* 的所有 key.
     path1 = "device.vap.*";
     key_array = NULL;
-    if(mcm_config_get_all_key_by_path(this_session, path1, &count,
-                                      (MCM_DTYPE_EK_TD **) &key_array) < MCM_RCODE_PASS)
+    if(mcm_config_get_all_key_by_path(this_session, path1, (MCM_DTYPE_EK_TD **) &key_array,
+                                      &count) < MCM_RCODE_PASS)
     {
         DMSG("call mcm_config_add_entry_by_path(%s) fail", path1);
         goto FREE_01;
@@ -3458,8 +3458,8 @@ int mcm_module_get_all_key_value_test(
     // 範例-02 : 取得 device.vap.@1.station.* 所有的 key.
     path1 = "device.vap.@1.station.*";
     key_array = NULL;
-    if(mcm_config_get_all_key_by_path(this_session, path1, &count,
-                                      (MCM_DTYPE_EK_TD **) &key_array) < MCM_RCODE_PASS)
+    if(mcm_config_get_all_key_by_path(this_session, path1, (MCM_DTYPE_EK_TD **) &key_array,
+                                      &count) < MCM_RCODE_PASS)
     {
         DMSG("call mcm_config_add_entry_by_path(%s) fail", path1);
         goto FREE_01;
@@ -3488,8 +3488,8 @@ int mcm_module_get_all_key_value_test(
     // 範例-03 : 取得 device.vap.#2.station.* 所有的 key.
     path1 = "device.vap.#2.station.*";
     key_array = NULL;
-    if(mcm_config_get_all_key_by_path(this_session, path1, &count,
-                                      (MCM_DTYPE_EK_TD **) &key_array) < MCM_RCODE_PASS)
+    if(mcm_config_get_all_key_by_path(this_session, path1, (MCM_DTYPE_EK_TD **) &key_array,
+                                      &count) < MCM_RCODE_PASS)
     {
         DMSG("call mcm_config_add_entry_by_path(%s) fail", path1);
         goto FREE_01;

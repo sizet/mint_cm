@@ -226,8 +226,8 @@ int mcm_config_get_all_key_by_info(
 int mcm_config_get_all_key_by_path(
     struct mcm_service_session_t *this_session,
     char *mix_path,
-    MCM_DTYPE_EK_TD *count_buf,
-    MCM_DTYPE_EK_TD **key_buf);
+    MCM_DTYPE_EK_TD **key_buf,
+    MCM_DTYPE_EK_TD *count_buf);
 
 int mcm_config_get_all_entry_by_info(
     struct mcm_service_session_t *this_session,

@@ -941,7 +941,7 @@ int case_get_all_key(
 
     // 讀出 device.vap.*
     path1 = "device.vap.*";
-    if(mcm_lulib_get_all_key(this_lulib, path1, &vap_count, (MCM_DTYPE_EK_TD **) &vap_key_array)
+    if(mcm_lulib_get_all_key(this_lulib, path1, (MCM_DTYPE_EK_TD **) &vap_key_array, &vap_count)
                              < MCM_RCODE_PASS)
     {
         DMSG("call mcm_lulib_get_all_key(%s) fail", path1);
@@ -977,8 +977,8 @@ int case_get_all_key(
     for(i = 0; i < vap_count; i++)
     {
         snprintf(path2, sizeof(path2), "device.vap.#%u.station.*", vap_key_array[i]);
-        if(mcm_lulib_get_all_key(this_lulib, path2, &station_count,
-                                 (MCM_DTYPE_EK_TD **) &station_key_array) < MCM_RCODE_PASS)
+        if(mcm_lulib_get_all_key(this_lulib, path2, (MCM_DTYPE_EK_TD **) &station_key_array,
+                                 &station_count) < MCM_RCODE_PASS)
         {
             DMSG("call mcm_lulib_get_all_key(%s) fail", path2);
             goto FREE_01;
@@ -1001,8 +1001,8 @@ int case_get_all_key(
 
     // 讀出 device.limit.*
     path1 = "device.limit.*";
-    if(mcm_lulib_get_all_key(this_lulib, path1, &limit_count,
-                             (MCM_DTYPE_EK_TD **) &limit_key_array) < MCM_RCODE_PASS)
+    if(mcm_lulib_get_all_key(this_lulib, path1, (MCM_DTYPE_EK_TD **) &limit_key_array,
+                             &limit_count) < MCM_RCODE_PASS)
     {
         DMSG("call mcm_lulib_get_all_key(%s) fail", path1);
         goto FREE_01;
@@ -1046,7 +1046,7 @@ int case_get_all_entry(
 
     // 讀出 device
     path1 = "device";
-    if(mcm_lulib_get_all_entry(this_lulib, path1, &count, (void **) &device_v) < MCM_RCODE_PASS)
+    if(mcm_lulib_get_all_entry(this_lulib, path1, (void **) &device_v, &count) < MCM_RCODE_PASS)
     {
         DMSG("call mcm_lulib_get_all_entry(%s) fail", path1);
         goto FREE_01;
@@ -1066,7 +1066,7 @@ int case_get_all_entry(
 
     // 讀出 device.system
     path1 = "device.system";
-    if(mcm_lulib_get_all_entry(this_lulib, path1, &count, (void **) &system_v) < MCM_RCODE_PASS)
+    if(mcm_lulib_get_all_entry(this_lulib, path1, (void **) &system_v, &count) < MCM_RCODE_PASS)
     {
         DMSG("call mcm_lulib_get_all_entry(%s) fail", path1);
         goto FREE_01;
@@ -1080,7 +1080,7 @@ int case_get_all_entry(
 
     // 讀出 device.vap.*
     path1 = "device.vap.*";
-    if(mcm_lulib_get_all_entry(this_lulib, path1, &vap_count, (void **) &vap_v) < MCM_RCODE_PASS)
+    if(mcm_lulib_get_all_entry(this_lulib, path1, (void **) &vap_v, &vap_count) < MCM_RCODE_PASS)
     {
         DMSG("call mcm_lulib_get_all_entry(%s) fail", path1);
         goto FREE_01;
@@ -1097,7 +1097,7 @@ int case_get_all_entry(
 
     // 讀出 device.vap.@1.extra
     path1 = "device.vap.@1.extra";
-    if(mcm_lulib_get_all_entry(this_lulib, path1, &count, (void **) &extra_v) < MCM_RCODE_PASS)
+    if(mcm_lulib_get_all_entry(this_lulib, path1, (void **) &extra_v, &count) < MCM_RCODE_PASS)
     {
         DMSG("call mcm_lulib_get_all_entry(%s) fail", path1);
         goto FREE_01;
@@ -1111,7 +1111,7 @@ int case_get_all_entry(
     for(i = 0; i < vap_count; i++)
     {
         snprintf(path2, sizeof(path2), "device.vap.@%u.station.*", i + 1);
-        if(mcm_lulib_get_all_entry(this_lulib, path2, &station_count, (void **) &station_v)
+        if(mcm_lulib_get_all_entry(this_lulib, path2, (void **) &station_v, &station_count)
                                    < MCM_RCODE_PASS)
         {
             DMSG("call mcm_lulib_get_all_entry(%s) fail", path2);
@@ -1129,7 +1129,7 @@ int case_get_all_entry(
 
     // 讀出 device.limit.*
     path1 = "device.limit.*";
-    if(mcm_lulib_get_all_entry(this_lulib, path1, &count, (void **) &limit_v) < MCM_RCODE_PASS)
+    if(mcm_lulib_get_all_entry(this_lulib, path1, (void **) &limit_v, &count) < MCM_RCODE_PASS)
     {
         DMSG("call mcm_lulib_get_all_entry(%s) fail", path1);
         goto FREE_01;

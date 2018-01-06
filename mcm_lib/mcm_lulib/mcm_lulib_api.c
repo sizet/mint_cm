@@ -1002,8 +1002,8 @@ FREE_01:
 int mcm_lulib_get_all_key(
     struct mcm_lulib_lib_t *this_lulib,
     char *mix_path,
-    MCM_DTYPE_EK_TD *count_buf,
-    MCM_DTYPE_EK_TD **key_buf)
+    MCM_DTYPE_EK_TD **key_buf,
+    MCM_DTYPE_EK_TD *count_buf)
 {
     int fret;
     MCM_DTYPE_EK_TD tmp_count;
@@ -1121,8 +1121,8 @@ int mcm_lulib_get_all_key(
         memcpy(tmp_buf, tmp_offset, xlen);
     }
 
-    *count_buf = tmp_count;
     *key_buf = tmp_buf;
+    *count_buf = tmp_count;
 
 FREE_01:
     this_lulib->rep_code = fret;
@@ -1132,8 +1132,8 @@ FREE_01:
 int mcm_lulib_get_all_entry(
     struct mcm_lulib_lib_t *this_lulib,
     char *mix_path,
-    MCM_DTYPE_EK_TD *count_buf,
-    void **data_buf)
+    void **data_buf,
+    MCM_DTYPE_EK_TD *count_buf)
 {
     int fret;
     MCM_DTYPE_EK_TD tmp_count;
@@ -1251,8 +1251,8 @@ int mcm_lulib_get_all_entry(
         memcpy(tmp_buf, tmp_offset, xlen);
     }
 
-    *count_buf = tmp_count;
     *data_buf = tmp_buf;
+    *count_buf = tmp_count;
 
 FREE_01:
     this_lulib->rep_code = fret;
@@ -3033,8 +3033,8 @@ int mcm_lulib_do_del_entry(
 int mcm_lulib_do_get_all_key(
     struct mcm_lulib_lib_t *this_lulib,
     char *mix_path,
-    MCM_DTYPE_EK_TD *count_buf,
-    MCM_DTYPE_EK_TD **key_buf)
+    MCM_DTYPE_EK_TD **key_buf,
+    MCM_DTYPE_EK_TD *count_buf)
 {
     int fret;
 
@@ -3046,7 +3046,7 @@ int mcm_lulib_do_get_all_key(
         return fret;
     }
 
-    fret = mcm_lulib_get_all_key(this_lulib, mix_path, count_buf, key_buf);
+    fret = mcm_lulib_get_all_key(this_lulib, mix_path, key_buf, count_buf);
     if(fret < MCM_RCODE_PASS)
     {
         if(fret != MCM_RCODE_CONFIG_NOT_FIND_STORE)
@@ -3063,8 +3063,8 @@ int mcm_lulib_do_get_all_key(
 int mcm_lulib_do_get_all_entry(
     struct mcm_lulib_lib_t *this_lulib,
     char *mix_path,
-    MCM_DTYPE_EK_TD *count_buf,
-    void **data_buf)
+    void **data_buf,
+    MCM_DTYPE_EK_TD *count_buf)
 {
     int fret;
 
@@ -3076,7 +3076,7 @@ int mcm_lulib_do_get_all_entry(
         return fret;
     }
 
-    fret = mcm_lulib_get_all_entry(this_lulib, mix_path, count_buf, data_buf);
+    fret = mcm_lulib_get_all_entry(this_lulib, mix_path, data_buf, count_buf);
     if(fret < MCM_RCODE_PASS)
     {
         if(fret != MCM_RCODE_CONFIG_NOT_FIND_STORE)
