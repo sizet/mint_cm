@@ -42,8 +42,8 @@ struct mcm_service_session_t
     MCM_DTYPE_USIZE_TD req_data_len;
     void *cache_buf;
     MCM_DTYPE_USIZE_TD cache_size;
-    char *rep_msg_buf;
-    MCM_DTYPE_USIZE_TD rep_msg_size;
+    void *rep_data_buf;
+    MCM_DTYPE_USIZE_TD rep_data_len;
     struct mcm_service_session_t *prev_session;
     struct mcm_service_session_t *next_session;
 };

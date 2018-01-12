@@ -26,7 +26,7 @@
 
 
 
-#define MCM_BUILD_BASE_REP_01(tmp_offset, this_lklib, req_code) \
+#define MCM_BUILD_BASE_REQ_01(tmp_offset, this_lklib, req_code) \
     do                                                              \
     {                                                               \
         /* T */                                                     \
@@ -40,11 +40,11 @@
     }                                                               \
     while(0)
 
-#define MCM_BUILD_BASE_REP_02(tmp_offset, this_lklib, req_code, req_path, req_plen) \
+#define MCM_BUILD_BASE_REQ_02(tmp_offset, this_lklib, req_code, req_path, req_plen) \
     do                                                           \
     {                                                            \
         /* T + REQ */                                            \
-        MCM_BUILD_BASE_REP_01(tmp_offset, this_lklib, req_code); \
+        MCM_BUILD_BASE_REQ_01(tmp_offset, this_lklib, req_code); \
         /* PC */                                                 \
         memcpy(tmp_offset, req_path, req_plen);                  \
         tmp_offset += req_plen;                                  \
@@ -52,11 +52,11 @@
     }                                                            \
     while(0)
 
-#define MCM_BUILD_BASE_REP_03(tmp_offset, this_lklib, req_code, req_path, req_plen) \
+#define MCM_BUILD_BASE_REQ_03(tmp_offset, this_lklib, req_code, req_path, req_plen) \
     do                                                           \
     {                                                            \
         /* T + REQ */                                            \
-        MCM_BUILD_BASE_REP_01(tmp_offset, this_lklib, req_code); \
+        MCM_BUILD_BASE_REQ_01(tmp_offset, this_lklib, req_code); \
         /* PL */                                                 \
         *((MCM_DTYPE_USIZE_TD *) tmp_offset) = req_plen;         \
         tmp_offset += sizeof(MCM_DTYPE_USIZE_TD);                \
@@ -65,6 +65,18 @@
         tmp_offset += req_plen;                                  \
         /* ... */                                                \
     }                                                            \
+    while(0)
+
+#define MCM_PARSE_BASE_REP(tmp_offset, this_lklib, tmp_code) \
+    do                                                                 \
+    {                                                                  \
+        /* T */                                                        \
+        tmp_offset = this_lklib->pkt_buf + sizeof(MCM_DTYPE_USIZE_TD); \
+        /* REP */                                                      \
+        tmp_code = *((MCM_DTYPE_LIST_TD *) tmp_offset);                \
+        MCM_LKDMSG("tmp_code[" MCM_DTYPE_LIST_PF "]", tmp_code);       \
+        tmp_offset += sizeof(MCM_DTYPE_LIST_TD);                       \
+    }                                                                  \
     while(0)
 
 
@@ -240,59 +252,6 @@ int mcm_recv_rep(
     return MCM_RCODE_PASS;
 }
 
-int mcm_parse_base_rep(
-    struct mcm_lklib_lib_t *this_lklib,
-    MCM_DTYPE_BOOL_TD with_msg)
-{
-    void *tmp_offset;
-
-
-    // 封包格式 (不帶有回應訊息, with_msg == 0) :
-    // | T | REP | ... |.
-    // T   [MCM_DTYPE_USIZE_TD].
-    //     紀錄封包的總長度, 內容 = T + REP + ML + MC + ...
-    // REP [MCM_DTYPE_LIST_TD].
-    //     紀錄回應的類型.
-    // ...
-    //     剩餘的資料.
-
-    // 封包格式 (帶有回應訊息, with_msg == 1) :
-    // | T | REP | ML | MC | ... |.
-    // T   [MCM_DTYPE_USIZE_TD].
-    //     紀錄封包的總長度, 內容 = T + REP + ML + MC + ...
-    // REP [MCM_DTYPE_LIST_TD].
-    //     紀錄回應的類型.
-    // ML  [MCM_DTYPE_USIZE_TD].
-    //     紀錄回應的訊息的長度 (包含最後的 \0).
-    // MC  [binary].
-    //     紀錄回應的訊息.
-    // ...
-    //     剩餘的資料.
-
-    // T.
-    tmp_offset = this_lklib->pkt_buf;
-    tmp_offset += sizeof(MCM_DTYPE_USIZE_TD);
-    // REP.
-    this_lklib->rep_code = *((MCM_DTYPE_LIST_TD *) tmp_offset);
-    MCM_LKDMSG("rep_code[" MCM_DTYPE_LIST_PF "]", this_lklib->rep_code);
-    tmp_offset += sizeof(MCM_DTYPE_LIST_TD);
-    if(with_msg != 0)
-    {
-        // ML.
-        this_lklib->rep_msg_len = *((MCM_DTYPE_USIZE_TD *) tmp_offset);
-        tmp_offset += sizeof(MCM_DTYPE_USIZE_TD);
-        // MC.
-        this_lklib->rep_msg_con = tmp_offset;
-        MCM_LKDMSG("rep_msg[" MCM_DTYPE_USIZE_PF "][%s]",
-                   this_lklib->rep_msg_len, this_lklib->rep_msg_con);
-        tmp_offset += this_lklib->rep_msg_len;
-    }
-    // ...
-    this_lklib->pkt_offset = tmp_offset;
-
-    return this_lklib->rep_code;
-}
-
 // 資料初始化.
 // this_lklib (I) :
 //   連線資訊.
@@ -424,7 +383,6 @@ FREE_03:
 FREE_02:
     kfree(this_lklib->pkt_buf);
 FREE_01:
-    this_lklib->rep_code = fret;
     return fret;
 }
 EXPORT_SYMBOL(mcm_lklib_init);
@@ -457,9 +415,6 @@ int mcm_lklib_get_alone(
     void *tmp_offset;
 
 
-    this_lklib->rep_msg_con = NULL;
-    this_lklib->rep_msg_len = 0;
-
     xlen = strlen(full_path) + 1;
     this_lklib->pkt_len = sizeof(MCM_DTYPE_USIZE_TD) +
                           sizeof(MCM_DTYPE_LIST_TD) +
@@ -485,7 +440,7 @@ int mcm_lklib_get_alone(
     //     紀錄請求的路徑.
 
     // T + REQ + PC.
-    MCM_BUILD_BASE_REP_02(tmp_offset, this_lklib, MCM_SREQUEST_GET_ALONE, full_path, xlen);
+    MCM_BUILD_BASE_REQ_02(tmp_offset, this_lklib, MCM_SREQUEST_GET_ALONE, full_path, xlen);
 
     fret = mcm_send_req(this_lklib);
     if(fret < MCM_RCODE_PASS)
@@ -513,16 +468,15 @@ int mcm_lklib_get_alone(
     //     紀錄回應的資料.
 
     // T + REP.
-    fret = mcm_parse_base_rep(this_lklib, 0);
+    MCM_PARSE_BASE_REP(tmp_offset, this_lklib, fret);
     if(fret < MCM_RCODE_PASS)
     {
         if(fret != MCM_RCODE_CONFIG_NOT_FIND_STORE)
         {
-            MCM_KECTMSG("call mcm_parse_base_rep() fail");
+            MCM_KECTMSG("call fail (%d)", fret);
         }
         goto FREE_01;
     }
-    tmp_offset = this_lklib->pkt_offset;
     // DL.
     xlen = *((MCM_DTYPE_USIZE_TD *) tmp_offset);
     MCM_LKDMSG("data_len[" MCM_DTYPE_USIZE_PF "]", xlen);
@@ -532,7 +486,6 @@ int mcm_lklib_get_alone(
         memcpy(data_buf, tmp_offset, xlen);
 
 FREE_01:
-    this_lklib->rep_code = fret;
     return fret;
 }
 EXPORT_SYMBOL(mcm_lklib_get_alone);
@@ -547,9 +500,6 @@ int mcm_lklib_set_alone(
     MCM_DTYPE_USIZE_TD xlen;
     void *tmp_offset;
 
-
-    this_lklib->rep_msg_con = NULL;
-    this_lklib->rep_msg_len = 0;
 
     xlen = strlen(full_path) + 1;
     this_lklib->pkt_len = sizeof(MCM_DTYPE_USIZE_TD) +
@@ -583,7 +533,7 @@ int mcm_lklib_set_alone(
     //     紀錄要傳送的資料.
 
     // T + REQ + PL + PC.
-    MCM_BUILD_BASE_REP_03(tmp_offset, this_lklib, MCM_SREQUEST_SET_ALONE, full_path, xlen);
+    MCM_BUILD_BASE_REQ_03(tmp_offset, this_lklib, MCM_SREQUEST_SET_ALONE, full_path, xlen);
     // DL.
     *((MCM_DTYPE_USIZE_TD *) tmp_offset) = data_len;
     tmp_offset += sizeof(MCM_DTYPE_USIZE_TD);
@@ -615,18 +565,17 @@ int mcm_lklib_set_alone(
     //     紀錄回應的類型.
 
     // T + REP.
-    fret = mcm_parse_base_rep(this_lklib, 0);
+    MCM_PARSE_BASE_REP(tmp_offset, this_lklib, fret);
     if(fret < MCM_RCODE_PASS)
     {
         if(fret != MCM_RCODE_CONFIG_NOT_FIND_STORE)
         {
-            MCM_KECTMSG("call mcm_parse_base_rep() fail");
+            MCM_KECTMSG("call fail (%d)", fret);
         }
         goto FREE_01;
     }
 
 FREE_01:
-    this_lklib->rep_code = fret;
     return fret;
 }
 EXPORT_SYMBOL(mcm_lklib_set_alone);
@@ -640,9 +589,6 @@ int mcm_lklib_get_entry(
     MCM_DTYPE_USIZE_TD xlen;
     void *tmp_offset;
 
-
-    this_lklib->rep_msg_con = NULL;
-    this_lklib->rep_msg_len = 0;
 
     xlen = strlen(full_path) + 1;
     this_lklib->pkt_len = sizeof(MCM_DTYPE_USIZE_TD) +
@@ -669,7 +615,7 @@ int mcm_lklib_get_entry(
     //     紀錄請求的路徑.
 
     // T + REQ + PC.
-    MCM_BUILD_BASE_REP_02(tmp_offset, this_lklib, MCM_SREQUEST_GET_ENTRY, full_path, xlen);
+    MCM_BUILD_BASE_REQ_02(tmp_offset, this_lklib, MCM_SREQUEST_GET_ENTRY, full_path, xlen);
 
     fret = mcm_send_req(this_lklib);
     if(fret < MCM_RCODE_PASS)
@@ -697,16 +643,15 @@ int mcm_lklib_get_entry(
     //     紀錄回應的資料.
 
     // T + REP.
-    fret = mcm_parse_base_rep(this_lklib, 0);
+    MCM_PARSE_BASE_REP(tmp_offset, this_lklib, fret);
     if(fret < MCM_RCODE_PASS)
     {
         if(fret != MCM_RCODE_CONFIG_NOT_FIND_STORE)
         {
-            MCM_KECTMSG("call mcm_parse_base_rep() fail");
+            MCM_KECTMSG("call fail (%d)", fret);
         }
         goto FREE_01;
     }
-    tmp_offset = this_lklib->pkt_offset;
     // DL.
     xlen = *((MCM_DTYPE_USIZE_TD *) tmp_offset);
     MCM_LKDMSG("data_len[" MCM_DTYPE_USIZE_PF "]", xlen);
@@ -716,7 +661,6 @@ int mcm_lklib_get_entry(
         memcpy(data_buf, tmp_offset, xlen);
 
 FREE_01:
-    this_lklib->rep_code = fret;
     return fret;
 }
 EXPORT_SYMBOL(mcm_lklib_get_entry);
@@ -731,9 +675,6 @@ int mcm_lklib_set_entry(
     MCM_DTYPE_USIZE_TD xlen;
     void *tmp_offset;
 
-
-    this_lklib->rep_msg_con = NULL;
-    this_lklib->rep_msg_len = 0;
 
     xlen = strlen(full_path) + 1;
     this_lklib->pkt_len = sizeof(MCM_DTYPE_USIZE_TD) +
@@ -765,7 +706,7 @@ int mcm_lklib_set_entry(
     //     紀錄要傳送的資料.
 
     // T + REQ + PL + PC.
-    MCM_BUILD_BASE_REP_03(tmp_offset, this_lklib, MCM_SREQUEST_SET_ENTRY, full_path, xlen);
+    MCM_BUILD_BASE_REQ_03(tmp_offset, this_lklib, MCM_SREQUEST_SET_ENTRY, full_path, xlen);
     // DC.
     memcpy(tmp_offset, data_con, data_len);
 
@@ -791,18 +732,17 @@ int mcm_lklib_set_entry(
     //     紀錄回應的類型.
 
     // T + REP.
-    fret = mcm_parse_base_rep(this_lklib, 0);
+    MCM_PARSE_BASE_REP(tmp_offset, this_lklib, fret);
     if(fret < MCM_RCODE_PASS)
     {
         if(fret != MCM_RCODE_CONFIG_NOT_FIND_STORE)
         {
-            MCM_KECTMSG("call mcm_parse_base_rep() fail");
+            MCM_KECTMSG("call fail (%d)", fret);
         }
         goto FREE_01;
     }
 
 FREE_01:
-    this_lklib->rep_code = fret;
     return fret;
 }
 EXPORT_SYMBOL(mcm_lklib_set_entry);
@@ -818,9 +758,6 @@ int mcm_lklib_add_entry(
     MCM_DTYPE_USIZE_TD xlen, ilen;
     void *tmp_offset;
 
-
-    this_lklib->rep_msg_con = NULL;
-    this_lklib->rep_msg_len = 0;
 
     xlen = strlen(full_path) + 1;
     ilen = insert_path == NULL ? 1 : strlen(insert_path) + 1;
@@ -860,7 +797,7 @@ int mcm_lklib_add_entry(
     //     紀錄要傳送的資料.
 
     // T + REQ + PL + PC.
-    MCM_BUILD_BASE_REP_03(tmp_offset, this_lklib, MCM_SREQUEST_ADD_ENTRY, full_path, xlen);
+    MCM_BUILD_BASE_REQ_03(tmp_offset, this_lklib, MCM_SREQUEST_ADD_ENTRY, full_path, xlen);
     // IL.
     *((MCM_DTYPE_USIZE_TD *) tmp_offset) = ilen;
     tmp_offset += sizeof(MCM_DTYPE_USIZE_TD);
@@ -899,18 +836,17 @@ int mcm_lklib_add_entry(
     //     紀錄回應的類型.
 
     // T + REP.
-    fret = mcm_parse_base_rep(this_lklib, 0);
+    MCM_PARSE_BASE_REP(tmp_offset, this_lklib, fret);
     if(fret < MCM_RCODE_PASS)
     {
         if(fret != MCM_RCODE_CONFIG_NOT_FIND_STORE)
         {
-            MCM_KECTMSG("call mcm_parse_base_rep() fail");
+            MCM_KECTMSG("call fail (%d)", fret);
         }
         goto FREE_01;
     }
 
 FREE_01:
-    this_lklib->rep_code = fret;
     return fret;
 }
 EXPORT_SYMBOL(mcm_lklib_add_entry);
@@ -923,9 +859,6 @@ int mcm_lklib_del_entry(
     MCM_DTYPE_USIZE_TD xlen;
     void *tmp_offset;
 
-
-    this_lklib->rep_msg_con = NULL;
-    this_lklib->rep_msg_len = 0;
 
     xlen = strlen(full_path) + 1;
     this_lklib->pkt_len = sizeof(MCM_DTYPE_USIZE_TD) +
@@ -952,7 +885,7 @@ int mcm_lklib_del_entry(
     //     紀錄請求的路徑.
 
     // T + REQ + PC.
-    MCM_BUILD_BASE_REP_02(tmp_offset, this_lklib, MCM_SREQUEST_DEL_ENTRY, full_path, xlen);
+    MCM_BUILD_BASE_REQ_02(tmp_offset, this_lklib, MCM_SREQUEST_DEL_ENTRY, full_path, xlen);
 
     fret = mcm_send_req(this_lklib);
     if(fret < MCM_RCODE_PASS)
@@ -976,18 +909,17 @@ int mcm_lklib_del_entry(
     //     紀錄回應的類型.
 
     // T + REP.
-    fret = mcm_parse_base_rep(this_lklib, 0);
+    MCM_PARSE_BASE_REP(tmp_offset, this_lklib, fret);
     if(fret < MCM_RCODE_PASS)
     {
         if(fret != MCM_RCODE_CONFIG_NOT_FIND_STORE)
         {
-            MCM_KECTMSG("call mcm_parse_base_rep() fail");
+            MCM_KECTMSG("call fail (%d)", fret);
         }
         goto FREE_01;
     }
 
 FREE_01:
-    this_lklib->rep_code = fret;
     return fret;
 }
 EXPORT_SYMBOL(mcm_lklib_del_entry);
@@ -1006,9 +938,6 @@ int mcm_lklib_get_all_key(
 
     *key_buf = NULL;
 
-    this_lklib->rep_msg_con = NULL;
-    this_lklib->rep_msg_len = 0;
-
     xlen = strlen(mix_path) + 1;
     this_lklib->pkt_len = sizeof(MCM_DTYPE_USIZE_TD) +
                           sizeof(MCM_DTYPE_LIST_TD) +
@@ -1034,7 +963,7 @@ int mcm_lklib_get_all_key(
     //     紀錄請求的路徑.
 
     // T + REQ + PC.
-    MCM_BUILD_BASE_REP_02(tmp_offset, this_lklib, MCM_SREQUEST_GET_ALL_KEY, mix_path, xlen);
+    MCM_BUILD_BASE_REQ_02(tmp_offset, this_lklib, MCM_SREQUEST_GET_ALL_KEY, mix_path, xlen);
 
     fret = mcm_send_req(this_lklib);
     if(fret < MCM_RCODE_PASS)
@@ -1064,27 +993,22 @@ int mcm_lklib_get_all_key(
     //     紀錄回應的資料 (資料內容).
 
     // T + REP.
-    fret = mcm_parse_base_rep(this_lklib, 0);
+    MCM_PARSE_BASE_REP(tmp_offset, this_lklib, fret);
     if(fret < MCM_RCODE_PASS)
     {
         if(fret != MCM_RCODE_CONFIG_NOT_FIND_STORE)
         {
-            MCM_KECTMSG("call mcm_parse_base_rep() fail");
+            MCM_KECTMSG("call fail (%d)", fret);
         }
         goto FREE_01;
     }
-    tmp_offset = this_lklib->pkt_offset;
     // EC.
     tmp_count = *((MCM_DTYPE_EK_TD *) tmp_offset);
-#if MCM_LUDMODE
     MCM_LKDMSG("count[" MCM_DTYPE_EK_PF "]", tmp_count);
-#endif
     tmp_offset += sizeof(MCM_DTYPE_EK_TD);
     // DL.
     xlen = *((MCM_DTYPE_USIZE_TD *) tmp_offset);
-#if MCM_LUDMODE
     MCM_LKDMSG("data_len[" MCM_DTYPE_USIZE_PF "]", xlen);
-#endif
     tmp_offset += sizeof(MCM_DTYPE_USIZE_TD);
     // DC.
     if(xlen > 0)
@@ -1103,7 +1027,6 @@ int mcm_lklib_get_all_key(
     *count_buf = tmp_count;
 
 FREE_01:
-    this_lklib->rep_code = fret;
     return fret;
 }
 EXPORT_SYMBOL(mcm_lklib_get_all_key);
@@ -1121,9 +1044,6 @@ int mcm_lklib_get_all_entry(
 
 
     *data_buf = NULL;
-
-    this_lklib->rep_msg_con = NULL;
-    this_lklib->rep_msg_len = 0;
 
     xlen = strlen(mix_path) + 1;
     this_lklib->pkt_len = sizeof(MCM_DTYPE_USIZE_TD) +
@@ -1150,7 +1070,7 @@ int mcm_lklib_get_all_entry(
     //     紀錄請求的路徑.
 
     // T + REQ + PC.
-    MCM_BUILD_BASE_REP_02(tmp_offset, this_lklib, MCM_SREQUEST_GET_ALL_ENTRY, mix_path, xlen);
+    MCM_BUILD_BASE_REQ_02(tmp_offset, this_lklib, MCM_SREQUEST_GET_ALL_ENTRY, mix_path, xlen);
 
     fret = mcm_send_req(this_lklib);
     if(fret < MCM_RCODE_PASS)
@@ -1180,16 +1100,15 @@ int mcm_lklib_get_all_entry(
     //     紀錄回應的資料 (資料內容).
 
     // T + REP.
-    fret = mcm_parse_base_rep(this_lklib, 0);
+    MCM_PARSE_BASE_REP(tmp_offset, this_lklib, fret);
     if(fret < MCM_RCODE_PASS)
     {
         if(fret != MCM_RCODE_CONFIG_NOT_FIND_STORE)
         {
-            MCM_KECTMSG("call mcm_parse_base_rep() fail");
+            MCM_KECTMSG("call fail (%d)", fret);
         }
         goto FREE_01;
     }
-    tmp_offset = this_lklib->pkt_offset;
     // EC.
     tmp_count = *((MCM_DTYPE_EK_TD *) tmp_offset);
     MCM_LKDMSG("count[" MCM_DTYPE_EK_PF "]", tmp_count);
@@ -1215,7 +1134,6 @@ int mcm_lklib_get_all_entry(
     *count_buf = tmp_count;
 
 FREE_01:
-    this_lklib->rep_code = fret;
     return fret;
 }
 EXPORT_SYMBOL(mcm_lklib_get_all_entry);
@@ -1228,9 +1146,6 @@ int mcm_lklib_del_all_entry(
     MCM_DTYPE_USIZE_TD xlen;
     void *tmp_offset;
 
-
-    this_lklib->rep_msg_con = NULL;
-    this_lklib->rep_msg_len = 0;
 
     xlen = strlen(mix_path) + 1;
     this_lklib->pkt_len = sizeof(MCM_DTYPE_USIZE_TD) +
@@ -1257,7 +1172,7 @@ int mcm_lklib_del_all_entry(
     //     紀錄請求的路徑.
 
     // T + REQ + PC.
-    MCM_BUILD_BASE_REP_02(tmp_offset, this_lklib, MCM_SREQUEST_DEL_ALL_ENTRY, mix_path, xlen);
+    MCM_BUILD_BASE_REQ_02(tmp_offset, this_lklib, MCM_SREQUEST_DEL_ALL_ENTRY, mix_path, xlen);
 
     fret = mcm_send_req(this_lklib);
     if(fret < MCM_RCODE_PASS)
@@ -1281,18 +1196,17 @@ int mcm_lklib_del_all_entry(
     //     紀錄回應的類型.
 
     // T + REP.
-    fret = mcm_parse_base_rep(this_lklib, 0);
+    MCM_PARSE_BASE_REP(tmp_offset, this_lklib, fret);
     if(fret < MCM_RCODE_PASS)
     {
         if(fret != MCM_RCODE_CONFIG_NOT_FIND_STORE)
         {
-            MCM_KECTMSG("call mcm_parse_base_rep() fail");
+            MCM_KECTMSG("call fail (%d)", fret);
         }
         goto FREE_01;
     }
 
 FREE_01:
-    this_lklib->rep_code = fret;
     return fret;
 }
 EXPORT_SYMBOL(mcm_lklib_del_all_entry);
@@ -1306,9 +1220,6 @@ int mcm_lklib_get_max_count(
     MCM_DTYPE_USIZE_TD xlen;
     void *tmp_offset;
 
-
-    this_lklib->rep_msg_con = NULL;
-    this_lklib->rep_msg_len = 0;
 
     xlen = strlen(mask_path) + 1;
     this_lklib->pkt_len = sizeof(MCM_DTYPE_USIZE_TD) +
@@ -1335,7 +1246,7 @@ int mcm_lklib_get_max_count(
     //     紀錄請求的路徑.
 
     // T + REQ + PC.
-    MCM_BUILD_BASE_REP_02(tmp_offset, this_lklib, MCM_SREQUEST_GET_MAX_COUNT, mask_path, xlen);
+    MCM_BUILD_BASE_REQ_02(tmp_offset, this_lklib, MCM_SREQUEST_GET_MAX_COUNT, mask_path, xlen);
 
     fret = mcm_send_req(this_lklib);
     if(fret < MCM_RCODE_PASS)
@@ -1361,19 +1272,17 @@ int mcm_lklib_get_max_count(
     //     紀錄回應的資料.
 
     // T + REP.
-    fret = mcm_parse_base_rep(this_lklib, 0);
+    MCM_PARSE_BASE_REP(tmp_offset, this_lklib, fret);
     if(fret < MCM_RCODE_PASS)
     {
-        MCM_KECTMSG("call mcm_parse_base_rep() fail");
+        MCM_KECTMSG("call fail (%d)", fret);
         goto FREE_01;
     }
-    tmp_offset = this_lklib->pkt_offset;
     // EC.
     *count_buf = *((MCM_DTYPE_EK_TD *) tmp_offset);
     MCM_LKDMSG("max_count[" MCM_DTYPE_EK_PF "]", *count_buf);
 
 FREE_01:
-    this_lklib->rep_code = fret;
     return fret;
 }
 EXPORT_SYMBOL(mcm_lklib_get_max_count);
@@ -1388,9 +1297,6 @@ int mcm_lklib_get_count(
     void *tmp_offset;
 
 
-    this_lklib->rep_msg_con = NULL;
-    this_lklib->rep_msg_len = 0;
-
     xlen = strlen(mix_path) + 1;
     this_lklib->pkt_len = sizeof(MCM_DTYPE_USIZE_TD) +
                           sizeof(MCM_DTYPE_LIST_TD) +
@@ -1416,7 +1322,7 @@ int mcm_lklib_get_count(
     //     紀錄請求的路徑.
 
     // T + REQ + PC.
-    MCM_BUILD_BASE_REP_02(tmp_offset, this_lklib, MCM_SREQUEST_GET_COUNT, mix_path, xlen);
+    MCM_BUILD_BASE_REQ_02(tmp_offset, this_lklib, MCM_SREQUEST_GET_COUNT, mix_path, xlen);
 
     fret = mcm_send_req(this_lklib);
     if(fret < MCM_RCODE_PASS)
@@ -1442,22 +1348,20 @@ int mcm_lklib_get_count(
     //     紀錄回應的資料.
 
     // T + REP.
-    fret = mcm_parse_base_rep(this_lklib, 0);
+    MCM_PARSE_BASE_REP(tmp_offset, this_lklib, fret);
     if(fret < MCM_RCODE_PASS)
     {
         if(fret != MCM_RCODE_CONFIG_NOT_FIND_STORE)
         {
-            MCM_KECTMSG("call mcm_parse_base_rep() fail");
+            MCM_KECTMSG("call fail (%d)", fret);
         }
         goto FREE_01;
     }
-    tmp_offset = this_lklib->pkt_offset;
     // EC.
     *count_buf = *((MCM_DTYPE_EK_TD *) tmp_offset);
     MCM_LKDMSG("count[" MCM_DTYPE_EK_PF "]", *count_buf);
 
 FREE_01:
-    this_lklib->rep_code = fret;
     return fret;
 }
 EXPORT_SYMBOL(mcm_lklib_get_count);
@@ -1471,9 +1375,6 @@ int mcm_lklib_get_usable_key(
     MCM_DTYPE_USIZE_TD xlen;
     void *tmp_offset;
 
-
-    this_lklib->rep_msg_con = NULL;
-    this_lklib->rep_msg_len = 0;
 
     xlen = strlen(mix_path) + 1;
     this_lklib->pkt_len = sizeof(MCM_DTYPE_USIZE_TD) +
@@ -1500,7 +1401,7 @@ int mcm_lklib_get_usable_key(
     //     紀錄請求的路徑.
 
     // T + REQ + PC.
-    MCM_BUILD_BASE_REP_02(tmp_offset, this_lklib, MCM_SREQUEST_GET_USABLE_KEY, mix_path, xlen);
+    MCM_BUILD_BASE_REQ_02(tmp_offset, this_lklib, MCM_SREQUEST_GET_USABLE_KEY, mix_path, xlen);
 
     fret = mcm_send_req(this_lklib);
     if(fret < MCM_RCODE_PASS)
@@ -1526,22 +1427,20 @@ int mcm_lklib_get_usable_key(
     //     紀錄回應的資料.
 
     // T + REP.
-    fret = mcm_parse_base_rep(this_lklib, 0);
+    MCM_PARSE_BASE_REP(tmp_offset, this_lklib, fret);
     if(fret < MCM_RCODE_PASS)
     {
         if(fret != MCM_RCODE_CONFIG_NOT_FIND_STORE)
         {
-            MCM_KECTMSG("call mcm_parse_base_rep() fail");
+            MCM_KECTMSG("call fail (%d)", fret);
         }
         goto FREE_01;
     }
-    tmp_offset = this_lklib->pkt_offset;
     // EK.
     *key_buf = *((MCM_DTYPE_EK_TD *) tmp_offset);
     MCM_LKDMSG("usable_key[" MCM_DTYPE_EK_PF "]", *key_buf);
 
 FREE_01:
-    this_lklib->rep_code = fret;
     return fret;
 }
 EXPORT_SYMBOL(mcm_lklib_get_usable_key);
@@ -1552,9 +1451,6 @@ int mcm_lklib_update(
     int fret;
     void *tmp_offset;
 
-
-    this_lklib->rep_msg_con = NULL;
-    this_lklib->rep_msg_len = 0;
 
     this_lklib->pkt_len = sizeof(MCM_DTYPE_USIZE_TD) +
                           sizeof(MCM_DTYPE_LIST_TD);
@@ -1577,7 +1473,7 @@ int mcm_lklib_update(
     //     紀錄請求類型.
 
     // T + REQ.
-    MCM_BUILD_BASE_REP_01(tmp_offset, this_lklib, MCM_SREQUEST_UPDATE);
+    MCM_BUILD_BASE_REQ_01(tmp_offset, this_lklib, MCM_SREQUEST_UPDATE);
 
     fret = mcm_send_req(this_lklib);
     if(fret < MCM_RCODE_PASS)
@@ -1601,15 +1497,14 @@ int mcm_lklib_update(
     //     紀錄回應的類型.
 
     // T + REP.
-    fret = mcm_parse_base_rep(this_lklib, 0);
+    MCM_PARSE_BASE_REP(tmp_offset, this_lklib, fret);
     if(fret < MCM_RCODE_PASS)
     {
-        MCM_KECTMSG("call mcm_parse_base_rep() fail");
+        MCM_KECTMSG("call fail (%d)", fret);
         goto FREE_01;
     }
 
 FREE_01:
-    this_lklib->rep_code = fret;
     return fret;
 }
 EXPORT_SYMBOL(mcm_lklib_update);
@@ -1621,9 +1516,6 @@ int mcm_lklib_save(
     int fret;
     void *tmp_offset;
 
-
-    this_lklib->rep_msg_con = NULL;
-    this_lklib->rep_msg_len = 0;
 
     this_lklib->pkt_len = sizeof(MCM_DTYPE_USIZE_TD) +
                           sizeof(MCM_DTYPE_LIST_TD) +
@@ -1649,7 +1541,7 @@ int mcm_lklib_save(
     //     紀錄要傳送的資料.
 
     // T + REQ.
-    MCM_BUILD_BASE_REP_01(tmp_offset, this_lklib, MCM_SREQUEST_SAVE);
+    MCM_BUILD_BASE_REQ_01(tmp_offset, this_lklib, MCM_SREQUEST_SAVE);
     // DC.
     memcpy(tmp_offset, &force_save, sizeof(MCM_DTYPE_BOOL_TD));
 
@@ -1675,35 +1567,41 @@ int mcm_lklib_save(
     //     紀錄回應的類型.
 
     // T + REP.
-    fret = mcm_parse_base_rep(this_lklib, 0);
+    MCM_PARSE_BASE_REP(tmp_offset, this_lklib, fret);
     if(fret < MCM_RCODE_PASS)
     {
-        MCM_KECTMSG("call mcm_parse_base_rep() fail");
+        MCM_KECTMSG("call fail (%d)", fret);
         goto FREE_01;
     }
 
 FREE_01:
-    this_lklib->rep_code = fret;
     return fret;
 }
 EXPORT_SYMBOL(mcm_lklib_save);
 
 int mcm_lklib_run(
     struct mcm_lklib_lib_t *this_lklib,
-    char *module_function)
+    char *module_function,
+    void *req_data_con,
+    MCM_DTYPE_USIZE_TD req_data_len,
+    void **rep_data_buf,
+    MCM_DTYPE_USIZE_TD *rep_data_len_buf)
 {
     int fret;
     MCM_DTYPE_USIZE_TD xlen;
-    void *tmp_offset;
+    void *tmp_offset, *tmp_buf;
 
 
-    this_lklib->rep_msg_con = NULL;
-    this_lklib->rep_msg_len = 0;
+    if(rep_data_buf != NULL)
+        *rep_data_buf = NULL;
+    if(rep_data_len_buf != NULL)
+        *rep_data_len_buf = 0;
 
     xlen = strlen(module_function) + 1;
     this_lklib->pkt_len = sizeof(MCM_DTYPE_USIZE_TD) +
                           sizeof(MCM_DTYPE_LIST_TD) +
-                          xlen;
+                          sizeof(MCM_DTYPE_USIZE_TD) + xlen +
+                          sizeof(MCM_DTYPE_USIZE_TD) + req_data_len;
 
     if(this_lklib->pkt_len > this_lklib->pkt_size)
     {
@@ -1716,16 +1614,28 @@ int mcm_lklib_run(
     }
 
     // 封包格式 :
-    // | T | REQ | PC |.
+    // | T | REQ | PL | PC | DL | DC |.
     // T   [MCM_DTYPE_USIZE_TD].
-    //     紀錄封包的總長度, 內容 = T + REQ + PC.
+    //     紀錄封包的總長度, 內容 = T + REQ + PL + PC + DL + DC.
     // REQ [MCM_DTYPE_LIST_TD].
     //     紀錄請求類型.
+    // PL  [MCM_DTYPE_USIZE_TD].
+    //     紀錄請求的路徑長度 (包括最後的 \0).
     // PC  [binary].
     //     紀錄請求的路徑.
+    // DL  [MCM_DTYPE_USIZE_TD].
+    //     紀錄要傳送的資料的長度.
+    // DC  [binary].
+    //     紀錄要傳送的資料.
 
-    // T + REQ + PC.
-    MCM_BUILD_BASE_REP_02(tmp_offset, this_lklib, MCM_SREQUEST_RUN, module_function, xlen);
+    // T + REQ + PL + PC.
+    MCM_BUILD_BASE_REQ_03(tmp_offset, this_lklib, MCM_SREQUEST_RUN, module_function, xlen);
+    // DL.
+    *((MCM_DTYPE_USIZE_TD *) tmp_offset) = req_data_len;
+    tmp_offset += sizeof(MCM_DTYPE_USIZE_TD);
+    // DC.
+    if(req_data_con != NULL)
+        memcpy(tmp_offset, req_data_con, req_data_len);
 
     fret = mcm_send_req(this_lklib);
     if(fret < MCM_RCODE_PASS)
@@ -1742,26 +1652,44 @@ int mcm_lklib_run(
     }
 
     // 封包格式 :
-    // | T | REP | ML | MC |.
+    // | T | REP | DL | DC |.
     // T   [MCM_DTYPE_USIZE_TD].
-    //     紀錄封包的總長度, 內容 = T + REP + ML + MC.
+    //     紀錄封包的總長度, 內容 = T + REP + DL + DC.
     // REP [MCM_DTYPE_LIST_TD].
     //     紀錄回應的類型.
-    // ML  [MCM_DTYPE_USIZE_TD].
-    //     紀錄回應的訊息的長度 (包含最後的 \0).
-    // MC  [binary].
-    //     紀錄回應的訊息.
+    // DL  [MCM_DTYPE_USIZE_TD].
+    //     紀錄回應的資料的長度.
+    // DC  [binary].
+    //     紀錄回應的資料.
 
-    // T + REP + ML + MC.
-    fret = mcm_parse_base_rep(this_lklib, 1);
+    // T + REP.
+    MCM_PARSE_BASE_REP(tmp_offset, this_lklib, fret);
     if(fret < MCM_RCODE_PASS)
     {
-        MCM_KECTMSG("call mcm_parse_base_rep() fail");
-        goto FREE_01;
+        MCM_KECTMSG("call fail (%d)", fret);
+    }
+    // DL.
+    xlen = *((MCM_DTYPE_USIZE_TD *) tmp_offset);
+    MCM_LKDMSG("data_len[" MCM_DTYPE_USIZE_PF "]", xlen);
+    tmp_offset += sizeof(MCM_DTYPE_USIZE_TD);
+    // DC.
+    if((xlen > 0) && (rep_data_buf != NULL))
+    {
+        tmp_buf = kmalloc(xlen, GFP_KERNEL);
+        if(tmp_buf == NULL)
+        {
+            MCM_KEMSG("call kmalloc() fail");
+            fret = MCM_RCODE_LULIB_ALLOC_FAIL;
+            goto FREE_01;
+        }
+        memcpy(tmp_buf, tmp_offset, xlen);
+
+        *rep_data_buf = tmp_buf;
+        if(rep_data_len_buf != NULL)
+            *rep_data_len_buf = xlen;
     }
 
 FREE_01:
-    this_lklib->rep_code = fret;
     return fret;
 }
 EXPORT_SYMBOL(mcm_lklib_run);
@@ -1772,9 +1700,6 @@ int mcm_lklib_shutdown(
     int fret;
     void *tmp_offset;
 
-
-    this_lklib->rep_msg_con = NULL;
-    this_lklib->rep_msg_len = 0;
 
     this_lklib->pkt_len = sizeof(MCM_DTYPE_USIZE_TD) +
                           sizeof(MCM_DTYPE_LIST_TD);
@@ -1797,7 +1722,7 @@ int mcm_lklib_shutdown(
     //     紀錄請求類型.
 
     // T + REQ.
-    MCM_BUILD_BASE_REP_01(tmp_offset, this_lklib, MCM_SREQUEST_SHUTDOWN);
+    MCM_BUILD_BASE_REQ_01(tmp_offset, this_lklib, MCM_SREQUEST_SHUTDOWN);
 
     fret = mcm_send_req(this_lklib);
     if(fret < MCM_RCODE_PASS)
@@ -1821,15 +1746,14 @@ int mcm_lklib_shutdown(
     //     紀錄回應的類型.
 
     // T + REP.
-    fret = mcm_parse_base_rep(this_lklib, 0);
+    MCM_PARSE_BASE_REP(tmp_offset, this_lklib, fret);
     if(fret < MCM_RCODE_PASS)
     {
-        MCM_KECTMSG("call mcm_parse_base_rep() fail");
+        MCM_KECTMSG("call fail (%d)", fret);
         goto FREE_01;
     }
 
 FREE_01:
-    this_lklib->rep_code = fret;
     return fret;
 }
 EXPORT_SYMBOL(mcm_lklib_shutdown);
@@ -1845,9 +1769,6 @@ int mcm_lklib_check_store_file(
     MCM_DTYPE_USIZE_TD xlen, clen;
     void *tmp_offset;
 
-
-    this_lklib->rep_msg_con = NULL;
-    this_lklib->rep_msg_len = 0;
 
     xlen = strlen(file_path) + 1;
     this_lklib->pkt_len = sizeof(MCM_DTYPE_USIZE_TD) +
@@ -1874,7 +1795,7 @@ int mcm_lklib_check_store_file(
     //     紀錄檢查的檔案的路徑.
 
     // T + REQ + PC.
-    MCM_BUILD_BASE_REP_02(tmp_offset, this_lklib, MCM_SREQUEST_CHECK_STORE_FILE, file_path, xlen);
+    MCM_BUILD_BASE_REQ_02(tmp_offset, this_lklib, MCM_SREQUEST_CHECK_STORE_FILE, file_path, xlen);
 
     fret = mcm_send_req(this_lklib);
     if(fret < MCM_RCODE_PASS)
@@ -1904,13 +1825,12 @@ int mcm_lklib_check_store_file(
     //     紀錄檔案的版本資訊.
 
     // T + REP.
-    fret = mcm_parse_base_rep(this_lklib, 0);
+    MCM_PARSE_BASE_REP(tmp_offset, this_lklib, fret);
     if(fret < MCM_RCODE_PASS)
     {
-        MCM_KECTMSG("call mcm_parse_base_rep() fail");
+        MCM_KECTMSG("call fail (%d)", fret);
         goto FREE_01;
     }
-    tmp_offset = this_lklib->pkt_offset;
     // SR.
     *store_result_buf = *((MCM_DTYPE_LIST_TD *) tmp_offset);
     MCM_LKDMSG("store_result[" MCM_DTYPE_LIST_PF "]", *store_result_buf);
@@ -1930,7 +1850,6 @@ int mcm_lklib_check_store_file(
     }
 
 FREE_01:
-    this_lklib->rep_code = fret;
     return fret;
 }
 EXPORT_SYMBOL(mcm_lklib_check_store_file);
@@ -2349,7 +2268,11 @@ EXPORT_SYMBOL(mcm_lklib_do_save);
 
 int mcm_lklib_do_run(
     struct mcm_lklib_lib_t *this_lklib,
-    char *module_function)
+    char *module_function,
+    void *req_data_con,
+    MCM_DTYPE_USIZE_TD req_data_len,
+    void **rep_data_buf,
+    MCM_DTYPE_USIZE_TD *rep_data_len_buf)
 {
     int fret;
 
@@ -2361,7 +2284,8 @@ int mcm_lklib_do_run(
         return fret;
     }
 
-    fret = mcm_lklib_run(this_lklib, module_function);
+    fret = mcm_lklib_run(this_lklib, module_function, req_data_con, req_data_len,
+                         rep_data_buf, rep_data_len_buf);
     if(fret < MCM_RCODE_PASS)
     {
         MCM_KECTMSG("call mcm_lklib_run() fail");

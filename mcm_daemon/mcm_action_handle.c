@@ -64,9 +64,13 @@ int mcm_action_boot_profile_run(
                 return MCM_RCODE_ACTION_INTERNAL_ERROR;
             }
 
+            self_session.rep_data_buf = NULL;
+            self_session.rep_data_len = 0;
+
             fret = module_cb(&self_session);
 
-            mcm_service_response_exit(&self_session);
+            if(self_session.rep_data_buf != NULL)
+                free(self_session.rep_data_buf);
 
             if(fret < MCM_RCODE_PASS)
                 return fret;
@@ -122,9 +126,13 @@ int mcm_action_boot_other_run(
                 return MCM_RCODE_ACTION_INTERNAL_ERROR;
             }
 
+            self_session.rep_data_buf = NULL;
+            self_session.rep_data_len = 0;
+
             module_cb(&self_session);
 
-            mcm_service_response_exit(&self_session);
+            if(self_session.rep_data_buf != NULL)
+                free(self_session.rep_data_buf);
         }
 
     fret = mcm_config_save(&self_session, MCM_DUPDATE_SYNC, 1, 0);

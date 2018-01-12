@@ -21,12 +21,8 @@ struct mcm_lulib_lib_t
     MCM_DTYPE_USIZE_TD session_stack_size;
     int sock_fd;
     void *pkt_buf;
-    void *pkt_offset;
     MCM_DTYPE_USIZE_TD pkt_len;
     MCM_DTYPE_USIZE_TD pkt_size;
-    MCM_DTYPE_LIST_TD rep_code;
-    char *rep_msg_con;
-    MCM_DTYPE_USIZE_TD rep_msg_len;
 };
 
 
@@ -116,7 +112,11 @@ int mcm_lulib_save(
 
 int mcm_lulib_run(
     struct mcm_lulib_lib_t *this_lulib,
-    char *module_function);
+    char *module_function,
+    void *req_data_con,
+    MCM_DTYPE_USIZE_TD req_data_len,
+    void **rep_data_buf,
+    MCM_DTYPE_USIZE_TD *rep_data_len_buf);
 
 int mcm_lulib_shutdown(
     struct mcm_lulib_lib_t *this_lulib);
@@ -239,7 +239,11 @@ int mcm_lulib_do_save(
 
 int mcm_lulib_do_run(
     struct mcm_lulib_lib_t *this_lulib,
-    char *module_function);
+    char *module_function,
+    void *req_data_con,
+    MCM_DTYPE_USIZE_TD req_data_len,
+    void **rep_data_buf,
+    MCM_DTYPE_USIZE_TD *rep_data_len_buf);
 
 int mcm_lulib_do_shutdown(
     struct mcm_lulib_lib_t *this_lulib);

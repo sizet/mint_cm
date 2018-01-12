@@ -2143,19 +2143,19 @@ int mcm_do_push_command(
 void mcm_fill_submit_response(
     struct mcm_command_list_t *this_command,
     struct mcm_request_para_t *request_info,
-    int call_ret,
+    int rep_code,
     char *rep_msg)
 {
-    mcm_cgi_fill_response_header(1, 1, call_ret);
+    mcm_cgi_fill_response_header(1, 1, rep_code);
 
     // 如果執行 run 指令後 module 有回傳自訂的訊息則輸出自訂的訊息.
-    if(rep_msg[0] != '\0')
+    if(rep_msg != NULL)
     {
         printf("%s", rep_msg);
     }
     else
     {
-        if(call_ret < MCM_RCODE_PASS)
+        if(rep_code < MCM_RCODE_PASS)
         {
             printf("alert(\"call mcm_lulib_run() fail\\n[%s]\");", this_command->module_path);
         }
@@ -2181,17 +2181,18 @@ int mcm_do_module_command(
     MCM_DTYPE_BOOL_TD *fill_report_buf)
 {
     int fret;
+    void *tmp_buf;
 
 
     MCM_CCDMSG("=> %s", __FUNCTION__);
 
     MCM_CCDMSG("cmd [%s][%s]", MCM_MODULE_RUN_KEY, this_command->module_path);
-    fret = mcm_lulib_run(this_lulib, this_command->module_path);
+    fret = mcm_lulib_run(this_lulib, this_command->module_path, NULL, 0, &tmp_buf, NULL);
     if(fret < MCM_RCODE_PASS)
     {
         MCM_CEMSG("call mcm_lulib_run(%s) fail", this_command->module_path);
-        mcm_fill_submit_response(this_command, request_info, fret, this_lulib->rep_msg_con);
-        return fret;
+        mcm_fill_submit_response(this_command, request_info, fret, tmp_buf);
+        goto FREE_01;
     }
     else
     {
@@ -2199,13 +2200,16 @@ int mcm_do_module_command(
         if(request_info->request_action == MCM_RACTION_SUBMIT_CONFIG)
             if(this_command->module_last != 0)
             {
-                mcm_fill_submit_response(this_command, request_info, fret,
-                                         this_lulib->rep_msg_con);
+                mcm_fill_submit_response(this_command, request_info, fret, tmp_buf);
                 *fill_report_buf = 1;
             }
     }
 
-    return MCM_RCODE_PASS;
+    fret = MCM_RCODE_PASS;
+FREE_01:
+    if(tmp_buf != NULL)
+        free(tmp_buf);
+    return fret;
 }
 
 // 處理 POST 資料.
@@ -2438,7 +2442,7 @@ int mcm_process_request(
         else
         if(request_info->request_action == MCM_RACTION_SUBMIT_CONFIG)
             if(fill_report == 0)
-                mcm_fill_submit_response(command_list_info, request_info, MCM_RCODE_PASS, "");
+                mcm_fill_submit_response(command_list_info, request_info, MCM_RCODE_PASS, NULL);
     }
 
     fret = MCM_RCODE_PASS;

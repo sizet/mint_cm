@@ -692,17 +692,21 @@ int do_run(
     struct mcm_command_t *command_info)
 {
     int fret;
+    void *tmp_buf;
 
 
-    fret = mcm_lulib_run(this_lulib, command_info->cmd_path);
+    fret = mcm_lulib_run(this_lulib, command_info->cmd_path, NULL, 0, &tmp_buf, NULL);
     if(fret < MCM_RCODE_PASS)
     {
         MCM_EMSG("call mcm_lulib_run(%s) fail", command_info->cmd_path);
         return fret;
     }
 
-    if(this_lulib->rep_msg_con[0] != '\0')
-        printf("%s\n", this_lulib->rep_msg_con);
+    if(tmp_buf != NULL)
+    {
+        printf("%s\n", (char *) tmp_buf);
+        free(tmp_buf);
+    }
 
     return fret;
 }

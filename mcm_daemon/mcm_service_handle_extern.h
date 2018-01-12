@@ -29,13 +29,6 @@ int mcm_service_run_wait(
 int mcm_service_run_post(
     void);
 
-int mcm_service_response_init(
-    struct mcm_service_session_t *this_session,
-    MCM_DTYPE_USIZE_TD buf_size);
-
-int mcm_service_response_exit(
-    struct mcm_service_session_t *this_session);
-
 
 
 
