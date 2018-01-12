@@ -1240,7 +1240,7 @@ int case_run(
 
     path1 = "mcm_module_kernel_test_01";
     DMSG("[run] %s", path1);
-    if(mcm_lklib_run(this_lklib, path1) < MCM_RCODE_PASS)
+    if(mcm_lklib_run(this_lklib, path1, NULL, 0, NULL, NULL) < MCM_RCODE_PASS)
     {
         DMSG("call mcm_lklib_run(%s) fail", path1);
         goto FREE_01;
@@ -1248,7 +1248,7 @@ int case_run(
 
     path1 = "mcm_module_kernel_test_02";
     DMSG("[run] %s", path1);
-    if(mcm_lklib_run(this_lklib, path1) < MCM_RCODE_PASS)
+    if(mcm_lklib_run(this_lklib, path1, NULL, 0, NULL, NULL) < MCM_RCODE_PASS)
     {
         DMSG("call mcm_lklib_run(%s) fail", path1);
         goto FREE_01;

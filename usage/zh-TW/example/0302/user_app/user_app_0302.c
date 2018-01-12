@@ -1203,7 +1203,7 @@ int case_run(
 
     path1 = "mcm_module_user_test_01";
     DMSG("[run] %s", path1);
-    if(mcm_lulib_run(this_lulib, path1) < MCM_RCODE_PASS)
+    if(mcm_lulib_run(this_lulib, path1, NULL, 0, NULL, NULL) < MCM_RCODE_PASS)
     {
         DMSG("call mcm_lulib_run(%s) fail", path1);
         goto FREE_01;
@@ -1211,7 +1211,7 @@ int case_run(
 
     path1 = "mcm_module_user_test_02";
     DMSG("[run] %s", path1);
-    if(mcm_lulib_run(this_lulib, path1) < MCM_RCODE_PASS)
+    if(mcm_lulib_run(this_lulib, path1, NULL, 0, NULL, NULL) < MCM_RCODE_PASS)
     {
         DMSG("call mcm_lulib_run(%s) fail", path1);
         goto FREE_01;
