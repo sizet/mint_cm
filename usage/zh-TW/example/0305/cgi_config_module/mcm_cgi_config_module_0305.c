@@ -190,12 +190,14 @@ int find_limit_by_priority(
         MCM_CCMEMSG("call mcm_lulib_get_alone(%s) fail", path1);
         goto FREE_01;
     }
+    priority_range[0] = priority_range[1] = 0;
     if(priority_rule == 0)
     {
         priority_range[0] = 1;
         priority_range[1] = 10;
     }
     else
+    if(priority_rule == 1)
     {
         priority_range[0] = 11;
         priority_range[1] = 20;

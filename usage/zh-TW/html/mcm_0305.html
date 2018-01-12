@@ -487,7 +487,7 @@ device.vap.#23
             <tr>
               <td class="css_td_list1_l">04.&nbsp;</td>
               <td class="css_td_list1_r">
-                允許 key_list_buf != NULL 而 key_count_buf = 0 的情況
+                允許 key_list_buf != NULL 而 key_count_buf == 0 的情況
               </td>
             </tr>
             <tr>
@@ -837,8 +837,9 @@ function main_init()
 &lt;/head&gt;
 &lt;body&gt;
   &lt;select id="rule_select"&gt;
-    &lt;option value="0"&gt;list visible vap&lt;/option&gt;
-    &lt;option value="1"&gt;list hidden vap&lt;/option&gt;
+    &lt;option value="0"&gt;find visible vap&lt;/option&gt;
+    &lt;option value="1"&gt;find hidden vap&lt;/option&gt;
+    &lt;option value="2"&gt;find unknown vap&lt;/option&gt;
   &lt;/select&gt;
   &lt;br&gt;
   &lt;button type="button" onclick="main_init()"&gt;test&lt;/button&gt;
@@ -1025,6 +1026,7 @@ function main_init()
     &lt;option value="5"&gt;find remote (rule = 5) station&lt;/option&gt;
     &lt;option value="6"&gt;find control (rule = 6) station&lt;/option&gt;
     &lt;option value="7"&gt;find security (rule = 7) station&lt;/option&gt;
+    &lt;option value="8"&gt;find unknown (rule = 8) station&lt;/option&gt;
   &lt;/select&gt;
   &lt;br&gt;
   &lt;button type="button" onclick="main_init()"&gt;test&lt;/button&gt;
