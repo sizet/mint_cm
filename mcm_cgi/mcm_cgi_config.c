@@ -329,6 +329,9 @@ struct mcm_store_t
 {
     // store 使用的 model.
     struct mcm_model_t *link_model;
+    // 對於沒有任何 store 的 entry 會建立一個空的 sotre.
+    // 紀錄此 store 是否為空的 store.
+    MCM_DTYPE_BOOL_TD empty_store;
     // store 的 key.
     MCM_DTYPE_EK_TD entry_key;
     // store 的 member 的資料內容表.
@@ -1429,7 +1432,7 @@ int mcm_create_store(
     struct mcm_model_t *self_model;
     struct mcm_store_t *self_store = NULL, *prev_other_store = NULL, *tail_store = NULL,
         *head_store = NULL;
-    MCM_DTYPE_EK_TD kidx, key_count = 0, *key_list = NULL;
+    MCM_DTYPE_EK_TD kidx = 0, key_count = 0, *key_list = NULL;
     char *dl_err;
     int (*module_cb)(struct mcm_lulib_lib_t *this_lulib,
                      MCM_DTYPE_USIZE_TD part_level,
@@ -1553,8 +1556,8 @@ int mcm_create_store(
                    this_command->pull_config_part_type[part_level] == MCM_DTYPE_GS_INDEX ?
                    MCM_DTYPE_GS_KEY : MCM_DTYPE_GD_KEY);
 
-        // 每個 entry 建立一個 store.
-        for(kidx = 0; kidx < key_count; kidx++)
+        // 每個 entry 建立一個 store, 沒有任何 entry 的話會建立一個空的 store.
+        do
         {
             self_store = (struct mcm_store_t *) calloc(1, sizeof(struct mcm_store_t));
             if(self_store == NULL)
@@ -1564,17 +1567,21 @@ int mcm_create_store(
                 MCM_CGI_AEMSG(fret, 0, "call calloc() fail\\n[%s]", strerror(errno));
                 goto FREE_02;
             }
-            MCM_CCDMSG("[%s.%c" MCM_DTYPE_EK_PF "] alloc store[%p]",
+            MCM_CCDMSG("[%s] [%s.%c" MCM_DTYPE_EK_PF "] alloc store[%p]",
+                       key_count == 0 ? "empty" : "normal",
                        self_model->group_name, MCM_SPROFILE_PATH_KEY_KEY,
-                       key_list[kidx], self_store);
-
-            self_store->entry_key = key_list[kidx];
+                       key_count == 0 ? 0 : key_list[kidx], self_store);
 
             // 鍊結使用的 model.
             self_store->link_model = self_model;
             MCM_CCDMSG("[%s.%c" MCM_DTYPE_EK_PF "] link model[%p]",
                        self_model->group_name, MCM_SPROFILE_PATH_KEY_KEY,
                        self_store->entry_key, self_model);
+
+            if(key_count == 0)
+                self_store->empty_store = 1;
+            else
+                self_store->entry_key = key_list[kidx];
 
             if(tail_store == NULL)
             {
@@ -1627,86 +1634,88 @@ int mcm_create_store(
                            MCM_SPROFILE_PATH_KEY_KEY, tail_store->entry_key);
             }
             tail_store = self_store;
-        }
 
-        if(key_count > 0)
+            kidx++;
+        }
+        while(kidx < key_count);
+
+        MCM_CCDMSG("[%s.%c" MCM_DTYPE_EK_PF "] tail",
+                   self_model->group_name, MCM_SPROFILE_PATH_KEY_KEY, self_store->entry_key);
+
+        // 重新設定 parent 的 child 節尾.
+        if(parent_store != NULL)
         {
-            MCM_CCDMSG("[%s.%c" MCM_DTYPE_EK_PF "] tail",
-                       self_model->group_name, MCM_SPROFILE_PATH_KEY_KEY, self_store->entry_key);
-
-            // 重新設定 parent 的 child 節尾.
-            if(parent_store != NULL)
-            {
-                parent_store->child_store_tail = tail_store;
-                MCM_CCDMSG("[%s.%c" MCM_DTYPE_EK_PF "] link parent->child_tail"
-                           "[%s.%c" MCM_DTYPE_EK_PF "]",
-                           parent_store->link_model->group_name, MCM_SPROFILE_PATH_KEY_KEY,
-                           parent_store->entry_key, self_model->group_name,
-                           MCM_SPROFILE_PATH_KEY_KEY, tail_store->entry_key);
-            }
-
-            // 鍊結前一個使用其他 model 的 store 到此串列.
-            if(prev_other_store != NULL)
-            {
-                prev_other_store->next_other_store = head_store;
-                MCM_CCDMSG("[%s.%c" MCM_DTYPE_EK_PF "] link other neighbor"
-                           "[%s.%c" MCM_DTYPE_EK_PF "->]",
-                           self_model->group_name, MCM_SPROFILE_PATH_KEY_KEY,
-                           head_store->entry_key, prev_other_store->link_model->group_name,
-                           MCM_SPROFILE_PATH_KEY_KEY, prev_other_store->entry_key);
-            }
-
-            self_store = head_store;
+            parent_store->child_store_tail = tail_store;
+            MCM_CCDMSG("[%s.%c" MCM_DTYPE_EK_PF "] link parent->child_tail"
+                       "[%s.%c" MCM_DTYPE_EK_PF "]",
+                       parent_store->link_model->group_name, MCM_SPROFILE_PATH_KEY_KEY,
+                       parent_store->entry_key, self_model->group_name,
+                       MCM_SPROFILE_PATH_KEY_KEY, tail_store->entry_key);
         }
+
+        // 鍊結前一個使用其他 model 的 store 到此串列.
+        if(prev_other_store != NULL)
+        {
+            prev_other_store->next_other_store = head_store;
+            MCM_CCDMSG("[%s.%c" MCM_DTYPE_EK_PF "] link other neighbor"
+                       "[%s.%c" MCM_DTYPE_EK_PF "->]",
+                       self_model->group_name, MCM_SPROFILE_PATH_KEY_KEY,
+                       head_store->entry_key, prev_other_store->link_model->group_name,
+                       MCM_SPROFILE_PATH_KEY_KEY, prev_other_store->entry_key);
+        }
+
+        self_store = head_store;
     }
 
     // 填充每個 store 需要的資料.
-    for(; (self_store != NULL) && (self_store->link_model == self_model);
-        self_store = self_store->next_store)
-    {
-        MCM_CCDMSG("[%s.%c" MCM_DTYPE_EK_PF "] do",
-                   self_model->group_name, MCM_SPROFILE_PATH_KEY_KEY, self_store->entry_key);
-
-        this_command->pull_config_part_key[part_level] = self_store->entry_key;
-
-        if((part_level + 1) < this_command->pull_config_level)
+    if(self_store->empty_store == 0)
+        for(; (self_store != NULL) && (self_store->link_model == self_model);
+            self_store = self_store->next_store)
         {
-            // 處理下一層 store.
-            fret = mcm_create_store(this_module_fp, this_lulib, this_command, part_level + 1,
-                                    cache_path, self_model->child_model,
-                                    self_store->child_store_head, self_store, NULL);
-            if(fret < MCM_RCODE_PASS)
+            MCM_CCDMSG("[%s.%c" MCM_DTYPE_EK_PF "] do",
+                       self_model->group_name, MCM_SPROFILE_PATH_KEY_KEY, self_store->entry_key);
+
+            this_command->pull_config_part_key[part_level] = self_store->entry_key;
+
+            if((part_level + 1) < this_command->pull_config_level)
             {
-                MCM_CECTMSG("call mcm_create_store() fail");
-                goto FREE_02;
+                // 處理下一層 store.
+                fret = mcm_create_store(this_module_fp, this_lulib, this_command, part_level + 1,
+                                        cache_path, self_model->child_model,
+                                        self_store->child_store_head, self_store, NULL);
+                if(fret < MCM_RCODE_PASS)
+                {
+                    MCM_CECTMSG("call mcm_create_store() fail");
+                    goto FREE_02;
+                }
+            }
+            else
+            {
+                // 填充 full 類型的路徑用來取得資料內容
+                mcm_fill_path(this_command, part_level, MCM_FPATH_FULL, cache_path);
+
+                MCM_CCDMSG("[%s.%c" MCM_DTYPE_EK_PF "] entry_info_value[%s]",
+                           self_store->link_model->group_name, MCM_SPROFILE_PATH_KEY_KEY,
+                           self_store->entry_key, cache_path);
+
+                // 取出每個 entry 的資料內容.
+                fret = mcm_lulib_get_list_value(this_lulib, cache_path,
+                                                &self_store->member_value_list,
+                                                &self_store->member_value_len);
+                if(fret < MCM_RCODE_PASS)
+                {
+                    MCM_CEMSG("call mcm_lulib_get_list_value(%s) fail", cache_path);
+                    MCM_CGI_AEMSG(fret, 0, "call mcm_lulib_get_list_value() fail\\n[%s]",
+                                  cache_path);
+                    goto FREE_02;
+                }
+                MCM_CCDMSG("[%s.%c" MCM_DTYPE_EK_PF "] alloc entry_info_value"
+                           "[" MCM_DTYPE_USIZE_PF "][%p]",
+                           self_store->link_model->group_name, MCM_SPROFILE_PATH_KEY_KEY,
+                           self_store->entry_key, self_store->member_value_len,
+                           self_store->member_value_list);
             }
         }
-        else
-        {
-            // 填充 full 類型的路徑用來取得資料內容
-            mcm_fill_path(this_command, part_level, MCM_FPATH_FULL, cache_path);
-
-            MCM_CCDMSG("[%s.%c" MCM_DTYPE_EK_PF "] entry_info_value[%s]",
-                       self_store->link_model->group_name, MCM_SPROFILE_PATH_KEY_KEY,
-                       self_store->entry_key, cache_path);
-
-            // 取出每個 entry 的資料內容.
-            fret = mcm_lulib_get_list_value(this_lulib, cache_path,
-                                            &self_store->member_value_list,
-                                            &self_store->member_value_len);
-            if(fret < MCM_RCODE_PASS)
-            {
-                MCM_CEMSG("call mcm_lulib_get_list_value(%s) fail", cache_path);
-                MCM_CGI_AEMSG(fret, 0, "call mcm_lulib_get_list_value() fail\\n[%s]", cache_path);
-                goto FREE_02;
-            }
-            MCM_CCDMSG("[%s.%c" MCM_DTYPE_EK_PF "] alloc entry_info_value"
-                       "[" MCM_DTYPE_USIZE_PF "][%p]",
-                       self_store->link_model->group_name, MCM_SPROFILE_PATH_KEY_KEY,
-                       self_store->entry_key, self_store->member_value_len,
-                       self_store->member_value_list);
-        }
-    }
 
 FREE_02:
     if(key_list != NULL)
@@ -2014,6 +2023,12 @@ void mcm_output_data_json_tree(
                 {
                     if(this_store->link_model != this_model)
                         break;
+
+                    if(this_store->empty_store != 0)
+                    {
+                        this_store = this_store->next_store;
+                        break;
+                    }
 
                     printf("{");
 
