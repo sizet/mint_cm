@@ -14,33 +14,84 @@ Some rights reserved. See README.
 <script type="text/javascript" src="json3.js"></script>
 <script type="text/javascript" src="mcm_jslib_api.js"></script>
 <script type="text/javascript" src="mcm_jslib_data_info_auto.js"></script>
+<script type="text/javascript" src="web_app_0504_script.js"></script>
 <link rel="stylesheet" href="web_app_0504_style.css">
 
 <script type="text/javascript">
-function do_test()
+function main_init()
 {
-    var self_jslib, req_cmd, rep_ret, mcm_dv;
+    var self_jslib, req_cmd = "", rep_ret, mcm_dv, tmp_html = "", i, j;
 
 
-    req_cmd = "&set.device.system.uptime=123456789";
+    // 把要過濾的規則寫入到資料庫, 之後內部模組函式再從資料庫讀出過濾規則.
+    req_cmd += "&set.device.filter.rule1=" +
+               $("#rule_select").val();
+
+    // 指定要讀出的資料.
+    req_cmd += "&get.device.vap.*.station.*=find_match_rule_station" +
+               // vap 和 station 路徑有階層關係, 需要注意順序,
+               // 因為是要找出指定的 station 所屬的 vap 資料,
+               // 所以 vap 指令必須在 station 指令之後.
+               "&get.device.vap.*";
 
     self_jslib = new mcm_jslib_lib_t();
     self_jslib.socket_path = "@mintcm";
-    // 錯誤的存取模式, 應該是 mcm_session_permission.rw.
-    self_jslib.session_permission = mcm_session_permission.ro;
+    self_jslib.session_permission = mcm_session_permission.rw;
     self_jslib.session_stack_size = 0;
     self_jslib.request_command = req_cmd;
-    self_jslib.after_complete = mcm_after_complete.reload;
+    self_jslib.data_format = mcm_data_format.all_default;
     self_jslib.other_query = "";
-    rep_ret = mcm_jslib_submit_config(self_jslib);
+    rep_ret = mcm_jslib_obtain_config(self_jslib);
     if(rep_ret.rep_code < mcm_return_code.pass)
     {
-        alert("call mcm_jslib_submit_config() fail" +
+        alert("call mcm_jslib_obtain_config() fail" +
               "[" + rep_ret.rep_code + "]");
         mcm_jslib_run_script(rep_ret.rep_data);
         return;
     }
-    mcm_jslib_run_script(rep_ret.rep_data);
+    mcm_dv = JSON.parse(rep_ret.rep_data);
+
+    // 顯示 device.vap.*
+    data_array = new Array(4);
+    data_array[0] = new Array();
+    data_array[1] = new Array();
+    data_array[2] = new Array();
+    data_array[3] = new Array();
+    data_array[0].push("");
+    data_array[1].push("ekey");
+    data_array[2].push("ssid");
+    data_array[3].push("channel");
+    for(i = 0; i < mcm_dv.device.vap.length; i++)
+    {
+        data_array[0].push("device.vap.@" + (i + 1));
+        data_array[1].push(mcm_dv.device.vap[i].ekey);
+        data_array[2].push(mcm_jslib_convert_html_str(mcm_dv.device.vap[i].ssid));
+        data_array[3].push(mcm_dv.device.vap[i].channel);
+    }
+    tmp_html += jsapi_make_table("css_table1", "css_td1", data_array);
+
+    // 顯示 device.vap.*.station.*
+    data_array = new Array(4);
+    data_array[0] = new Array();
+    data_array[1] = new Array();
+    data_array[2] = new Array();
+    data_array[3] = new Array();
+    data_array[0].push("");
+    data_array[1].push("ekey");
+    data_array[2].push("mac_addr");
+    data_array[3].push("rule");
+    for(i = 0; i < mcm_dv.device.vap.length; i++)
+        for(j = 0; j < mcm_dv.device.vap[i].station.length; j++)
+        {
+            data_array[0].push("device.vap.@" + (i + 1) + ".station.@" + (j + 1));
+            data_array[1].push(mcm_dv.device.vap[i].station[j].ekey);
+            data_array[2].push(
+                mcm_jslib_convert_html_str(mcm_dv.device.vap[i].station[j].mac_addr));
+            data_array[3].push(mcm_dv.device.vap[i].station[j].rule);
+        }
+    tmp_html += jsapi_make_table("css_table1", "css_td1", data_array);
+
+    $("#show_box").html(tmp_html);
 }
 </script>
 
@@ -48,9 +99,24 @@ function do_test()
 
 <body>
 
-  <div>[submit_config]<br>[system error]</div>
+  <div>[advanced get]<br>[CGI config module]<br>[module]</div>
 
-  <button type="button" onclick="do_test()">test</button>
+  <select id="rule_select">
+    <option value="1">find phone (rule = 1) station</option>
+    <option value="2">find mobile (rule = 2) station</option>
+    <option value="3">find geme (rule = 3) station</option>
+    <option value="4">find stream (rule = 4) station</option>
+    <option value="5">find remote (rule = 5) station</option>
+    <option value="6">find control (rule = 6) station</option>
+    <option value="7">find security (rule = 7) station</option>
+    <option value="8">find unknown (rule = 8) station</option>
+  </select>
+  <br>
+
+  <button type="button" onclick="main_init()">test</button>
+  <br><br>
+
+  <div id="show_box"></div>
 
 </body>
 

@@ -50,5 +50,10 @@ Some rights reserved. See README.
     <location_x type="fld">0</location_x>
     <location_y type="fld">0</location_y>
   </client>
+
+  <filter type="gs" max="1" save="0">
+    <ekey type="ek">0</ekey>
+    <rule1 type="isi">0</rule1>
+  </filter>
 </device>
 </base>

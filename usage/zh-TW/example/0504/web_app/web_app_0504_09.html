@@ -19,13 +19,13 @@ Some rights reserved. See README.
 <script type="text/javascript">
 function do_test()
 {
-    var self_jslib, req_cmd = "", rep_ret, custom_data;
+    var self_jslib, req_cmd = "", rep_ret;
 
 
     req_cmd += "&set.device.descript=" +
                mcm_jslib_convert_submit_str($("#descript_text").val());
 
-    req_cmd += "&run.mcm_module_submit_json_test";
+    req_cmd += "&run.mcm_module_submit_text_test";
 
     self_jslib = new mcm_jslib_lib_t();
     self_jslib.socket_path = "@mintcm";
@@ -43,9 +43,8 @@ function do_test()
         return;
     }
 
-    // 處理回傳的文字.
-    custom_data = JSON.parse(rep_ret.rep_data);
-    alert(custom_data.descript);
+    // 顯示回傳的文字.
+    alert(rep_ret.rep_data);
 }
 </script>
 
@@ -53,7 +52,7 @@ function do_test()
 
 <body>
 
-  <div>[submit_config]<br>[module JSON]</div>
+  <div>[submit_config]<br>[module text]</div>
 
   <table>
     <tr>

@@ -22,7 +22,8 @@ function do_test()
     var self_jslib, req_cmd, rep_ret, mcm_dv;
 
 
-    req_cmd = "&set.device.system.uptime=123456789";
+    req_cmd = "&set.device.system.uptime=123456789" +
+              "&run.mcm_module_submit_error_test";
 
     self_jslib = new mcm_jslib_lib_t();
     self_jslib.socket_path = "@mintcm";
@@ -47,7 +48,7 @@ function do_test()
 
 <body>
 
-  <div>[submit_config]<br>[success]</div>
+  <div>[submit_config]<br>[module error]</div>
 
   <button type="button" onclick="do_test()">test</button>
 

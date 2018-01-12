@@ -11,24 +11,46 @@ device descript:Wireless%20Device serial_number:0022E5A1CC9F
 device.system date:2015/06/07 ip_addr:192.168.10.254 uptime:0 loading:45.678
 
 ; device.vap.*
-device.vap.#8 ssid:open-1 channel:10
-device.vap.#15 ssid:radius-2 channel:44
-device.vap.#23 ssid:wap2-3 channel:0
+device.vap.#5 ssid:garden-open-5G channel:7
+device.vap.#8 ssid:parlor-psk-2.4G channel:44
+device.vap.#13 ssid:balcony-eap-2.4G channel:11
+device.vap.#22 ssid:greenhouse-psk-5G channel:48
+device.vap.#34 ssid:studio-wep-5G channel:136
+device.vap.#37 ssid:park-open-2.4G channel:3
 
 ; device.vap.*.extra
-device.vap.#8.extra hidden:1 tx_power:9
-device.vap.#15.extra hidden:0 tx_power:10
-device.vap.#23.extra hidden:0 tx_power:3
+device.vap.#5.extra hidden:0 tx_power:30
+device.vap.#8.extra hidden:0 tx_power:9
+device.vap.#13.extra hidden:1 tx_power:16
+device.vap.#22.extra hidden:0 tx_power:21
+device.vap.#34.extra hidden:1 tx_power:5
+device.vap.#37.extra hidden:0 tx_power:27
 
 ; device.vap.*.station.*
-device.vap.#8.station.#20 mac_addr:00:11:22:33:44:55 rule:3
-device.vap.#15.station.#30 mac_addr:00:aa:bb:cc:dd:ee rule:5
-device.vap.#15.station.#33 mac_addr:00:aa:bb:cc:dd:ff rule:6
+device.vap.#5.station.#1 mac_addr:a8:26:d9:10:d5:f9 rule:1
+device.vap.#5.station.#2 mac_addr:38:2c:4a:a1:9f:0a rule:2
+device.vap.#5.station.#9 mac_addr:b0:65:bd:7c:22:c0 rule:1
+device.vap.#8.station.#2 mac_addr:00:1d:40:66:d2:3e rule:4
+device.vap.#8.station.#8 mac_addr:00:e0:4c:bc:01:5a rule:3
+device.vap.#8.station.#17 mac_addr:18:a9:9b:46:c9:8d rule:2
+device.vap.#8.station.#23 mac_addr:b0:65:bd:14:cd:a5 rule:1
+device.vap.#22.station.#1 mac_addr:00:1d:40:cf:05:0d rule:6
+device.vap.#22.station.#7 mac_addr:00:e0:4c:d1:60:61 rule:5
+device.vap.#22.station.#9 mac_addr:b0:65:bd:11:a9:4f rule:1
+device.vap.#34.station.#15 mac_addr:38:2c:4a:34:cb:24 rule:6
+device.vap.#34.station.#32 mac_addr:18:a9:9b:cc:1e:9d rule:3
+device.vap.#37.station.#6 mac_addr:00:e0:4c:fe:15:4c rule:7
 
 ; device.limit.*
-device.limit.#3 name:normal priority:10
-device.limit.#5 name:height priority:15
-device.limit.#6 name:low priority:5
+device.limit.#1 name:phone priority:11
+device.limit.#2 name:mobile priority:2
+device.limit.#3 name:geme priority:16
+device.limit.#4 name:stream priority:5
+device.limit.#5 name:remote priority:8
+device.limit.#6 name:control priority:13
+device.limit.#7 name:security priority:18
 
 ; device.client.*
+
+; device.filter
 

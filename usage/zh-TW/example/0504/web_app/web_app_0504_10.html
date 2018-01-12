@@ -19,13 +19,13 @@ Some rights reserved. See README.
 <script type="text/javascript">
 function do_test()
 {
-    var self_jslib, req_cmd = "", rep_ret;
+    var self_jslib, req_cmd = "", rep_ret, custom_data;
 
 
-    req_cmd += "&set.device.system.uptime=" +
-               $("#uptime_text").val();
+    req_cmd += "&set.device.descript=" +
+               mcm_jslib_convert_submit_str($("#descript_text").val());
 
-    req_cmd += "&run.mcm_module_javascript_control_element_test";
+    req_cmd += "&run.mcm_module_submit_json_test";
 
     self_jslib = new mcm_jslib_lib_t();
     self_jslib.socket_path = "@mintcm";
@@ -43,8 +43,9 @@ function do_test()
         return;
     }
 
-    // 執行回傳的文字.
-    mcm_jslib_run_script(rep_ret.rep_data);
+    // 處理回傳的文字.
+    custom_data = JSON.parse(rep_ret.rep_data);
+    alert(custom_data.descript);
 }
 </script>
 
@@ -52,19 +53,16 @@ function do_test()
 
 <body>
 
-  <div>[submit_config]<br>[module JavaScript]<br>[control element]</div>
+  <div>[submit_config]<br>[module JSON]</div>
 
   <table>
     <tr>
-      <td>input number : </td>
+      <td>input srting : </td>
       <td>
-        <input id="uptime_text" type="text" size="8" value="0">
+        <input id="descript_text" type="text" size="32">
       </td>
       <td>
-        <button type="button" onclick="do_test()">submit</button>
-      </td>
-      <td>
-        <div id="number_div"></div>
+        <button type="button" onclick="do_test()">test</button>
       </td>
     </tr>
   </table>

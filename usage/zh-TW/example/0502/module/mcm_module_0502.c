@@ -21,63 +21,92 @@
 #define DMSG(msg_fmt, msgs...) printf("%s(%04u): " msg_fmt "\n", __FILE__, __LINE__, ##msgs)
 
 
-int mcm_module_return_test_01(
+int mcm_module_user_data_test_01(
     struct mcm_service_session_t *this_session)
 {
     int fret = MCM_RCODE_MODULE_INTERNAL_ERROR;
+    MCM_DTYPE_USIZE_TD tmp_len;
+    char *tmp_buf;
 
 
-    DMSG("return test 01 :");
+    DMSG("string data test :");
 
     srand(time(NULL));
 
-    if(mcm_service_response_init(this_session, 256) < MCM_RCODE_PASS)
+    // 外部程式傳來的資料.
+
+    DMSG("recv [" MCM_DTYPE_USIZE_PF "][%s]",
+         this_session->req_data_len, (char *) this_session->req_data_con);
+
+    // 內部模組要回傳的資料.
+
+    tmp_len = 256;
+    tmp_buf = (char *) malloc(tmp_len);
+    if(tmp_buf == NULL)
     {
-        DMSG("call mcm_service_response_init() fail");
+        DMSG("call malloc() fail [%s]", strerror(errno));
         goto FREE_01;
     }
-    DMSG("buffer [%p][" MCM_DTYPE_USIZE_PF "]",
-         this_session->rep_msg_buf, this_session->rep_msg_size);
 
-    snprintf(this_session->rep_msg_buf, this_session->rep_msg_size,
-             "call from %d, rand = %u",
-             this_session->call_from, rand());
+    snprintf(tmp_buf, tmp_len, "internal data %u", rand());
+    tmp_len = strlen(tmp_buf) + 1;
+    DMSG("send [" MCM_DTYPE_USIZE_PF "][%s]", tmp_len, tmp_buf);
 
-    fret = 12345;
+    this_session->rep_data_buf = tmp_buf;
+    this_session->rep_data_len = tmp_len;
 
+    fret = MCM_RCODE_PASS;
 FREE_01:
     return fret;
 }
 
-int mcm_module_return_test_02(
+int mcm_module_user_data_test_02(
     struct mcm_service_session_t *this_session)
 {
     int fret = MCM_RCODE_MODULE_INTERNAL_ERROR;
-    MCM_DTYPE_USIZE_TD tmp_len = 0;
+    MCM_DTYPE_USIZE_TD tmp_len, idx, count;
+    int *tmp_buf;
 
 
-    DMSG("return test 02 :");
+    DMSG("bytes data test :");
 
     srand(time(NULL));
 
-    if(mcm_service_response_init(this_session, 1024) < MCM_RCODE_PASS)
+    // 外部程式傳來的資料.
+
+    tmp_buf = (int *) this_session->req_data_con;
+    count = this_session->req_data_len / sizeof(int);
+    DMSG("recv [" MCM_DTYPE_USIZE_PF "] (" MCM_DTYPE_USIZE_PF ") -",
+         this_session->req_data_len, count);
+    for(idx = 0; idx < count; idx++)
     {
-        DMSG("call mcm_service_response_init() fail");
+        DMSG("%d", tmp_buf[idx]);
+    }
+
+    // 內部模組要回傳的資料.
+
+    count = 6;
+    tmp_buf = calloc(count, sizeof(int));
+    if(tmp_buf == NULL)
+    {
+        DMSG("call calloc() fail [%s]", strerror(errno));
         goto FREE_01;
     }
-    DMSG("buffer [%p][" MCM_DTYPE_USIZE_PF "]",
-         this_session->rep_msg_buf, this_session->rep_msg_size);
+    tmp_len = sizeof(int) * count;
 
-    tmp_len += snprintf(this_session->rep_msg_buf + tmp_len,
-                        this_session->rep_msg_size - tmp_len,
-                        "call from %d, return test 2\n",
-                        this_session->call_from);
-    tmp_len += snprintf(this_session->rep_msg_buf + tmp_len,
-                        this_session->rep_msg_size - tmp_len,
-                        "rand = %u\n",
-                        rand());
+    for(idx = 0; idx < count; idx++)
+        tmp_buf[idx] = rand() % 10;
 
-    fret = 2468;
+    DMSG("send [" MCM_DTYPE_USIZE_PF "] (" MCM_DTYPE_USIZE_PF ") -", tmp_len, count);
+    for(idx = 0; idx < count; idx++)
+    {
+        DMSG("%d", tmp_buf[idx]);
+    }
+
+    this_session->rep_data_buf = tmp_buf;
+    this_session->rep_data_len = tmp_len;
+
+    fret = MCM_RCODE_PASS;
 
 FREE_01:
     return fret;
