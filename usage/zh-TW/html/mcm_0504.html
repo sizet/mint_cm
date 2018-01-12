@@ -25,7 +25,11 @@ Some rights reserved. See README.
   <div class="css_div_box_content">
     <br>
 
-    此章節說明如何在網頁端程式使用內部模組回傳資訊.
+    此章節說明如何在網頁端程式使用.
+    <br><br>
+
+    網頁端無法傳送資料給內部模組, 不過內部模組可以回傳資料給 CGI, 再由 CGI 輸出給網頁端,
+    需要注意內部模組回傳的資料必須是<font class="css_font_r1">字串格式</font>.
     <br><br>
 
   </div>
@@ -48,7 +52,7 @@ Some rights reserved. See README.
           <font class="css_font_g1">rep_code</font>
         </td>
         <td class="css_td_list2_r1">
-          內部模組回傳的整數 <a href="mcm_0501.html#hook_0501_return_integer_01">[詳細]</a>
+          內部模組回傳的執行結果 <a href="mcm_0407.html#hook_0407_module_return_code_01">[詳細]</a>
         </td>
       </tr>
       <tr>
@@ -56,7 +60,7 @@ Some rights reserved. See README.
           <font class="css_font_g1">rep_data</font>
         </td>
         <td class="css_td_list2_r1">
-          內部模組回傳的字串內容 <a href="mcm_0501.html#hook_0501_return_string_01">[詳細]</a><br>
+          內部模組回傳的字串內容 <a href="mcm_0501.html#hook_0501_rep_data_buf_01">[詳細]</a><br>
         </td>
       </tr>
     </table>
@@ -277,19 +281,24 @@ int mcm_module_obtain_error_test(
     struct mcm_service_session_t *this_session)
 {
     int fret = MCM_RCODE_MODULE_INTERNAL_ERROR;
+    MCM_DTYPE_USIZE_TD tmp_len;
+    char *tmp_buf;
 
     DMSG("obtain error test :");
 
-    if(mcm_service_response_init(this_session, 1024) < MCM_RCODE_PASS)
+    tmp_len = 128;
+    tmp_buf = (char *) malloc(tmp_len);
+    if(tmp_buf == NULL)
     {
-        DMSG("call mcm_service_response_init() fail");
+        DMSG("call malloc() fail [%s]", strerror(errno));
         goto FREE_01;
     }
-    DMSG("buffer [%p][" MCM_DTYPE_USIZE_PF "]",
-         this_session->rep_msg_buf, this_session->rep_msg_size);
 
-    snprintf(this_session->rep_msg_buf, this_session->rep_msg_size,
-             "alert(\"custom error\");");
+    snprintf(tmp_buf, tmp_len, "alert(\"custom error\");");
+    tmp_len = strlen(tmp_buf) + 1;
+
+    this_session->rep_data_buf = tmp_buf;
+    this_session->rep_data_len = tmp_len;
 
 FREE_01:
     return fret;
@@ -367,19 +376,24 @@ int mcm_module_obtain_multiple_test_01(
     struct mcm_service_session_t *this_session)
 {
     int fret = MCM_RCODE_MODULE_INTERNAL_ERROR;
+    MCM_DTYPE_USIZE_TD tmp_len;
+    char *tmp_buf;
 
     DMSG("obtain multiple test 01 :");
 
-    if(mcm_service_response_init(this_session, 1024) < MCM_RCODE_PASS)
+    tmp_len = 128;
+    tmp_buf = (char *) malloc(tmp_len);
+    if(tmp_buf == NULL)
     {
-        DMSG("call mcm_service_response_init() fail");
+        DMSG("call malloc() fail [%s]", strerror(errno));
         goto FREE_01;
     }
-    DMSG("buffer [%p][" MCM_DTYPE_USIZE_PF "]",
-         this_session->rep_msg_buf, this_session->rep_msg_size);
 
-    snprintf(this_session->rep_msg_buf, this_session->rep_msg_size,
-             "alert(\"custom error 01\");");
+    snprintf(tmp_buf, tmp_len, "custom error 01");
+    tmp_len = strlen(tmp_buf) + 1;
+
+    this_session->rep_data_buf = tmp_buf;
+    this_session->rep_data_len = tmp_len;
 
 FREE_01:
     return fret;
@@ -389,19 +403,433 @@ int mcm_module_obtain_multiple_test_02(
     struct mcm_service_session_t *this_session)
 {
     int fret = MCM_RCODE_MODULE_INTERNAL_ERROR;
+    MCM_DTYPE_USIZE_TD tmp_len;
+    char *tmp_buf;
 
     DMSG("obtain multiple test 02 :");
 
-    if(mcm_service_response_init(this_session, 1024) < MCM_RCODE_PASS)
+    tmp_len = 128;
+    tmp_buf = (char *) malloc(tmp_len);
+    if(tmp_buf == NULL)
     {
-        DMSG("call mcm_service_response_init() fail");
+        DMSG("call malloc() fail [%s]", strerror(errno));
         goto FREE_01;
     }
-    DMSG("buffer [%p][" MCM_DTYPE_USIZE_PF "]",
-         this_session->rep_msg_buf, this_session->rep_msg_size);
 
-    snprintf(this_session->rep_msg_buf, this_session->rep_msg_size,
-             "alert(\"custom error 02\");");
+    snprintf(tmp_buf, tmp_len, "custom error 02");
+    tmp_len = strlen(tmp_buf) + 1;
+
+    this_session->rep_data_buf = tmp_buf;
+    this_session->rep_data_len = tmp_len;
+
+FREE_01:
+    return fret;
+}
+</pre>
+          <br>
+          <div class="css_div_hook" id="hook_0504_mcm_jslib_obtain_config_advanced_get_01"></div>
+          範例 : 進階 get 處理, CGI 端的模組函式呼叫內部模組處理資料的過濾.<br>
+<pre class="css_pre_code">
+網頁程式部分
+
+&lt;html&gt;
+&lt;head&gt;
+&lt;meta http-equiv="cache-control" content="no-cache"&gt;
+&lt;meta http-equiv="content-type" content="text/html; charset=utf-8"&gt;
+&lt;script type="text/javascript" src="jquery_main.js"&gt;&lt;/script&gt;
+&lt;script type="text/javascript" src="json3.js"&gt;&lt;/script&gt;
+&lt;script type="text/javascript" src="mcm_jslib_api.js"&gt;&lt;/script&gt;
+&lt;script type="text/javascript" src="mcm_jslib_data_info_auto.js"&gt;&lt;/script&gt;
+&lt;script type="text/javascript"&gt;
+function main_init()
+{
+    var self_jslib, req_cmd = "", rep_ret, mcm_dv, i, j;
+
+    // 把要過濾的規則寫入到資料庫, 之後內部模組函式再從資料庫讀出過濾規則.
+    req_cmd += "&set.device.filter.rule1=" +
+               $("#rule_select").val();
+
+    // 指定要讀出的資料.
+    req_cmd += "&get.device.vap.*.station.*=find_match_rule_station" +
+               // vap 和 station 路徑有階層關係, 需要注意順序,
+               // 因為是要找出指定的 station 所屬的 vap 資料,
+               // 所以 vap 指令必須在 station 指令之後.
+               "&get.device.vap.*";
+
+    self_jslib = new mcm_jslib_lib_t();
+    self_jslib.socket_path = "@mintcm";
+    self_jslib.session_permission = mcm_session_permission.rw;
+    self_jslib.session_stack_size = 0;
+    self_jslib.request_command = req_cmd;
+    self_jslib.data_format = mcm_data_format.all_default;
+    self_jslib.other_query = "";
+    rep_ret = mcm_jslib_obtain_config(self_jslib);
+    if(rep_ret.rep_code < mcm_return_code.pass)
+    {
+        alert("call mcm_jslib_obtain_config() fail" +
+              "[" + rep_ret.rep_code + "]");
+        mcm_jslib_run_script(rep_ret.rep_data);
+        return;
+    }
+    mcm_dv = JSON.parse(rep_ret.rep_data);
+
+    for(i = 0; i < mcm_dv.device.vap.length; i++)
+    {
+        console.log("device.vap.@" + (i + 1) + ".ekey = " +
+                    mcm_dv.device.vap[i].ekey);
+        console.log("device.vap.@" + (i + 1) + ".ssid = " +
+                    mcm_dv.device.vap[i].ssid);
+        console.log("device.vap.@" + (i + 1) + ".channel = " +
+                    mcm_dv.device.vap[i].channel);
+
+        for(j = 0; j < mcm_dv.device.vap[i].station.length; j++)
+        {
+            console.log("device.vap.@" + (i + 1) + ".station.@" + (j + 1) + ".ekey = " +
+                        mcm_dv.device.vap[i].station[j].ekey);
+            console.log("device.vap.@" + (i + 1) + ".station.@" + (j + 1) + ".mac_addr = " +
+                        mcm_dv.device.vap[i].station[j].mac_addr);
+            console.log("device.vap.@" + (i + 1) + ".station.@" + (j + 1) + ".rule = " +
+                        mcm_dv.device.vap[i].station[j].rule);
+        }
+    }
+}
+&lt;/script&gt;
+&lt;/head&gt;
+&lt;body&gt;
+  &lt;select id="rule_select"&gt;
+    &lt;option value="1"&gt;find phone (rule = 1) station&lt;/option&gt;
+    &lt;option value="2"&gt;find mobile (rule = 2) station&lt;/option&gt;
+    &lt;option value="3"&gt;find geme (rule = 3) station&lt;/option&gt;
+    &lt;option value="4"&gt;find stream (rule = 4) station&lt;/option&gt;
+    &lt;option value="5"&gt;find remote (rule = 5) station&lt;/option&gt;
+    &lt;option value="6"&gt;find control (rule = 6) station&lt;/option&gt;
+    &lt;option value="7"&gt;find security (rule = 7) station&lt;/option&gt;
+    &lt;option value="8"&gt;find unknown (rule = 8) station&lt;/option&gt;
+  &lt;/select&gt;
+  &lt;br&gt;
+  &lt;button type="button" onclick="main_init()"&gt;test&lt;/button&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+</pre>
+<pre class="css_pre_code">
+CGI 模組部分
+
+#include &lt;stdlib.h&gt;
+#include "../../mcm_lib/mcm_lheader/mcm_type.h"
+#include "../../mcm_lib/mcm_lheader/mcm_size.h"
+#include "../../mcm_lib/mcm_lheader/mcm_connect.h"
+#include "../../mcm_lib/mcm_lheader/mcm_return.h"
+#include "../../mcm_lib/mcm_lheader/mcm_data_exinfo_auto.h"
+#include "../../mcm_lib/mcm_lulib/mcm_lulib_api.h"
+#include "mcm_cgi_module_debug.h"
+
+int find_match_rule_station(
+    struct mcm_lulib_lib_t *this_lulib,
+    MCM_DTYPE_USIZE_TD part_level,
+    MCM_DTYPE_EK_TD *part_key,
+    MCM_DTYPE_EK_TD **key_list_buf,
+    MCM_DTYPE_EK_TD *key_count_buf)
+{
+    int fret;
+    char *path1;
+    MCM_DTYPE_USIZE_TD pidx, req_len, rep_len;
+    MCM_DTYPE_EK_TD req_data[MCM_PATH_MAX_LEVEL], *rep_data;
+
+#if MCM_CCMEMODE | MCM_CCMDMODE
+    dbg_tty_fd = open(MCM_DBG_DEV_TTY, O_WRONLY);
+    if(dbg_tty_fd == -1)
+        return MCM_RCODE_CGI_CONFIG_INTERNAL_ERROR;
+#endif
+
+    MCM_CCMDMSG("part_level = %u", part_level);
+
+    // 依照 | part_key[0] | part_key[1] | ... | part_key[part_level - 1] |,
+    // 的順序將資料傳給內部模組.
+    req_len = (sizeof(MCM_DTYPE_EK_TD) * part_level);
+    for(pidx = 0; pidx < part_level; pidx++)
+        req_data[pidx] = part_key[pidx];
+
+    path1 = "mcm_module_obtain_match_rule_station";
+    MCM_CCMDMSG("[run] %s", path1);
+    fret = mcm_lulib_run(this_lulib, path1, req_data, req_len, (void **) &rep_data, &rep_len);
+    if(fret < MCM_RCODE_PASS)
+    {
+        MCM_CCMDMSG("call mcm_lulib_run(%s) fail", path1);
+        goto FREE_01;
+    }
+
+    // 內部模組回傳的資料, 格式 : | key1 | key2 | ... | keyN |.
+    *key_list_buf = rep_data;
+    *key_count_buf = rep_len / sizeof(MCM_DTYPE_EK_TD);
+
+FREE_01:
+#if MCM_CCMEMODE | MCM_CCMDMODE
+    close(dbg_tty_fd);
+#endif
+    return fret;
+}
+</pre>
+<pre class="css_pre_code">
+內部模組部分
+
+#include &lt;errno.h&gt;
+#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+#include "../../mcm_lib/mcm_lheader/mcm_type.h"
+#include "../../mcm_lib/mcm_lheader/mcm_size.h"
+#include "../../mcm_lib/mcm_lheader/mcm_control.h"
+#include "../../mcm_lib/mcm_lheader/mcm_connect.h"
+#include "../../mcm_lib/mcm_lheader/mcm_return.h"
+#include "../../mcm_lib/mcm_lheader/mcm_debug.h"
+#include "../../mcm_lib/mcm_lheader/mcm_data_exinfo_auto.h"
+#include "../mcm_service_handle_extern.h"
+#include "../mcm_config_handle_extern.h"
+
+#define DMSG(msg_fmt, msgs...) printf("%s(%04u): " msg_fmt "\n", __FILE__, __LINE__, ##msgs)
+
+int process_station_vap_part(
+    struct mcm_service_session_t *this_session,
+    MCM_DTYPE_EK_TD *part_key,
+    MCM_DTYPE_EK_TD **key_list_buf,
+    MCM_DTYPE_EK_TD *key_count_buf,
+    MCM_DTYPE_ISI_TD rule_rule)
+{
+    int fret;
+    char *path1, path2[MCM_PATH_MAX_LENGTH];
+    MCM_DTYPE_EK_TD vap_count, *rep_list = NULL, rep_count = 0;
+    MCM_DTYPE_BOOL_TD is_match;
+    struct mcm_config_model_group_t *vap_group, *station_group;
+    struct mcm_config_store_t *device_store, *vap_store, *station_store;
+    struct mcm_dv_device_vap_t vap_v;
+    struct mcm_dv_device_vap_station_t station_v;
+
+    // 使用進階模式讀取資料, 先取出 device.vap.* 的開頭 store_info.
+    path1 = "device.vap.*";
+    fret = mcm_config_find_entry_by_mix(this_session, path1, &vap_group, &vap_store, NULL,
+                                        NULL, NULL, &device_store);
+    if(fret < MCM_RCODE_PASS)
+    {
+        DMSG("call mcm_config_find_entry_by_mix(%s) fail", path1);
+        goto FREE_01;
+    }
+
+    // 取出 vap 的資料數目, 之後配置空間記錄符合的資料的 key.
+    fret = mcm_config_get_count_by_info(this_session, vap_group, device_store, &vap_count);
+    if(fret < MCM_RCODE_PASS)
+    {
+        DMSG("call mcm_config_get_count_by_info(%s) fail", path1);
+        goto FREE_01;
+    }
+
+    if(vap_count > 0)
+    {
+        // 配置空間.
+        rep_list = malloc(sizeof(MCM_DTYPE_EK_TD) * vap_count);
+        if(rep_list == NULL)
+        {
+            DMSG("call malloc() fail [%s]", strerror(errno));
+            goto FREE_01;
+        }
+
+        // 處理每一個 device.vap.*
+        for(; vap_store != NULL; vap_store = vap_store->next_store)
+        {
+            // 讀出 vap 的 key 以便組合 station 的路徑來取出資料.
+            fret = mcm_config_get_entry_by_info(this_session, vap_group, vap_store,
+                                                MCM_DACCESS_SYS, &vap_v);
+            if(fret < MCM_RCODE_PASS)
+            {
+                DMSG("call mcm_config_get_entry_by_info() fail");
+                goto FREE_02;
+            }
+
+            // 使用進階模式讀取資料, 取出 device.vap.${vap_v.ekey}.station.* 的開頭 store_info.
+            snprintf(path2, sizeof(path2), "device.vap.#%u.station.*", vap_v.ekey);
+            fret = mcm_config_find_entry_by_mix(this_session, path2, &station_group,
+                                                &station_store, NULL, NULL, NULL, NULL);
+            if(fret < MCM_RCODE_PASS)
+            {
+                DMSG("call mcm_config_find_entry_by_mix(%s) fail", path2);
+                goto FREE_02;
+            }
+
+            is_match = 0;
+
+            // 處理每一個 device.vap.${vap_v.ekey}.station.*
+            for(; station_store != NULL; station_store = station_store->next_store)
+            {
+                // 讀出 station 資料.
+                fret = mcm_config_get_entry_by_info(this_session, station_group, station_store,
+                                                    MCM_DACCESS_SYS, &station_v);
+                if(fret < MCM_RCODE_PASS)
+                {
+                    DMSG("call mcm_config_get_entry_by_info() fail");
+                    goto FREE_02;
+                }
+
+                // 檢查是否符合.
+                if(rule_rule == station_v.rule)
+                {
+                    is_match = 1;
+                    break;
+                }
+            }
+
+            // 把符合的 key 加入到表中.
+            if(is_match != 0)
+            {
+                rep_list[rep_count] = vap_v.ekey;
+                rep_count++;
+            }
+        }
+    }
+
+    *key_list_buf = rep_list;
+    *key_count_buf = rep_count;
+
+    return fret;
+FREE_02:
+    free(rep_list);
+FREE_01:
+    return fret;
+}
+
+int process_station_station_part(
+    struct mcm_service_session_t *this_session,
+    MCM_DTYPE_EK_TD *part_key,
+    MCM_DTYPE_EK_TD **key_list_buf,
+    MCM_DTYPE_EK_TD *key_count_buf,
+    MCM_DTYPE_ISI_TD rule_rule)
+{
+    int fret;
+    char path2[MCM_PATH_MAX_LENGTH];
+    MCM_DTYPE_EK_TD target_vap, station_count, *rep_list = NULL, rep_count = 0;
+    struct mcm_config_model_group_t *station_group;
+    struct mcm_config_store_t *vap_store, *station_store;
+    struct mcm_dv_device_vap_station_t station_v;
+
+    // 使用進階模式讀取資料, 取出 device.vap.${target_vap}.station.* 的開頭 store_info.
+    target_vap = part_key[1];
+    snprintf(path2, sizeof(path2), "device.vap.#%u.station.*", target_vap);
+    fret = mcm_config_find_entry_by_mix(this_session, path2, &station_group,
+                                        &station_store, NULL, NULL, NULL, &vap_store);
+    if(fret < MCM_RCODE_PASS)
+    {
+        DMSG("call mcm_config_find_entry_by_mix(%s) fail", path2);
+        goto FREE_01;
+    }
+
+    // 取出 station 的資料數目, 之後配置空間記錄符合的資料的 key.
+    fret = mcm_config_get_count_by_info(this_session, station_group, vap_store, &station_count);
+    if(fret < MCM_RCODE_PASS)
+    {
+        DMSG("call mcm_config_get_count_by_info(%s) fail", path2);
+        goto FREE_01;
+    }
+
+    if(station_count > 0)
+    {
+        // 配置空間.
+        rep_list = malloc(sizeof(MCM_DTYPE_EK_TD) * station_count);
+        if(rep_list == NULL)
+        {
+            DMSG("call malloc() fail [%s]", strerror(errno));
+            goto FREE_01;
+        }
+
+        // 處理每一個 device.vap.${target_vap}.station.*
+        for(; station_store != NULL; station_store = station_store->next_store)
+        {
+            // 讀出 station 資料.
+            fret = mcm_config_get_entry_by_info(this_session, station_group, station_store,
+                                                MCM_DACCESS_SYS, &station_v);
+            if(fret < MCM_RCODE_PASS)
+            {
+                DMSG("call mcm_config_get_entry_by_info() fail");
+                goto FREE_02;
+            }
+
+            // 檢查是否符合.
+            if(rule_rule == station_v.rule)
+            {
+                rep_list[rep_count] = station_v.ekey;
+                rep_count++;
+            }
+        }
+    }
+
+    *key_list_buf = rep_list;
+    *key_count_buf = rep_count;
+
+    return fret;
+FREE_02:
+    free(rep_list);
+FREE_01:
+    return fret;
+}
+
+int mcm_module_obtain_match_rule_station(
+    struct mcm_service_session_t *this_session)
+{
+    int fret;
+    char *path1;
+    MCM_DTYPE_USIZE_TD part_level;
+    MCM_DTYPE_EK_TD *part_key, *rep_list = NULL, rep_count = 0;
+    MCM_DTYPE_ISI_TD rule_rule;
+
+    DMSG("obtain match rule station test (advance get) :");
+
+    // 取出 CGI 模組傳送的資料,
+    // 格式 : | part_key[0] | part_key[1] | ... | part_key[part_level - 1] |.
+    part_level = this_session->req_data_len / sizeof(MCM_DTYPE_EK_TD);
+    part_key = (MCM_DTYPE_EK_TD *) this_session->req_data_con;
+
+    DMSG("part_level = %u", part_level);
+
+    // 讀出規則.
+    path1 = "device.filter.rule1";
+    fret = mcm_config_get_alone_by_path(this_session, path1, MCM_DACCESS_AUTO, &rule_rule);
+    if(fret < MCM_RCODE_PASS)
+    {
+        DMSG("call mcm_lulib_get_alone(%s) fail", path1);
+        goto FREE_01;
+    }
+    DMSG("find station (rule = " MCM_DTYPE_ISI_PF ")", rule_rule);
+
+    // 處理 device.vap.*.station.* 的 vap 部分,
+    // 回報符合規則的 station 所屬的 vap.
+    if(part_level == 2)
+    {
+        DMSG("process vap part");
+
+        fret = process_station_vap_part(this_session, part_key, &rep_list, &rep_count,
+                                        rule_rule);
+        if(fret < MCM_RCODE_PASS)
+        {
+            DMSG("call process_station_vap_part() fail");
+            goto FREE_01;
+        }
+    }
+    else
+    // 處理 device.vap.*.station.* 的 station 部分,
+    // 回報符合規則的 station.
+    if(part_level == 3)
+    {
+        DMSG("process station part");
+        DMSG("device.vap.#%u.station.*", part_key[1]);
+
+        fret = process_station_station_part(this_session, part_key, &rep_list, &rep_count,
+                                            rule_rule);
+        if(fret < MCM_RCODE_PASS)
+        {
+            DMSG("call process_station_station_part() fail");
+            goto FREE_01;
+        }
+    }
+
+    // 回傳符合的資料, 格式 : | key1 | key2 | ... | keyN |.
+    this_session->rep_data_buf = rep_list;
+    this_session->rep_data_len = sizeof(MCM_DTYPE_EK_TD) * rep_count;
 
 FREE_01:
     return fret;
@@ -557,19 +985,24 @@ int mcm_module_submit_error_test(
     struct mcm_service_session_t *this_session)
 {
     int fret = MCM_RCODE_MODULE_INTERNAL_ERROR;
+    MCM_DTYPE_USIZE_TD tmp_len;
+    char *tmp_buf;
 
     DMSG("submit error test :");
 
-    if(mcm_service_response_init(this_session, 1024) < MCM_RCODE_PASS)
+    tmp_len = 128;
+    tmp_buf = (char *) malloc(tmp_len);
+    if(tmp_buf == NULL)
     {
-        DMSG("call mcm_service_response_init() fail");
+        DMSG("call malloc() fail [%s]", strerror(errno));
         goto FREE_01;
     }
-    DMSG("buffer [%p][" MCM_DTYPE_USIZE_PF "]",
-         this_session->rep_msg_buf, this_session->rep_msg_size);
 
-    snprintf(this_session->rep_msg_buf, this_session->rep_msg_size,
-             "alert(\"custom error\");");
+    snprintf(tmp_buf, tmp_len, "alert(\"custom error\");");
+    tmp_len = strlen(tmp_buf) + 1;
+
+    this_session->rep_data_buf = tmp_buf;
+    this_session->rep_data_len = tmp_len;
 
 FREE_01:
     return fret;
@@ -701,18 +1134,11 @@ int mcm_module_submit_text_test(
     struct mcm_service_session_t *this_session)
 {
     int fret = MCM_RCODE_MODULE_INTERNAL_ERROR;
-    char *path1;
+    char *path1, *tmp_buf;
     struct mcm_dv_device_t device_v;
+    MCM_DTYPE_USIZE_TD tmp_len;
 
     DMSG("submit text test :");
-
-    if(mcm_service_response_init(this_session, 1024) < MCM_RCODE_PASS)
-    {
-        DMSG("call mcm_service_response_init() fail");
-        goto FREE_01;
-    }
-    DMSG("buffer [%p][" MCM_DTYPE_USIZE_PF "]",
-         this_session->rep_msg_buf, this_session->rep_msg_size);
 
     path1 = "device";
     if(mcm_config_get_entry_by_path(this_session, path1, MCM_DACCESS_AUTO, &device_v)
@@ -722,9 +1148,19 @@ int mcm_module_submit_text_test(
         goto FREE_01;
     }
 
-    snprintf(this_session->rep_msg_buf, this_session->rep_msg_size,
-             " %s",
-             device_v.descript);
+    tmp_len = 512;
+    tmp_buf = (char *) malloc(tmp_len);
+    if(tmp_buf == NULL)
+    {
+        DMSG("call malloc() fail [%s]", strerror(errno));
+        goto FREE_01;
+    }
+
+    snprintf(tmp_buf, tmp_len, " %s", device_v.descript);
+    tmp_len = strlen(tmp_buf) + 1;
+
+    this_session->rep_data_buf = tmp_buf;
+    this_session->rep_data_len = tmp_len;
 
     fret = MCM_RCODE_PASS;
 FREE_01:
@@ -814,18 +1250,11 @@ int mcm_module_submit_json_test(
     struct mcm_service_session_t *this_session)
 {
     int fret = MCM_RCODE_MODULE_INTERNAL_ERROR;
-    char *path1;
+    char *path1, *tmp_buf;
     struct mcm_dv_device_t device_v;
+    MCM_DTYPE_USIZE_TD tmp_len;
 
     DMSG("submit json test :");
-
-    if(mcm_service_response_init(this_session, 1024) < MCM_RCODE_PASS)
-    {
-        DMSG("call mcm_service_response_init() fail");
-        goto FREE_01;
-    }
-    DMSG("buffer [%p][" MCM_DTYPE_USIZE_PF "]",
-         this_session->rep_msg_buf, this_session->rep_msg_size);
 
     path1 = "device";
     if(mcm_config_get_entry_by_path(this_session, path1, MCM_DACCESS_AUTO, &device_v)
@@ -835,9 +1264,19 @@ int mcm_module_submit_json_test(
         goto FREE_01;
     }
 
-    snprintf(this_session->rep_msg_buf, this_session->rep_msg_size,
-             "{\"descript\":\"%s\"}",
-             device_v.descript);
+    tmp_len = 512;
+    tmp_buf = (char *) malloc(tmp_len);
+    if(tmp_buf == NULL)
+    {
+        DMSG("call malloc() fail [%s]", strerror(errno));
+        goto FREE_01;
+    }
+
+    snprintf(tmp_buf, tmp_len, "{\"descript\":\"%s\"}", device_v.descript);
+    tmp_len = strlen(tmp_buf) + 1;
+
+    this_session->rep_data_buf = tmp_buf;
+    this_session->rep_data_len = tmp_len;
 
     fret = MCM_RCODE_PASS;
 FREE_01:
@@ -929,18 +1368,11 @@ int mcm_module_javascript_control_element_test(
     struct mcm_service_session_t *this_session)
 {
     int fret = MCM_RCODE_MODULE_INTERNAL_ERROR;
-    char *path1;
+    char *path1, *tmp_buf;
     struct mcm_dv_device_system_t system_v;
+    MCM_DTYPE_USIZE_TD tmp_len;
 
     DMSG("submit javascript control element test :");
-
-    if(mcm_service_response_init(this_session, 1024) < MCM_RCODE_PASS)
-    {
-        DMSG("call mcm_service_response_init() fail");
-        goto FREE_01;
-    }
-    DMSG("buffer [%p][" MCM_DTYPE_USIZE_PF "]",
-         this_session->rep_msg_buf, this_session->rep_msg_size);
 
     path1 = "device.system";
     if(mcm_config_get_entry_by_path(this_session, path1, MCM_DACCESS_AUTO, &system_v)
@@ -950,12 +1382,24 @@ int mcm_module_javascript_control_element_test(
         goto FREE_01;
     }
 
-    snprintf(this_session->rep_msg_buf, this_session->rep_msg_size,
+    tmp_len = 512;
+    tmp_buf = (char *) malloc(tmp_len);
+    if(tmp_buf == NULL)
+    {
+        DMSG("call malloc() fail [%s]", strerror(errno));
+        goto FREE_01;
+    }
+
+    snprintf(tmp_buf, tmp_len,
              "$(\"#number_div\").html(\""
              "&lt;font color=\\\"#%s\\\"&gt;%s number&lt;/font&gt;"
              "\");",
              system_v.uptime % 2 == 0 ? "FF0000" : "0000FF",
              system_v.uptime % 2 == 0 ? "even" : "odd");
+    tmp_len = strlen(tmp_buf) + 1;
+
+    this_session->rep_data_buf = tmp_buf;
+    this_session->rep_data_len = tmp_len;
 
     fret = MCM_RCODE_PASS;
 FREE_01:
@@ -1044,18 +1488,11 @@ int mcm_module_submit_javascript_redirect_page_test(
     struct mcm_service_session_t *this_session)
 {
     int fret = MCM_RCODE_MODULE_INTERNAL_ERROR;
-    char *path1;
+    char *path1, *tmp_buf;
     struct mcm_dv_device_t device_v;
+    MCM_DTYPE_USIZE_TD tmp_len;
 
     DMSG("submit javascript redirect page test :");
-
-    if(mcm_service_response_init(this_session, 1024) < MCM_RCODE_PASS)
-    {
-        DMSG("call mcm_service_response_init() fail");
-        goto FREE_01;
-    }
-    DMSG("buffer [%p][" MCM_DTYPE_USIZE_PF "]",
-         this_session->rep_msg_buf, this_session->rep_msg_size);
 
     path1 = "device";
     if(mcm_config_get_entry_by_path(this_session, path1, MCM_DACCESS_AUTO, &device_v)
@@ -1065,9 +1502,19 @@ int mcm_module_submit_javascript_redirect_page_test(
         goto FREE_01;
     }
 
-    snprintf(this_session->rep_msg_buf, this_session->rep_msg_size,
-             "window.location.href = \"%s\";",
-             device_v.descript);
+    tmp_len = 512;
+    tmp_buf = (char *) malloc(tmp_len);
+    if(tmp_buf == NULL)
+    {
+        DMSG("call malloc() fail [%s]", strerror(errno));
+        goto FREE_01;
+    }
+
+    snprintf(tmp_buf, tmp_len, "window.location.href = \"%s\";", device_v.descript);
+    tmp_len = strlen(tmp_buf) + 1;
+
+    this_session->rep_data_buf = tmp_buf;
+    this_session->rep_data_len = tmp_len;
 
     fret = MCM_RCODE_PASS;
 FREE_01:
@@ -1147,19 +1594,24 @@ int mcm_module_submit_multiple_test_01(
     struct mcm_service_session_t *this_session)
 {
     int fret = MCM_RCODE_MODULE_INTERNAL_ERROR;
+    MCM_DTYPE_USIZE_TD tmp_len;
+    char *tmp_buf;
 
     DMSG("submit multiple test 01 :");
 
-    if(mcm_service_response_init(this_session, 1024) < MCM_RCODE_PASS)
+    tmp_len = 128;
+    tmp_buf = (char *) malloc(tmp_len);
+    if(tmp_buf == NULL)
     {
-        DMSG("call mcm_service_response_init() fail");
+        DMSG("call malloc() fail [%s]", strerror(errno));
         goto FREE_01;
     }
-    DMSG("buffer [%p][" MCM_DTYPE_USIZE_PF "]",
-         this_session->rep_msg_buf, this_session->rep_msg_size);
 
-    snprintf(this_session->rep_msg_buf, this_session->rep_msg_size,
-             "custom message 01");
+    snprintf(tmp_buf, tmp_len, "custom message 01");
+    tmp_len = strlen(tmp_buf) + 1;
+
+    this_session->rep_data_buf = tmp_buf;
+    this_session->rep_data_len = tmp_len;
 
     fret = MCM_RCODE_PASS;
 FREE_01:
@@ -1170,19 +1622,24 @@ int mcm_module_submit_multiple_test_02(
     struct mcm_service_session_t *this_session)
 {
     int fret = MCM_RCODE_MODULE_INTERNAL_ERROR;
+    MCM_DTYPE_USIZE_TD tmp_len;
+    char *tmp_buf;
 
     DMSG("submit multiple test 02 :");
 
-    if(mcm_service_response_init(this_session, 1024) < MCM_RCODE_PASS)
+    tmp_len = 128;
+    tmp_buf = (char *) malloc(tmp_len);
+    if(tmp_buf == NULL)
     {
-        DMSG("call mcm_service_response_init() fail");
+        DMSG("call malloc() fail [%s]", strerror(errno));
         goto FREE_01;
     }
-    DMSG("buffer [%p][" MCM_DTYPE_USIZE_PF "]",
-         this_session->rep_msg_buf, this_session->rep_msg_size);
 
-    snprintf(this_session->rep_msg_buf, this_session->rep_msg_size,
-             "custom message 02");
+    snprintf(tmp_buf, tmp_len, "custom message 02");
+    tmp_len = strlen(tmp_buf) + 1;
+
+    this_session->rep_data_buf = tmp_buf;
+    this_session->rep_data_len = tmp_len;
 
     fret = MCM_RCODE_PASS;
 FREE_01:
@@ -1269,50 +1726,56 @@ FREE_01:
             <tr>
               <td class="css_td_list2_l2">case-05</td>
               <td class="css_td_list2_r1">
-                mcm_jslib_submit_config()<br>指令內指定錯誤的路徑
+                mcm_jslib_obtain_config()<br>進階 get 處理, CGI 端的模組函式呼叫內部模組處理資料的過濾
               </td>
             </tr>
             <tr>
               <td class="css_td_list2_l2">case-06</td>
               <td class="css_td_list2_r1">
+                mcm_jslib_submit_config()<br>指令內指定錯誤的路徑
+              </td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l2">case-09</td>
+              <td class="css_td_list2_r1">
                 mcm_jslib_submit_config()<br>由內部模組設定錯誤
               </td>
             </tr>
             <tr>
-              <td class="css_td_list2_l2">case-07</td>
+              <td class="css_td_list2_l2">case-08</td>
               <td class="css_td_list2_r1">
                 mcm_jslib_submit_config()<br>
                 處理指令沒有錯誤, CGI 部分填入重新整理頁面的 JavaScript 格式訊息
               </td>
             </tr>
             <tr>
-              <td class="css_td_list2_l2">case-08</td>
+              <td class="css_td_list2_l2">case-09</td>
               <td class="css_td_list2_r1">
                 mcm_jslib_submit_config()<br>內部模組自訂訊息, 文字格式
               </td>
             </tr>
             <tr>
-              <td class="css_td_list2_l2">case-09</td>
-              <td class="css_td_list2_r1">
-                mcm_jslib_submit_config()<br>內部模組自訂訊息, JSON 格式
-              </td>
-            </tr>
-            <tr>
               <td class="css_td_list2_l2">case-10</td>
               <td class="css_td_list2_r1">
-                mcm_jslib_submit_config()<br>
-                內部模組自訂訊息, JavaScript 格式, 控制網頁元素
+                mcm_jslib_submit_config()<br>內部模組自訂訊息, JSON 格式
               </td>
             </tr>
             <tr>
               <td class="css_td_list2_l2">case-11</td>
               <td class="css_td_list2_r1">
                 mcm_jslib_submit_config()<br>
-                內部模組自訂訊息, JavaScript 格式, 頁面導向
+                內部模組自訂訊息, JavaScript 格式, 控制網頁元素
               </td>
             </tr>
             <tr>
               <td class="css_td_list2_l2">case-12</td>
+              <td class="css_td_list2_r1">
+                mcm_jslib_submit_config()<br>
+                內部模組自訂訊息, JavaScript 格式, 頁面導向
+              </td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l2">case-13</td>
               <td class="css_td_list2_r1">
                 mcm_jslib_submit_config()<br>執行多個內部模組
               </td>

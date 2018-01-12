@@ -981,16 +981,24 @@ int mcm_module_command_test_01(struct mcm_service_session_t *this_session)
 int mcm_module_command_test_02(struct mcm_service_session_t *this_session)
 {
     int fret = MCM_RCODE_MODULE_INTERNAL_ERROR;
+    MCM_DTYPE_USIZE_TD tmp_len;
+    char *tmp_buf;
 
     // 回傳訊息給外部程式, 這部分的用法會在 05-02 說明.
-    if(mcm_service_response_init(this_session, 256) < MCM_RCODE_PASS)
+
+    tmp_len = 256;
+    tmp_buf = (char *) malloc(tmp_len);
+    if(tmp_buf == NULL)
     {
-        DMSG("call mcm_service_response_init() fail");
+        DMSG("call malloc() fail [%s]", strerror(errno));
         goto FREE_01;
     }
 
-    snprintf(this_session->rep_msg_buf, this_session->rep_msg_size,
-             "command-%u", rand());
+    snprintf(tmp_buf, tmp_len, "command-%u", rand());
+    tmp_len = strlen(tmp_buf) + 1;
+
+    this_session->rep_data_buf = tmp_buf;
+    this_session->rep_data_len = tmp_len;
 
     fret = MCM_RCODE_PASS;
 FREE_01:

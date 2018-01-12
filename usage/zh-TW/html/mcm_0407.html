@@ -529,6 +529,23 @@ FREE_01:
 </div>
 <br>
 
+<div class="css_div_hook" id="hook_0407_module_return_code_01"></div>
+<div class="css_div_box_frame_full">
+  <div class="css_div_box_title">內部模組回傳值的注意事項</div>
+  <div class="css_div_box_content">
+    <br>
+
+    內部模組的回傳值沒有限制, 但是內部有預留部分範圍來使用, 參考
+    <font class="css_font_b1">mint_cm/mcm_lib/mcm_lheader/mcm_return.h</font>
+    的 <font class="css_font_g1">MCM_RCODE_TABLE</font>.<br>
+    注意, 如果回傳的值小於 MCM_RCODE_PASS, 會觸發資料有錯誤需要放棄資料的動作.
+    <a href="mcm_0401.html#hook_0401_submit_flow_01">[詳細][B06]</a>
+    <br><br>
+
+  </div>
+</div>
+<br>
+
 <div class="css_div_box_frame_full">
   <div class="css_div_box_title">資料狀態的注意事項</div>
   <div class="css_div_box_content">

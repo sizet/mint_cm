@@ -3166,6 +3166,52 @@ FREE_01:
                 目標的函式名稱
               </td>
             </tr>
+            <tr>
+              <td class="css_td_list2_l1">
+                <div class="css_div_hook" id="hook_0302_req_data_con_01"></div>
+                <font class="css_font_r1">void *</font><br>
+                <font class="css_font_g1">req_data_con</font>
+              </td>
+              <td class="css_td_list2_r1">
+                要傳給模組函式的資料<br>
+                <font class="css_font_p1">可為 NULL, 表示不傳送資料給模組函式</font>
+              </td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l1">
+                <div class="css_div_hook" id="hook_0302_req_data_len_01"></div>
+                <font class="css_font_r1">MCM_DTYPE_USIZE_TD</font><br>
+                <font class="css_font_g1">req_data_len</font><br>
+              </td>
+              <td class="css_td_list2_r1">
+                要傳給模組函式的資料的長度<br>
+                <font class="css_font_p1">若 req_data_con 是 NULL 則為 0</font>
+              </td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l1">
+                <div class="css_div_hook" id="hook_0302_rep_data_buf_01"></div>
+                <font class="css_font_r1">void **</font><br>
+                <font class="css_font_g1">rep_data_buf</font>
+              </td>
+              <td class="css_td_list2_r1">
+                紀錄模組函式回傳的資料的變數的緩衝<br>
+                <font class="css_font_r1">內部函式會配置記憶體空間並放入資料, 使用完需要釋放, 傳入參數需要做強制轉型 (void **)</font><br>
+                <font class="css_font_p1">可為 NULL, 表示不接收模組函式回傳的資料</font>
+              </td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l1">
+                <div class="css_div_hook" id="hook_0302_rep_data_len_buf_01"></div>
+                <font class="css_font_r1">MCM_DTYPE_USIZE_TD *</font><br>
+                <font class="css_font_g1">rep_data_len_buf</font><br>
+              </td>
+              <td class="css_td_list2_r1">
+                紀錄模組函式回傳的資料的長度的變數的緩衝<br>
+                <font class="css_font_r1">如果 rep_data_buf 是 NULL 則不會紀錄資料長度</font><br>
+                <font class="css_font_p1">可為 NULL, 表示不記錄資料長度</font><br>
+              </td>
+            </tr>
           </table>
           <table class="css_table_list2">
             <tr>
@@ -3197,6 +3243,13 @@ FREE_01:
                 因為內部模組函式的內容是客制化的, 所以需要的堆疊空間不固定
                 (區域變數的多寡和函式呼叫的層數都會影響需要的堆疊空間),
                 透過 session_stack_size 調整伺服器端處理此連線的執行緒的堆疊空間.
+              </td>
+            </tr>
+            <tr>
+              <td class="css_td_list1_l">03.&nbsp;</td>
+              <td class="css_td_list1_r">
+                和內部模組函式的資料傳遞的用法會在
+                <a href="mcm_0501.html">#05-01#</a>, <a href="mcm_0502.html">#05-02#</a> 說明.
               </td>
             </tr>
           </table>
@@ -3236,7 +3289,7 @@ int main(int argc, char **argv)
     // 範例 : 執行 mcm_module_user_test_01 此函式.
     path1 = "mcm_module_user_test_01";
     DMSG("[run] %s", path1);
-    if(mcm_lulib_run(&self_lulib, path1) < MCM_RCODE_PASS)
+    if(mcm_lulib_run(&self_lulib, path1, NULL, 0, NULL, NULL) < MCM_RCODE_PASS)
     {
         DMSG("call mcm_lulib_run(%s) fail", path1);
         goto FREE_02;
@@ -3750,13 +3803,13 @@ FREE_01:
 <pre class="css_pre_code">
 // 執行 module_get_loading(), 取得 device.system.loading
 path1 = "module_get_loading";
-mcm_lulib_run(&self_lulib, path1);
+mcm_lulib_run(&self_lulib, path1, NULL, 0, NULL, NULL);
 path1 = "device.system.loading";
 mcm_lulib_get_alone(&self_lulib, path1, &loading);
 
 // 執行 mcm_module_get_client(), 取得 device.client.*
 path1 = "mcm_module_get_client";
-mcm_lulib_run(&self_lulib, path1);
+mcm_lulib_run(&self_lulib, path1, NULL, 0, NULL, NULL);
 path1 = device.client.*;
 mcm_lulib_get_all_entry(&self_lulib, path1, &client_v, &count);
 
@@ -3808,7 +3861,7 @@ mcm_lulib_get_all_entry(&self_lulib, path1, &client_v, &count);
 path1 = "device.system.ip_addr";
 mcm_lulib_set_alone(&self_lulib, path1, &ip_addr, sizeof(ip_addr));
 path1 = "module_config_sytem";
-mcm_lulib_run(&self_lulib, path1);
+mcm_lulib_run(&self_lulib, path1, NULL, 0, NULL, NULL);
 
 // 設定 device.vap.@1, 執行 module_config_vap 實作.
 path1 = "device.vap.@1";
@@ -3823,7 +3876,7 @@ path1 = "device.vap.#55";
 mcm_lulib_add_entry(&self_lulib, path1, NULL, &vap_v, sizeof(vap_v));
 
 path1 = "module_config_vap";
-mcm_lulib_run(&self_lulib, path1);
+mcm_lulib_run(&self_lulib, path1, NULL, 0, NULL, NULL);
 
 ...
 </pre>

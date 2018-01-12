@@ -1269,6 +1269,23 @@ vap    => 已經處理過 (只有資料索引), 補上這些資料的內容.
 <br>
 
 <div class="css_div_box_frame_full">
+  <div class="css_div_box_title">其他</div>
+  <div class="css_div_box_content">
+    <br>
+
+    此方法因為必須將資料從資料庫中取出作分析, 所以會耗費較多的時間,
+    若是要加快處理速度可以在 CGI 端的模組函式內使用 <a href="mcm_0302.html#hook_0302_mcm_lulib_run_01">mcm_lulib_run</a>,
+    將 part_level, part_key 等資料傳遞給內部模組 (內部模組的用法在 <a href="mcm_0401.html">#04-01#</a> 說明,
+    資料傳遞的用法在 <a href="mcm_0501.html">#05-01#</a> <a href="mcm_0502.html">#05-02#</a> 說明),
+    並在內部模組處理分析資料的部分, 最後再將符合的資料的 key 從內部模組回傳給 CGI 的模組函式.
+    <a href="mcm_0504.html#hook_0504_mcm_jslib_obtain_config_advanced_get_01">[範例 #05-04#]</a>
+    <br><br>
+
+  </div>
+</div>
+<br>
+
+<div class="css_div_box_frame_full">
   <div class="css_div_box_title">範例程式的使用</div>
   <div class="css_div_box_content">
     <br>
