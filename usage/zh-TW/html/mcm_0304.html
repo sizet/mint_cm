@@ -2152,7 +2152,8 @@ function main_submit()
 
 #define DMSG(msg_fmt, msgs...) printf("%s(%04u): " msg_fmt "\n", __FILE__, __LINE__, ##msgs)
 
-int mcm_module_web_test_01(struct mcm_service_session_t *this_session)
+int mcm_module_web_test_01(
+    struct mcm_service_session_t *this_session)
 {
     srand(time(NULL));
 

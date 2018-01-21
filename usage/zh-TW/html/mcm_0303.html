@@ -214,7 +214,8 @@ Some rights reserved. See README.
     printk(KERN_INFO "%s(%04u): " msg_fmt "\n", \
            strrchr(__FILE__, '/') ? strrchr(__FILE__, '/') + 1 : __FILE__, __LINE__, ##msgs)
 
-static int __init main_init(void)
+static int __init main_init(
+    void)
 {
     struct mcm_lklib_lib_t self_lklib;
 
@@ -236,7 +237,8 @@ FREE_01:
     return 0;
 }
 
-static void __exit main_exit(void)
+static void __exit main_exit(
+    void)
 {
     return;
 }
@@ -301,7 +303,8 @@ MODULE_LICENSE("GPL");
     printk(KERN_INFO "%s(%04u): " msg_fmt "\n", \
            strrchr(__FILE__, '/') ? strrchr(__FILE__, '/') + 1 : __FILE__, __LINE__, ##msgs)
 
-static int __init main_init(void)
+static int __init main_init(
+    void)
 {
     struct mcm_lklib_lib_t self_lklib;
 
@@ -324,7 +327,8 @@ FREE_01:
     return 0;
 }
 
-static void __exit main_exit(void)
+static void __exit main_exit(
+    void)
 {
     return;
 }
@@ -421,7 +425,8 @@ MODULE_LICENSE("GPL");
     printk(KERN_INFO "%s(%04u): " msg_fmt "\n", \
            strrchr(__FILE__, '/') ? strrchr(__FILE__, '/') + 1 : __FILE__, __LINE__, ##msgs)
 
-static int __init main_init(void)
+static int __init main_init(
+    void)
 {
     char *path1;
     struct mcm_lklib_lib_t self_lklib;
@@ -474,7 +479,8 @@ FREE_01:
     return 0;
 }
 
-static void __exit main_exit(void)
+static void __exit main_exit(
+    void)
 {
     return;
 }
@@ -506,7 +512,8 @@ MODULE_LICENSE("GPL");
     printk(KERN_INFO "%s(%04u): " msg_fmt "\n", \
            strrchr(__FILE__, '/') ? strrchr(__FILE__, '/') + 1 : __FILE__, __LINE__, ##msgs)
 
-static int __init main_init(void)
+static int __init main_init(
+    void)
 {
     char *path1;
 
@@ -528,7 +535,8 @@ static int __init main_init(void)
     return 0;
 }
 
-static void __exit main_exit(void)
+static void __exit main_exit(
+    void)
 {
     return;
 }
@@ -630,7 +638,8 @@ MODULE_LICENSE("GPL");
     printk(KERN_INFO "%s(%04u): " msg_fmt "\n", \
            strrchr(__FILE__, '/') ? strrchr(__FILE__, '/') + 1 : __FILE__, __LINE__, ##msgs)
 
-static int __init main_init(void)
+static int __init main_init(
+    void)
 {
     char *path1;
     struct mcm_lklib_lib_t self_lklib;
@@ -696,7 +705,8 @@ FREE_01:
     return 0;
 }
 
-static void __exit main_exit(void)
+static void __exit main_exit(
+    void)
 {
     return;
 }
@@ -798,7 +808,8 @@ MODULE_LICENSE("GPL");
     printk(KERN_INFO "%s(%04u): " msg_fmt "\n", \
            strrchr(__FILE__, '/') ? strrchr(__FILE__, '/') + 1 : __FILE__, __LINE__, ##msgs)
 
-static int __init main_init(void)
+static int __init main_init(
+    void)
 {
     char *path1;
     struct mcm_lklib_lib_t self_lklib;
@@ -907,7 +918,8 @@ FREE_01:
     return 0;
 }
 
-static void __exit main_exit(void)
+static void __exit main_exit(
+    void)
 {
     return;
 }
@@ -1025,7 +1037,8 @@ MODULE_LICENSE("GPL");
     printk(KERN_INFO "%s(%04u): " msg_fmt "\n", \
            strrchr(__FILE__, '/') ? strrchr(__FILE__, '/') + 1 : __FILE__, __LINE__, ##msgs)
 
-static unsigned int rand(void)
+static unsigned int rand(
+    void)
 {
     unsigned int tmp_value;
 
@@ -1034,7 +1047,8 @@ static unsigned int rand(void)
     return tmp_value;
 }
 
-static int __init main_init(void)
+static int __init main_init(
+    void)
 {
     char *path1;
     struct mcm_lklib_lib_t self_lklib;
@@ -1151,7 +1165,8 @@ FREE_01:
     return 0;
 }
 
-static void __exit main_exit(void)
+static void __exit main_exit(
+    void)
 {
     return;
 }
@@ -1253,7 +1268,8 @@ MODULE_LICENSE("GPL");
     printk(KERN_INFO "%s(%04u): " msg_fmt "\n", \
            strrchr(__FILE__, '/') ? strrchr(__FILE__, '/') + 1 : __FILE__, __LINE__, ##msgs)
 
-static int __init main_init(void)
+static int __init main_init(
+    void)
 {
     char *path1;
     struct mcm_lklib_lib_t self_lklib;
@@ -1358,7 +1374,8 @@ FREE_01:
     return 0;
 }
 
-static void __exit main_exit(void)
+static void __exit main_exit(
+    void)
 {
     return;
 }
@@ -1466,7 +1483,8 @@ MODULE_LICENSE("GPL");
     printk(KERN_INFO "%s(%04u): " msg_fmt "\n", \
            strrchr(__FILE__, '/') ? strrchr(__FILE__, '/') + 1 : __FILE__, __LINE__, ##msgs)
 
-static unsigned int rand(void)
+static unsigned int rand(
+    void)
 {
     unsigned int tmp_value;
 
@@ -1475,7 +1493,8 @@ static unsigned int rand(void)
     return tmp_value;
 }
 
-static int __init main_init(void)
+static int __init main_init(
+    void)
 {
     char *path1;
     struct mcm_lklib_lib_t self_lklib;
@@ -1597,7 +1616,8 @@ FREE_01:
     return 0;
 }
 
-static void __exit main_exit(void)
+static void __exit main_exit(
+    void)
 {
     return;
 }
@@ -1746,7 +1766,8 @@ MODULE_LICENSE("GPL");
     printk(KERN_INFO "%s(%04u): " msg_fmt "\n", \
            strrchr(__FILE__, '/') ? strrchr(__FILE__, '/') + 1 : __FILE__, __LINE__, ##msgs)
 
-static unsigned int rand(void)
+static unsigned int rand(
+    void)
 {
     unsigned int tmp_value;
 
@@ -1755,7 +1776,8 @@ static unsigned int rand(void)
     return tmp_value;
 }
 
-static int __init main_init(void)
+static int __init main_init(
+    void)
 {
     char *path1;
     struct mcm_lklib_lib_t self_lklib;
@@ -1871,7 +1893,8 @@ FREE_01:
     return 0;
 }
 
-static void __exit main_exit(void)
+static void __exit main_exit(
+    void)
 {
     return;
 }
@@ -1964,7 +1987,8 @@ MODULE_LICENSE("GPL");
     printk(KERN_INFO "%s(%04u): " msg_fmt "\n", \
            strrchr(__FILE__, '/') ? strrchr(__FILE__, '/') + 1 : __FILE__, __LINE__, ##msgs)
 
-static int __init main_init(void)
+static int __init main_init(
+    void)
 {
     char *path1;
     struct mcm_lklib_lib_t self_lklib;
@@ -2008,7 +2032,8 @@ FREE_01:
     return 0;
 }
 
-static void __exit main_exit(void)
+static void __exit main_exit(
+    void)
 {
     return;
 }
@@ -2148,14 +2173,14 @@ MODULE_LICENSE("GPL");
     printk(KERN_INFO "%s(%04u): " msg_fmt "\n", \
            strrchr(__FILE__, '/') ? strrchr(__FILE__, '/') + 1 : __FILE__, __LINE__, ##msgs)
 
-static int __init main_init(void)
+static int __init main_init(
+    void)
 {
     char *path1, path2[MCM_PATH_MAX_LENGTH];
     struct mcm_lklib_lib_t self_lklib;
     struct mcm_dv_device_vap_t vap_v;
     struct mcm_dv_device_vap_station_t station_v;
     MCM_DTYPE_EK_TD i, count, *key_array;
-
 
     memset(&self_lklib, 0, sizeof(struct mcm_lklib_lib_t));
     self_lklib.socket_path = "@mintcm";
@@ -2261,7 +2286,8 @@ FREE_01:
     return 0;
 }
 
-static void __exit main_exit(void)
+static void __exit main_exit(
+    void)
 {
     return;
 }
@@ -2373,7 +2399,8 @@ MODULE_LICENSE("GPL");
     printk(KERN_INFO "%s(%04u): " msg_fmt "\n", \
            strrchr(__FILE__, '/') ? strrchr(__FILE__, '/') + 1 : __FILE__, __LINE__, ##msgs)
 
-static int __init main_init(void)
+static int __init main_init(
+    void)
 {
     char *path1, path2[MCM_PATH_MAX_LENGTH];
     struct mcm_lklib_lib_t self_lklib;
@@ -2472,7 +2499,8 @@ FREE_01:
     return 0;
 }
 
-static void __exit main_exit(void)
+static void __exit main_exit(
+    void)
 {
     return;
 }
@@ -2565,7 +2593,8 @@ MODULE_LICENSE("GPL");
     printk(KERN_INFO "%s(%04u): " msg_fmt "\n", \
            strrchr(__FILE__, '/') ? strrchr(__FILE__, '/') + 1 : __FILE__, __LINE__, ##msgs)
 
-static int __init main_init(void)
+static int __init main_init(
+    void)
 {
     char *path1;
     struct mcm_lklib_lib_t self_lklib;
@@ -2619,7 +2648,8 @@ FREE_01:
     return 0;
 }
 
-static void __exit main_exit(void)
+static void __exit main_exit(
+    void)
 {
     return;
 }
@@ -2727,7 +2757,8 @@ MODULE_LICENSE("GPL");
     printk(KERN_INFO "%s(%04u): " msg_fmt "\n", \
            strrchr(__FILE__, '/') ? strrchr(__FILE__, '/') + 1 : __FILE__, __LINE__, ##msgs)
 
-static int __init main_init(void)
+static int __init main_init(
+    void)
 {
     char *path1;
     struct mcm_lklib_lib_t self_lklib;
@@ -2770,7 +2801,8 @@ FREE_01:
     return 0;
 }
 
-static void __exit main_exit(void)
+static void __exit main_exit(
+    void)
 {
     return;
 }
@@ -2920,7 +2952,8 @@ MODULE_LICENSE("GPL");
     printk(KERN_INFO "%s(%04u): " msg_fmt "\n", \
            strrchr(__FILE__, '/') ? strrchr(__FILE__, '/') + 1 : __FILE__, __LINE__, ##msgs)
 
-static int __init main_init(void)
+static int __init main_init(
+    void)
 {
     char *path1;
     struct mcm_lklib_lib_t self_lklib;
@@ -2951,7 +2984,8 @@ FREE_01:
     return 0;
 }
 
-static void __exit main_exit(void)
+static void __exit main_exit(
+    void)
 {
     return;
 }
@@ -2981,7 +3015,8 @@ MODULE_LICENSE("GPL");
 
 #define DMSG(msg_fmt, msgs...) printf("%s(%04u): " msg_fmt "\n", __FILE__, __LINE__, ##msgs)
 
-int mcm_module_kernel_test_01(struct mcm_service_session_t *this_session)
+int mcm_module_kernel_test_01(
+    struct mcm_service_session_t *this_session)
 {
     srand(time(NULL));
 
@@ -3105,7 +3140,8 @@ int mcm_module_kernel_test_01(struct mcm_service_session_t *this_session)
     printk(KERN_INFO "%s(%04u): " msg_fmt "\n", \
            strrchr(__FILE__, '/') ? strrchr(__FILE__, '/') + 1 : __FILE__, __LINE__, ##msgs)
 
-static int __init main_init(void)
+static int __init main_init(
+    void)
 {
     char *path1;
     struct mcm_lklib_lib_t self_lklib;
@@ -3171,7 +3207,8 @@ FREE_01:
     return 0;
 }
 
-static void __exit main_exit(void)
+static void __exit main_exit(
+    void)
 {
     return;
 }
@@ -3261,7 +3298,8 @@ MODULE_LICENSE("GPL");
     printk(KERN_INFO "%s(%04u): " msg_fmt "\n", \
            strrchr(__FILE__, '/') ? strrchr(__FILE__, '/') + 1 : __FILE__, __LINE__, ##msgs)
 
-static int __init main_init(void)
+static int __init main_init(
+    void)
 {
     struct mcm_lklib_lib_t self_lklib;
     MCM_DTYPE_BOOL_TD force_save = 1;
@@ -3290,7 +3328,8 @@ FREE_01:
     return 0;
 }
 
-static void __exit main_exit(void)
+static void __exit main_exit(
+    void)
 {
     return;
 }
@@ -3375,7 +3414,8 @@ MODULE_LICENSE("GPL");
     printk(KERN_INFO "%s(%04u): " msg_fmt "\n", \
            strrchr(__FILE__, '/') ? strrchr(__FILE__, '/') + 1 : __FILE__, __LINE__, ##msgs)
 
-static int __init main_init(void)
+static int __init main_init(
+    void)
 {
     struct mcm_lklib_lib_t self_lklib;
 
@@ -3403,7 +3443,8 @@ FREE_01:
     return 0;
 }
 
-static void __exit main_exit(void)
+static void __exit main_exit(
+    void)
 {
     return;
 }

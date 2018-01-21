@@ -182,7 +182,7 @@ void upload_handle_02(
     // 執行處理的內部模組.
     path1 = "mcm_module_upload_test_02";
     MCM_CUMDMSG("[run] %s", path1);
-    if(mcm_lulib_run(&self_lulib, path1) < MCM_RCODE_PASS)
+    if(mcm_lulib_run(&self_lulib, path1, NULL, 0, NULL, NULL) < MCM_RCODE_PASS)
     {
         MCM_CUMEMSG("call mcm_lulib_run(%s) fail", path1);
         FILL_MSG("tmp_html += \"process fail, call mcm_lulib_run(%s) fail<br>\";", path1);

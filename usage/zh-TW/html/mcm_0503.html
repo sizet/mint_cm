@@ -59,7 +59,7 @@ Some rights reserved. See README.
     printk(KERN_INFO "%s(%04u): " msg_fmt "\n", \
            strrchr(__FILE__, '/') ? strrchr(__FILE__, '/') + 1 : __FILE__, __LINE__, ##msgs)
 
-static int __init kernel_app_0503_init(
+static int __init main_init(
     void)
 {
     char *path1;
@@ -137,7 +137,7 @@ FREE_01:
     return 0;
 }
 
-static void __exit kernel_app_0503_exit(
+static void __exit main_exit(
     void)
 {
     return;

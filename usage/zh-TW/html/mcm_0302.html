@@ -743,7 +743,9 @@ Some rights reserved. See README.
 
 #define DMSG(msg_fmt, msgs...) printf("%s(%04u): " msg_fmt "\n", __FILE__, __LINE__, ##msgs)
 
-int main(int argc, char **argv)
+int main(
+    int argc,
+    char **argv)
 {
     struct mcm_lulib_lib_t self_lulib;
 
@@ -818,7 +820,9 @@ FREE_01:
 
 #define DMSG(msg_fmt, msgs...) printf("%s(%04u): " msg_fmt "\n", __FILE__, __LINE__, ##msgs)
 
-int main(int argc, char **argv)
+int main(
+    int argc,
+    char **argv)
 {
     struct mcm_lulib_lib_t self_lulib;
 
@@ -926,7 +930,9 @@ FREE_01:
 
 #define DMSG(msg_fmt, msgs...) printf("%s(%04u): " msg_fmt "\n", __FILE__, __LINE__, ##msgs)
 
-int main(int argc, char **argv)
+int main(
+    int argc,
+    char **argv)
 {
     char *path1;
     struct mcm_lulib_lib_t self_lulib;
@@ -1020,7 +1026,9 @@ FREE_01:
 
 #define DMSG(msg_fmt, msgs...) printf("%s(%04u): " msg_fmt "\n", __FILE__, __LINE__, ##msgs)
 
-int main(int argc, char **argv)
+int main(
+    int argc,
+    char **argv)
 {
     char *path1;
 
@@ -1132,7 +1140,9 @@ int main(int argc, char **argv)
 
 #define DMSG(msg_fmt, msgs...) printf("%s(%04u): " msg_fmt "\n", __FILE__, __LINE__, ##msgs)
 
-int main(int argc, char **argv)
+int main(
+    int argc,
+    char **argv)
 {
     char *path1;
     struct mcm_lulib_lib_t self_lulib;
@@ -1288,7 +1298,9 @@ FREE_01:
 
 #define DMSG(msg_fmt, msgs...) printf("%s(%04u): " msg_fmt "\n", __FILE__, __LINE__, ##msgs)
 
-int main(int argc, char **argv)
+int main(
+    int argc,
+    char **argv)
 {
     char *path1;
     struct mcm_lulib_lib_t self_lulib;
@@ -1503,7 +1515,9 @@ FREE_01:
 
 #define DMSG(msg_fmt, msgs...) printf("%s(%04u): " msg_fmt "\n", __FILE__, __LINE__, ##msgs)
 
-int main(int argc, char **argv)
+int main(
+    int argc,
+    char **argv)
 {
     char *path1;
     struct mcm_lulib_lib_t self_lulib;
@@ -1712,7 +1726,9 @@ FREE_01:
 
 #define DMSG(msg_fmt, msgs...) printf("%s(%04u): " msg_fmt "\n", __FILE__, __LINE__, ##msgs)
 
-int main(int argc, char **argv)
+int main(
+    int argc,
+    char **argv)
 {
     char *path1;
     struct mcm_lulib_lib_t self_lulib;
@@ -1914,7 +1930,9 @@ FREE_01:
 
 #define DMSG(msg_fmt, msgs...) printf("%s(%04u): " msg_fmt "\n", __FILE__, __LINE__, ##msgs)
 
-int main(int argc, char **argv)
+int main(
+    int argc,
+    char **argv)
 {
     char *path1;
     struct mcm_lulib_lib_t self_lulib;
@@ -2175,7 +2193,9 @@ FREE_01:
 
 #define DMSG(msg_fmt, msgs...) printf("%s(%04u): " msg_fmt "\n", __FILE__, __LINE__, ##msgs)
 
-int main(int argc, char **argv)
+int main(
+    int argc,
+    char **argv)
 {
     char *path1;
     struct mcm_lulib_lib_t self_lulib;
@@ -2373,7 +2393,9 @@ FREE_01:
 
 #define DMSG(msg_fmt, msgs...) printf("%s(%04u): " msg_fmt "\n", __FILE__, __LINE__, ##msgs)
 
-int main(int argc, char **argv)
+int main(
+    int argc,
+    char **argv)
 {
     char *path1;
     struct mcm_lulib_lib_t self_lulib;
@@ -2546,14 +2568,15 @@ FREE_01:
 
 #define DMSG(msg_fmt, msgs...) printf("%s(%04u): " msg_fmt "\n", __FILE__, __LINE__, ##msgs)
 
-int main(int argc, char **argv)
+int main(
+    int argc,
+    char **argv)
 {
     char *path1, path2[MCM_PATH_MAX_LENGTH];
     struct mcm_lulib_lib_t self_lulib;
     struct mcm_dv_device_vap_t vap_v;
     struct mcm_dv_device_vap_station_t station_v;
     MCM_DTYPE_EK_TD i, count, *key_array;
-
 
     memset(&self_lulib, 0, sizeof(struct mcm_lulib_lib_t));
     self_lulib.socket_path = "@mintcm";
@@ -2759,7 +2782,9 @@ FREE_01:
 
 #define DMSG(msg_fmt, msgs...) printf("%s(%04u): " msg_fmt "\n", __FILE__, __LINE__, ##msgs)
 
-int main(int argc, char **argv)
+int main(
+    int argc,
+    char **argv)
 {
     char *path1, path2[MCM_PATH_MAX_LENGTH];
     struct mcm_lulib_lib_t self_lulib;
@@ -2939,7 +2964,9 @@ FREE_01:
 
 #define DMSG(msg_fmt, msgs...) printf("%s(%04u): " msg_fmt "\n", __FILE__, __LINE__, ##msgs)
 
-int main(int argc, char **argv)
+int main(
+    int argc,
+    char **argv)
 {
     char *path1;
     struct mcm_lulib_lib_t self_lulib;
@@ -3089,7 +3116,9 @@ FREE_01:
 
 #define DMSG(msg_fmt, msgs...) printf("%s(%04u): " msg_fmt "\n", __FILE__, __LINE__, ##msgs)
 
-int main(int argc, char **argv)
+int main(
+    int argc,
+    char **argv)
 {
     char *path1;
     struct mcm_lulib_lib_t self_lulib;
@@ -3270,7 +3299,9 @@ FREE_01:
 
 #define DMSG(msg_fmt, msgs...) printf("%s(%04u): " msg_fmt "\n", __FILE__, __LINE__, ##msgs)
 
-int main(int argc, char **argv)
+int main(
+    int argc,
+    char **argv)
 {
     char *path1;
     struct mcm_lulib_lib_t self_lulib;
@@ -3321,7 +3352,8 @@ FREE_01:
 
 #define DMSG(msg_fmt, msgs...) printf("%s(%04u): " msg_fmt "\n", __FILE__, __LINE__, ##msgs)
 
-int mcm_module_user_test_01(struct mcm_service_session_t *this_session)
+int mcm_module_user_test_01(
+    struct mcm_service_session_t *this_session)
 {
     srand(time(NULL));
 
@@ -3443,7 +3475,9 @@ int mcm_module_user_test_01(struct mcm_service_session_t *this_session)
 
 #define DMSG(msg_fmt, msgs...) printf("%s(%04u): " msg_fmt "\n", __FILE__, __LINE__, ##msgs)
 
-int main(int argc, char **argv)
+int main(
+    int argc,
+    char **argv)
 {
     char *path1;
     struct mcm_lulib_lib_t self_lulib;
@@ -3587,7 +3621,9 @@ FREE_01:
 
 #define DMSG(msg_fmt, msgs...) printf("%s(%04u): " msg_fmt "\n", __FILE__, __LINE__, ##msgs)
 
-int main(int argc, char **argv)
+int main(
+    int argc,
+    char **argv)
 {
     struct mcm_lulib_lib_t self_lulib;
     MCM_DTYPE_BOOL_TD force_save = 1;
@@ -3689,7 +3725,9 @@ FREE_01:
 
 #define DMSG(msg_fmt, msgs...) printf("%s(%04u): " msg_fmt "\n", __FILE__, __LINE__, ##msgs)
 
-int main(int argc, char **argv)
+int main(
+    int argc,
+    char **argv)
 {
     struct mcm_lulib_lib_t self_lulib;
 

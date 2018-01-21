@@ -159,7 +159,9 @@ device.limit.#6 name:low priority:5
 
 #define DMSG(msg_fmt, msgs...) printf("%s(%04u): " msg_fmt "\n", __FILE__, __LINE__, ##msgs)
 
-int main(int argc, char **argv)
+int main(
+    int argc,
+    char **argv)
 {
     char *path1, store_version[MCM_BASE_VERSION_BUFFER_SIZE];
     struct mcm_lulib_lib_t self_lulib;

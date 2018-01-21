@@ -45,6 +45,7 @@ int mcm_module_save_test(
     int fret = MCM_RCODE_MODULE_INTERNAL_ERROR;
     MCM_DTYPE_BOOL_TD force_save = 1;
 
+
     DMSG("[save] %s", force_save == 0 ? "check" : "force");
     if(mcm_config_save(this_session, MCM_DUPDATE_SYNC, 0, force_save) < MCM_RCODE_PASS)
     {
@@ -61,6 +62,7 @@ int mcm_module_shutdown_test(
     struct mcm_service_session_t *this_session)
 {
     int fret = MCM_RCODE_MODULE_INTERNAL_ERROR;
+
 
     DMSG("[shutdown]");
     if(mcm_config_shutdown(this_session) < MCM_RCODE_PASS)

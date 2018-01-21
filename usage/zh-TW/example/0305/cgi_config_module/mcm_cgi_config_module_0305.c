@@ -266,7 +266,7 @@ int process_user_vap_part(
     char *path1, path2[MCM_PATH_MAX_LENGTH];
     struct mcm_dv_device_vap_station_user_t *user_v;
     MCM_DTYPE_EK_TD vap_idx, vap_count, *vap_key, station_idx, station_count, *station_key,
-                    user_idx, user_count, rep_idx, *rep_list = NULL, rep_count = 0;
+        user_idx, user_count, rep_idx, *rep_list = NULL, rep_count = 0;
 
 
     // 讀出 device.vap.* 所有的 key.
@@ -373,7 +373,7 @@ int process_user_station_part(
     char path2[MCM_PATH_MAX_LENGTH];
     struct mcm_dv_device_vap_station_user_t *user_v;
     MCM_DTYPE_EK_TD station_idx, station_count, *station_key, user_idx, user_count, rep_idx,
-                    *rep_list = NULL, rep_count = 0;
+        *rep_list = NULL, rep_count = 0;
 
 
     // 讀出 device.vap.#{target_vap}.station.* 所有的 key.

@@ -484,7 +484,9 @@ Some rights reserved. See README.
 
 #define DMSG(msg_fmt, msgs...) printf("%s(%04u): " msg_fmt "\n", __FILE__, __LINE__, ##msgs)
 
-int main(int argc, char **argv)
+int main(
+    int argc,
+    char **argv)
 {
     char *path1;
     struct mcm_lulib_lib_t self_lulib;
@@ -503,7 +505,7 @@ int main(int argc, char **argv)
     // 呼叫內部模組.
     path1 = "mcm_module_mask_path_test";
     DMSG("[run] %s", path1);
-    if(mcm_lulib_run(&self_lulib, path1) < MCM_RCODE_PASS)
+    if(mcm_lulib_run(&self_lulib, path1, NULL, 0, NULL, NULL) < MCM_RCODE_PASS)
     {
         DMSG("call mcm_lulib_run(%s) fail", path1);
         goto FREE_02;
@@ -708,7 +710,9 @@ FREE_01:
 
 #define DMSG(msg_fmt, msgs...) printf("%s(%04u): " msg_fmt "\n", __FILE__, __LINE__, ##msgs)
 
-int main(int argc, char **argv)
+int main(
+    int argc,
+    char **argv)
 {
     char *path1;
     struct mcm_lulib_lib_t self_lulib;
@@ -727,7 +731,7 @@ int main(int argc, char **argv)
     // 呼叫內部模組.
     path1 = "mcm_module_mix_path_test";
     DMSG("[run] %s", path1);
-    if(mcm_lulib_run(&self_lulib, path1) < MCM_RCODE_PASS)
+    if(mcm_lulib_run(&self_lulib, path1, NULL, 0, NULL, NULL) < MCM_RCODE_PASS)
     {
         DMSG("call mcm_lulib_run(%s) fail", path1);
         goto FREE_02;
@@ -908,7 +912,9 @@ FREE_01:
 
 #define DMSG(msg_fmt, msgs...) printf("%s(%04u): " msg_fmt "\n", __FILE__, __LINE__, ##msgs)
 
-int main(int argc, char **argv)
+int main(
+    int argc,
+    char **argv)
 {
     char *path1;
     struct mcm_lulib_lib_t self_lulib;
@@ -927,7 +933,7 @@ int main(int argc, char **argv)
     // 呼叫內部模組.
     path1 = "mcm_module_alone_full_path";
     DMSG("[run] %s", path1);
-    if(mcm_lulib_run(&self_lulib, path1) < MCM_RCODE_PASS)
+    if(mcm_lulib_run(&self_lulib, path1, NULL, 0, NULL, NULL) < MCM_RCODE_PASS)
     {
         DMSG("call mcm_lulib_run(%s) fail", path1);
         goto FREE_02;
@@ -1094,7 +1100,9 @@ FREE_01:
 
 #define DMSG(msg_fmt, msgs...) printf("%s(%04u): " msg_fmt "\n", __FILE__, __LINE__, ##msgs)
 
-int main(int argc, char **argv)
+int main(
+    int argc,
+    char **argv)
 {
     char *path1;
     struct mcm_lulib_lib_t self_lulib;
@@ -1113,7 +1121,7 @@ int main(int argc, char **argv)
     // 呼叫內部模組.
     path1 = "mcm_module_entry_full_path";
     DMSG("[run] %s", path1);
-    if(mcm_lulib_run(&self_lulib, path1) < MCM_RCODE_PASS)
+    if(mcm_lulib_run(&self_lulib, path1, NULL, 0, NULL, NULL) < MCM_RCODE_PASS)
     {
         DMSG("call mcm_lulib_run(%s) fail", path1);
         goto FREE_02;
@@ -1303,7 +1311,9 @@ FREE_01:
 
 #define DMSG(msg_fmt, msgs...) printf("%s(%04u): " msg_fmt "\n", __FILE__, __LINE__, ##msgs)
 
-int main(int argc, char **argv)
+int main(
+    int argc,
+    char **argv)
 {
     char *path1;
     struct mcm_lulib_lib_t self_lulib;
@@ -1322,7 +1332,7 @@ int main(int argc, char **argv)
     // 呼叫內部模組.
     path1 = "mcm_module_entry_ik_path";
     DMSG("[run] %s", path1);
-    if(mcm_lulib_run(&self_lulib, path1) < MCM_RCODE_PASS)
+    if(mcm_lulib_run(&self_lulib, path1, NULL, 0, NULL, NULL) < MCM_RCODE_PASS)
     {
         DMSG("call mcm_lulib_run(%s) fail", path1);
         goto FREE_02;
