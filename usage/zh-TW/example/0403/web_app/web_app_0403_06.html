@@ -14,26 +14,38 @@ Some rights reserved. See README.
 <script type="text/javascript" src="json3.js"></script>
 <script type="text/javascript" src="mcm_jslib_api.js"></script>
 <script type="text/javascript" src="mcm_jslib_data_info_auto.js"></script>
-<script type="text/javascript" src="web_app_0403_script.js"></script>
 <link rel="stylesheet" href="web_app_0403_style.css">
 
 <script type="text/javascript">
 function body_init()
 {
-    $("#limit_table").find("tbody").empty();
+    $("#descript_div").html();
+    $("#serial_number_div").html();
+    $("#date_div").html();
+    $("#ip_addr_div").html();
+    $("#uptime_div").html();
+    $("#loading_div").html();
 }
 
-// 讀取 device.limit.*
+// 讀取資料.
 function module_run()
 {
-    var self_jslib, req_cmd = "", rep_ret, mcm_dv, data_array, tmp_html, i;
+    var self_jslib, req_cmd = "", rep_ret, mcm_dv;
 
 
-    $("#limit_table").find("tbody").empty();
+    $("#descript_div").html();
+    $("#serial_number_div").html();
+    $("#date_div").html();
+    $("#ip_addr_div").html();
+    $("#uptime_div").html();
+    $("#loading_div").html();
 
-    // 執行模組, 模組修改資料, 在讀出 device.limit.*
-    req_cmd += "&run.mcm_module_del_usablekey_add_entry";
-    req_cmd += "&get.device.limit.*";
+    // 執行模組, 模組修改資料, 在讀出 device
+    req_cmd += "&run.mcm_module_set_alone";
+    req_cmd += "&get.device";
+    // 執行模組, 模組修改資料, 在讀出 device.system
+    req_cmd += "&run.mcm_module_set_entry";
+    req_cmd += "&get.device.system";
 
     // 送出讀出資料請求.
     self_jslib = new mcm_jslib_lib_t();
@@ -54,17 +66,15 @@ function module_run()
     // 處理資料格式.
     mcm_dv = JSON.parse(rep_ret.rep_data);
 
-    // 顯示 device.limit.{i}
-    for(i = 0; i < mcm_dv.device.limit.length; i++)
-    {
-        data_array = new Array(4);
-        data_array[0] = "device.limit.@" + (i + 1);
-        data_array[1] = mcm_dv.device.limit[i].ekey;
-        data_array[2] = mcm_dv.device.limit[i].name;
-        data_array[3] = mcm_dv.device.limit[i].priority;
-        tmp_html = jsapi_make_trtd("css_td1", data_array);
-        $("#limit_table").find("tbody").append(tmp_html);
-    }
+    // 顯示 device
+    $("#descript_div").html(mcm_dv.device.descript);
+    $("#serial_number_div").html(mcm_dv.device.serial_number);
+
+    // 顯示 device.system
+    $("#date_div").html(mcm_dv.device.system.date);
+    $("#ip_addr_div").html(mcm_dv.device.system.ip_addr);
+    $("#uptime_div").html(mcm_dv.device.system.uptime);
+    $("#loading_div").html(mcm_dv.device.system.loading);
 }
 </script>
 
@@ -72,21 +82,49 @@ function module_run()
 
 <body onload="body_init()">
 
-  <div>[del-entry]</div>
-  <div>[usable-key]</div>
-  <div>[add-entry]</div>
+  <div>[set-alone]</div>
+  <div>[set-entry]</div>
 
-  <table id="limit_table" class="css_table1">
-    <thead>
-      <tr>
-        <td class="css_td1"></td>
-        <td class="css_td1">ekey</td>
-        <td class="css_td1">name</td>
-        <td class="css_td1">priority</td>
-      </tr>
-    </thead>
-    <tbody>
-    </tbody>
+  <table class="css_table1">
+    <tr>
+      <td class="css_td1">device.descript</td>
+      <td class="css_td1">
+        <div id="descript_div"></div>
+      </td>
+    </tr>
+    <tr>
+      <td class="css_td1">device.serial_number</td>
+      <td class="css_td1">
+        <div id="serial_number_div"></div>
+      </td>
+    </tr>
+  </table>
+
+  <table class="css_table1">
+    <tr>
+      <td class="css_td1">device.system.date</td>
+      <td class="css_td1">
+        <div id="date_div"></div>
+      </td>
+    </tr>
+    <tr>
+      <td class="css_td1">device.system.ip_addr</td>
+      <td class="css_td1">
+        <div id="ip_addr_div"></div>
+      </td>
+    </tr>
+    <tr>
+      <td class="css_td1">device.system.uptime</td>
+      <td class="css_td1">
+        <div id="uptime_div"></div>
+      </td>
+    </tr>
+    <tr>
+      <td class="css_td1">device.system.loading</td>
+      <td class="css_td1">
+        <div id="loading_div"></div>
+      </td>
+    </tr>
   </table>
 
   <button type="button" onclick="module_run()">run</button>

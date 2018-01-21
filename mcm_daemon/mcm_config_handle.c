@@ -2845,7 +2845,7 @@ int mcm_load_store_fill_store(
 //     MCM_FSOURCE_VERIFY  : 待檢查檔.
 // file_line (I) :
 //   此資料是在檔案中的第幾行.
-// value_buf (O) :
+// data_buf (O) :
 //   儲存轉換後的資料緩衝.
 // return :
 //   >= MCM_RCODE_PASS : 成功.
@@ -7300,7 +7300,7 @@ int mcm_config_del_entry_by_path(
 // key_buf_alloc (O) :
 //   紀錄 key 的緩衝的緩衝 (需要內部函式幫忙配置).
 // count_buf (O) :
-//   儲存筆數的緩衝.
+//   紀錄筆數的緩衝.
 // return :
 //   >= MCM_RCODE_PASS : 成功.
 //   <  MCM_RCODE_PASS : 錯誤.
@@ -7400,7 +7400,7 @@ FREE_01:
 // key_buf (O) :
 //   紀錄 key 的緩衝.
 // count_buf (O) :
-//   儲存筆數的緩衝.
+//   紀錄筆數的緩衝.
 // return :
 //   >= MCM_RCODE_PASS : 成功.
 //   <  MCM_RCODE_PASS : 錯誤.
@@ -7434,7 +7434,7 @@ int mcm_config_get_all_key_by_info(
 // key_buf (O) :
 //   紀錄 key 的緩衝.
 // count_buf (O) :
-//   儲存筆數的緩衝.
+//   紀錄筆數的緩衝.
 // return :
 //   >= MCM_RCODE_PASS : 成功.
 //   <  MCM_RCODE_PASS : 錯誤.
@@ -7479,7 +7479,7 @@ int mcm_config_get_all_key_by_path(
     return fret;
 }
 
-// 取得 group 的全部 entry 的資料數值 (進階模式).
+// 取得 group 的全部 entry 的資料數值.
 // this_session (I) :
 //   session 資料.
 // this_model_group (I) :
@@ -7491,28 +7491,40 @@ int mcm_config_get_all_key_by_path(
 //     MCM_DACCESS_SYS  : 已存在的.
 //     MCM_DACCESS_NEW  : 新設定的.
 //     MCM_DACCESS_AUTO : 優先取新設定的資料, 沒有才找已存在的資料.
-// data_buf (O) :
-//   紀錄資料數值的緩衝.
-//     == NULL : 表示由內部配置紀錄資料數值的緩衝.
-//     != NULL : 表示由外部指定紀錄資料數值的緩衝.
+// need_alloc_data_buf (I) :
+//   紀錄資料的數值的緩衝是否需要由函式幫忙配置.
+//     0 : 否.
+//     1 : 是.
+// data_buf_exist (O) :
+//   紀錄資料的數值的緩衝 (外部函式已經配置好).
+// data_buf_alloc (O) :
+//   紀錄資料的數值的緩衝的緩衝 (需要內部函式幫忙配置).
+// source_buf (O) :
+//   紀錄資料的來源的緩衝的緩衝.
+//     == MCM_DACCESS_SYS : 資料由已存在的資料中取出.
+//     == MCM_DACCESS_NEW : 資料由新設定的資料中取出.
 // count_buf (O) :
-//   儲存筆數的緩衝.
+//   紀錄筆數的緩衝.
 // return :
 //   >= MCM_RCODE_PASS : 成功.
 //   <  MCM_RCODE_PASS : 錯誤.
-int mcm_config_get_all_entry_by_info(
+int mcm_config_get_all_entry_local(
     struct mcm_service_session_t *this_session,
     struct mcm_config_model_group_t *this_model_group,
     struct mcm_config_store_t *parent_store,
     MCM_DTYPE_FLAG_TD data_access,
-    void **data_buf,
+    MCM_DTYPE_BOOL_TD need_alloc_data_buf,
+    void *data_buf_exist,
+    void **data_buf_alloc,
+    MCM_DTYPE_FLAG_TD **source_buf,
     MCM_DTYPE_EK_TD *count_buf)
 {
     int fret;
     struct mcm_config_store_t **store_head_in_parent = NULL, *list_store, *each_store;
     MCM_DTYPE_EK_TD *store_count_in_parent, self_count = 0;
-    MCM_DTYPE_USIZE_TD dlen;
-    void *data_loc = NULL, *tmp_buf, *buf_loc;
+    MCM_DTYPE_USIZE_TD xlen;
+    MCM_DTYPE_FLAG_TD *tmp_sbuf = NULL, *sbuf_loc = NULL;
+    void *data_loc = NULL, *tmp_dbuf = NULL, *dbuf_loc;
 #if MCM_CFDMODE
     MCM_DTYPE_EK_TD dbg_key = 0;
     void *dbg_dloc;
@@ -7546,24 +7558,36 @@ int mcm_config_get_all_entry_by_info(
 
     if(list_store != NULL)
     {
-        dlen = this_model_group->data_value_size * self_count;
-
-        if(*data_buf != NULL)
+        if(source_buf != NULL)
         {
-            tmp_buf = buf_loc = *data_buf;
-        }
-        else
-        {
-            tmp_buf = buf_loc = malloc(dlen);
-            if(tmp_buf == NULL)
+            xlen = sizeof(MCM_DTYPE_FLAG_TD) * self_count;
+            tmp_sbuf = sbuf_loc = (MCM_DTYPE_FLAG_TD *) malloc(xlen);
+            if(tmp_sbuf == NULL)
             {
                 MCM_EMSG("call malloc() fail [%s]", strerror(errno));
                 fret = MCM_RCODE_CONFIG_ALLOC_FAIL;
                 goto FREE_01;
             }
+            MCM_CFDMSG("source_buf[" MCM_DTYPE_USIZE_PF "][%p]", xlen, tmp_sbuf);
         }
-        MCM_CFDMSG("%s data_buf[" MCM_DTYPE_USIZE_PF "][%p]",
-                   *data_buf != NULL ? "self" : "alloc", dlen, tmp_buf);
+
+        xlen = this_model_group->data_value_size * self_count;
+        if(need_alloc_data_buf == 0)
+        {
+            tmp_dbuf = dbuf_loc = data_buf_exist;
+        }
+        else
+        {
+            tmp_dbuf = dbuf_loc = malloc(xlen);
+            if(tmp_dbuf == NULL)
+            {
+                MCM_EMSG("call malloc() fail [%s]", strerror(errno));
+                fret = MCM_RCODE_CONFIG_ALLOC_FAIL;
+                goto FREE_02;
+            }
+        }
+        MCM_CFDMSG("data_buf[%s][" MCM_DTYPE_USIZE_PF "][%p]",
+                   need_alloc_data_buf == 0 ? "exist" : "alloc", xlen, tmp_dbuf);
 
         MCM_CFDMSG("access[" MCM_DTYPE_FLAG_PF "]", data_access);
 
@@ -7589,27 +7613,85 @@ int mcm_config_get_all_entry_by_info(
             if(data_loc == NULL)
             {
                 fret = MCM_RCODE_CONFIG_INVALID_STORE;
-                goto FREE_02;
+                goto FREE_03;
             }
 
-            memcpy(buf_loc, data_loc, this_model_group->data_value_size);
-            buf_loc += this_model_group->data_value_size;
-        }
+            if(source_buf != NULL)
+            {
+                *sbuf_loc = data_loc == each_store->data_value_new ?
+                            MCM_DACCESS_NEW : MCM_DACCESS_SYS;
+                sbuf_loc++;
+            }
 
+            memcpy(dbuf_loc, data_loc, this_model_group->data_value_size);
+            dbuf_loc += this_model_group->data_value_size;
+        }
+    }
+
+    if(need_alloc_data_buf != 0)
+        *data_buf_alloc = tmp_dbuf;
+
+    if(source_buf != NULL)
+        *source_buf = tmp_sbuf;
+
+    if(count_buf != NULL)
         *count_buf = self_count;
-        if(*data_buf == NULL)
-            *data_buf = tmp_buf;
-    }
-    else
-    {
-        *count_buf = 0;
-    }
 
     return MCM_RCODE_PASS;
+FREE_03:
+    if(need_alloc_data_buf == 0)
+        free(tmp_dbuf);
 FREE_02:
-    if(*data_buf == NULL)
-        free(tmp_buf);
+    if(source_buf != NULL)
+        free(tmp_sbuf);
 FREE_01:
+    return fret;
+}
+
+// 取得 group 的全部 entry 的資料數值 (進階模式).
+// this_session (I) :
+//   session 資料.
+// this_model_group (I) :
+//   目標 model group.
+// parent_store (I) :
+//   目標 store 的 parent.
+// data_access (I) :
+//   要從何處取出數值.
+//     MCM_DACCESS_SYS  : 已存在的.
+//     MCM_DACCESS_NEW  : 新設定的.
+//     MCM_DACCESS_AUTO : 優先取新設定的資料, 沒有才找已存在的資料.
+// data_buf (O) :
+//   紀錄資料數值的緩衝.
+// source_buf (O) :
+//   紀錄資料的來源的緩衝.
+//     == MCM_DACCESS_SYS : 資料由已存在的資料中取出.
+//     == MCM_DACCESS_NEW : 資料由新設定的資料中取出.
+// count_buf (O) :
+//   紀錄筆數的緩衝.
+// return :
+//   >= MCM_RCODE_PASS : 成功.
+//   <  MCM_RCODE_PASS : 錯誤.
+int mcm_config_get_all_entry_by_info(
+    struct mcm_service_session_t *this_session,
+    struct mcm_config_model_group_t *this_model_group,
+    struct mcm_config_store_t *parent_store,
+    MCM_DTYPE_FLAG_TD data_access,
+    void **data_buf,
+    MCM_DTYPE_FLAG_TD **source_buf,
+    MCM_DTYPE_EK_TD *count_buf)
+{
+    int fret;
+
+
+    MCM_CFDMSG("=> %s", __FUNCTION__);
+
+    fret = mcm_config_get_all_entry_local(this_session, this_model_group, parent_store,
+                                          data_access, 1, NULL, data_buf, source_buf, count_buf);
+    if(fret < MCM_RCODE_PASS)
+    {
+        MCM_ECTMSG("call mcm_config_get_all_entry_local() fail");
+    }
+
     return fret;
 }
 
@@ -7625,10 +7707,12 @@ FREE_01:
 //     MCM_DACCESS_AUTO : 優先取新設定的資料, 沒有才找已存在的資料.
 // data_buf (O) :
 //   紀錄資料數值的緩衝.
-//     == NULL : 表示由內部配置紀錄資料數值的緩衝.
-//     != NULL : 表示由外部指定紀錄資料數值的緩衝.
+// source_buf (O) :
+//   紀錄資料的來源的緩衝.
+//     == MCM_DACCESS_SYS : 資料由已存在的資料中取出.
+//     == MCM_DACCESS_NEW : 資料由新設定的資料中取出.
 // count_buf (O) :
-//   儲存筆數的緩衝.
+//   紀錄筆數的緩衝.
 // return :
 //   >= MCM_RCODE_PASS : 成功.
 //   <  MCM_RCODE_PASS : 錯誤.
@@ -7637,6 +7721,7 @@ int mcm_config_get_all_entry_by_path(
     char *mix_path,
     MCM_DTYPE_FLAG_TD data_access,
     void **data_buf,
+    MCM_DTYPE_FLAG_TD **source_buf,
     MCM_DTYPE_EK_TD *count_buf)
 {
     int fret;
@@ -7665,7 +7750,7 @@ int mcm_config_get_all_entry_by_path(
     }
 
     fret = mcm_config_get_all_entry_by_info(this_session, self_model_group, parent_store,
-                                            data_access, data_buf, count_buf);
+                                            data_access, data_buf, source_buf, count_buf);
     if(fret < MCM_RCODE_PASS)
     {
         MCM_ECTMSG("call mcm_config_get_all_entry_by_info() fail");

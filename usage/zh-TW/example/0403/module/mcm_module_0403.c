@@ -375,7 +375,7 @@ FREE_01:
     return fret;
 }
 
-int mcm_module_get_key_entry(
+int mcm_module_get_all_key_entry(
     struct mcm_service_session_t *this_session)
 {
     int fret = MCM_RCODE_MODULE_INTERNAL_ERROR;
@@ -485,6 +485,46 @@ int mcm_module_get_key_entry(
         }
     }
     free(key_array);
+
+    fret = MCM_RCODE_PASS;
+FREE_01:
+    return fret;
+}
+
+int mcm_module_get_all_entry(
+    struct mcm_service_session_t *this_session)
+{
+    int fret = MCM_RCODE_MODULE_INTERNAL_ERROR;
+    char *path1, path2[MCM_PATH_MAX_LENGTH], *source;
+    MCM_DTYPE_EK_TD count, i;
+    MCM_DTYPE_FLAG_TD *from;
+    struct mcm_dv_device_vap_t *vap_v;
+
+
+    DMSG("get-all-entry test :");
+
+    // device.vap.* 的所有 entry 的資料.
+    path1 = "device.vap.*";
+    if(mcm_config_get_all_entry_by_path(this_session, path1, MCM_DACCESS_AUTO, (void **) &vap_v,
+                                        (MCM_DTYPE_FLAG_TD **) &from, &count) < MCM_RCODE_PASS)
+    {
+        DMSG("call mcm_config_get_all_entry_by_path(%s) fail", path1);
+        goto FREE_01;
+    }
+    DMSG("[count] %s = " MCM_DTYPE_EK_PF, path1, count);
+    for(i = 0; i < count; i++)
+    {
+        snprintf(path2, sizeof(path2), "device.vap.@%u", i + 1);
+        source = from[i] == MCM_DACCESS_NEW ? "NEW" : "SYS";
+        DMSG("[get-all-entry][AUTO] %s.ekey = " MCM_DTYPE_EK_PF " [%s]",
+             path2, vap_v[i].ekey, source);
+        DMSG("[get-all-entry][AUTO] %s.ssid = " MCM_DTYPE_S_PF " [%s]",
+             path2, vap_v[i].ssid, source);
+        DMSG("[get-all-entry][AUTO] %s.channel = " MCM_DTYPE_IUI_PF " [%s]",
+             path2, vap_v[i].channel, source);
+    }
+    free(vap_v);
+    free(from);
 
     fret = MCM_RCODE_PASS;
 FREE_01:

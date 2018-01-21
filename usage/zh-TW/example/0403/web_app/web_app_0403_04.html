@@ -123,7 +123,7 @@ function module_run()
     }
 
     // 執行內部模組.
-    req_cmd += "&run.mcm_module_get_key_entry";
+    req_cmd += "&run.mcm_module_get_all_key_entry";
 
     // 送出修改資料請求.
     self_jslib = new mcm_jslib_lib_t();
@@ -149,6 +149,7 @@ function module_run()
 
 <body onload="body_init()">
 
+  <div>[get-all-key]</div>
   <div>[get-entry]</div>
 
   <table id="vap_table" class="css_table1">

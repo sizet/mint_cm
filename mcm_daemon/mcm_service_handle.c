@@ -1516,12 +1516,12 @@ int mcm_req_get_all_entry(
         }
     }
 
-    fret = mcm_config_get_all_entry_by_info(this_session, self_model_group, parent_store,
-                                            MCM_DACCESS_AUTO, &this_session->cache_buf,
-                                            &self_count);
+    fret = mcm_config_get_all_entry_local(this_session, self_model_group, parent_store,
+                                          MCM_DACCESS_AUTO, 0, this_session->cache_buf, NULL,
+                                          NULL, NULL);
     if(fret < MCM_RCODE_PASS)
     {
-        MCM_ECTMSG("call mcm_config_get_all_entry_by_info() fail");
+        MCM_ECTMSG("call mcm_config_get_all_entry_local() fail");
         goto FREE_01;
     }
 

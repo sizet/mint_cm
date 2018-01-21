@@ -238,12 +238,24 @@ int mcm_config_get_all_key_by_path(
     MCM_DTYPE_EK_TD **key_buf,
     MCM_DTYPE_EK_TD *count_buf);
 
+int mcm_config_get_all_entry_local(
+    struct mcm_service_session_t *this_session,
+    struct mcm_config_model_group_t *this_model_group,
+    struct mcm_config_store_t *parent_store,
+    MCM_DTYPE_FLAG_TD data_access,
+    MCM_DTYPE_BOOL_TD need_alloc,
+    void *data_buf_exist,
+    void **data_buf_alloc,
+    MCM_DTYPE_FLAG_TD **source_buf,
+    MCM_DTYPE_EK_TD *count_buf);
+
 int mcm_config_get_all_entry_by_info(
     struct mcm_service_session_t *this_session,
     struct mcm_config_model_group_t *this_model_group,
     struct mcm_config_store_t *parent_store,
     MCM_DTYPE_FLAG_TD data_access,
     void **data_buf,
+    MCM_DTYPE_FLAG_TD **source_buf,
     MCM_DTYPE_EK_TD *count_buf);
 
 int mcm_config_get_all_entry_by_path(
@@ -251,6 +263,7 @@ int mcm_config_get_all_entry_by_path(
     char *mix_path,
     MCM_DTYPE_FLAG_TD data_access,
     void **data_buf,
+    MCM_DTYPE_FLAG_TD **source_buf,
     MCM_DTYPE_EK_TD *count_buf);
 
 int mcm_config_del_all_entry_by_info(

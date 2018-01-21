@@ -14,43 +14,24 @@ Some rights reserved. See README.
 <script type="text/javascript" src="json3.js"></script>
 <script type="text/javascript" src="mcm_jslib_api.js"></script>
 <script type="text/javascript" src="mcm_jslib_data_info_auto.js"></script>
+<script type="text/javascript" src="web_app_0403_script.js"></script>
 <link rel="stylesheet" href="web_app_0403_style.css">
 
 <script type="text/javascript">
+var mcm_dv = null;
+
 function body_init()
 {
-    $("#descript_div").html();
-    $("#serial_number_div").html();
-    $("#date_div").html();
-    $("#ip_addr_div").html();
-    $("#uptime_div").html();
-    $("#loading_div").html();
-}
-
-// 讀取資料.
-function module_run()
-{
-    var self_jslib, req_cmd = "", rep_ret, mcm_dv;
+    var self_jslib, req_cmd = "", rep_ret, data_array, tmp_html;
 
 
-    $("#descript_div").html();
-    $("#serial_number_div").html();
-    $("#date_div").html();
-    $("#ip_addr_div").html();
-    $("#uptime_div").html();
-    $("#loading_div").html();
-
-    // 執行模組, 模組修改資料, 在讀出 device
-    req_cmd += "&run.mcm_module_set_alone";
-    req_cmd += "&get.device";
-    // 執行模組, 模組修改資料, 在讀出 device.system
-    req_cmd += "&run.mcm_module_set_entry";
-    req_cmd += "&get.device.system";
+    // 指定要讀出的資料.
+    req_cmd = "&get.device.vap.*";
 
     // 送出讀出資料請求.
     self_jslib = new mcm_jslib_lib_t();
     self_jslib.socket_path = "@mintcm";
-    self_jslib.session_permission = mcm_session_permission.rw;
+    self_jslib.session_permission = mcm_session_permission.ro;
     self_jslib.session_stack_size = 0;
     self_jslib.request_command = req_cmd;
     self_jslib.data_format = mcm_data_format.all_default;
@@ -66,15 +47,101 @@ function module_run()
     // 處理資料格式.
     mcm_dv = JSON.parse(rep_ret.rep_data);
 
-    // 顯示 device
-    $("#descript_div").html(mcm_dv.device.descript);
-    $("#serial_number_div").html(mcm_dv.device.serial_number);
+    for(i = 0; i < mcm_mcount_device_vap_max_count; i++)
+    {
+        data_array = new Array(5);
+        if(i < mcm_dv.device.vap.length)
+        {
+            // 顯示 device.vap.{i}
+            data_array[0] = "device.vap.@" + (i + 1);
+            data_array[1] = jsapi_make_text("ekey_text_" + i, 4, mcm_dv.device.vap[i].ekey);
+            data_array[2] = jsapi_make_text("ssid_text_" + i, 24, mcm_dv.device.vap[i].ssid);
+            data_array[3] = jsapi_make_text("channel_text_" + i, 6, mcm_dv.device.vap[i].channel);
+            data_array[4] = jsapi_make_select("vap_select_" + i, 1, 0, 1);
+        }
+        else
+        {
+            // 顯示空白表格.
+            data_array[0] = "device.vap.*";
+            data_array[1] = jsapi_make_text("ekey_text_" + i, 4, "");
+            data_array[2] = jsapi_make_text("ssid_text_" + i, 24, "");
+            data_array[3] = jsapi_make_text("channel_text_" + i, 6, "");
+            data_array[4] = jsapi_make_select("vap_select_" + i, 0, 1, 0);
+        }
+        tmp_html = jsapi_make_trtd("css_td1", data_array);
+        $("#vap_table").find("tbody").append(tmp_html);
+    }
+}
 
-    // 顯示 device.system
-    $("#date_div").html(mcm_dv.device.system.date);
-    $("#ip_addr_div").html(mcm_dv.device.system.ip_addr);
-    $("#uptime_div").html(mcm_dv.device.system.uptime);
-    $("#loading_div").html(mcm_dv.device.system.loading);
+// 設定/增加/刪除 device.vap.*
+function module_run()
+{
+    var self_jslib, req_cmd = "", rep_ret, tmp_path, i;
+
+
+    for(i = 0; i < mcm_mcount_device_vap_max_count; i++)
+    {
+        if($("#vap_select_" + i).val() == "set")
+        {
+            // 填充 device.vap.{i} 路徑.
+            tmp_path = "device.vap.#" + mcm_dv.device.vap[i].ekey;
+
+            // 設定 device.vap.{i}.ssid
+            req_cmd += "&set." + tmp_path + ".ssid=" +
+                       mcm_jslib_convert_submit_str($("#ssid_text_" + i).val());
+
+            // 設定 device.vap.{i}.channel
+            req_cmd += "&set." + tmp_path + ".channel=" +
+                       $("#channel_text_" + i).val();
+        }
+        else
+        if($("#vap_select_" + i).val() == "add")
+        {
+            // 填充 device.vap.{i} 路徑.
+            tmp_path = "device.vap.#" + $("#ekey_text_" + i).val();
+
+            // 增加 device.vap.{i}
+            req_cmd += "&add." + tmp_path + "=";
+
+            // 設定 device.vap.{i}.ssid
+            req_cmd += "&set." + tmp_path + ".ssid=" +
+                       mcm_jslib_convert_submit_str($("#ssid_text_" + i).val());
+
+            // 設定 device.vap.{i}.channel
+            req_cmd += "&set." + tmp_path + ".channel=" +
+                       $("#channel_text_" + i).val();
+        }
+        else
+        if($("#vap_select_" + i).val() == "del")
+        {
+            // 填充 device.vap.{i} 路徑.
+            tmp_path = "device.vap.#" + mcm_dv.device.vap[i].ekey;
+
+            // 刪除 device.vap.{i}
+            req_cmd += "&del." + tmp_path;
+        }
+    }
+
+    // 執行內部模組.
+    req_cmd += "&run.mcm_module_get_all_entry";
+
+    // 送出修改資料請求.
+    self_jslib = new mcm_jslib_lib_t();
+    self_jslib.socket_path = "@mintcm";
+    self_jslib.session_permission = mcm_session_permission.rw;
+    self_jslib.session_stack_size = 0;
+    self_jslib.request_command = req_cmd;
+    self_jslib.after_complete = mcm_after_complete.reload;
+    self_jslib.other_query = "";
+    rep_ret = mcm_jslib_submit_config(self_jslib);
+    if(rep_ret.rep_code < mcm_return_code.pass)
+    {
+        alert("call mcm_jslib_submit_config() fail" +
+              "[" + rep_ret.rep_code + "]");
+        mcm_jslib_run_script(rep_ret.rep_data);
+        return;
+    }
+    mcm_jslib_run_script(rep_ret.rep_data);
 }
 </script>
 
@@ -82,49 +149,20 @@ function module_run()
 
 <body onload="body_init()">
 
-  <div>[set-alone]</div>
-  <div>[set-entry]</div>
+  <div>[get-all-entry]</div>
 
-  <table class="css_table1">
-    <tr>
-      <td class="css_td1">device.descript</td>
-      <td class="css_td1">
-        <div id="descript_div"></div>
-      </td>
-    </tr>
-    <tr>
-      <td class="css_td1">device.serial_number</td>
-      <td class="css_td1">
-        <div id="serial_number_div"></div>
-      </td>
-    </tr>
-  </table>
-
-  <table class="css_table1">
-    <tr>
-      <td class="css_td1">device.system.date</td>
-      <td class="css_td1">
-        <div id="date_div"></div>
-      </td>
-    </tr>
-    <tr>
-      <td class="css_td1">device.system.ip_addr</td>
-      <td class="css_td1">
-        <div id="ip_addr_div"></div>
-      </td>
-    </tr>
-    <tr>
-      <td class="css_td1">device.system.uptime</td>
-      <td class="css_td1">
-        <div id="uptime_div"></div>
-      </td>
-    </tr>
-    <tr>
-      <td class="css_td1">device.system.loading</td>
-      <td class="css_td1">
-        <div id="loading_div"></div>
-      </td>
-    </tr>
+  <table id="vap_table" class="css_table1">
+    <thead>
+      <tr>
+        <td class="css_td1"></td>
+        <td class="css_td1">ekey</td>
+        <td class="css_td1">ssid</td>
+        <td class="css_td1">channel</td>
+        <td class="css_td1"></td>
+      </tr>
+    </thead>
+    <tbody>
+    </tbody>
   </table>
 
   <button type="button" onclick="module_run()">run</button>
