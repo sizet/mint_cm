@@ -216,12 +216,21 @@ int mcm_config_del_entry_by_path(
     char *full_path,
     MCM_DTYPE_FLAG_TD data_access);
 
+int mcm_config_get_all_key_local(
+    struct mcm_service_session_t *this_session,
+    struct mcm_config_model_group_t *this_model_group,
+    struct mcm_config_store_t *parent_store,
+    MCM_DTYPE_BOOL_TD need_alloc,
+    MCM_DTYPE_EK_TD *key_buf_exist,
+    MCM_DTYPE_EK_TD **key_buf_empty,
+    MCM_DTYPE_EK_TD *count_buf);
+
 int mcm_config_get_all_key_by_info(
     struct mcm_service_session_t *this_session,
     struct mcm_config_model_group_t *this_model_group,
     struct mcm_config_store_t *parent_store,
-    MCM_DTYPE_EK_TD *count_buf,
-    MCM_DTYPE_EK_TD **key_buf);
+    MCM_DTYPE_EK_TD **key_buf,
+    MCM_DTYPE_EK_TD *count_buf);
 
 int mcm_config_get_all_key_by_path(
     struct mcm_service_session_t *this_session,
@@ -234,15 +243,15 @@ int mcm_config_get_all_entry_by_info(
     struct mcm_config_model_group_t *this_model_group,
     struct mcm_config_store_t *parent_store,
     MCM_DTYPE_FLAG_TD data_access,
-    MCM_DTYPE_EK_TD *count_buf,
-    void **data_buf);
+    void **data_buf,
+    MCM_DTYPE_EK_TD *count_buf);
 
 int mcm_config_get_all_entry_by_path(
     struct mcm_service_session_t *this_session,
     char *mix_path,
     MCM_DTYPE_FLAG_TD data_access,
-    MCM_DTYPE_EK_TD *count_buf,
-    void **data_buf);
+    void **data_buf,
+    MCM_DTYPE_EK_TD *count_buf);
 
 int mcm_config_del_all_entry_by_info(
     struct mcm_service_session_t *this_session,

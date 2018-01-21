@@ -1053,8 +1053,8 @@ int case_get_all_key(
             DMSG("call mcm_lklib_get_entry(%s) fail", path2);
             goto FREE_01;
         }
-        DMSG("[get-entry] %s.name = " MCM_DTYPE_S_PF, path1, limit_v.name);
-        DMSG("[get-entry] %s.priority = " MCM_DTYPE_ISI_PF, path1, limit_v.priority);
+        DMSG("[get-entry] %s.name = " MCM_DTYPE_S_PF, path2, limit_v.name);
+        DMSG("[get-entry] %s.priority = " MCM_DTYPE_ISI_PF, path2, limit_v.priority);
     }
     kfree(limit_key_array);
 

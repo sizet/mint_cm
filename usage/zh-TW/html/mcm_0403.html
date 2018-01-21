@@ -3291,7 +3291,6 @@ FREE_01:
               </td>
               <td class="css_td_list2_r1">
                 紀錄 key 列表的變數的緩衝<br>
-                <font class="css_font_p1">參數帶入函式前必須先將值設為 NULL</font><br>
                 <font class="css_font_r1">
                 內部函式會配置記憶體空間並放入資料, 使用完需要釋放,
                 傳入參數需要做強制轉型 (MCM_DTYPE_EK_TD **)
@@ -3448,7 +3447,6 @@ int mcm_module_get_all_key_value_test(
 
     // 範例-01 : 取得 device.vap.* 的所有 key.
     path1 = "device.vap.*";
-    key_array = NULL;
     if(mcm_config_get_all_key_by_path(this_session, path1, (MCM_DTYPE_EK_TD **) &key_array,
                                       &count) < MCM_RCODE_PASS)
     {
@@ -3475,7 +3473,6 @@ int mcm_module_get_all_key_value_test(
 
     // 範例-02 : 取得 device.vap.@1.station.* 所有的 key.
     path1 = "device.vap.@1.station.*";
-    key_array = NULL;
     if(mcm_config_get_all_key_by_path(this_session, path1, (MCM_DTYPE_EK_TD **) &key_array,
                                       &count) < MCM_RCODE_PASS)
     {
@@ -3505,7 +3502,6 @@ int mcm_module_get_all_key_value_test(
 
     // 範例-03 : 取得 device.vap.#2.station.* 所有的 key.
     path1 = "device.vap.#2.station.*";
-    key_array = NULL;
     if(mcm_config_get_all_key_by_path(this_session, path1, (MCM_DTYPE_EK_TD **) &key_array,
                                       &count) < MCM_RCODE_PASS)
     {

@@ -7284,32 +7284,38 @@ int mcm_config_del_entry_by_path(
     return fret;
 }
 
-// 取得 group 的全部 entry 的 key (進階模式).
+// 取得 group 的全部 entry 的 key.
 // this_session (I) :
 //   session 資料.
 // this_model_group (I) :
 //   目標 model group.
 // parent_store (I) :
 //   目標 store 的 parent.
+// need_alloc (I) :
+//   紀錄 key 的緩衝是否需要由函式幫忙配置.
+//     0 : 否.
+//     1 : 是.
+// key_buf_exist (O) :
+//   紀錄 key 的緩衝 (外部函式已經配置好).
+// key_buf_alloc (O) :
+//   紀錄 key 的緩衝的緩衝 (需要內部函式幫忙配置).
 // count_buf (O) :
 //   儲存筆數的緩衝.
-// key_buf (O) :
-//   紀錄 key 的緩衝.
-//     == NULL : 表示由內部配置紀錄 key 的緩衝.
-//     != NULL : 表示由外部指定紀錄 key 的緩衝.
 // return :
 //   >= MCM_RCODE_PASS : 成功.
 //   <  MCM_RCODE_PASS : 錯誤.
-int mcm_config_get_all_key_by_info(
+int mcm_config_get_all_key_local(
     struct mcm_service_session_t *this_session,
     struct mcm_config_model_group_t *this_model_group,
     struct mcm_config_store_t *parent_store,
-    MCM_DTYPE_EK_TD *count_buf,
-    MCM_DTYPE_EK_TD **key_buf)
+    MCM_DTYPE_BOOL_TD need_alloc,
+    MCM_DTYPE_EK_TD *key_buf_exist,
+    MCM_DTYPE_EK_TD **key_buf_alloc,
+    MCM_DTYPE_EK_TD *count_buf)
 {
     int fret = MCM_RCODE_PASS;
     struct mcm_config_store_t **store_head_in_parent = NULL, *list_store, *each_store;
-    MCM_DTYPE_EK_TD *store_count_in_parent, self_count = 0, each_key, *tmp_buf;
+    MCM_DTYPE_EK_TD *store_count_in_parent, self_count = 0, each_key, *tmp_buf = NULL, *buf_loc;
     MCM_DTYPE_USIZE_TD dlen;
     void *data_loc;
 
@@ -7342,14 +7348,13 @@ int mcm_config_get_all_key_by_info(
     if(list_store != NULL)
     {
         dlen = sizeof(MCM_DTYPE_EK_TD) * self_count;
-
-        if(*key_buf != NULL)
+        if(need_alloc == 0)
         {
-            tmp_buf = *key_buf;
+            tmp_buf = buf_loc = key_buf_exist;
         }
         else
         {
-            tmp_buf = (MCM_DTYPE_EK_TD *) malloc(dlen);
+            tmp_buf = buf_loc = (MCM_DTYPE_EK_TD *) malloc(dlen);
             if(tmp_buf == NULL)
             {
                 MCM_EMSG("call malloc() fail [%s]", strerror(errno));
@@ -7357,12 +7362,8 @@ int mcm_config_get_all_key_by_info(
                 goto FREE_01;
             }
         }
-        MCM_CFDMSG("%s key_buf[" MCM_DTYPE_USIZE_PF "][%p]",
-                   *key_buf != NULL ? "self" : "alloc", dlen, tmp_buf);
-
-        *count_buf = self_count;
-        if(*key_buf == NULL)
-            *key_buf = tmp_buf;
+        MCM_CFDMSG("key_buf[%s][" MCM_DTYPE_USIZE_PF "][%p]",
+                   need_alloc == 0 ? "exist" : "alloc", dlen, tmp_buf);
 
         for(each_store = list_store; each_store != NULL; each_store = each_store->next_store)
         {
@@ -7375,16 +7376,53 @@ int mcm_config_get_all_key_by_info(
                        this_model_group->group_name, MCM_SPROFILE_PATH_KEY_KEY, each_key);
 #endif
 
-            *tmp_buf = each_key;
-            tmp_buf++;
+            *buf_loc = each_key;
+            buf_loc++;
         }
     }
-    else
-    {
-        *count_buf = 0;
-    }
+
+    if(need_alloc != 0)
+        *key_buf_alloc = tmp_buf;
+    if(count_buf != NULL)
+        *count_buf = self_count;
 
 FREE_01:
+    return fret;
+}
+
+// 取得 group 的全部 entry 的 key (進階模式).
+// this_session (I) :
+//   session 資料.
+// this_model_group (I) :
+//   目標 model group.
+// parent_store (I) :
+//   目標 store 的 parent.
+// key_buf (O) :
+//   紀錄 key 的緩衝.
+// count_buf (O) :
+//   儲存筆數的緩衝.
+// return :
+//   >= MCM_RCODE_PASS : 成功.
+//   <  MCM_RCODE_PASS : 錯誤.
+int mcm_config_get_all_key_by_info(
+    struct mcm_service_session_t *this_session,
+    struct mcm_config_model_group_t *this_model_group,
+    struct mcm_config_store_t *parent_store,
+    MCM_DTYPE_EK_TD **key_buf,
+    MCM_DTYPE_EK_TD *count_buf)
+{
+    int fret;
+
+
+    MCM_CFDMSG("=> %s", __FUNCTION__);
+
+    fret = mcm_config_get_all_key_local(this_session, this_model_group, parent_store,
+                                        1, NULL, key_buf, count_buf);
+    if(fret < MCM_RCODE_PASS)
+    {
+        MCM_ECTMSG("call mcm_config_get_all_key_local() fail");
+    }
+
     return fret;
 }
 
@@ -7395,8 +7433,6 @@ FREE_01:
 //   目標路徑.
 // key_buf (O) :
 //   紀錄 key 的緩衝.
-//     == NULL : 表示由內部配置紀錄 key 的緩衝.
-//     != NULL : 表示由外部指定紀錄 key 的緩衝.
 // count_buf (O) :
 //   儲存筆數的緩衝.
 // return :
@@ -7434,7 +7470,7 @@ int mcm_config_get_all_key_by_path(
     }
 
     fret = mcm_config_get_all_key_by_info(this_session, self_model_group, parent_store,
-                                          count_buf, key_buf);
+                                          key_buf, count_buf);
     if(fret < MCM_RCODE_PASS)
     {
         MCM_ECTMSG("call mcm_config_get_all_key_by_info() fail");
@@ -7455,12 +7491,12 @@ int mcm_config_get_all_key_by_path(
 //     MCM_DACCESS_SYS  : 已存在的.
 //     MCM_DACCESS_NEW  : 新設定的.
 //     MCM_DACCESS_AUTO : 優先取新設定的資料, 沒有才找已存在的資料.
-// count_buf (O) :
-//   儲存筆數的緩衝.
 // data_buf (O) :
 //   紀錄資料數值的緩衝.
 //     == NULL : 表示由內部配置紀錄資料數值的緩衝.
 //     != NULL : 表示由外部指定紀錄資料數值的緩衝.
+// count_buf (O) :
+//   儲存筆數的緩衝.
 // return :
 //   >= MCM_RCODE_PASS : 成功.
 //   <  MCM_RCODE_PASS : 錯誤.
@@ -7469,8 +7505,8 @@ int mcm_config_get_all_entry_by_info(
     struct mcm_config_model_group_t *this_model_group,
     struct mcm_config_store_t *parent_store,
     MCM_DTYPE_FLAG_TD data_access,
-    MCM_DTYPE_EK_TD *count_buf,
-    void **data_buf)
+    void **data_buf,
+    MCM_DTYPE_EK_TD *count_buf)
 {
     int fret;
     struct mcm_config_store_t **store_head_in_parent = NULL, *list_store, *each_store;
@@ -7587,12 +7623,12 @@ FREE_01:
 //     MCM_DACCESS_SYS  : 已存在的.
 //     MCM_DACCESS_NEW  : 新設定的.
 //     MCM_DACCESS_AUTO : 優先取新設定的資料, 沒有才找已存在的資料.
-// count_buf (O) :
-//   儲存筆數的緩衝.
 // data_buf (O) :
 //   紀錄資料數值的緩衝.
 //     == NULL : 表示由內部配置紀錄資料數值的緩衝.
 //     != NULL : 表示由外部指定紀錄資料數值的緩衝.
+// count_buf (O) :
+//   儲存筆數的緩衝.
 // return :
 //   >= MCM_RCODE_PASS : 成功.
 //   <  MCM_RCODE_PASS : 錯誤.
@@ -7600,8 +7636,8 @@ int mcm_config_get_all_entry_by_path(
     struct mcm_service_session_t *this_session,
     char *mix_path,
     MCM_DTYPE_FLAG_TD data_access,
-    MCM_DTYPE_EK_TD *count_buf,
-    void **data_buf)
+    void **data_buf,
+    MCM_DTYPE_EK_TD *count_buf)
 {
     int fret;
     struct mcm_config_model_group_t *self_model_group;
@@ -7629,7 +7665,7 @@ int mcm_config_get_all_entry_by_path(
     }
 
     fret = mcm_config_get_all_entry_by_info(this_session, self_model_group, parent_store,
-                                            data_access, count_buf, data_buf);
+                                            data_access, data_buf, count_buf);
     if(fret < MCM_RCODE_PASS)
     {
         MCM_ECTMSG("call mcm_config_get_all_entry_by_info() fail");

@@ -1284,9 +1284,9 @@ void mcm_parse_get_all_key(
 int mcm_build_get_all_key(
     struct mcm_service_session_t *this_session,
     MCM_DTYPE_LIST_TD rep_code,
-    MCM_DTYPE_EK_TD rep_count,
     void *rep_data_con,
-    MCM_DTYPE_USIZE_TD rep_data_len)
+    MCM_DTYPE_USIZE_TD rep_data_len,
+    MCM_DTYPE_EK_TD rep_count)
 {
     int fret;
     void *tmp_offset;
@@ -1382,19 +1382,19 @@ int mcm_req_get_all_key(
         }
     }
 
-    fret = mcm_config_get_all_key_by_info(this_session, self_model_group, parent_store,
-                                          &self_count,
-                                          (MCM_DTYPE_EK_TD **) &this_session->cache_buf);
+    fret = mcm_config_get_all_key_local(this_session, self_model_group, parent_store,
+                                        0, (MCM_DTYPE_EK_TD *) this_session->cache_buf,
+                                        NULL, NULL);
     if(fret < MCM_RCODE_PASS)
     {
-        MCM_ECTMSG("call mcm_config_get_all_key_by_info() fail");
+        MCM_ECTMSG("call mcm_config_get_all_key_local() fail");
         goto FREE_01;
     }
 
 FREE_01:
     cret = mcm_build_get_all_key(this_session, fret,
-                                 fret < MCM_RCODE_PASS ? 0 : self_count, this_session->cache_buf,
-                                 fret < MCM_RCODE_PASS ? 0 : self_size);
+                                 this_session->cache_buf, fret < MCM_RCODE_PASS ? 0 : self_size,
+                                 fret < MCM_RCODE_PASS ? 0 : self_count);
     return fret < MCM_RCODE_PASS ? fret : cret;
 }
 
@@ -1418,9 +1418,9 @@ void mcm_parse_get_all_entry(
 int mcm_build_get_all_entry(
     struct mcm_service_session_t *this_session,
     MCM_DTYPE_LIST_TD rep_code,
-    MCM_DTYPE_EK_TD rep_count,
     void *rep_data_con,
-    MCM_DTYPE_USIZE_TD rep_data_len)
+    MCM_DTYPE_USIZE_TD rep_data_len,
+    MCM_DTYPE_EK_TD rep_count)
 {
     int fret;
     void *tmp_offset;
@@ -1517,8 +1517,8 @@ int mcm_req_get_all_entry(
     }
 
     fret = mcm_config_get_all_entry_by_info(this_session, self_model_group, parent_store,
-                                            MCM_DACCESS_AUTO, &self_count,
-                                            &this_session->cache_buf);
+                                            MCM_DACCESS_AUTO, &this_session->cache_buf,
+                                            &self_count);
     if(fret < MCM_RCODE_PASS)
     {
         MCM_ECTMSG("call mcm_config_get_all_entry_by_info() fail");
@@ -1527,8 +1527,8 @@ int mcm_req_get_all_entry(
 
 FREE_01:
     cret = mcm_build_get_all_entry(this_session, fret,
-                                   fret < MCM_RCODE_PASS ? 0 : self_count, this_session->cache_buf,
-                                   fret < MCM_RCODE_PASS ? 0 : self_size);
+                                   this_session->cache_buf, fret < MCM_RCODE_PASS ? 0 : self_size,
+                                   fret < MCM_RCODE_PASS ? 0 : self_count);
     return fret < MCM_RCODE_PASS ? fret : cret;
 }
 
