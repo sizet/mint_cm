@@ -1523,11 +1523,12 @@ int parse_tag(
         read_len--;
         read_con[read_len] = '\0';
     }
-    if(read_con[read_len - 1] == '\r')
-    {
-        read_len--;
-        read_con[read_len] = '\0';
-    }
+    if(read_len > 0)
+        if(read_con[read_len - 1] == '\r')
+        {
+            read_len--;
+            read_con[read_len] = '\0';
+        }
 
     // 移除前端的 " " 和 "\t".
     for(ridx = 0; ridx < read_len; ridx++)
