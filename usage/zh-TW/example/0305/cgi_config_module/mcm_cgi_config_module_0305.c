@@ -27,8 +27,8 @@ int find_5g_vap(
 
 
 #if MCM_CCMEMODE | MCM_CCMDMODE
-    dbg_tty_fd = open(MCM_DBG_DEV_TTY, O_WRONLY);
-    if(dbg_tty_fd == -1)
+    dbg_console_fd = open(MCM_DBG_CONSOLE, O_WRONLY);
+    if(dbg_console_fd == -1)
         return MCM_RCODE_CGI_CONFIG_INTERNAL_ERROR;
 #endif
 
@@ -78,7 +78,7 @@ FREE_02:
     free(vap_v);
 FREE_01:
 #if MCM_CCMEMODE | MCM_CCMDMODE
-    close(dbg_tty_fd);
+    close(dbg_console_fd);
 #endif
     return fret;
 }
@@ -97,8 +97,8 @@ int find_hidden_vap(
 
 
 #if MCM_CCMEMODE | MCM_CCMDMODE
-    dbg_tty_fd = open(MCM_DBG_DEV_TTY, O_WRONLY);
-    if(dbg_tty_fd == -1)
+    dbg_console_fd = open(MCM_DBG_CONSOLE, O_WRONLY);
+    if(dbg_console_fd == -1)
         return MCM_RCODE_CGI_CONFIG_INTERNAL_ERROR;
 #endif
 
@@ -155,7 +155,7 @@ FREE_02:
     free(vap_key);
 FREE_01:
 #if MCM_CCMEMODE | MCM_CCMDMODE
-    close(dbg_tty_fd);
+    close(dbg_console_fd);
 #endif
     return fret;
 }
@@ -175,8 +175,8 @@ int find_limit_by_priority(
 
 
 #if MCM_CCMEMODE | MCM_CCMDMODE
-    dbg_tty_fd = open(MCM_DBG_DEV_TTY, O_WRONLY);
-    if(dbg_tty_fd == -1)
+    dbg_console_fd = open(MCM_DBG_CONSOLE, O_WRONLY);
+    if(dbg_console_fd == -1)
         return MCM_RCODE_CGI_CONFIG_INTERNAL_ERROR;
 #endif
 
@@ -250,7 +250,7 @@ FREE_02:
     free(limit_v);
 FREE_01:
 #if MCM_CCMEMODE | MCM_CCMDMODE
-    close(dbg_tty_fd);
+    close(dbg_console_fd);
 #endif
     return fret;
 }
@@ -530,8 +530,8 @@ int find_user_by_gender(
 
 
 #if MCM_CCMEMODE | MCM_CCMDMODE
-    dbg_tty_fd = open(MCM_DBG_DEV_TTY, O_WRONLY);
-    if(dbg_tty_fd == -1)
+    dbg_console_fd = open(MCM_DBG_CONSOLE, O_WRONLY);
+    if(dbg_console_fd == -1)
         return MCM_RCODE_CGI_CONFIG_INTERNAL_ERROR;
 #endif
 
@@ -598,7 +598,7 @@ int find_user_by_gender(
 
 FREE_01:
 #if MCM_CCMEMODE | MCM_CCMDMODE
-    close(dbg_tty_fd);
+    close(dbg_console_fd);
 #endif
     return fret;
 }
@@ -618,8 +618,8 @@ int find_2g_or_5g_vap(
 
 
 #if MCM_CCMEMODE | MCM_CCMDMODE
-    dbg_tty_fd = open(MCM_DBG_DEV_TTY, O_WRONLY);
-    if(dbg_tty_fd == -1)
+    dbg_console_fd = open(MCM_DBG_CONSOLE, O_WRONLY);
+    if(dbg_console_fd == -1)
         return MCM_RCODE_CGI_CONFIG_INTERNAL_ERROR;
 #endif
 
@@ -685,7 +685,7 @@ FREE_02:
     free(vap_v);
 FREE_01:
 #if MCM_CCMEMODE | MCM_CCMDMODE
-    close(dbg_tty_fd);
+    close(dbg_console_fd);
 #endif
     return fret;
 }
@@ -705,8 +705,8 @@ int find_station_by_rule(
 
 
 #if MCM_CCMEMODE | MCM_CCMDMODE
-    dbg_tty_fd = open(MCM_DBG_DEV_TTY, O_WRONLY);
-    if(dbg_tty_fd == -1)
+    dbg_console_fd = open(MCM_DBG_CONSOLE, O_WRONLY);
+    if(dbg_console_fd == -1)
         return MCM_RCODE_CGI_CONFIG_INTERNAL_ERROR;
 #endif
 
@@ -792,7 +792,7 @@ FREE_02:
     free(station_v);
 FREE_01:
 #if MCM_CCMEMODE | MCM_CCMDMODE
-    close(dbg_tty_fd);
+    close(dbg_console_fd);
 #endif
     return fret;
 }

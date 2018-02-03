@@ -41,13 +41,13 @@ Some rights reserved. See README.
     </font>
     <br><br>
 
-    CGI 的標準輸出會被重定向, 顯示錯誤訊息或除錯訊息需要直接寫入 tty 設備, 需要指定 tty 設備 :<br>
+    CGI 的標準輸出會被重定向, 顯示錯誤訊息或除錯訊息需要直接寫入 console 設備, 需要指定 console 設備 :<br>
     <font class="css_font_b1">mint_cm/mcm_lib/mcm_lheader/mcm_debug.h</font><br>
     <div class="css_div_block">
-      <font class="css_font_g1">#define MCM_DBG_DEV_TTY "/dev/tty"</font><br>
-      tty 設備的路徑, 大部分是 tty 或 ttyS0
+      <font class="css_font_g1">#define MCM_DBG_CONSOLE "/dev/tty"</font><br>
+      console 設備的路徑, 大部分是 /dev/tty 或 /dev/ttyS0 或 /dev/console
       <br><br>
-      <font class="css_font_r1">如果不支援 tty 設備, 必須把顯示訊息關閉, 將以下的值設 0 關閉 :</font>
+      <font class="css_font_r1">如果不支援 console 設備, 必須把顯示訊息關閉, 將以下的值設 0 關閉 :</font>
       <br><br>
       <font class="css_font_g1">#define MCM_CGIEMODE 1</font><br>
       是否顯示錯誤訊息 (mcm_cgi_config.c 和 mcm_cgi_upload.c 部分)<br><br>

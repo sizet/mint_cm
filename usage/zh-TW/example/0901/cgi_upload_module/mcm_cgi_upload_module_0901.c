@@ -23,8 +23,8 @@ void upload_handle_01(
 
 
 #if MCM_CUMEMODE | MCM_CUMDMODE
-    dbg_tty_fd = open(MCM_DBG_DEV_TTY, O_WRONLY);
-    if(dbg_tty_fd == -1)
+    dbg_console_fd = open(MCM_DBG_CONSOLE, O_WRONLY);
+    if(dbg_console_fd == -1)
         return;
 #endif
 
@@ -68,7 +68,7 @@ void upload_handle_01(
     printf("$(\"#show_box\").html(tmp_html);");
 
 #if MCM_CUMEMODE | MCM_CUMDMODE
-    close(dbg_tty_fd);
+    close(dbg_console_fd);
 #endif
     return;
 }
@@ -93,8 +93,8 @@ void upload_handle_02(
 
 
 #if MCM_CUMEMODE | MCM_CUMDMODE
-    dbg_tty_fd = open(MCM_DBG_DEV_TTY, O_WRONLY);
-    if(dbg_tty_fd == -1)
+    dbg_console_fd = open(MCM_DBG_CONSOLE, O_WRONLY);
+    if(dbg_console_fd == -1)
         goto FREE_01;
 #endif
 
@@ -209,7 +209,7 @@ FREE_02:
     printf("%s", msg_buf);
     printf("$(\"#show_box\").html(tmp_html);");
 #if MCM_CUMEMODE | MCM_CUMDMODE
-    close(dbg_tty_fd);
+    close(dbg_console_fd);
 FREE_01:
 #endif
     return;

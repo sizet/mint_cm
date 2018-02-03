@@ -26,8 +26,8 @@ int find_match_rule_station(
 
 
 #if MCM_CCMEMODE | MCM_CCMDMODE
-    dbg_tty_fd = open(MCM_DBG_DEV_TTY, O_WRONLY);
-    if(dbg_tty_fd == -1)
+    dbg_console_fd = open(MCM_DBG_CONSOLE, O_WRONLY);
+    if(dbg_console_fd == -1)
         return MCM_RCODE_CGI_CONFIG_INTERNAL_ERROR;
 #endif
 
@@ -54,7 +54,7 @@ int find_match_rule_station(
 
 FREE_01:
 #if MCM_CCMEMODE | MCM_CCMDMODE
-    close(dbg_tty_fd);
+    close(dbg_console_fd);
 #endif
     return fret;
 }

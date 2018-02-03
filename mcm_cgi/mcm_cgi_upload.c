@@ -7,15 +7,13 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include <unistd.h>
 #include "../mcm_lib/mcm_lheader/mcm_type.h"
 #include "../mcm_lib/mcm_lheader/mcm_return.h"
 #include "mcm_cgi_common_extern.h"
 
 #if MCM_CGIEMODE | MCM_CGIECTMODE | MCM_CUDMODE
     #include <fcntl.h>
-    #include <stdio.h>
-    #include <string.h>
-    #include <unistd.h>
     #include <sys/stat.h>
 #endif
 
@@ -23,27 +21,27 @@
 
 
 #if MCM_CGIEMODE | MCM_CGIECTMODE | MCM_CUDMODE
-int dbg_tty_fd;
+int dbg_console_fd;
 char dbg_msg_buf[MCM_DBG_BUFFER_SIZE];
 #endif
 
 #if MCM_CGIEMODE
     #define MCM_CEMSG(msg_fmt, msg_args...) \
-        MCM_CGI_TTY_MSG(dbg_tty_fd, dbg_msg_buf, msg_fmt, ##msg_args)
+        MCM_CGI_CONSOLE_MSG(dbg_console_fd, dbg_msg_buf, msg_fmt, ##msg_args)
 #else
     #define MCM_CEMSG(msg_fmt, msg_args...)
 #endif
 
 #if MCM_CGIECTMODE
     #define MCM_CECTMSG(msg_fmt, msg_args...) \
-        MCM_CGI_TTY_MSG(dbg_tty_fd, dbg_msg_buf, msg_fmt, ##msg_args)
+        MCM_CGI_CONSOLE_MSG(dbg_console_fd, dbg_msg_buf, msg_fmt, ##msg_args)
 #else
     #define MCM_CECTMSG(msg_fmt, msg_args...)
 #endif
 
 #if MCM_CUDMODE
     #define MCM_CUDMSG(msg_fmt, msg_args...) \
-        MCM_CGI_TTY_MSG(dbg_tty_fd, dbg_msg_buf, msg_fmt, ##msg_args)
+        MCM_CGI_CONSOLE_MSG(dbg_console_fd, dbg_msg_buf, msg_fmt, ##msg_args)
 #else
     #define MCM_CUDMSG(msg_fmt, msg_args...)
 #endif
@@ -742,11 +740,11 @@ int main(
 
 
 #if MCM_CGIEMODE | MCM_CGIECTMODE | MCM_CUDMODE
-    dbg_tty_fd = open(MCM_DBG_DEV_TTY, O_WRONLY);
-    if(dbg_tty_fd == -1)
+    dbg_console_fd = open(MCM_DBG_CONSOLE, O_WRONLY);
+    if(dbg_console_fd == -1)
     {
         MCM_CGI_AEMSG(MCM_RCODE_CGI_UPLOAD_INTERNAL_ERROR, 0,
-                      "call open() fail [%s]\\n[%s]", strerror(errno), MCM_DBG_DEV_TTY);
+                      "call open() fail [%s]\\n[%s]", strerror(errno), MCM_DBG_CONSOLE);
         goto FREE_01;
     }
 #endif
@@ -845,8 +843,7 @@ int main(
     free(post_buf);
 FREE_01:
 #if MCM_CGIEMODE | MCM_CGIECTMODE | MCM_CUDMODE
-    if(dbg_tty_fd != -1)
-        close(dbg_tty_fd);
+    close(dbg_console_fd);
 #endif
     return MCM_RCODE_PASS;
 }

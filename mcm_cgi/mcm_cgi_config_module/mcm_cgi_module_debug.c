@@ -8,6 +8,6 @@
 
 
 #if MCM_CCMEMODE | MCM_CCMDMODE
-int dbg_tty_fd;
+int dbg_console_fd;
 char dbg_msg_buf[MCM_DBG_BUFFER_SIZE];
 #endif

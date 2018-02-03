@@ -440,24 +440,24 @@ function upload_file()
     <br><br>
 
     其他 : 在 console 顯示除錯訊息.<br>
-    在 CGI 使用 printf() 會被網頁伺服器導向輸出給瀏覽器, 訊息要寫入 tty 設備才能顯示.
+    在 CGI 使用 printf() 會被網頁伺服器導向輸出給瀏覽器, 訊息要寫入 console 設備才能顯示.
     <br><br>
 
-    在處理函式的開頭加入打開 tty 設備 :<br>
+    在處理函式的開頭加入打開 console 設備 :<br>
     <div class="css_div_block">
       <font class="css_font_g1">
       #if MCM_CUMEMODE | MCM_CUMDMODE<br>
-      &nbsp;&nbsp;&nbsp;&nbsp;dbg_tty_fd = open(MCM_DBG_DEV_TTY, O_WRONLY);<br>
-      &nbsp;&nbsp;&nbsp;&nbsp;if(dbg_tty_fd == -1)<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;dbg_console_fd = open(MCM_DBG_CONSOLE, O_WRONLY);<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;if(dbg_console_fd == -1)<br>
       &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;return;<br>
       #endif
       </font>
     </div>
-    在離開處理函式時加入關閉 tty 設備 :<br>
+    在離開處理函式時加入關閉 console 設備 :<br>
     <div class="css_div_block">
       <font class="css_font_g1">
       #if MCM_CUMEMODE | MCM_CUMDMODE<br>
-      &nbsp;&nbsp;&nbsp;&nbsp;close(dbg_tty_fd);<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;close(dbg_console_fd);<br>
       #endif
       </font>
     </div>
@@ -473,12 +473,12 @@ function upload_file()
     開關的值的定義在 <font class="css_font_b1">mint_cm/mcm_lib/mcm_lheader/mcm_debug.h</font>.
     <br><br>
 
-    <font class="css_font_b1">[MCM_DBG_DEV_TTY]</font><br>
+    <font class="css_font_b1">[MCM_DBG_CONSOLE]</font><br>
     定義, console 設備的路徑.<br>
     路徑的值定義在 <font class="css_font_b1">mint_cm/mcm_lib/mcm_lheader/mcm_debug.h</font>.
     <br><br>
 
-    <font class="css_font_b1">[int dbg_tty_fd]</font><br>
+    <font class="css_font_b1">[int dbg_console_fd]</font><br>
     變數, 紀錄開啟的設備的檔案編號.<br>
     變數的宣告定義在 <font class="css_font_b1">mcm_cgi_module_debug.h</font>.
     <br><br>
@@ -516,8 +516,8 @@ void upload_handle(
     struct part_info_t *tmp_part;
 
 #if MCM_CUMEMODE | MCM_CUMDMODE
-    dbg_tty_fd = open(MCM_DBG_DEV_TTY, O_WRONLY);
-    if(dbg_tty_fd == -1)
+    dbg_console_fd = open(MCM_DBG_CONSOLE, O_WRONLY);
+    if(dbg_console_fd == -1)
         return;
 #endif
 
@@ -541,7 +541,7 @@ void upload_handle(
     printf(");\n");
 
 #if MCM_CUMEMODE | MCM_CUMDMODE
-    close(dbg_tty_fd);
+    close(dbg_console_fd);
 #endif
     return;
 }

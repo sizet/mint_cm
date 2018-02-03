@@ -148,7 +148,7 @@
 #define MCM_CUMDMODE 0
 
 
-#define MCM_DBG_DEV_TTY "/dev/tty"
+#define MCM_DBG_CONSOLE "/dev/tty"
 
 #define MCM_DBG_BUFFER_SIZE 1024
 
