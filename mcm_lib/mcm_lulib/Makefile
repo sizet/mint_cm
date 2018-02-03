@@ -2,8 +2,8 @@
 # This file is part of the MintCM.
 # Some rights reserved. See README.
 
-CC_FLAGS = -Wall -Wno-strict-aliasing -Wunused-result -fPIC -O2
-LD_FLAGS = -fPIC -shared
+CC_FLAGS = $(CFLAGS) -fPIC -Wall -Wno-strict-aliasing -Wunused-result -O2
+LD_FLAGS = $(LDFLAGS) -fPIC -shared
 AR_FLAGS = -rs
 
 INCLUDE_PATH =

@@ -2,8 +2,8 @@
 # This file is part of the MintCM.
 # Some rights reserved. See README.
 
-CC_FLAGS = -Wall -Wno-unused-result -O2 -fPIC
-LD_FLAGS = -fPIC -shared
+CC_FLAGS = $(CFLAGS) -fPIC -Wall -Wno-unused-result -O2
+LD_FLAGS = $(LDFLAGS) -fPIC -shared
 
 INCLUDE_PATH =
 LIBRARY_PATH =

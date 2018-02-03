@@ -27,11 +27,11 @@ endif
 BINDIR = /usr/local/sbin
 MANDIR = /usr/local/man
 
-#CC     = cc
-CDEFS   = $(SSL_DEFS) $(SSL_INC) $(MCM_DEFINE)
-CFLAGS  = -O $(CDEFS) -Wall -Wpointer-arith -Wshadow -Wcast-qual -Wcast-align -Wstrict-prototypes -Wmissing-prototypes -Wmissing-declarations -Wredundant-decls -Wno-long-long
-LDFLAGS = -s
-LDLIBS  = $(CRYPT_LIB) $(SSL_LIBS) $(SYSV_LIBS)
+#CC      = cc
+CDEFS    = $(SSL_DEFS) $(SSL_INC) $(MCM_DEFINE)
+CC_FLAGS = $(CDEFS) $(CFLAGS) -Wall -Wpointer-arith -Wshadow -Wcast-qual -Wcast-align -Wstrict-prototypes -Wmissing-prototypes -Wmissing-declarations -Wredundant-decls -Wno-long-long -O
+LD_FLAGS = $(LDFLAGS) -s
+LDLIBS   = $(CRYPT_LIB) $(SSL_LIBS) $(SYSV_LIBS)
 
 
 binary : mini_httpd htpasswd

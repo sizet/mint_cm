@@ -49,6 +49,15 @@ binary_profile :
 	$(MAKE) -C $(MCM_BUILD_PATH) binary
 	$(MAKE) -C $(MCM_BUILD_PATH) profile
 
+binary_lulib :
+	$(MAKE) -C $(MCM_LULIB_PATH) binary
+
+binary_lklib :
+	cd $(MCM_LKLIB_PATH); $(MAKE) binary
+
+binary_cgi :
+	$(MAKE) -C $(MCM_CGI_PATH) binary
+
 binary_library :
 	$(MAKE) -C $(MCM_LULIB_PATH) binary
 	cd $(MCM_LKLIB_PATH); $(MAKE) binary
@@ -62,6 +71,16 @@ binary_command :
 
 binary_httpd :
 	$(MAKE) -C $(HTTP_SERVER_PATH) binary
+
+install_lulib :
+	$(MAKE) -C $(MCM_LULIB_PATH) install
+
+install_lklib :
+	cd $(MCM_LKLIB_PATH); $(MAKE) install
+
+install_cgi :
+	$(MAKE) -C $(MCM_JSLIB_PATH) install_common
+	$(MAKE) -C $(MCM_CGI_PATH) install
 
 install_library :
 	$(MAKE) -C $(MCM_LULIB_PATH) install

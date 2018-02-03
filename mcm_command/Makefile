@@ -2,8 +2,8 @@
 # This file is part of the MintCM.
 # Some rights reserved. See README.
 
-CC_FLAGS = -Wall -O2
-LD_FLAGS =
+CC_FLAGS = $(CFLAGS) -Wall -O2
+LD_FLAGS = $(LDFLAGS)
 
 INCLUDE_PATH =
 LIBRARY_PATH = -L../mcm_lib/mcm_lulib

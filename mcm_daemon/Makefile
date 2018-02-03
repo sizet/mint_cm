@@ -2,8 +2,8 @@
 # This file is part of the MintCM.
 # Some rights reserved. See README.
 
-CC_FLAGS = $(CC_MULTIPLE_MODEL_SUFFIX) -Wall -Wno-strict-aliasing -O2
-LD_FLAGS = -Wl,--export-dynamic
+CC_FLAGS = $(CC_MULTIPLE_MODEL_SUFFIX) $(CFLAGS) -Wall -Wno-strict-aliasing -O2
+LD_FLAGS = $(LDFLAGS) -Wl,--export-dynamic
 
 INCLUDE_PATH =
 LIBRARY_PATH =
