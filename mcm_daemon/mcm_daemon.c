@@ -222,8 +222,8 @@ int main(
     int argc,
     char **argv)
 {
-    int fret = MCM_RCODE_DAEMON_INTERNAL_ERROR, cret, sig_code;
-    char opt_ch, *server_socket_path = NULL;
+    int fret = MCM_RCODE_DAEMON_INTERNAL_ERROR, cret, opt_ch, sig_code;
+    char *server_socket_path = NULL;
     MCM_DTYPE_USIZE_TD max_session_count = 0;
     char *module_path = NULL, *model_profile_path = NULL;
     MCM_DTYPE_BOOL_TD assign_max_session = 0, error_exit = 0, main_exit = 0;
@@ -261,6 +261,7 @@ int main(
                 mcm_daemon_pid_path = optarg;
                 break;
             default:
+                MCM_EMSG("unknown argument [%d]", opt_ch);
                 goto FREE_HELP;
         }
 

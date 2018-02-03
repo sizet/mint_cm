@@ -766,9 +766,9 @@ int main(
     int argc,
     char **argv)
 {
-    int fret = MCM_RCODE_COMMAND_INTERNAL_ERROR;
+    int fret = MCM_RCODE_COMMAND_INTERNAL_ERROR, opt_ch;
     struct mcm_lulib_lib_t self_lulib;
-    char opt_ch, *arg_socket_path = NULL, *arg_permission = NULL, *arg_stack_size = NULL;
+    char *arg_socket_path = NULL, *arg_permission = NULL, *arg_stack_size = NULL;
     MCM_DTYPE_USIZE_TD ccnt, cidx, pidx;
     struct mcm_command_t *command_list, *each_command;
 
@@ -786,13 +786,20 @@ int main(
                 arg_stack_size = optarg;
                 break;
             default:
+                MCM_EMSG("unknown argument [%d]", opt_ch);
                 goto FREE_HELP;
         }
 
     if(arg_socket_path == NULL)
+    {
+        MCM_EMSG("miss socket-path");
         goto FREE_HELP;
+    }
     if(arg_permission == NULL)
+    {
+        MCM_EMSG("miss session-permission");
         goto FREE_HELP;
+    }
 
     // 計算指令的數目和在參數列表中的位置.
     ccnt = argc - optind;
@@ -872,7 +879,7 @@ FREE_HELP:
     printf("      get alone.\n");
     printf("    set.<full-path>=<data> :\n");
     printf("      set alone.\n");
-    printf("    add.<full-path> :\n");
+    printf("    add.<full-path>=<insert-path> :\n");
     printf("      add entry.\n");
     printf("    del.<full-path> :\n");
     printf("      delete entry.\n");
