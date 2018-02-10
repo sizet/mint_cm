@@ -3,7 +3,7 @@
 # Some rights reserved. See README.
 
 CC_FLAGS = $(CFLAGS) -fPIC -Wall -Wno-unused-result -O2
-LD_FLAGS = $(LDFLAGS) -fPIC -shared
+LD_FLAGS = $(LDFLAGS) -fPIC -shared  -Wl,--no-undefined
 
 INCLUDE_PATH =
 LIBRARY_PATH =

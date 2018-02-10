@@ -40,6 +40,9 @@ export MCM_RUN_ROOT_PATH = $(PWD)/run
 export MCM_RUN_WEB_PATH  = $(MCM_RUN_ROOT_PATH)/web
 export MCM_RUN_CGI_PATH  = $(MCM_RUN_WEB_PATH)/cgi
 
+export USE_STATIC_MCM_LIB  = YES
+export USE_STATIC_MAAM_LIB = YES
+
 
 all : binary_profile binary_library binary_httpd binary_daemon binary_command \
       install_library install_httpd install_profile install_daemon install_command

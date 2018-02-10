@@ -2,15 +2,14 @@
 # This file is part of the MintCM.
 # Some rights reserved. See README.
 
-CC_FLAGS = -Wall -Wno-unused-result -O2 -fPIC
-LD_FLAGS = -fPIC -shared
+CC_FLAGS = $(CFLAGS) -fPIC -Wall -Wno-unused-result -O2
+LD_FLAGS = $(LDFLAGS) -fPIC -shared -Wl,--no-undefined
 
 INCLUDE_PATH =
 LIBRARY_PATH = -L../../mcm_lib/mcm_lulib
 
 LIBRARY_FILE =
 
-USE_STATIC_MCM_LIB = YES
 ifeq (${USE_STATIC_MCM_LIB}, YES)
 LIBRARY_FILE += ../../mcm_lib/mcm_lulib/mcm_lulib_api.a
 else

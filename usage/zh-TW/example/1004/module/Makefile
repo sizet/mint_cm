@@ -2,8 +2,8 @@
 # This file is part of the MintCM.
 # Some rights reserved. See README.
 
-CC_FLAGS = -Wall -O2 -fPIC
-LD_FLAGS = -fPIC -shared
+CC_FLAGS = $(CFLAGS) -fPIC -Wall -O2
+LD_FLAGS = $(LDFLAGS) -fPIC -shared
 
 MAAM_PATH       = $(PWD)/http_server/mini_httpd/last
 MAAM_LIB_PATH   = $(MAAM_PATH)/mint_aam/maam_lib
@@ -17,7 +17,6 @@ LIBRARY_FILE =
 INCLUDE_PATH += -I$(MAAM_LIB_PATH)
 LIBRARY_PATH += -L$(MAAM_LULIB_PATH)
 
-USE_STATIC_MAAM_LIB = YES
 ifeq (${USE_STATIC_MAAM_LIB}, YES)
 LIBRARY_FILE += $(MAAM_LULIB_PATH)/maam_lulib_api.a
 else

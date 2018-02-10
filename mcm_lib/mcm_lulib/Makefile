@@ -3,7 +3,7 @@
 # Some rights reserved. See README.
 
 CC_FLAGS = $(CFLAGS) -fPIC -Wall -Wno-strict-aliasing -Wunused-result -O2
-LD_FLAGS = $(LDFLAGS) -fPIC -shared
+LD_FLAGS = $(LDFLAGS) -fPIC -shared -Wl,--no-undefined
 AR_FLAGS = -rs
 
 INCLUDE_PATH =

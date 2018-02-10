@@ -10,7 +10,6 @@ LIBRARY_PATH = -L../mcm_lib/mcm_lulib
 
 CGI_CONFIG_LIBRARY_FILE = -ldl
 
-USE_STATIC_MCM_LIB = YES
 ifeq (${USE_STATIC_MCM_LIB}, YES)
 CGI_CONFIG_LIBRARY_FILE += ../mcm_lib/mcm_lulib/mcm_lulib_api.a
 else

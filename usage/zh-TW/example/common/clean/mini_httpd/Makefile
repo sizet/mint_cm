@@ -36,8 +36,8 @@ ifeq (${MINT_ACCOUNT_AUTH_MINIHTTPD}, YES)
     MAAM_BUILDIN_INCLUDE_PATH =
     MAAM_BUILDIN_LIBRARY_FILE =
 
-    MAAM_LULIB_CC_FLAGS = -Wall -fPIC -O2 $(MAAM_DEFINE)
-    MAAM_LULIB_LD_FLAGS = -fPIC -shared
+    MAAM_LULIB_CC_FLAGS = $(MAAM_DEFINE) $(CFLAGS) -fPIC -Wall -O2
+    MAAM_LULIB_LD_FLAGS = $(LDFLAGS) -fPIC -shared -Wl,--no-undefined
     MAAM_LULIB_AR_FLAGS = -rs
 
     MAAM_SHARE_DEPEND_FILE = $(MAAM_BUILDIN_PATH)/maam_common.h
@@ -67,8 +67,8 @@ ifeq (${MINT_ACCOUNT_AUTH_MINIHTTPD}, YES)
 endif
 
 MH_CC_DEFS  = $(MH_SSL_DEFS) $(MH_SSL_INC) $(MCM_DEFINE) $(MAAM_DEFINE) $(MAAM_BUILDIN_INCLUDE_PATH)
-MH_CC_FLAGS = -O2 $(MH_CC_DEFS) -Wall -Wpointer-arith -Wshadow -Wcast-qual -Wcast-align -Wstrict-prototypes -Wmissing-prototypes -Wmissing-declarations -Wredundant-decls -Wno-long-long
-MH_LD_FLAGS = -s
+MH_CC_FLAGS = $(MH_CC_DEFS) $(CFLAGS) -Wall -Wpointer-arith -Wshadow -Wcast-qual -Wcast-align -Wstrict-prototypes -Wmissing-prototypes -Wmissing-declarations -Wredundant-decls -Wno-long-long -O2
+MH_LD_FLAGS = $(LDFLAGS) -s
 MH_LD_LIBS  = $(MH_CRYPT_LIB) $(MH_SSL_LIBS) $(MH_SYSV_LIBS) $(MAAM_BUILDIN_LIBRARY_FILE)
 
 

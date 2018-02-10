@@ -8,7 +8,6 @@ LD_FLAGS = $(LDFLAGS)
 INCLUDE_PATH =
 LIBRARY_PATH = -L../mcm_lib/mcm_lulib
 
-USE_STATIC_MCM_LIB = YES
 ifeq (${USE_STATIC_MCM_LIB}, YES)
 LIBRARY_FILE = ../mcm_lib/mcm_lulib/mcm_lulib_api.a
 else
