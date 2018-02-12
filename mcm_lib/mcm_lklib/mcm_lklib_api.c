@@ -128,42 +128,22 @@ int mcm_realloc_buf_lib(
 int mcm_send_req(
     struct mcm_lklib_lib_t *this_lklib)
 {
-    int fret, slen;
-    struct iovec sock_iov;
+    int slen;
     struct msghdr sock_msg;
-    mm_segment_t tmp_kfs;
+    struct kvec sock_iov;
 
 
-    memset(&sock_iov, 0, sizeof(struct iovec));
+    memset(&sock_msg, 0, sizeof(struct msghdr));
     sock_iov.iov_base = this_lklib->pkt_buf;
     sock_iov.iov_len = this_lklib->pkt_len;
-    memset(&sock_msg, 0, sizeof(struct msghdr));
-#if LINUX_VERSION_CODE < KERNEL_VERSION(3, 19, 0)
-    sock_msg.msg_iov = &sock_iov;
-    sock_msg.msg_iovlen = 1;
-#else
-    sock_msg.msg_iter.type = ITER_IOVEC;
-    sock_msg.msg_iter.count = sock_iov.iov_len;
-    sock_msg.msg_iter.iov = &sock_iov;
-    sock_msg.msg_iter.nr_segs = 1;
-#endif
-
-    fret = MCM_RCODE_PASS;
-    tmp_kfs = get_fs();
-    set_fs(KERNEL_DS);
-#if LINUX_VERSION_CODE < KERNEL_VERSION(4, 1, 0)
-    slen = sock_sendmsg(this_lklib->sock_fp, &sock_msg, sock_iov.iov_len);
-#else
-    slen = sock_sendmsg(this_lklib->sock_fp, &sock_msg);
-#endif
+    slen = kernel_sendmsg(this_lklib->sock_fp, &sock_msg, &sock_iov, 1, sock_iov.iov_len);
     if(slen < 0)
     {
         MCM_KEMSG("call sock_sendmsg() fail [%d]", slen);
-        fret = MCM_RCODE_LKLIB_SOCKET_ERROR;
+        return MCM_RCODE_LKLIB_SOCKET_ERROR;
     }
-    set_fs(tmp_kfs);
 
-    return fret;
+    return MCM_RCODE_PASS;
 }
 
 // 接收封包.
@@ -179,9 +159,8 @@ int mcm_recv_rep(
     void *bloc;
     MCM_DTYPE_USIZE_TD bsize;
     MCM_DTYPE_USIZE_TD tlen, clen;
-    struct iovec sock_iov;
     struct msghdr sock_msg;
-    mm_segment_t tmp_kfs;
+    struct kvec sock_iov;
 
 
     bloc = this_lklib->pkt_buf;
@@ -189,32 +168,15 @@ int mcm_recv_rep(
     tlen = clen = 0;
     while(1)
     {
-        memset(&sock_iov, 0, sizeof(struct iovec));
+        memset(&sock_msg, 0, sizeof(struct msghdr));
         sock_iov.iov_base = bloc;
         sock_iov.iov_len = bsize;
-        memset(&sock_msg, 0, sizeof(struct msghdr));
-#if LINUX_VERSION_CODE < KERNEL_VERSION(3, 19, 0)
-        sock_msg.msg_iov = &sock_iov;
-        sock_msg.msg_iovlen = 1;
-#else
-        sock_msg.msg_iter.type = ITER_IOVEC;
-        sock_msg.msg_iter.count = sock_iov.iov_len;
-        sock_msg.msg_iter.iov = &sock_iov;
-        sock_msg.msg_iter.nr_segs = 1;
-#endif
-
-        fret = MCM_RCODE_PASS;
-        tmp_kfs = get_fs();
-        set_fs(KERNEL_DS);
-        rlen = sock_recvmsg(this_lklib->sock_fp, &sock_msg, sock_iov.iov_len, 0);
+        rlen = kernel_recvmsg(this_lklib->sock_fp, &sock_msg, &sock_iov, 1, sock_iov.iov_len, 0);
         if(rlen < 0)
         {
-            MCM_KEMSG("call sock_recvmsg() fail");
-            fret = MCM_RCODE_LKLIB_SOCKET_ERROR;
+            MCM_KEMSG("call sock_recvmsg() fail [%d]", rlen);
+            return MCM_RCODE_LKLIB_SOCKET_ERROR;
         }
-        set_fs(tmp_kfs);
-        if(fret < MCM_RCODE_PASS)
-            return fret;
 
         if(tlen == 0)
         {
@@ -265,9 +227,8 @@ int mcm_lklib_init(
     struct sockaddr_un *sock_addr;
     size_t addr_len;
     struct mcm_connect_option_t connect_data;
-    struct iovec sock_iov;
     struct msghdr sock_msg;
-    mm_segment_t tmp_kfs;
+    struct kvec sock_iov;
     char notify_usable = 0;
 
 
@@ -316,68 +277,32 @@ int mcm_lklib_init(
                connect_data.call_from, MCM_DBG_SPERMISSION(connect_data.session_permission),
                connect_data.session_stack_size);
 
-    memset(&sock_iov, 0, sizeof(struct iovec));
+    memset(&sock_msg, 0, sizeof(struct msghdr));
     sock_iov.iov_base = &connect_data;
     sock_iov.iov_len = sizeof(struct mcm_connect_option_t);
-    memset(&sock_msg, 0, sizeof(struct msghdr));
-#if LINUX_VERSION_CODE < KERNEL_VERSION(3, 19, 0)
-    sock_msg.msg_iov = &sock_iov;
-    sock_msg.msg_iovlen = 1;
-#else
-    sock_msg.msg_iter.type = ITER_IOVEC;
-    sock_msg.msg_iter.count = sock_iov.iov_len;
-    sock_msg.msg_iter.iov = &sock_iov;
-    sock_msg.msg_iter.nr_segs = 1;
-#endif
-
-    fret = MCM_RCODE_PASS;
-    tmp_kfs = get_fs();
-    set_fs(KERNEL_DS);
-#if LINUX_VERSION_CODE < KERNEL_VERSION(4, 1, 0)
-    xlen = sock_sendmsg(this_lklib->sock_fp, &sock_msg, sock_iov.iov_len);
-#else
-    xlen = sock_sendmsg(this_lklib->sock_fp, &sock_msg);
-#endif
+    xlen = kernel_sendmsg(this_lklib->sock_fp, &sock_msg, &sock_iov, 1, sock_iov.iov_len);
     if(xlen < 0)
     {
         MCM_KEMSG("call sock_sendmsg() fail [%d]", xlen);
         fret = MCM_RCODE_LKLIB_SOCKET_ERROR;
-    }
-    set_fs(tmp_kfs);
-    if(fret < MCM_RCODE_PASS)
         goto FREE_04;
+    }
 
-    memset(&sock_iov, 0, sizeof(struct iovec));
+    memset(&sock_msg, 0, sizeof(struct msghdr));
     sock_iov.iov_base = &notify_usable;
     sock_iov.iov_len = sizeof(notify_usable);
-    memset(&sock_msg, 0, sizeof(struct msghdr));
-#if LINUX_VERSION_CODE < KERNEL_VERSION(3, 19, 0)
-    sock_msg.msg_iov = &sock_iov;
-    sock_msg.msg_iovlen = 1;
-#else
-    sock_msg.msg_iter.type = ITER_IOVEC;
-    sock_msg.msg_iter.count = sock_iov.iov_len;
-    sock_msg.msg_iter.iov = &sock_iov;
-    sock_msg.msg_iter.nr_segs = 1;
-#endif
-
-    fret = MCM_RCODE_PASS;
-    tmp_kfs = get_fs();
-    set_fs(KERNEL_DS);
-    xlen = sock_recvmsg(this_lklib->sock_fp, &sock_msg, sock_iov.iov_len, 0);
+    xlen = kernel_recvmsg(this_lklib->sock_fp, &sock_msg, &sock_iov, 1, sock_iov.iov_len, 0);
     if(xlen < 0)
     {
         MCM_KEMSG("call sock_recvmsg() fail [%d]", xlen);
         fret = MCM_RCODE_LKLIB_SOCKET_ERROR;
-    }
-    set_fs(tmp_kfs);
-    if(fret < MCM_RCODE_PASS)
         goto FREE_04;
+    }
 
     kfree(sock_addr);
     return MCM_RCODE_PASS;
 FREE_04:
-     sock_release(this_lklib->sock_fp);
+    sock_release(this_lklib->sock_fp);
 FREE_03:
     kfree(sock_addr);
 FREE_02:
