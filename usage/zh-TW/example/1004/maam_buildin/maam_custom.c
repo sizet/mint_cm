@@ -11,12 +11,12 @@ Some rights reserved. See README.
 #include "maam_local.h"
 #include "maam_md5.h"
 #include "maam_custom.h"
-#include "mcm_lheader/mcm_type.h"
-#include "mcm_lheader/mcm_size.h"
-#include "mcm_lheader/mcm_connect.h"
-#include "mcm_lheader/mcm_return.h"
-#include "mcm_lheader/mcm_data_exinfo_auto.h"
-#include "mcm_lulib/mcm_lulib_api.h"
+#include "mcm_lib/mcm_lheader/mcm_type.h"
+#include "mcm_lib/mcm_lheader/mcm_size.h"
+#include "mcm_lib/mcm_lheader/mcm_connect.h"
+#include "mcm_lib/mcm_lheader/mcm_return.h"
+#include "mcm_lib/mcm_lheader/mcm_data_exinfo_auto.h"
+#include "mcm_lib/mcm_lulib/mcm_lulib_api.h"
 
 
 

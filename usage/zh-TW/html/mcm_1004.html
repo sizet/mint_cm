@@ -35,13 +35,12 @@ Some rights reserved. See README.
     <div class="css_div_block">
     # 路徑設定.<br>
     <font class="css_font_p1">
-    MAAM_PATH&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; = mint_cm/http_server/mini_httpd/last<br>
-    MAAM_LIB_PATH&nbsp;&nbsp; = $(MAAM_PATH)/mcm_lib<br>
-    MAAM_LULIB_PATH = $(MAAM_PATH)
+    MAAM_PATH&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; = mint_cm/http_server/mini_httpd/last/mint_aam<br>
+    MAAM_LULIB_PATH = $(MAAM_PATH)/maam_lib/maam_lulib<br>
     </font>
-    <br><br>
+    <br>
     # 標頭檔路徑.<br>
-    <font class="css_font_p1">INCLUDE_PATH = -I$(MAAM_LIB_PATH)</font><br>
+    <font class="css_font_p1">INCLUDE_PATH = -I$(MAAM_PATH)</font><br>
     # 函式庫路徑.<br>
     <font class="css_font_p1">LIBRARY_PATH = -L$(MAAM_LULIB_PATH)</font>
     <br><br>
@@ -55,12 +54,12 @@ Some rights reserved. See README.
     endif<br>
     </font>
     </div>
-    MintAAM 的用戶端函式庫在 <font class="css_font_b1">mint_cm/http_server/mini_httpd/last</font>.<br>
+    MintAAM 的用戶端函式庫在 <font class="css_font_b1">mint_cm/http_server/mini_httpd/last/mint_aam/maam_lib/maam_lulib</font>.<br>
     使用動態鏈結必須將 <font class="css_font_b1">libmaam_lulib_api.so</font> 複製到系統的 lib 目錄.
     <br><br>
 
     需要的標頭檔 :<br>
-    <font class="css_font_p1">#include "maam_lulib/maam_lulib_api.h"</font>
+    <font class="css_font_p1">#include "maam_lib/maam_lulib/maam_lulib_api.h"</font>
     <br><br>
 
   </div>
@@ -341,7 +340,7 @@ Some rights reserved. See README.
 <pre class="css_pre_code">
 #include &lt;stdio.h&gt;
 #include &lt;string.h&gt;
-#include "maam_lulib/maam_lulib_api.h"
+#include "maam_lib/maam_lulib/maam_lulib_api.h"
 
 #define DMSG(msg_fmt, msgs...) printf("%s(%04u): " msg_fmt "\n", __FILE__, __LINE__, ##msgs)
 
@@ -419,7 +418,7 @@ FREE_01:
 <pre class="css_pre_code">
 #include &lt;stdio.h&gt;
 #include &lt;string.h&gt;
-#include "maam_lulib/maam_lulib_api.h"
+#include "maam_lib/maam_lulib/maam_lulib_api.h"
 
 #define DMSG(msg_fmt, msgs...) printf("%s(%04u): " msg_fmt "\n", __FILE__, __LINE__, ##msgs)
 
@@ -492,7 +491,7 @@ FREE_01:
 <pre class="css_pre_code">
 #include &lt;stdio.h&gt;
 #include &lt;string.h&gt;
-#include "maam_lulib/maam_lulib_api.h"
+#include "maam_lib/maam_lulib/maam_lulib_api.h"
 
 #define DMSG(msg_fmt, msgs...) printf("%s(%04u): " msg_fmt "\n", __FILE__, __LINE__, ##msgs)
 
@@ -575,7 +574,7 @@ FREE_01:
 <pre class="css_pre_code">
 #include &lt;stdio.h&gt;
 #include &lt;string.h&gt;
-#include "maam_lulib/maam_lulib_api.h"
+#include "maam_lib/maam_lulib/maam_lulib_api.h"
 
 #define DMSG(msg_fmt, msgs...) printf("%s(%04u): " msg_fmt "\n", __FILE__, __LINE__, ##msgs)
 
@@ -668,7 +667,7 @@ FREE_01:
 <pre class="css_pre_code">
 #include &lt;stdio.h&gt;
 #include &lt;string.h&gt;
-#include "maam_lulib/maam_lulib_api.h"
+#include "maam_lib/maam_lulib/maam_lulib_api.h"
 
 #define DMSG(msg_fmt, msgs...) printf("%s(%04u): " msg_fmt "\n", __FILE__, __LINE__, ##msgs)
 
@@ -758,7 +757,7 @@ FREE_01:
 <pre class="css_pre_code">
 #include &lt;stdio.h&gt;
 #include &lt;string.h&gt;
-#include "maam_lulib/maam_lulib_api.h"
+#include "maam_lib/maam_lulib/maam_lulib_api.h"
 
 #define DMSG(msg_fmt, msgs...) printf("%s(%04u): " msg_fmt "\n", __FILE__, __LINE__, ##msgs)
 
@@ -854,7 +853,7 @@ FREE_01:
 #include &lt;sys/types.h&gt;
 #include &lt;sys/socket.h&gt;
 #include &lt;arpa/inet.h&gt;
-#include "maam_lulib/maam_lulib_api.h"
+#include "maam_lib/maam_lulib/maam_lulib_api.h"
 
 #define DMSG(msg_fmt, msgs...) printf("%s(%04u): " msg_fmt "\n", __FILE__, __LINE__, ##msgs)
 
@@ -943,7 +942,7 @@ FREE_01:
 <pre class="css_pre_code">
 #include &lt;stdio.h&gt;
 #include &lt;string.h&gt;
-#include "maam_lulib/maam_lulib_api.h"
+#include "maam_lib/maam_lulib/maam_lulib_api.h"
 
 #define DMSG(msg_fmt, msgs...) printf("%s(%04u): " msg_fmt "\n", __FILE__, __LINE__, ##msgs)
 

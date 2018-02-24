@@ -17,7 +17,7 @@
 #include "../../mcm_lib/mcm_lheader/mcm_data_exinfo_auto.h"
 #include "../mcm_service_handle_define.h"
 #include "../mcm_config_handle_extern.h"
-#include "maam_lulib/maam_lulib_api.h"
+#include "maam_lib/maam_lulib/maam_lulib_api.h"
 
 
 #define DMSG(msg_fmt, msgs...) printf("%s(%04u): " msg_fmt "\n", __FILE__, __LINE__, ##msgs)

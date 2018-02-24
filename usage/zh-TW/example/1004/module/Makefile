@@ -5,16 +5,15 @@
 CC_FLAGS = $(CFLAGS) -fPIC -Wall -O2
 LD_FLAGS = $(LDFLAGS) -fPIC -shared
 
-MAAM_PATH       = $(PWD)/http_server/mini_httpd/last
-MAAM_LIB_PATH   = $(MAAM_PATH)/mint_aam/maam_lib
-MAAM_LULIB_PATH = $(MAAM_PATH)
+MAAM_PATH       = $(MAAM_TOP_PATH)
+MAAM_LULIB_PATH = $(MAAM_PATH)/maam_lib/maam_lulib
 
 INCLUDE_PATH =
 LIBRARY_PATH =
 
 LIBRARY_FILE =
 
-INCLUDE_PATH += -I$(MAAM_LIB_PATH)
+INCLUDE_PATH += -I$(MAAM_PATH)
 LIBRARY_PATH += -L$(MAAM_LULIB_PATH)
 
 ifeq (${USE_STATIC_MAAM_LIB}, YES)

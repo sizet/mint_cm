@@ -28,25 +28,27 @@ Some rights reserved. See README.
     此章節說明核心程式如何透過提供的介面存取資料.
     <br><br><br>
 
+    <div class="css_div_hook" id="hook_0303_makefile_01"></div>
     Makefile 的編譯參數 :<br>
     <div class="css_div_block">
-    # 路徑設定.<br>
-    <font class="css_font_p1">
-    MCM_PATH&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; = mint_cm<br>
-    MCM_LIB_PATH&nbsp;&nbsp; = $(MCM_PATH)/mcm_lib<br>
-    MCM_LKLIB_PATH = $(MCM_LIB_PATH)/mcm_lklib
-    </font>
-    <br><br>
-    # 標頭檔路徑.<br>
-    <font class="css_font_p1">INCLUDE_PATH = -I$(MCM_LIB_PATH)</font>
-    <br><br>
-    # 導出符號.<br>
-    <font class="css_font_p1">export KBUILD_EXTRA_SYMBOLS = $(MCM_LKLIB_PATH)/Module.symvers</font>
+      # 路徑設定.<br>
+      <font class="css_font_p1">
+      MCM_PATH&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; = mint_cm<br>
+      MCM_LIB_PATH&nbsp;&nbsp; = $(MCM_PATH)/mcm_lib<br>
+      MCM_LKLIB_PATH = $(MCM_LIB_PATH)/mcm_lklib
+      </font>
+      <br><br>
+      # 標頭檔路徑.<br>
+      <font class="css_font_p1">INCLUDE_PATH = -I$(MCM_LIB_PATH)</font>
+      <br><br>
+      # 導出符號.<br>
+      <font class="css_font_p1">export KBUILD_EXTRA_SYMBOLS = $(MCM_LKLIB_PATH)/Module.symvers</font>
     </div>
     MintCM 的核心端函式庫在 <font class="css_font_b1">mint_cm/mcm_lib/mcm_lklib</font>.<br>
     程式使用前必須先將 <font class="css_font_b1">mcm_lklib_api.ko</font> 載入到核心 (insmod).
     <br><br>
 
+    <div class="css_div_hook" id="hook_0303_include_01"></div>
     需要的標頭檔 :<br>
     <font class="css_font_p1">#include "mcm_lheader/mcm_type.h"</font><br>
     <font class="css_font_p1">#include "mcm_lheader/mcm_size.h"</font><br>

@@ -36,7 +36,10 @@ HTTP_SERVER_PATH = ./http_server/mini_httpd/last
 
 EXAMPLE_PATH = ./usage/zh-TW/example/$(KEY)
 
-export MCM_RUN_ROOT_PATH = $(PWD)/run
+export MCM_TOP_PATH  = $(PWD)
+export MAAM_TOP_PATH = $(MCM_TOP_PATH)/$(HTTP_SERVER_PATH)/mint_aam
+
+export MCM_RUN_ROOT_PATH = $(MCM_TOP_PATH)/run
 export MCM_RUN_WEB_PATH  = $(MCM_RUN_ROOT_PATH)/web
 export MCM_RUN_CGI_PATH  = $(MCM_RUN_WEB_PATH)/cgi
 

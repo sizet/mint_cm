@@ -31,16 +31,15 @@ ifeq (${MINT_ACCOUNT_AUTH_MINIHTTPD}, YES)
     MAAM_LULIB_PATH   = $(MAAM_PATH)/maam_lib/maam_lulib
     MAAM_JSLIB_PATH   = $(MAAM_PATH)/maam_lib/maam_jslib
 
-    MCM_PATH       = ../../..
-    MCM_LIB_PATH   = $(MCM_PATH)/mcm_lib
-    MCM_LULIB_PATH = $(MCM_LIB_PATH)/mcm_lulib
+    MCM_PATH       = $(MCM_TOP_PATH)
+    MCM_LULIB_PATH = $(MCM_PATH)/mcm_lib/mcm_lulib
 
     MAAM_DEFINE = -DMINT_ACCOUNT_AUTH_MINIHTTPD
 
     MAAM_BUILDIN_INCLUDE_PATH =
     MAAM_BUILDIN_LIBRARY_FILE =
 
-    MAAM_BUILDIN_INCLUDE_PATH += -I$(MCM_LIB_PATH)
+    MAAM_BUILDIN_INCLUDE_PATH += -I$(MCM_PATH)
 
     ifeq (${USE_STATIC_MCM_LIB}, YES)
     MAAM_BUILDIN_LIBRARY_FILE += $(MCM_LULIB_PATH)/mcm_lulib_api.a
@@ -130,6 +129,7 @@ $(MAAM_LULIB_TARGET_FILE_S) $(MAAM_LULIB_TARGET_FILE_D) : $(MAAM_LULIB_OBJECT_FI
 	$(AR) $(MAAM_LULIB_AR_FLAGS) $(MAAM_LULIB_TARGET_FILE_S) $^
 	$(CC) $(MAAM_LULIB_LD_FLAGS) $^ -o $(MAAM_LULIB_TARGET_FILE_D)
 	$(STRIP) $(MAAM_LULIB_TARGET_FILE_D)
+	mv $(MAAM_LULIB_TARGET_FILE_S) $(MAAM_LULIB_TARGET_FILE_D) $(MAAM_LULIB_PATH)
 
 maam_lulib_api.o : $(MAAM_LULIB_PATH)/maam_lulib_api.c $(MAAM_LULIB_PATH)/maam_lulib_api.h $(MAAM_LULIB_DEPEND_FILE)
 	$(CC) $(MAAM_LULIB_CC_FLAGS) -c $(MAAM_LULIB_PATH)/maam_lulib_api.c
@@ -143,14 +143,14 @@ mini_httpd.pem : mini_httpd.cnf
 install :
 	cp -f mini_httpd mini_httpd.conf $(MCM_RUN_ROOT_PATH)
 ifeq (${MINT_ACCOUNT_AUTH_MINIHTTPD}, YES)
-	cp -f $(MAAM_LULIB_TARGET_FILE_D) $(MCM_RUN_ROOT_PATH)
+	cp -f $(MAAM_LULIB_PATH)/$(MAAM_LULIB_TARGET_FILE_D) $(MCM_RUN_ROOT_PATH)
 	cp -f $(MAAM_JSLIB_SOURCE_FILE) $(MCM_RUN_WEB_PATH)
 endif
 
 clean:
 	rm -f mini_httpd mime_encodings.h mime_types.h htpasswd mini_httpd.rnd *.o core core.* *.core
 ifeq (${MINT_ACCOUNT_AUTH_MINIHTTPD}, YES)
-	rm -f *.a *.so
+	rm -f $(MAAM_LULIB_PATH)/*.a $(MAAM_LULIB_PATH)/*.so
 	cd $(MCM_RUN_ROOT_PATH); rm -f mini_httpd mini_httpd.conf $(MAAM_LULIB_TARGET_FILE_D)
 	cd $(MCM_RUN_WEB_PATH); rm -f $(notdir $(MAAM_JSLIB_SOURCE_FILE))
 endif
