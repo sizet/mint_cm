@@ -5,7 +5,7 @@
 #include <errno.h>
 #include <stdio.h>
 #include <string.h>
-#include "../../mcm_lib/mcm_lheader/mcm_return.h"
+#include "mcm_lib/mcm_lheader/mcm_return.h"
 #include "../mcm_cgi_common_extern.h"
 #include "mcm_cgi_module_debug.h"
 

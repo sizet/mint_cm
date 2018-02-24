@@ -8,8 +8,8 @@
 
 
 
-#include "../mcm_lib/mcm_lheader/mcm_type.h"
-#include "../mcm_lib/mcm_lheader/mcm_debug.h"
+#include "mcm_lib/mcm_lheader/mcm_type.h"
+#include "mcm_lib/mcm_lheader/mcm_debug.h"
 
 
 

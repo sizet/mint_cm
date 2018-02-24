@@ -8,8 +8,8 @@
 #include <string.h>
 #include <stdlib.h>
 #include <unistd.h>
-#include "../mcm_lib/mcm_lheader/mcm_type.h"
-#include "../mcm_lib/mcm_lheader/mcm_return.h"
+#include "mcm_lib/mcm_lheader/mcm_type.h"
+#include "mcm_lib/mcm_lheader/mcm_return.h"
 #include "mcm_cgi_common_extern.h"
 
 #if MCM_CGIEMODE | MCM_CGIECTMODE | MCM_CUDMODE

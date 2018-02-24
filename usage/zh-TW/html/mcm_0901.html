@@ -249,17 +249,17 @@ function upload_file()
 
     步驟-01 : 加入基本的標頭檔 :<br>
     <font class="css_font_p1">#include &lt;stdio.h&gt;</font><br>
-    <font class="css_font_p1">#include "../../mcm_lib/mcm_lheader/mcm_return.h"</font><br>
+    <font class="css_font_p1">#include "mcm_lib/mcm_lheader/mcm_return.h"</font><br>
     <font class="css_font_p1">#include "../mcm_cgi_common_extern.h"</font><br>
     <font class="css_font_p1">#include "mcm_cgi_module_debug.h"</font><br>
     如果需要使用 MintCM 函式則改加入 (以及在 Makefile 中加入鏈結 MintCM 的函式庫) :<br>
     <font class="css_font_p1">#include &lt;stdio.h&gt;</font><br>
-    <font class="css_font_p1">#include "../../mcm_lib/mcm_lheader/mcm_type.h"</font><br>
-    <font class="css_font_p1">#include "../../mcm_lib/mcm_lheader/mcm_size.h"</font><br>
-    <font class="css_font_p1">#include "../../mcm_lib/mcm_lheader/mcm_connect.h"</font><br>
-    <font class="css_font_p1">#include "../../mcm_lib/mcm_lheader/mcm_return.h"</font><br>
-    <font class="css_font_p1">#include "../../mcm_lib/mcm_lheader/mcm_data_exinfo_auto.h"</font><br>
-    <font class="css_font_p1">#include "../../mcm_lib/mcm_lulib/mcm_lulib_api.h"</font><br>
+    <font class="css_font_p1">#include "mcm_lib/mcm_lheader/mcm_type.h"</font><br>
+    <font class="css_font_p1">#include "mcm_lib/mcm_lheader/mcm_size.h"</font><br>
+    <font class="css_font_p1">#include "mcm_lib/mcm_lheader/mcm_connect.h"</font><br>
+    <font class="css_font_p1">#include "mcm_lib/mcm_lheader/mcm_return.h"</font><br>
+    <font class="css_font_p1">#include "mcm_lib/mcm_lheader/mcm_data_exinfo_auto.h"</font><br>
+    <font class="css_font_p1">#include "mcm_lib/mcm_lulib/mcm_lulib_api.h"</font><br>
     <font class="css_font_p1">#include "../mcm_cgi_common_extern.h"</font><br>
     <font class="css_font_p1">#include "mcm_cgi_module_debug.h"</font>
     <br><br><br>
@@ -506,7 +506,7 @@ function upload_file()
 #include &lt;errno.h&gt;
 #include &lt;stdio.h&gt;
 #include &lt;string.h&gt;
-#include "../../mcm_lib/mcm_lheader/mcm_return.h"
+#include "mcm_lib/mcm_lheader/mcm_return.h"
 #include "../mcm_cgi_common_extern.h"
 #include "mcm_cgi_module_debug.h"
 

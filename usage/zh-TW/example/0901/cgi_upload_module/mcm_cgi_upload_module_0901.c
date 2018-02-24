@@ -6,12 +6,12 @@
 #include <stdio.h>
 #include <string.h>
 #include <unistd.h>
-#include "../../mcm_lib/mcm_lheader/mcm_type.h"
-#include "../../mcm_lib/mcm_lheader/mcm_size.h"
-#include "../../mcm_lib/mcm_lheader/mcm_connect.h"
-#include "../../mcm_lib/mcm_lheader/mcm_return.h"
-#include "../../mcm_lib/mcm_lheader/mcm_data_exinfo_auto.h"
-#include "../../mcm_lib/mcm_lulib/mcm_lulib_api.h"
+#include "mcm_lib/mcm_lheader/mcm_type.h"
+#include "mcm_lib/mcm_lheader/mcm_size.h"
+#include "mcm_lib/mcm_lheader/mcm_connect.h"
+#include "mcm_lib/mcm_lheader/mcm_return.h"
+#include "mcm_lib/mcm_lheader/mcm_data_exinfo_auto.h"
+#include "mcm_lib/mcm_lulib/mcm_lulib_api.h"
 #include "../mcm_cgi_common_extern.h"
 #include "mcm_cgi_module_debug.h"
 
