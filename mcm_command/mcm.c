@@ -7,13 +7,13 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
-#include "../mcm_lib/mcm_lheader/mcm_type.h"
-#include "../mcm_lib/mcm_lheader/mcm_keyword.h"
-#include "../mcm_lib/mcm_lheader/mcm_connect.h"
-#include "../mcm_lib/mcm_lheader/mcm_return.h"
-#include "../mcm_lib/mcm_lheader/mcm_limit.h"
-#include "../mcm_lib/mcm_lheader/mcm_debug.h"
-#include "../mcm_lib/mcm_lulib/mcm_lulib_api.h"
+#include "mcm_lib/mcm_lheader/mcm_type.h"
+#include "mcm_lib/mcm_lheader/mcm_keyword.h"
+#include "mcm_lib/mcm_lheader/mcm_connect.h"
+#include "mcm_lib/mcm_lheader/mcm_return.h"
+#include "mcm_lib/mcm_lheader/mcm_limit.h"
+#include "mcm_lib/mcm_lheader/mcm_debug.h"
+#include "mcm_lib/mcm_lulib/mcm_lulib_api.h"
 
 
 

@@ -2,14 +2,17 @@
 # This file is part of the MintCM.
 # Some rights reserved. See README.
 
+MCM_PATH       = $(MCM_TOP_PATH)
+MCM_LULIB_PATH = $(MCM_PATH)/mcm_lib/mcm_lulib
+
 CC_FLAGS = $(CFLAGS) -Wall -O2
 LD_FLAGS = $(LDFLAGS)
 
-INCLUDE_PATH =
-LIBRARY_PATH = -L../mcm_lib/mcm_lulib
+INCLUDE_PATH = -I$(MCM_PATH)
+LIBRARY_PATH = -L$(MCM_LULIB_PATH)
 
 ifeq (${USE_STATIC_MCM_LIB}, YES)
-LIBRARY_FILE = ../mcm_lib/mcm_lulib/mcm_lulib_api.a
+LIBRARY_FILE = $(MCM_LULIB_PATH)/mcm_lulib_api.a
 else
 LIBRARY_FILE = -lmcm_lulib_api
 endif
