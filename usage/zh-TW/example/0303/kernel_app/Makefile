@@ -3,12 +3,11 @@
 # Some rights reserved. See README.
 
 MCM_PATH       = $(PWD)/../../../../..
-MCM_LIB_PATH   = $(MCM_PATH)/mcm_lib
-MCM_LKLIB_PATH = $(MCM_LIB_PATH)/mcm_lklib
+MCM_LKLIB_PATH = $(MCM_PATH)/mcm_lib/mcm_lklib
 
 CC_FLAGS = -Wall -Wno-unused-result
 
-INCLUDE_PATH = -I$(MCM_LIB_PATH)
+INCLUDE_PATH = -I$(MCM_PATH)
 
 export EXTRA_CFLAGS = $(CC_FLAGS) $(INCLUDE_PATH)
 

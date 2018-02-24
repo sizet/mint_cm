@@ -34,14 +34,13 @@ Some rights reserved. See README.
       # 路徑設定.<br>
       <font class="css_font_p1">
       MCM_PATH&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; = mint_cm<br>
-      MCM_LIB_PATH&nbsp;&nbsp; = $(MCM_PATH)/mcm_lib<br>
-      MCM_LKLIB_PATH = $(MCM_LIB_PATH)/mcm_lklib
+      MCM_LKLIB_PATH = $(MCM_PATH)/mcm_lib/mcm_lklib
       </font>
       <br><br>
       # 標頭檔路徑.<br>
-      <font class="css_font_p1">INCLUDE_PATH = -I$(MCM_LIB_PATH)</font>
+      <font class="css_font_p1">INCLUDE_PATH = -I$(MCM_PATH)</font>
       <br><br>
-      # 導出符號.<br>
+      # 導出符號路徑.<br>
       <font class="css_font_p1">export KBUILD_EXTRA_SYMBOLS = $(MCM_LKLIB_PATH)/Module.symvers</font>
     </div>
     MintCM 的核心端函式庫在 <font class="css_font_b1">mint_cm/mcm_lib/mcm_lklib</font>.<br>
@@ -50,12 +49,12 @@ Some rights reserved. See README.
 
     <div class="css_div_hook" id="hook_0303_include_01"></div>
     需要的標頭檔 :<br>
-    <font class="css_font_p1">#include "mcm_lheader/mcm_type.h"</font><br>
-    <font class="css_font_p1">#include "mcm_lheader/mcm_size.h"</font><br>
-    <font class="css_font_p1">#include "mcm_lheader/mcm_connect.h"</font><br>
-    <font class="css_font_p1">#include "mcm_lheader/mcm_return.h"</font><br>
-    <font class="css_font_p1">#include "mcm_lheader/mcm_data_exinfo_auto.h"</font><br>
-    <font class="css_font_p1">#include "mcm_lklib/mcm_lklib_api.h"</font>
+    <font class="css_font_p1">#include "mcm_lib/mcm_lheader/mcm_type.h"</font><br>
+    <font class="css_font_p1">#include "mcm_lib/mcm_lheader/mcm_size.h"</font><br>
+    <font class="css_font_p1">#include "mcm_lib/mcm_lheader/mcm_connect.h"</font><br>
+    <font class="css_font_p1">#include "mcm_lib/mcm_lheader/mcm_return.h"</font><br>
+    <font class="css_font_p1">#include "mcm_lib/mcm_lheader/mcm_data_exinfo_auto.h"</font><br>
+    <font class="css_font_p1">#include "mcm_lib/mcm_lklib/mcm_lklib_api.h"</font>
     <br><br>
 
   </div>
@@ -205,12 +204,12 @@ Some rights reserved. See README.
 #include &lt;linux/kernel.h&gt;
 #include &lt;linux/module.h&gt;
 #include &lt;linux/random.h&gt;
-#include "mcm_lheader/mcm_type.h"
-#include "mcm_lheader/mcm_size.h"
-#include "mcm_lheader/mcm_connect.h"
-#include "mcm_lheader/mcm_return.h"
-#include "mcm_lheader/mcm_data_exinfo_auto.h"
-#include "mcm_lklib/mcm_lklib_api.h"
+#include "mcm_lib/mcm_lheader/mcm_type.h"
+#include "mcm_lib/mcm_lheader/mcm_size.h"
+#include "mcm_lib/mcm_lheader/mcm_connect.h"
+#include "mcm_lib/mcm_lheader/mcm_return.h"
+#include "mcm_lib/mcm_lheader/mcm_data_exinfo_auto.h"
+#include "mcm_lib/mcm_lklib/mcm_lklib_api.h"
 
 #define DMSG(msg_fmt, msgs...) \
     printk(KERN_INFO "%s(%04u): " msg_fmt "\n", \
@@ -294,12 +293,12 @@ MODULE_LICENSE("GPL");
 #include &lt;linux/kernel.h&gt;
 #include &lt;linux/module.h&gt;
 #include &lt;linux/random.h&gt;
-#include "mcm_lheader/mcm_type.h"
-#include "mcm_lheader/mcm_size.h"
-#include "mcm_lheader/mcm_connect.h"
-#include "mcm_lheader/mcm_return.h"
-#include "mcm_lheader/mcm_data_exinfo_auto.h"
-#include "mcm_lklib/mcm_lklib_api.h"
+#include "mcm_lib/mcm_lheader/mcm_type.h"
+#include "mcm_lib/mcm_lheader/mcm_size.h"
+#include "mcm_lib/mcm_lheader/mcm_connect.h"
+#include "mcm_lib/mcm_lheader/mcm_return.h"
+#include "mcm_lib/mcm_lheader/mcm_data_exinfo_auto.h"
+#include "mcm_lib/mcm_lklib/mcm_lklib_api.h"
 
 #define DMSG(msg_fmt, msgs...) \
     printk(KERN_INFO "%s(%04u): " msg_fmt "\n", \
@@ -416,12 +415,12 @@ MODULE_LICENSE("GPL");
 #include &lt;linux/kernel.h&gt;
 #include &lt;linux/module.h&gt;
 #include &lt;linux/random.h&gt;
-#include "mcm_lheader/mcm_type.h"
-#include "mcm_lheader/mcm_size.h"
-#include "mcm_lheader/mcm_connect.h"
-#include "mcm_lheader/mcm_return.h"
-#include "mcm_lheader/mcm_data_exinfo_auto.h"
-#include "mcm_lklib/mcm_lklib_api.h"
+#include "mcm_lib/mcm_lheader/mcm_type.h"
+#include "mcm_lib/mcm_lheader/mcm_size.h"
+#include "mcm_lib/mcm_lheader/mcm_connect.h"
+#include "mcm_lib/mcm_lheader/mcm_return.h"
+#include "mcm_lib/mcm_lheader/mcm_data_exinfo_auto.h"
+#include "mcm_lib/mcm_lklib/mcm_lklib_api.h"
 
 #define DMSG(msg_fmt, msgs...) \
     printk(KERN_INFO "%s(%04u): " msg_fmt "\n", \
@@ -503,12 +502,12 @@ MODULE_LICENSE("GPL");
 #include &lt;linux/kernel.h&gt;
 #include &lt;linux/module.h&gt;
 #include &lt;linux/random.h&gt;
-#include "mcm_lheader/mcm_type.h"
-#include "mcm_lheader/mcm_size.h"
-#include "mcm_lheader/mcm_connect.h"
-#include "mcm_lheader/mcm_return.h"
-#include "mcm_lheader/mcm_data_exinfo_auto.h"
-#include "mcm_lklib/mcm_lklib_api.h"
+#include "mcm_lib/mcm_lheader/mcm_type.h"
+#include "mcm_lib/mcm_lheader/mcm_size.h"
+#include "mcm_lib/mcm_lheader/mcm_connect.h"
+#include "mcm_lib/mcm_lheader/mcm_return.h"
+#include "mcm_lib/mcm_lheader/mcm_data_exinfo_auto.h"
+#include "mcm_lib/mcm_lklib/mcm_lklib_api.h"
 
 #define DMSG(msg_fmt, msgs...) \
     printk(KERN_INFO "%s(%04u): " msg_fmt "\n", \
@@ -629,12 +628,12 @@ MODULE_LICENSE("GPL");
 #include &lt;linux/kernel.h&gt;
 #include &lt;linux/module.h&gt;
 #include &lt;linux/random.h&gt;
-#include "mcm_lheader/mcm_type.h"
-#include "mcm_lheader/mcm_size.h"
-#include "mcm_lheader/mcm_connect.h"
-#include "mcm_lheader/mcm_return.h"
-#include "mcm_lheader/mcm_data_exinfo_auto.h"
-#include "mcm_lklib/mcm_lklib_api.h"
+#include "mcm_lib/mcm_lheader/mcm_type.h"
+#include "mcm_lib/mcm_lheader/mcm_size.h"
+#include "mcm_lib/mcm_lheader/mcm_connect.h"
+#include "mcm_lib/mcm_lheader/mcm_return.h"
+#include "mcm_lib/mcm_lheader/mcm_data_exinfo_auto.h"
+#include "mcm_lib/mcm_lklib/mcm_lklib_api.h"
 
 #define DMSG(msg_fmt, msgs...) \
     printk(KERN_INFO "%s(%04u): " msg_fmt "\n", \
@@ -799,12 +798,12 @@ MODULE_LICENSE("GPL");
 #include &lt;linux/kernel.h&gt;
 #include &lt;linux/module.h&gt;
 #include &lt;linux/random.h&gt;
-#include "mcm_lheader/mcm_type.h"
-#include "mcm_lheader/mcm_size.h"
-#include "mcm_lheader/mcm_connect.h"
-#include "mcm_lheader/mcm_return.h"
-#include "mcm_lheader/mcm_data_exinfo_auto.h"
-#include "mcm_lklib/mcm_lklib_api.h"
+#include "mcm_lib/mcm_lheader/mcm_type.h"
+#include "mcm_lib/mcm_lheader/mcm_size.h"
+#include "mcm_lib/mcm_lheader/mcm_connect.h"
+#include "mcm_lib/mcm_lheader/mcm_return.h"
+#include "mcm_lib/mcm_lheader/mcm_data_exinfo_auto.h"
+#include "mcm_lib/mcm_lklib/mcm_lklib_api.h"
 
 #define DMSG(msg_fmt, msgs...) \
     printk(KERN_INFO "%s(%04u): " msg_fmt "\n", \
@@ -1028,12 +1027,12 @@ MODULE_LICENSE("GPL");
 #include &lt;linux/kernel.h&gt;
 #include &lt;linux/module.h&gt;
 #include &lt;linux/random.h&gt;
-#include "mcm_lheader/mcm_type.h"
-#include "mcm_lheader/mcm_size.h"
-#include "mcm_lheader/mcm_connect.h"
-#include "mcm_lheader/mcm_return.h"
-#include "mcm_lheader/mcm_data_exinfo_auto.h"
-#include "mcm_lklib/mcm_lklib_api.h"
+#include "mcm_lib/mcm_lheader/mcm_type.h"
+#include "mcm_lib/mcm_lheader/mcm_size.h"
+#include "mcm_lib/mcm_lheader/mcm_connect.h"
+#include "mcm_lib/mcm_lheader/mcm_return.h"
+#include "mcm_lib/mcm_lheader/mcm_data_exinfo_auto.h"
+#include "mcm_lib/mcm_lklib/mcm_lklib_api.h"
 
 #define DMSG(msg_fmt, msgs...) \
     printk(KERN_INFO "%s(%04u): " msg_fmt "\n", \
@@ -1259,12 +1258,12 @@ MODULE_LICENSE("GPL");
 #include &lt;linux/kernel.h&gt;
 #include &lt;linux/module.h&gt;
 #include &lt;linux/random.h&gt;
-#include "mcm_lheader/mcm_type.h"
-#include "mcm_lheader/mcm_size.h"
-#include "mcm_lheader/mcm_connect.h"
-#include "mcm_lheader/mcm_return.h"
-#include "mcm_lheader/mcm_data_exinfo_auto.h"
-#include "mcm_lklib/mcm_lklib_api.h"
+#include "mcm_lib/mcm_lheader/mcm_type.h"
+#include "mcm_lib/mcm_lheader/mcm_size.h"
+#include "mcm_lib/mcm_lheader/mcm_connect.h"
+#include "mcm_lib/mcm_lheader/mcm_return.h"
+#include "mcm_lib/mcm_lheader/mcm_data_exinfo_auto.h"
+#include "mcm_lib/mcm_lklib/mcm_lklib_api.h"
 
 #define DMSG(msg_fmt, msgs...) \
     printk(KERN_INFO "%s(%04u): " msg_fmt "\n", \
@@ -1474,12 +1473,12 @@ MODULE_LICENSE("GPL");
 #include &lt;linux/kernel.h&gt;
 #include &lt;linux/module.h&gt;
 #include &lt;linux/random.h&gt;
-#include "mcm_lheader/mcm_type.h"
-#include "mcm_lheader/mcm_size.h"
-#include "mcm_lheader/mcm_connect.h"
-#include "mcm_lheader/mcm_return.h"
-#include "mcm_lheader/mcm_data_exinfo_auto.h"
-#include "mcm_lklib/mcm_lklib_api.h"
+#include "mcm_lib/mcm_lheader/mcm_type.h"
+#include "mcm_lib/mcm_lheader/mcm_size.h"
+#include "mcm_lib/mcm_lheader/mcm_connect.h"
+#include "mcm_lib/mcm_lheader/mcm_return.h"
+#include "mcm_lib/mcm_lheader/mcm_data_exinfo_auto.h"
+#include "mcm_lib/mcm_lklib/mcm_lklib_api.h"
 
 #define DMSG(msg_fmt, msgs...) \
     printk(KERN_INFO "%s(%04u): " msg_fmt "\n", \
@@ -1757,12 +1756,12 @@ MODULE_LICENSE("GPL");
 #include &lt;linux/kernel.h&gt;
 #include &lt;linux/module.h&gt;
 #include &lt;linux/random.h&gt;
-#include "mcm_lheader/mcm_type.h"
-#include "mcm_lheader/mcm_size.h"
-#include "mcm_lheader/mcm_connect.h"
-#include "mcm_lheader/mcm_return.h"
-#include "mcm_lheader/mcm_data_exinfo_auto.h"
-#include "mcm_lklib/mcm_lklib_api.h"
+#include "mcm_lib/mcm_lheader/mcm_type.h"
+#include "mcm_lib/mcm_lheader/mcm_size.h"
+#include "mcm_lib/mcm_lheader/mcm_connect.h"
+#include "mcm_lib/mcm_lheader/mcm_return.h"
+#include "mcm_lib/mcm_lheader/mcm_data_exinfo_auto.h"
+#include "mcm_lib/mcm_lklib/mcm_lklib_api.h"
 
 #define DMSG(msg_fmt, msgs...) \
     printk(KERN_INFO "%s(%04u): " msg_fmt "\n", \
@@ -1978,12 +1977,12 @@ MODULE_LICENSE("GPL");
 #include &lt;linux/kernel.h&gt;
 #include &lt;linux/module.h&gt;
 #include &lt;linux/random.h&gt;
-#include "mcm_lheader/mcm_type.h"
-#include "mcm_lheader/mcm_size.h"
-#include "mcm_lheader/mcm_connect.h"
-#include "mcm_lheader/mcm_return.h"
-#include "mcm_lheader/mcm_data_exinfo_auto.h"
-#include "mcm_lklib/mcm_lklib_api.h"
+#include "mcm_lib/mcm_lheader/mcm_type.h"
+#include "mcm_lib/mcm_lheader/mcm_size.h"
+#include "mcm_lib/mcm_lheader/mcm_connect.h"
+#include "mcm_lib/mcm_lheader/mcm_return.h"
+#include "mcm_lib/mcm_lheader/mcm_data_exinfo_auto.h"
+#include "mcm_lib/mcm_lklib/mcm_lklib_api.h"
 
 #define DMSG(msg_fmt, msgs...) \
     printk(KERN_INFO "%s(%04u): " msg_fmt "\n", \
@@ -2164,12 +2163,12 @@ MODULE_LICENSE("GPL");
 #include &lt;linux/kernel.h&gt;
 #include &lt;linux/module.h&gt;
 #include &lt;linux/random.h&gt;
-#include "mcm_lheader/mcm_type.h"
-#include "mcm_lheader/mcm_size.h"
-#include "mcm_lheader/mcm_connect.h"
-#include "mcm_lheader/mcm_return.h"
-#include "mcm_lheader/mcm_data_exinfo_auto.h"
-#include "mcm_lklib/mcm_lklib_api.h"
+#include "mcm_lib/mcm_lheader/mcm_type.h"
+#include "mcm_lib/mcm_lheader/mcm_size.h"
+#include "mcm_lib/mcm_lheader/mcm_connect.h"
+#include "mcm_lib/mcm_lheader/mcm_return.h"
+#include "mcm_lib/mcm_lheader/mcm_data_exinfo_auto.h"
+#include "mcm_lib/mcm_lklib/mcm_lklib_api.h"
 
 #define DMSG(msg_fmt, msgs...) \
     printk(KERN_INFO "%s(%04u): " msg_fmt "\n", \
@@ -2390,12 +2389,12 @@ MODULE_LICENSE("GPL");
 #include &lt;linux/kernel.h&gt;
 #include &lt;linux/module.h&gt;
 #include &lt;linux/random.h&gt;
-#include "mcm_lheader/mcm_type.h"
-#include "mcm_lheader/mcm_size.h"
-#include "mcm_lheader/mcm_connect.h"
-#include "mcm_lheader/mcm_return.h"
-#include "mcm_lheader/mcm_data_exinfo_auto.h"
-#include "mcm_lklib/mcm_lklib_api.h"
+#include "mcm_lib/mcm_lheader/mcm_type.h"
+#include "mcm_lib/mcm_lheader/mcm_size.h"
+#include "mcm_lib/mcm_lheader/mcm_connect.h"
+#include "mcm_lib/mcm_lheader/mcm_return.h"
+#include "mcm_lib/mcm_lheader/mcm_data_exinfo_auto.h"
+#include "mcm_lib/mcm_lklib/mcm_lklib_api.h"
 
 #define DMSG(msg_fmt, msgs...) \
     printk(KERN_INFO "%s(%04u): " msg_fmt "\n", \
@@ -2584,12 +2583,12 @@ MODULE_LICENSE("GPL");
 #include &lt;linux/kernel.h&gt;
 #include &lt;linux/module.h&gt;
 #include &lt;linux/random.h&gt;
-#include "mcm_lheader/mcm_type.h"
-#include "mcm_lheader/mcm_size.h"
-#include "mcm_lheader/mcm_connect.h"
-#include "mcm_lheader/mcm_return.h"
-#include "mcm_lheader/mcm_data_exinfo_auto.h"
-#include "mcm_lklib/mcm_lklib_api.h"
+#include "mcm_lib/mcm_lheader/mcm_type.h"
+#include "mcm_lib/mcm_lheader/mcm_size.h"
+#include "mcm_lib/mcm_lheader/mcm_connect.h"
+#include "mcm_lib/mcm_lheader/mcm_return.h"
+#include "mcm_lib/mcm_lheader/mcm_data_exinfo_auto.h"
+#include "mcm_lib/mcm_lklib/mcm_lklib_api.h"
 
 #define DMSG(msg_fmt, msgs...) \
     printk(KERN_INFO "%s(%04u): " msg_fmt "\n", \
@@ -2748,12 +2747,12 @@ MODULE_LICENSE("GPL");
 #include &lt;linux/kernel.h&gt;
 #include &lt;linux/module.h&gt;
 #include &lt;linux/random.h&gt;
-#include "mcm_lheader/mcm_type.h"
-#include "mcm_lheader/mcm_size.h"
-#include "mcm_lheader/mcm_connect.h"
-#include "mcm_lheader/mcm_return.h"
-#include "mcm_lheader/mcm_data_exinfo_auto.h"
-#include "mcm_lklib/mcm_lklib_api.h"
+#include "mcm_lib/mcm_lheader/mcm_type.h"
+#include "mcm_lib/mcm_lheader/mcm_size.h"
+#include "mcm_lib/mcm_lheader/mcm_connect.h"
+#include "mcm_lib/mcm_lheader/mcm_return.h"
+#include "mcm_lib/mcm_lheader/mcm_data_exinfo_auto.h"
+#include "mcm_lib/mcm_lklib/mcm_lklib_api.h"
 
 #define DMSG(msg_fmt, msgs...) \
     printk(KERN_INFO "%s(%04u): " msg_fmt "\n", \
@@ -2943,12 +2942,12 @@ MODULE_LICENSE("GPL");
 #include &lt;linux/kernel.h&gt;
 #include &lt;linux/module.h&gt;
 #include &lt;linux/random.h&gt;
-#include "mcm_lheader/mcm_type.h"
-#include "mcm_lheader/mcm_size.h"
-#include "mcm_lheader/mcm_connect.h"
-#include "mcm_lheader/mcm_return.h"
-#include "mcm_lheader/mcm_data_exinfo_auto.h"
-#include "mcm_lklib/mcm_lklib_api.h"
+#include "mcm_lib/mcm_lheader/mcm_type.h"
+#include "mcm_lib/mcm_lheader/mcm_size.h"
+#include "mcm_lib/mcm_lheader/mcm_connect.h"
+#include "mcm_lib/mcm_lheader/mcm_return.h"
+#include "mcm_lib/mcm_lheader/mcm_data_exinfo_auto.h"
+#include "mcm_lib/mcm_lklib/mcm_lklib_api.h"
 
 #define DMSG(msg_fmt, msgs...) \
     printk(KERN_INFO "%s(%04u): " msg_fmt "\n", \
@@ -3131,12 +3130,12 @@ int mcm_module_kernel_test_01(
 #include &lt;linux/kernel.h&gt;
 #include &lt;linux/module.h&gt;
 #include &lt;linux/random.h&gt;
-#include "mcm_lheader/mcm_type.h"
-#include "mcm_lheader/mcm_size.h"
-#include "mcm_lheader/mcm_connect.h"
-#include "mcm_lheader/mcm_return.h"
-#include "mcm_lheader/mcm_data_exinfo_auto.h"
-#include "mcm_lklib/mcm_lklib_api.h"
+#include "mcm_lib/mcm_lheader/mcm_type.h"
+#include "mcm_lib/mcm_lheader/mcm_size.h"
+#include "mcm_lib/mcm_lheader/mcm_connect.h"
+#include "mcm_lib/mcm_lheader/mcm_return.h"
+#include "mcm_lib/mcm_lheader/mcm_data_exinfo_auto.h"
+#include "mcm_lib/mcm_lklib/mcm_lklib_api.h"
 
 #define DMSG(msg_fmt, msgs...) \
     printk(KERN_INFO "%s(%04u): " msg_fmt "\n", \
@@ -3289,12 +3288,12 @@ MODULE_LICENSE("GPL");
 #include &lt;linux/kernel.h&gt;
 #include &lt;linux/module.h&gt;
 #include &lt;linux/random.h&gt;
-#include "mcm_lheader/mcm_type.h"
-#include "mcm_lheader/mcm_size.h"
-#include "mcm_lheader/mcm_connect.h"
-#include "mcm_lheader/mcm_return.h"
-#include "mcm_lheader/mcm_data_exinfo_auto.h"
-#include "mcm_lklib/mcm_lklib_api.h"
+#include "mcm_lib/mcm_lheader/mcm_type.h"
+#include "mcm_lib/mcm_lheader/mcm_size.h"
+#include "mcm_lib/mcm_lheader/mcm_connect.h"
+#include "mcm_lib/mcm_lheader/mcm_return.h"
+#include "mcm_lib/mcm_lheader/mcm_data_exinfo_auto.h"
+#include "mcm_lib/mcm_lklib/mcm_lklib_api.h"
 
 #define DMSG(msg_fmt, msgs...) \
     printk(KERN_INFO "%s(%04u): " msg_fmt "\n", \
@@ -3405,12 +3404,12 @@ MODULE_LICENSE("GPL");
 #include &lt;linux/kernel.h&gt;
 #include &lt;linux/module.h&gt;
 #include &lt;linux/random.h&gt;
-#include "mcm_lheader/mcm_type.h"
-#include "mcm_lheader/mcm_size.h"
-#include "mcm_lheader/mcm_connect.h"
-#include "mcm_lheader/mcm_return.h"
-#include "mcm_lheader/mcm_data_exinfo_auto.h"
-#include "mcm_lklib/mcm_lklib_api.h"
+#include "mcm_lib/mcm_lheader/mcm_type.h"
+#include "mcm_lib/mcm_lheader/mcm_size.h"
+#include "mcm_lib/mcm_lheader/mcm_connect.h"
+#include "mcm_lib/mcm_lheader/mcm_return.h"
+#include "mcm_lib/mcm_lheader/mcm_data_exinfo_auto.h"
+#include "mcm_lib/mcm_lklib/mcm_lklib_api.h"
 
 #define DMSG(msg_fmt, msgs...) \
     printk(KERN_INFO "%s(%04u): " msg_fmt "\n", \

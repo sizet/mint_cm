@@ -8,12 +8,12 @@
 #include <linux/module.h>
 #include <linux/proc_fs.h>
 #include <linux/uaccess.h>
-#include "mcm_lheader/mcm_type.h"
-#include "mcm_lheader/mcm_size.h"
-#include "mcm_lheader/mcm_connect.h"
-#include "mcm_lheader/mcm_return.h"
-#include "mcm_lheader/mcm_data_exinfo_auto.h"
-#include "mcm_lklib/mcm_lklib_api.h"
+#include "mcm_lib/mcm_lheader/mcm_type.h"
+#include "mcm_lib/mcm_lheader/mcm_size.h"
+#include "mcm_lib/mcm_lheader/mcm_connect.h"
+#include "mcm_lib/mcm_lheader/mcm_return.h"
+#include "mcm_lib/mcm_lheader/mcm_data_exinfo_auto.h"
+#include "mcm_lib/mcm_lklib/mcm_lklib_api.h"
 
 
 #define DMSG(msg_fmt, msgs...) \
