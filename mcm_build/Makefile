@@ -2,6 +2,8 @@
 # This file is part of the MintCM.
 # Some rights reserved. See README.
 
+MCM_PATH = $(MCM_TOP_PATH)
+
 CC    = gcc
 LD    = ld
 STRIP = strip
@@ -9,7 +11,7 @@ STRIP = strip
 CC_FLAGS = $(CC_MULTIPLE_MODEL_SUFFIX) -Wall -Wunused-result -O2
 LD_FLAGS =
 
-INCLUDE_PATH =
+INCLUDE_PATH = -I$(MCM_PATH)
 LIBRARY_PATH =
 
 LIBRARY_FILE =
@@ -26,10 +28,10 @@ STORE_CURRENT_PROFILE = mcm_store_profile_current$(MV_MULTIPLE_MODEL_SUFFIX_LOWE
 
 AUTO_FILE_EACH =
 AUTO_SOURCE_PATH_LIST =
-AUTO_SOURCE_PATH_LIST += ../mcm_lib/mcm_lheader/mcm_data_exinfo$(MV_MULTIPLE_MODEL_SUFFIX_LOWER)_auto.h
-AUTO_SOURCE_PATH_LIST += ../mcm_daemon$(MV_MULTIPLE_MODEL_SUFFIX_LOWER)/mcm_data_ininfo_auto.h
-AUTO_SOURCE_PATH_LIST += ../mcm_daemon$(MV_MULTIPLE_MODEL_SUFFIX_LOWER)/mcm_data_info_auto.c
-AUTO_SOURCE_PATH_LIST += ../mcm_lib/mcm_jslib/mcm_jslib_data_info$(MV_MULTIPLE_MODEL_SUFFIX_LOWER)_auto.js
+AUTO_SOURCE_PATH_LIST += $(MCM_PATH)/mcm_lib/mcm_lheader/mcm_data_exinfo$(MV_MULTIPLE_MODEL_SUFFIX_LOWER)_auto.h
+AUTO_SOURCE_PATH_LIST += $(MCM_PATH)/mcm_daemon$(MV_MULTIPLE_MODEL_SUFFIX_LOWER)/mcm_data_ininfo_auto.h
+AUTO_SOURCE_PATH_LIST += $(MCM_PATH)/mcm_daemon$(MV_MULTIPLE_MODEL_SUFFIX_LOWER)/mcm_data_info_auto.c
+AUTO_SOURCE_PATH_LIST += $(MCM_PATH)/mcm_lib/mcm_jslib/mcm_jslib_data_info$(MV_MULTIPLE_MODEL_SUFFIX_LOWER)_auto.js
 
 
 binary : $(TARGET_FILE)
@@ -53,7 +55,7 @@ $(TARGET_FILE) : $(OBJECT_FILE)
 -include $(SOURCE_FILE:.c=.d)
 
 $(MODEL_PROFILE) $(STORE_PROFILE) : $(DATA_PROFILE) $(TARGET_FILE)
-	./$(TARGET_FILE) -d $(DATA_PROFILE) -m $(MODEL_PROFILE) -s $(STORE_PROFILE)
+	./$(TARGET_FILE) -d $(DATA_PROFILE) -m $(MODEL_PROFILE) -s $(STORE_PROFILE) -t $(MCM_PATH)
 	@if [ ! -f "$(STORE_DEFAULT_PROFILE)" ]; then cp -f $(STORE_PROFILE) $(STORE_DEFAULT_PROFILE); fi
 
 install :

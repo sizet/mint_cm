@@ -8,10 +8,10 @@
 #include <string.h>
 #include <unistd.h>
 #include <sys/stat.h>
-#include "../mcm_lib/mcm_lheader/mcm_type.h"
-#include "../mcm_lib/mcm_lheader/mcm_keyword.h"
-#include "../mcm_lib/mcm_lheader/mcm_control.h"
-#include "../mcm_lib/mcm_lheader/mcm_limit.h"
+#include "mcm_lib/mcm_lheader/mcm_type.h"
+#include "mcm_lib/mcm_lheader/mcm_keyword.h"
+#include "mcm_lib/mcm_lheader/mcm_control.h"
+#include "mcm_lib/mcm_lheader/mcm_limit.h"
 
 
 
@@ -2682,6 +2682,7 @@ int output_config_sub_data_info_c_01(
 }
 
 int output_config_data_info_file(
+    char *dir_path,
     struct mcm_xml_info_t *this_xml)
 {
     int fret = -1;
@@ -2690,14 +2691,14 @@ int output_config_data_info_file(
     FILE *file_exinfo_fp, *file_ininfo_fp, *file_info_fp;
 
 
-    snprintf(path_exinfo_buf, sizeof(path_exinfo_buf), "../%s/%s",
-             MCM_MCM_LHEADER_PATH, MCM_MCM_DATA_EXINFO_H_AUTO_FILE);
+    snprintf(path_exinfo_buf, sizeof(path_exinfo_buf), "%s/%s/%s",
+             dir_path, MCM_MCM_LHEADER_PATH, MCM_MCM_DATA_EXINFO_H_AUTO_FILE);
 
-    snprintf(path_ininfo_buf, sizeof(path_ininfo_buf), "../%s/%s",
-             MCM_MCM_DAEMON_PATH, MCM_MCM_DATA_ININFO_H_AUTO_FILE);
+    snprintf(path_ininfo_buf, sizeof(path_ininfo_buf), "%s/%s/%s",
+             dir_path, MCM_MCM_DAEMON_PATH, MCM_MCM_DATA_ININFO_H_AUTO_FILE);
 
-    snprintf(path_info_buf, sizeof(path_info_buf), "../%s/%s",
-             MCM_MCM_DAEMON_PATH, MCM_MCM_DATA_INFO_C_AUTO_FILE);
+    snprintf(path_info_buf, sizeof(path_info_buf), "%s/%s/%s",
+             dir_path, MCM_MCM_DAEMON_PATH, MCM_MCM_DATA_INFO_C_AUTO_FILE);
 
 
     file_exinfo_fp = fopen(path_exinfo_buf, "w");
@@ -2821,6 +2822,7 @@ int output_jslib_sub_data_info_file(
 }
 
 int output_jslib_data_info_file(
+    char *dir_path,
     struct mcm_xml_info_t *this_xml)
 {
     int fret = -1;
@@ -2828,8 +2830,8 @@ int output_jslib_data_info_file(
     FILE *file_fp;
 
 
-    snprintf(path_buf, sizeof(path_buf), "../%s/%s",
-             MCM_MCM_JSLIB_PATH, MCM_MCM_JSLIB_DATA_INFO_AUTO_FILE);
+    snprintf(path_buf, sizeof(path_buf), "%s/%s/%s",
+             dir_path, MCM_MCM_JSLIB_PATH, MCM_MCM_JSLIB_DATA_INFO_AUTO_FILE);
 
     file_fp = fopen(path_buf, "w");
     if(file_fp == NULL)
@@ -3042,13 +3044,13 @@ FREE_01:
 
 int main(int argc, char **argv)
 {
-    int fret = -1;
-    char opt_ch, *data_ppath = NULL, *model_ppath = NULL, *store_ppath = NULL;
+    int fret = -1, opt_ch;
+    char *data_ppath = NULL, *model_ppath = NULL, *store_ppath = NULL, *top_path = NULL;
     struct mcm_xml_info_t xml_info;
     MCM_DTYPE_EK_TD tmp_ek;
 
 
-    while((opt_ch = getopt(argc , argv, "d:m:s:"))!= -1)
+    while((opt_ch = getopt(argc , argv, "d:m:s:t:"))!= -1)
         switch(opt_ch)
         {
             case 'd':
@@ -3060,14 +3062,21 @@ int main(int argc, char **argv)
             case 's':
                 store_ppath = optarg;
                 break;
+            case 't':
+                top_path = optarg;
+                break;
             default:
+                DMSG("unknown argument [%d]", opt_ch);
                 goto FREE_HELP;
         }
+
     if(data_ppath == NULL)
         goto FREE_HELP;
     if(model_ppath == NULL)
         goto FREE_HELP;
     if(store_ppath == NULL)
+        goto FREE_HELP;
+    if(top_path == NULL)
         goto FREE_HELP;
 
     // 計算最大長度, -- = '\0'.
@@ -3093,13 +3102,13 @@ int main(int argc, char **argv)
         goto FREE_02;
     }
 
-    if(output_config_data_info_file(&xml_info) < 0)
+    if(output_config_data_info_file(top_path, &xml_info) < 0)
     {
         DMSG("call output_config_data_info_file() fail");
         goto FREE_02;
     }
 
-    if(output_jslib_data_info_file(&xml_info) < 0)
+    if(output_jslib_data_info_file(top_path, &xml_info) < 0)
     {
         DMSG("call output_jslib_data_info_file() fail");
         goto FREE_02;
@@ -3123,9 +3132,10 @@ FREE_02:
 FREE_01:
     return fret;
 FREE_HELP:
-    printf("\nmcm_build <-d> <-m> <-s>\n");
+    printf("\nmcm_build <-d> <-m> <-s> <-t>\n");
     printf("  -d : <-d data_ppath>, the path of the data_profile.\n");
     printf("  -m : <-m model_ppath>, the path of the model_profile.\n");
-    printf("  -s : <-s store_ppath>, the path of the store_profile.\n\n");
+    printf("  -s : <-s store_ppath>, the path of the store_profile.\n");
+    printf("  -t : <-t top_ppath>, the path of the mint_cm.\n\n");
     return fret;
 }
