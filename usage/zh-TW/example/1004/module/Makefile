@@ -2,13 +2,15 @@
 # This file is part of the MintCM.
 # Some rights reserved. See README.
 
+MCM_PATH = $(MCM_TOP_PATH)
+
 CC_FLAGS = $(CFLAGS) -fPIC -Wall -O2
 LD_FLAGS = $(LDFLAGS) -fPIC -shared
 
 MAAM_PATH       = $(MAAM_TOP_PATH)
 MAAM_LULIB_PATH = $(MAAM_PATH)/maam_lib/maam_lulib
 
-INCLUDE_PATH =
+INCLUDE_PATH = -I$(MCM_PATH)
 LIBRARY_PATH =
 
 LIBRARY_FILE =

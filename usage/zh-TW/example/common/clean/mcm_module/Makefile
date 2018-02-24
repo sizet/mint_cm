@@ -2,10 +2,12 @@
 # This file is part of the MintCM.
 # Some rights reserved. See README.
 
+MCM_PATH = $(MCM_TOP_PATH)
+
 CC_FLAGS = $(CFLAGS) -fPIC -Wall -O2
 LD_FLAGS = $(LDFLAGS) -fPIC -shared
 
-INCLUDE_PATH =
+INCLUDE_PATH = -I$(MCM_PATH)
 LIBRARY_PATH =
 
 LIBRARY_FILE =

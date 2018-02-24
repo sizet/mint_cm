@@ -2750,9 +2750,9 @@ int output_config_data_info_file(
     WF2(file_ininfo_fp, "#ifndef %s\n", MCM_DN_DATA_ININFO_DEFINE_NAME);
     WF2(file_ininfo_fp, "#define %s\n\n\n\n\n", MCM_DN_DATA_ININFO_DEFINE_NAME);
 
-    WF2(file_ininfo_fp, "#include \"../%s/%s\"\n",
+    WF2(file_ininfo_fp, "#include \"%s/%s\"\n",
         MCM_MCM_LHEADER_PATH, MCM_MCM_TYPE_FILE);
-    WF2(file_ininfo_fp, "#include \"../%s/%s\"\n\n\n\n\n",
+    WF2(file_ininfo_fp, "#include \"%s/%s\"\n\n\n\n\n",
         MCM_MCM_LHEADER_PATH, MCM_MCM_DATA_EXINFO_H_AUTO_FILE);
 
     WF2(file_ininfo_fp, "#define %s %s\n\n",

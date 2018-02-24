@@ -11,8 +11,8 @@
 #include <signal.h>
 #include <pthread.h>
 #include <semaphore.h>
-#include "../mcm_lib/mcm_lheader/mcm_type.h"
-#include "../mcm_lib/mcm_lheader/mcm_connect.h"
+#include "mcm_lib/mcm_lheader/mcm_type.h"
+#include "mcm_lib/mcm_lheader/mcm_connect.h"
 
 
 

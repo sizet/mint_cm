@@ -2,9 +2,9 @@
 // This file is part of the MintCM.
 // Some rights reserved. See README.
 
-#include "../../mcm_lib/mcm_lheader/mcm_type.h"
-#include "../../mcm_lib/mcm_lheader/mcm_return.h"
-#include "../../mcm_lib/mcm_lheader/mcm_debug.h"
+#include "mcm_lib/mcm_lheader/mcm_type.h"
+#include "mcm_lib/mcm_lheader/mcm_return.h"
+#include "mcm_lib/mcm_lheader/mcm_debug.h"
 #include "../mcm_action_handle_define.h"
 
 

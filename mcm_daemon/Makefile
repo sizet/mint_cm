@@ -2,10 +2,12 @@
 # This file is part of the MintCM.
 # Some rights reserved. See README.
 
+MCM_PATH = $(MCM_TOP_PATH)
+
 CC_FLAGS = $(CC_MULTIPLE_MODEL_SUFFIX) $(CFLAGS) -Wall -Wno-strict-aliasing -O2
 LD_FLAGS = $(LDFLAGS) -Wl,--export-dynamic
 
-INCLUDE_PATH =
+INCLUDE_PATH = -I$(MCM_PATH)
 LIBRARY_PATH =
 
 LIBRARY_FILE = -ldl -lpthread

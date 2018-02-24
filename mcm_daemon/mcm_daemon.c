@@ -11,9 +11,9 @@
 #include <unistd.h>
 #include <pthread.h>
 #include <semaphore.h>
-#include "../mcm_lib/mcm_lheader/mcm_type.h"
-#include "../mcm_lib/mcm_lheader/mcm_return.h"
-#include "../mcm_lib/mcm_lheader/mcm_debug.h"
+#include "mcm_lib/mcm_lheader/mcm_type.h"
+#include "mcm_lib/mcm_lheader/mcm_return.h"
+#include "mcm_lib/mcm_lheader/mcm_debug.h"
 #include "mcm_service_handle_extern.h"
 #include "mcm_config_handle_extern.h"
 #include "mcm_action_handle_extern.h"
