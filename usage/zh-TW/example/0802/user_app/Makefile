@@ -3,8 +3,7 @@
 # Some rights reserved. See README.
 
 MCM_PATH       = $(PWD)/../../../../..
-MCM_LIB_PATH   = $(MCM_PATH)/mcm_lib
-MCM_LULIB_PATH = $(MCM_LIB_PATH)/mcm_lulib
+MCM_LULIB_PATH = $(MCM_PATH)/mcm_lib/mcm_lulib
 
 CROSS =
 CC    = $(CROSS)gcc
@@ -14,7 +13,7 @@ STRIP = $(CROSS)strip
 CC_FLAGS = -Wall -Wno-unused-result -O2
 LD_FLAGS =
 
-INCLUDE_PATH = -I$(MCM_LIB_PATH)
+INCLUDE_PATH = -I$(MCM_PATH)
 LIBRARY_PATH = -L$(MCM_LULIB_PATH)
 
 USE_STATIC_MCM_LIB = YES

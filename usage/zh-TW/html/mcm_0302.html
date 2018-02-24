@@ -34,12 +34,11 @@ Some rights reserved. See README.
       # 路徑設定.<br>
       <font class="css_font_p1">
       MCM_PATH&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; = mint_cm<br>
-      MCM_LIB_PATH&nbsp;&nbsp; = $(MCM_PATH)/mcm_lib<br>
-      MCM_LULIB_PATH = $(MCM_LIB_PATH)/mcm_lulib
+      MCM_LULIB_PATH = $(MCM_PATH)/mcm_lib/mcm_lulib
       </font>
       <br><br>
       # 標頭檔路徑.<br>
-      <font class="css_font_p1">INCLUDE_PATH = -I$(MCM_LIB_PATH)</font><br>
+      <font class="css_font_p1">INCLUDE_PATH = -I$(MCM_PATH)</font><br>
       # 函式庫路徑.<br>
       <font class="css_font_p1">LIBRARY_PATH = -L$(MCM_LULIB_PATH)</font>
       <br><br>
@@ -59,12 +58,12 @@ Some rights reserved. See README.
 
     <div class="css_div_hook" id="hook_0302_include_01"></div>
     需要的標頭檔 :<br>
-    <font class="css_font_p1">#include "mcm_lheader/mcm_type.h"</font><br>
-    <font class="css_font_p1">#include "mcm_lheader/mcm_size.h"</font><br>
-    <font class="css_font_p1">#include "mcm_lheader/mcm_connect.h"</font><br>
-    <font class="css_font_p1">#include "mcm_lheader/mcm_return.h"</font><br>
-    <font class="css_font_p1">#include "mcm_lheader/mcm_data_exinfo_auto.h"</font><br>
-    <font class="css_font_p1">#include "mcm_lulib/mcm_lulib_api.h"</font>
+    <font class="css_font_p1">#include "mcm_lib/mcm_lheader/mcm_type.h"</font><br>
+    <font class="css_font_p1">#include "mcm_lib/mcm_lheader/mcm_size.h"</font><br>
+    <font class="css_font_p1">#include "mcm_lib/mcm_lheader/mcm_connect.h"</font><br>
+    <font class="css_font_p1">#include "mcm_lib/mcm_lheader/mcm_return.h"</font><br>
+    <font class="css_font_p1">#include "mcm_lib/mcm_lheader/mcm_data_exinfo_auto.h"</font><br>
+    <font class="css_font_p1">#include "mcm_lib/mcm_lulib/mcm_lulib_api.h"</font>
     <br><br>
 
   </div>
@@ -736,12 +735,12 @@ Some rights reserved. See README.
 #include &lt;stdio.h&gt;
 #include &lt;string.h&gt;
 #include &lt;stdlib.h&gt;
-#include "mcm_lheader/mcm_type.h"
-#include "mcm_lheader/mcm_size.h"
-#include "mcm_lheader/mcm_connect.h"
-#include "mcm_lheader/mcm_return.h"
-#include "mcm_lheader/mcm_data_exinfo_auto.h"
-#include "mcm_lulib/mcm_lulib_api.h"
+#include "mcm_lib/mcm_lheader/mcm_type.h"
+#include "mcm_lib/mcm_lheader/mcm_size.h"
+#include "mcm_lib/mcm_lheader/mcm_connect.h"
+#include "mcm_lib/mcm_lheader/mcm_return.h"
+#include "mcm_lib/mcm_lheader/mcm_data_exinfo_auto.h"
+#include "mcm_lib/mcm_lulib/mcm_lulib_api.h"
 
 #define DMSG(msg_fmt, msgs...) printf("%s(%04u): " msg_fmt "\n", __FILE__, __LINE__, ##msgs)
 
@@ -813,12 +812,12 @@ FREE_01:
 #include &lt;stdio.h&gt;
 #include &lt;string.h&gt;
 #include &lt;stdlib.h&gt;
-#include "mcm_lheader/mcm_type.h"
-#include "mcm_lheader/mcm_size.h"
-#include "mcm_lheader/mcm_connect.h"
-#include "mcm_lheader/mcm_return.h"
-#include "mcm_lheader/mcm_data_exinfo_auto.h"
-#include "mcm_lulib/mcm_lulib_api.h"
+#include "mcm_lib/mcm_lheader/mcm_type.h"
+#include "mcm_lib/mcm_lheader/mcm_size.h"
+#include "mcm_lib/mcm_lheader/mcm_connect.h"
+#include "mcm_lib/mcm_lheader/mcm_return.h"
+#include "mcm_lib/mcm_lheader/mcm_data_exinfo_auto.h"
+#include "mcm_lib/mcm_lulib/mcm_lulib_api.h"
 
 #define DMSG(msg_fmt, msgs...) printf("%s(%04u): " msg_fmt "\n", __FILE__, __LINE__, ##msgs)
 
@@ -923,12 +922,12 @@ FREE_01:
 #include &lt;stdio.h&gt;
 #include &lt;string.h&gt;
 #include &lt;stdlib.h&gt;
-#include "mcm_lheader/mcm_type.h"
-#include "mcm_lheader/mcm_size.h"
-#include "mcm_lheader/mcm_connect.h"
-#include "mcm_lheader/mcm_return.h"
-#include "mcm_lheader/mcm_data_exinfo_auto.h"
-#include "mcm_lulib/mcm_lulib_api.h"
+#include "mcm_lib/mcm_lheader/mcm_type.h"
+#include "mcm_lib/mcm_lheader/mcm_size.h"
+#include "mcm_lib/mcm_lheader/mcm_connect.h"
+#include "mcm_lib/mcm_lheader/mcm_return.h"
+#include "mcm_lib/mcm_lheader/mcm_data_exinfo_auto.h"
+#include "mcm_lib/mcm_lulib/mcm_lulib_api.h"
 
 #define DMSG(msg_fmt, msgs...) printf("%s(%04u): " msg_fmt "\n", __FILE__, __LINE__, ##msgs)
 
@@ -1019,12 +1018,12 @@ FREE_01:
 #include &lt;stdio.h&gt;
 #include &lt;string.h&gt;
 #include &lt;stdlib.h&gt;
-#include "mcm_lheader/mcm_type.h"
-#include "mcm_lheader/mcm_size.h"
-#include "mcm_lheader/mcm_connect.h"
-#include "mcm_lheader/mcm_return.h"
-#include "mcm_lheader/mcm_data_exinfo_auto.h"
-#include "mcm_lulib/mcm_lulib_api.h"
+#include "mcm_lib/mcm_lheader/mcm_type.h"
+#include "mcm_lib/mcm_lheader/mcm_size.h"
+#include "mcm_lib/mcm_lheader/mcm_connect.h"
+#include "mcm_lib/mcm_lheader/mcm_return.h"
+#include "mcm_lib/mcm_lheader/mcm_data_exinfo_auto.h"
+#include "mcm_lib/mcm_lulib/mcm_lulib_api.h"
 
 #define DMSG(msg_fmt, msgs...) printf("%s(%04u): " msg_fmt "\n", __FILE__, __LINE__, ##msgs)
 
@@ -1133,12 +1132,12 @@ int main(
 #include &lt;stdio.h&gt;
 #include &lt;string.h&gt;
 #include &lt;stdlib.h&gt;
-#include "mcm_lheader/mcm_type.h"
-#include "mcm_lheader/mcm_size.h"
-#include "mcm_lheader/mcm_connect.h"
-#include "mcm_lheader/mcm_return.h"
-#include "mcm_lheader/mcm_data_exinfo_auto.h"
-#include "mcm_lulib/mcm_lulib_api.h"
+#include "mcm_lib/mcm_lheader/mcm_type.h"
+#include "mcm_lib/mcm_lheader/mcm_size.h"
+#include "mcm_lib/mcm_lheader/mcm_connect.h"
+#include "mcm_lib/mcm_lheader/mcm_return.h"
+#include "mcm_lib/mcm_lheader/mcm_data_exinfo_auto.h"
+#include "mcm_lib/mcm_lulib/mcm_lulib_api.h"
 
 #define DMSG(msg_fmt, msgs...) printf("%s(%04u): " msg_fmt "\n", __FILE__, __LINE__, ##msgs)
 
@@ -1291,12 +1290,12 @@ FREE_01:
 #include &lt;stdio.h&gt;
 #include &lt;string.h&gt;
 #include &lt;stdlib.h&gt;
-#include "mcm_lheader/mcm_type.h"
-#include "mcm_lheader/mcm_size.h"
-#include "mcm_lheader/mcm_connect.h"
-#include "mcm_lheader/mcm_return.h"
-#include "mcm_lheader/mcm_data_exinfo_auto.h"
-#include "mcm_lulib/mcm_lulib_api.h"
+#include "mcm_lib/mcm_lheader/mcm_type.h"
+#include "mcm_lib/mcm_lheader/mcm_size.h"
+#include "mcm_lib/mcm_lheader/mcm_connect.h"
+#include "mcm_lib/mcm_lheader/mcm_return.h"
+#include "mcm_lib/mcm_lheader/mcm_data_exinfo_auto.h"
+#include "mcm_lib/mcm_lulib/mcm_lulib_api.h"
 
 #define DMSG(msg_fmt, msgs...) printf("%s(%04u): " msg_fmt "\n", __FILE__, __LINE__, ##msgs)
 
@@ -1508,12 +1507,12 @@ FREE_01:
 #include &lt;stdio.h&gt;
 #include &lt;string.h&gt;
 #include &lt;stdlib.h&gt;
-#include "mcm_lheader/mcm_type.h"
-#include "mcm_lheader/mcm_size.h"
-#include "mcm_lheader/mcm_connect.h"
-#include "mcm_lheader/mcm_return.h"
-#include "mcm_lheader/mcm_data_exinfo_auto.h"
-#include "mcm_lulib/mcm_lulib_api.h"
+#include "mcm_lib/mcm_lheader/mcm_type.h"
+#include "mcm_lib/mcm_lheader/mcm_size.h"
+#include "mcm_lib/mcm_lheader/mcm_connect.h"
+#include "mcm_lib/mcm_lheader/mcm_return.h"
+#include "mcm_lib/mcm_lheader/mcm_data_exinfo_auto.h"
+#include "mcm_lib/mcm_lulib/mcm_lulib_api.h"
 
 #define DMSG(msg_fmt, msgs...) printf("%s(%04u): " msg_fmt "\n", __FILE__, __LINE__, ##msgs)
 
@@ -1719,12 +1718,12 @@ FREE_01:
 #include &lt;stdio.h&gt;
 #include &lt;string.h&gt;
 #include &lt;stdlib.h&gt;
-#include "mcm_lheader/mcm_type.h"
-#include "mcm_lheader/mcm_size.h"
-#include "mcm_lheader/mcm_connect.h"
-#include "mcm_lheader/mcm_return.h"
-#include "mcm_lheader/mcm_data_exinfo_auto.h"
-#include "mcm_lulib/mcm_lulib_api.h"
+#include "mcm_lib/mcm_lheader/mcm_type.h"
+#include "mcm_lib/mcm_lheader/mcm_size.h"
+#include "mcm_lib/mcm_lheader/mcm_connect.h"
+#include "mcm_lib/mcm_lheader/mcm_return.h"
+#include "mcm_lib/mcm_lheader/mcm_data_exinfo_auto.h"
+#include "mcm_lib/mcm_lulib/mcm_lulib_api.h"
 
 #define DMSG(msg_fmt, msgs...) printf("%s(%04u): " msg_fmt "\n", __FILE__, __LINE__, ##msgs)
 
@@ -1923,12 +1922,12 @@ FREE_01:
 #include &lt;stdio.h&gt;
 #include &lt;string.h&gt;
 #include &lt;stdlib.h&gt;
-#include "mcm_lheader/mcm_type.h"
-#include "mcm_lheader/mcm_size.h"
-#include "mcm_lheader/mcm_connect.h"
-#include "mcm_lheader/mcm_return.h"
-#include "mcm_lheader/mcm_data_exinfo_auto.h"
-#include "mcm_lulib/mcm_lulib_api.h"
+#include "mcm_lib/mcm_lheader/mcm_type.h"
+#include "mcm_lib/mcm_lheader/mcm_size.h"
+#include "mcm_lib/mcm_lheader/mcm_connect.h"
+#include "mcm_lib/mcm_lheader/mcm_return.h"
+#include "mcm_lib/mcm_lheader/mcm_data_exinfo_auto.h"
+#include "mcm_lib/mcm_lulib/mcm_lulib_api.h"
 
 #define DMSG(msg_fmt, msgs...) printf("%s(%04u): " msg_fmt "\n", __FILE__, __LINE__, ##msgs)
 
@@ -2186,12 +2185,12 @@ FREE_01:
 #include &lt;stdio.h&gt;
 #include &lt;string.h&gt;
 #include &lt;stdlib.h&gt;
-#include "mcm_lheader/mcm_type.h"
-#include "mcm_lheader/mcm_size.h"
-#include "mcm_lheader/mcm_connect.h"
-#include "mcm_lheader/mcm_return.h"
-#include "mcm_lheader/mcm_data_exinfo_auto.h"
-#include "mcm_lulib/mcm_lulib_api.h"
+#include "mcm_lib/mcm_lheader/mcm_type.h"
+#include "mcm_lib/mcm_lheader/mcm_size.h"
+#include "mcm_lib/mcm_lheader/mcm_connect.h"
+#include "mcm_lib/mcm_lheader/mcm_return.h"
+#include "mcm_lib/mcm_lheader/mcm_data_exinfo_auto.h"
+#include "mcm_lib/mcm_lulib/mcm_lulib_api.h"
 
 #define DMSG(msg_fmt, msgs...) printf("%s(%04u): " msg_fmt "\n", __FILE__, __LINE__, ##msgs)
 
@@ -2386,12 +2385,12 @@ FREE_01:
 #include &lt;stdio.h&gt;
 #include &lt;string.h&gt;
 #include &lt;stdlib.h&gt;
-#include "mcm_lheader/mcm_type.h"
-#include "mcm_lheader/mcm_size.h"
-#include "mcm_lheader/mcm_connect.h"
-#include "mcm_lheader/mcm_return.h"
-#include "mcm_lheader/mcm_data_exinfo_auto.h"
-#include "mcm_lulib/mcm_lulib_api.h"
+#include "mcm_lib/mcm_lheader/mcm_type.h"
+#include "mcm_lib/mcm_lheader/mcm_size.h"
+#include "mcm_lib/mcm_lheader/mcm_connect.h"
+#include "mcm_lib/mcm_lheader/mcm_return.h"
+#include "mcm_lib/mcm_lheader/mcm_data_exinfo_auto.h"
+#include "mcm_lib/mcm_lulib/mcm_lulib_api.h"
 
 #define DMSG(msg_fmt, msgs...) printf("%s(%04u): " msg_fmt "\n", __FILE__, __LINE__, ##msgs)
 
@@ -2561,12 +2560,12 @@ FREE_01:
 #include &lt;stdio.h&gt;
 #include &lt;string.h&gt;
 #include &lt;stdlib.h&gt;
-#include "mcm_lheader/mcm_type.h"
-#include "mcm_lheader/mcm_size.h"
-#include "mcm_lheader/mcm_connect.h"
-#include "mcm_lheader/mcm_return.h"
-#include "mcm_lheader/mcm_data_exinfo_auto.h"
-#include "mcm_lulib/mcm_lulib_api.h"
+#include "mcm_lib/mcm_lheader/mcm_type.h"
+#include "mcm_lib/mcm_lheader/mcm_size.h"
+#include "mcm_lib/mcm_lheader/mcm_connect.h"
+#include "mcm_lib/mcm_lheader/mcm_return.h"
+#include "mcm_lib/mcm_lheader/mcm_data_exinfo_auto.h"
+#include "mcm_lib/mcm_lulib/mcm_lulib_api.h"
 
 #define DMSG(msg_fmt, msgs...) printf("%s(%04u): " msg_fmt "\n", __FILE__, __LINE__, ##msgs)
 
@@ -2775,12 +2774,12 @@ FREE_01:
 #include &lt;stdio.h&gt;
 #include &lt;string.h&gt;
 #include &lt;stdlib.h&gt;
-#include "mcm_lheader/mcm_type.h"
-#include "mcm_lheader/mcm_size.h"
-#include "mcm_lheader/mcm_connect.h"
-#include "mcm_lheader/mcm_return.h"
-#include "mcm_lheader/mcm_data_exinfo_auto.h"
-#include "mcm_lulib/mcm_lulib_api.h"
+#include "mcm_lib/mcm_lheader/mcm_type.h"
+#include "mcm_lib/mcm_lheader/mcm_size.h"
+#include "mcm_lib/mcm_lheader/mcm_connect.h"
+#include "mcm_lib/mcm_lheader/mcm_return.h"
+#include "mcm_lib/mcm_lheader/mcm_data_exinfo_auto.h"
+#include "mcm_lib/mcm_lulib/mcm_lulib_api.h"
 
 #define DMSG(msg_fmt, msgs...) printf("%s(%04u): " msg_fmt "\n", __FILE__, __LINE__, ##msgs)
 
@@ -2957,12 +2956,12 @@ FREE_01:
 #include &lt;stdio.h&gt;
 #include &lt;string.h&gt;
 #include &lt;stdlib.h&gt;
-#include "mcm_lheader/mcm_type.h"
-#include "mcm_lheader/mcm_size.h"
-#include "mcm_lheader/mcm_connect.h"
-#include "mcm_lheader/mcm_return.h"
-#include "mcm_lheader/mcm_data_exinfo_auto.h"
-#include "mcm_lulib/mcm_lulib_api.h"
+#include "mcm_lib/mcm_lheader/mcm_type.h"
+#include "mcm_lib/mcm_lheader/mcm_size.h"
+#include "mcm_lib/mcm_lheader/mcm_connect.h"
+#include "mcm_lib/mcm_lheader/mcm_return.h"
+#include "mcm_lib/mcm_lheader/mcm_data_exinfo_auto.h"
+#include "mcm_lib/mcm_lulib/mcm_lulib_api.h"
 
 #define DMSG(msg_fmt, msgs...) printf("%s(%04u): " msg_fmt "\n", __FILE__, __LINE__, ##msgs)
 
@@ -3109,12 +3108,12 @@ FREE_01:
 #include &lt;stdio.h&gt;
 #include &lt;string.h&gt;
 #include &lt;stdlib.h&gt;
-#include "mcm_lheader/mcm_type.h"
-#include "mcm_lheader/mcm_size.h"
-#include "mcm_lheader/mcm_connect.h"
-#include "mcm_lheader/mcm_return.h"
-#include "mcm_lheader/mcm_data_exinfo_auto.h"
-#include "mcm_lulib/mcm_lulib_api.h"
+#include "mcm_lib/mcm_lheader/mcm_type.h"
+#include "mcm_lib/mcm_lheader/mcm_size.h"
+#include "mcm_lib/mcm_lheader/mcm_connect.h"
+#include "mcm_lib/mcm_lheader/mcm_return.h"
+#include "mcm_lib/mcm_lheader/mcm_data_exinfo_auto.h"
+#include "mcm_lib/mcm_lulib/mcm_lulib_api.h"
 
 #define DMSG(msg_fmt, msgs...) printf("%s(%04u): " msg_fmt "\n", __FILE__, __LINE__, ##msgs)
 
@@ -3292,12 +3291,12 @@ FREE_01:
 #include &lt;stdio.h&gt;
 #include &lt;string.h&gt;
 #include &lt;stdlib.h&gt;
-#include "mcm_lheader/mcm_type.h"
-#include "mcm_lheader/mcm_size.h"
-#include "mcm_lheader/mcm_connect.h"
-#include "mcm_lheader/mcm_return.h"
-#include "mcm_lheader/mcm_data_exinfo_auto.h"
-#include "mcm_lulib/mcm_lulib_api.h"
+#include "mcm_lib/mcm_lheader/mcm_type.h"
+#include "mcm_lib/mcm_lheader/mcm_size.h"
+#include "mcm_lib/mcm_lheader/mcm_connect.h"
+#include "mcm_lib/mcm_lheader/mcm_return.h"
+#include "mcm_lib/mcm_lheader/mcm_data_exinfo_auto.h"
+#include "mcm_lib/mcm_lulib/mcm_lulib_api.h"
 
 #define DMSG(msg_fmt, msgs...) printf("%s(%04u): " msg_fmt "\n", __FILE__, __LINE__, ##msgs)
 
@@ -3468,12 +3467,12 @@ int mcm_module_user_test_01(
 #include &lt;stdio.h&gt;
 #include &lt;string.h&gt;
 #include &lt;stdlib.h&gt;
-#include "mcm_lheader/mcm_type.h"
-#include "mcm_lheader/mcm_size.h"
-#include "mcm_lheader/mcm_connect.h"
-#include "mcm_lheader/mcm_return.h"
-#include "mcm_lheader/mcm_data_exinfo_auto.h"
-#include "mcm_lulib/mcm_lulib_api.h"
+#include "mcm_lib/mcm_lheader/mcm_type.h"
+#include "mcm_lib/mcm_lheader/mcm_size.h"
+#include "mcm_lib/mcm_lheader/mcm_connect.h"
+#include "mcm_lib/mcm_lheader/mcm_return.h"
+#include "mcm_lib/mcm_lheader/mcm_data_exinfo_auto.h"
+#include "mcm_lib/mcm_lulib/mcm_lulib_api.h"
 
 #define DMSG(msg_fmt, msgs...) printf("%s(%04u): " msg_fmt "\n", __FILE__, __LINE__, ##msgs)
 
@@ -3614,12 +3613,12 @@ FREE_01:
 #include &lt;stdio.h&gt;
 #include &lt;string.h&gt;
 #include &lt;stdlib.h&gt;
-#include "mcm_lheader/mcm_type.h"
-#include "mcm_lheader/mcm_size.h"
-#include "mcm_lheader/mcm_connect.h"
-#include "mcm_lheader/mcm_return.h"
-#include "mcm_lheader/mcm_data_exinfo_auto.h"
-#include "mcm_lulib/mcm_lulib_api.h"
+#include "mcm_lib/mcm_lheader/mcm_type.h"
+#include "mcm_lib/mcm_lheader/mcm_size.h"
+#include "mcm_lib/mcm_lheader/mcm_connect.h"
+#include "mcm_lib/mcm_lheader/mcm_return.h"
+#include "mcm_lib/mcm_lheader/mcm_data_exinfo_auto.h"
+#include "mcm_lib/mcm_lulib/mcm_lulib_api.h"
 
 #define DMSG(msg_fmt, msgs...) printf("%s(%04u): " msg_fmt "\n", __FILE__, __LINE__, ##msgs)
 
@@ -3718,12 +3717,12 @@ FREE_01:
 #include &lt;stdio.h&gt;
 #include &lt;string.h&gt;
 #include &lt;stdlib.h&gt;
-#include "mcm_lheader/mcm_type.h"
-#include "mcm_lheader/mcm_size.h"
-#include "mcm_lheader/mcm_connect.h"
-#include "mcm_lheader/mcm_return.h"
-#include "mcm_lheader/mcm_data_exinfo_auto.h"
-#include "mcm_lulib/mcm_lulib_api.h"
+#include "mcm_lib/mcm_lheader/mcm_type.h"
+#include "mcm_lib/mcm_lheader/mcm_size.h"
+#include "mcm_lib/mcm_lheader/mcm_connect.h"
+#include "mcm_lib/mcm_lheader/mcm_return.h"
+#include "mcm_lib/mcm_lheader/mcm_data_exinfo_auto.h"
+#include "mcm_lib/mcm_lulib/mcm_lulib_api.h"
 
 #define DMSG(msg_fmt, msgs...) printf("%s(%04u): " msg_fmt "\n", __FILE__, __LINE__, ##msgs)
 
