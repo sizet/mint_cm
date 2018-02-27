@@ -10,7 +10,7 @@ Some rights reserved. See README.
 
 
 
-#include "maam_common.h"
+#include "maam_lib/maam_lulib/maam_common.h"
 
 
 

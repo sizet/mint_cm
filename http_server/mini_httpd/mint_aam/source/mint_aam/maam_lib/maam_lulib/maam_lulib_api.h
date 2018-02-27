@@ -11,7 +11,7 @@ Some rights reserved. See README.
 
 
 #include <sys/types.h>
-#include "../../maam_buildin/maam_common.h"
+#include "maam_common.h"
 
 
 
