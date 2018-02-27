@@ -1,0 +1,502 @@
+<!--
+Copyright © 2017, Che-Wei Hsu <cwxhsu@gmail.com>
+This file is part of the MintCM.
+Some rights reserved. See README.
+-->
+
+<html>
+
+<head>
+<meta http-equiv="content-type" content="text/html; charset=utf-8">
+<link rel="stylesheet" href="../css/mcm_style.css">
+</head>
+
+<body class="css_body">
+
+<div class="css_div_box_frame_full">
+  <div class="css_div_box_title">chapter 12-02</div>
+  <div class="css_div_box_content">
+  </div>
+</div>
+<br>
+
+<div class="css_div_box_frame_full">
+  <div class="css_div_box_title">移植到 OpenWRT</div>
+  <div class="css_div_box_content">
+    <br>
+
+    此章節說明如何移植此系統到 OpenWRT 上使用.
+    <br><br>
+
+  </div>
+</div>
+<br>
+
+<div class="css_div_box_frame_full">
+  <div class="css_div_box_title">主程式部分</div>
+  <div class="css_div_box_content">
+    <br>
+
+    這邊說明如何將此系統加入到 OpenWRT 的 package 做編譯和使用.
+    <br><br>
+
+    <table class="css_table_list1">
+      <tr>
+        <td class="css_td_list1_l">01.&nbsp;</td>
+        <td class="css_td_list1_r">
+          在 OpenWRT 的 <font class="css_font_b1">package/system</font> 建立目錄, 結構為 :<br>
+          <div class="css_div_block">
+            主目錄.<br>
+            <font class="css_font_b1">mint-cm</font><br>
+            放置原始碼的目錄.<br>
+            <font class="css_font_b1">mint-cm/src</font><br>
+            放置其他檔案的目錄.<br>
+            <font class="css_font_b1">mint-cm/files</font>
+          </div>
+        </td>
+      </tr>
+    </table>
+    <br>
+
+    <table class="css_table_list1">
+      <tr>
+        <td class="css_td_list1_l">02.&nbsp;</td>
+        <td class="css_td_list1_r">
+          將 <font class="css_font_b1">mint_cm</font> 裡面的檔案複製到
+          <font class="css_font_b1">mint-cm/src</font> 目錄內.
+        </td>
+      </tr>
+    </table>
+    <br>
+
+    <table class="css_table_list1">
+      <tr>
+        <td class="css_td_list1_l">03.&nbsp;</td>
+        <td class="css_td_list1_r">
+          參考 <a href="mcm_0304.html#hook_0304_console_01">#03-04#</a>,
+          修改 CGI 端用來顯示錯誤訊息或除錯訊息的 console 設備為
+          <font class="css_font_p1">/dev/console</font>.
+        </td>
+      </tr>
+    </table>
+    <br>
+
+    <table class="css_table_list1">
+      <tr>
+        <td class="css_td_list1_l">04.&nbsp;</td>
+        <td class="css_td_list1_r">
+          參考 <a href="mcm_1201.html#hook_1201_use_dynamic_mcm_lib_01">#12-01#01</a>
+          和 <a href="mcm_1201.html.#hook_1201_use_dynamic_maam_lib_01">#12-01#02</a>,
+          把 <font class="css_font_b1">mint-cm/src</font> 目錄內用到 MintCM 和 MintAAM
+          的部分改為使用動態鏈結.
+        </td>
+      </tr>
+    </table>
+    <br>
+
+    <table class="css_table_list1">
+      <tr>
+        <td class="css_td_list1_l">05.&nbsp;</td>
+        <td class="css_td_list1_r">
+          在 <font class="css_font_b1">mint-cm</font> 目錄建立給 OpenWRT 編譯使用的
+          <font class="css_font_b1">Makefile</font>, 內容 :<br>
+<pre class="css_pre_code">
+include $(TOPDIR)/rules.mk
+
+PKG_NAME:=mint-cm
+PKG_RELEASE:=1
+
+PKG_BUILD_DIR:=$(BUILD_DIR)/$(PKG_NAME)
+
+include $(INCLUDE_DIR)/package.mk
+include $(INCLUDE_DIR)/kernel.mk
+
+define Package/$(PKG_NAME)
+	SECTION:=base
+	CATEGORY:=Base system
+	TITLE:=Mint Configuration Management
+	DEPENDS:=+libpthread
+endef
+
+define Build/Prepare
+	# 複製程式碼到 build_dir 目錄.
+	mkdir -p $(PKG_BUILD_DIR)
+	$(CP) ./src/* $(PKG_BUILD_DIR)/
+endef
+
+define Build/Configure
+	# 在 PC 上編譯和執行 mcm_build, 分析 mcm_data_profile.xml 產生相關的檔案.
+	cd $(PKG_BUILD_DIR); \
+	$(MAKE) binary_profile
+endef
+
+define Build/Compile
+	# 編譯 mcm_lulib_api.
+	cd $(PKG_BUILD_DIR); \
+	$(MAKE) binary_lulib \
+		CROSS="$(TARGET_CROSS)" \
+		CFLAGS="$(TARGET_CFLAGS)" \
+		LDFLAGS="$(TARGET_LDFLAGS)"
+
+	# 編譯 mcm_lklib_api.
+	cd $(PKG_BUILD_DIR); \
+	$(MAKE) binary_lklib \
+		ARCH="$(LINUX_KARCH)" \
+		CROSS="$(TARGET_CROSS)" \
+		KERNEL_PATH="$(LINUX_DIR)" \
+		EXTRA_CFLAGS="$(EXTRA_CFLAGS)"
+
+	# 編譯 mcm_cgi.
+	cd $(PKG_BUILD_DIR); \
+	$(MAKE) binary_cgi \
+		CROSS="$(TARGET_CROSS)" \
+		CFLAGS="$(TARGET_CFLAGS)" \
+		LDFLAGS="$(TARGET_LDFLAGS)"
+
+	# 編譯 mini_httpd.
+	cd $(PKG_BUILD_DIR); \
+	$(MAKE) binary_httpd \
+		CROSS="$(TARGET_CROSS)" \
+		CFLAGS="$(TARGET_CFLAGS)" \
+		LDFLAGS="$(TARGET_LDFLAGS)"
+
+	# 編譯 mcm_daemon.
+	cd $(PKG_BUILD_DIR); \
+	$(MAKE) binary_daemon \
+		CROSS="$(TARGET_CROSS)" \
+		CFLAGS="$(TARGET_CFLAGS)" \
+		LDFLAGS="$(TARGET_LDFLAGS)"
+
+	# 編譯 mcm_command.
+	cd $(PKG_BUILD_DIR); \
+	$(MAKE) binary_command \
+		CROSS="$(TARGET_CROSS)" \
+		CFLAGS="$(TARGET_CFLAGS)" \
+		LDFLAGS="$(TARGET_LDFLAGS)"
+endef
+
+MCM_LIB_PATH:=$(PKG_BUILD_DIR)/mcm_lib
+MCM_LHEADER_PATH:=$(MCM_LIB_PATH)/mcm_lheader
+MCM_LULIB_PATH:=$(MCM_LIB_PATH)/mcm_lulib
+MCM_LKLIB_PATH:=$(MCM_LIB_PATH)/mcm_lklib
+MCM_JSLIB_PATH:=$(MCM_LIB_PATH)/mcm_jslib
+MCM_BUILD_PATH:=$(PKG_BUILD_DIR)/mcm_build
+MCM_DAEMON_PATH:=$(PKG_BUILD_DIR)/mcm_daemon
+MCM_MODULE_PATH:=$(MCM_DAEMON_PATH)/mcm_module
+MCM_COMMAND_PATH:=$(PKG_BUILD_DIR)/mcm_command
+MCM_CGI_PATH:=$(PKG_BUILD_DIR)/mcm_cgi
+MCM_CGI_CONFIG_MODULE_PATH:=$(MCM_CGI_PATH)/mcm_cgi_config_module
+MCM_CGI_UPLOAD_MODULE_PATH:=$(MCM_CGI_PATH)/mcm_cgi_upload_module
+MINIHTTPD_PATH:=$(PKG_BUILD_DIR)/http_server/mini_httpd/last
+MAAM_PATH:=$(MINIHTTPD_PATH)/mint_aam
+MAAM_LIB_PATH:=$(MAAM_PATH)/maam_lib
+MAAM_LULIB_PATH:=$(MAAM_LIB_PATH)/maam_lulib
+MAAM_JSLIB_PATH:=$(MAAM_LIB_PATH)/maam_jslib
+
+# 假設目標平台存放網頁的路徑為 /web,
+# 注意則 mini_httpd.conf 內的 [dir=...] 要改為 [dir=/].
+TARGET_WEB_PATH:=web
+
+define Package/$(PKG_NAME)/install
+	## 安裝 mcm_lulib_api 部分 ##
+	# 安裝給其他程式使用的標頭檔.
+	rm -rf $(STAGING_DIR)/usr/include/mcm_lib
+	$(INSTALL_DIR) $(STAGING_DIR)/usr/include/mcm_lib/mcm_lheader
+	$(CP) $(MCM_LHEADER_PATH)/*.h $(STAGING_DIR)/usr/include/mcm_lib/mcm_lheader
+	$(INSTALL_DIR) $(STAGING_DIR)/usr/include/mcm_lib/mcm_lulib
+	$(CP) $(MCM_LULIB_PATH)/*.h $(STAGING_DIR)/usr/include/mcm_lib/mcm_lulib
+	# 安裝 mcm_lulib_api 函式庫.
+	$(INSTALL_DIR) $(1)/usr/lib
+	$(CP) $(MCM_LULIB_PATH)/*.so $(1)/usr/lib
+
+	## 安裝 mcm_lklib_api 部分 ##
+	# 安裝給其他程式使用的標頭檔.
+	rm -rf $(LINUX_DIR)/include/mcm_lib
+	$(INSTALL_DIR) $(LINUX_DIR)/include/mcm_lib/mcm_lheader
+	$(CP) $(MCM_LHEADER_PATH)/*.h $(LINUX_DIR)/include/mcm_lib/mcm_lheader
+	$(INSTALL_DIR) $(LINUX_DIR)/include/mcm_lib/mcm_lklib
+	$(CP) $(MCM_LKLIB_PATH)/*.h $(LINUX_DIR)/include/mcm_lib/mcm_lklib
+	# 安裝 mcm_lklib_api 函式庫.
+	$(INSTALL_DIR) $(1)/lib/modules/$(LINUX_VERSION)
+	$(CP) $(MCM_LKLIB_PATH)/*.ko $(1)/lib/modules/$(LINUX_VERSION)
+	# 設定開機自動載入 mcm_lklib_api.
+	$(INSTALL_DIR) $(1)/etc/modules.d
+	echo "mcm_lklib_api" > $(1)/etc/modules.d/01-mcm_lklib_api
+	chmod 775 $(1)/etc/modules.d/01-mcm_lklib_api
+
+	# 安裝 mcm_daemon, 模組函式, 資料模組, 資料預設值.
+	$(INSTALL_DIR) $(1)/sbin
+	$(INSTALL_BIN) $(MCM_DAEMON_PATH)/mcm_daemon $(1)/sbin
+	$(INSTALL_DIR) $(1)/etc
+	$(CP) $(MCM_MODULE_PATH)/mcm_module.lib $(1)/etc
+	$(CP) $(MCM_BUILD_PATH)/mcm_model_profile.txt $(1)/etc
+	$(INSTALL_DIR) $(1)/etc/config
+	$(CP) $(MCM_BUILD_PATH)/mcm_store_profile_default.txt $(1)/etc/config
+
+	# 安裝 mcm command.
+	$(INSTALL_DIR) $(1)/sbin
+	$(INSTALL_BIN) $(MCM_COMMAND_PATH)/mcm $(1)/sbin
+
+	# 安裝 mini_httpd 和設定檔.
+	$(INSTALL_DIR) $(1)/sbin
+	$(INSTALL_BIN) $(MINIHTTPD_PATH)/mini_httpd $(1)/sbin
+	$(INSTALL_DIR) $(1)/etc
+	$(CP) $(MINIHTTPD_PATH)/mini_httpd.conf $(1)/etc
+
+	# 安裝網頁端存取使用的函式.
+	$(INSTALL_DIR) $(1)/$(TARGET_WEB_PATH)
+	$(CP) $(MCM_JSLIB_PATH)/*.js $(1)/$(TARGET_WEB_PATH)
+
+	# 安裝 mcm_cgi.
+	$(INSTALL_DIR) $(1)/$(TARGET_WEB_PATH)/cgi
+	$(INSTALL_BIN) $(MCM_CGI_PATH)/mcm_cgi_config.cgi $(1)/$(TARGET_WEB_PATH)/cgi
+	$(CP) $(MCM_CGI_CONFIG_MODULE_PATH)/mcm_cgi_config_module.lib $(1)/$(TARGET_WEB_PATH)/cgi
+	$(INSTALL_BIN) $(MCM_CGI_PATH)/mcm_cgi_upload.cgi $(1)/$(TARGET_WEB_PATH)/cgi
+	$(CP) $(MCM_CGI_UPLOAD_MODULE_PATH)/mcm_cgi_upload_module.lib $(1)/$(TARGET_WEB_PATH)/cgi
+
+	## 安裝 maam_lulib_api 部分 (標頭檔, 函式庫,  網頁函式) ##
+	if [ -d "$(MAAM_PATH)" ]; then \
+		rm -rf $(STAGING_DIR)/usr/include/maam_lib; \
+		$(INSTALL_DIR) $(STAGING_DIR)/usr/include/maam_lib/maam_lulib; \
+		$(CP) $(MAAM_LULIB_PATH)/*.h $(STAGING_DIR)/usr/include/maam_lib/maam_lulib; \
+		$(INSTALL_DIR) $(1)/usr/lib; \
+		$(CP) $(MAAM_LULIB_PATH)/*.so $(1)/usr/lib; \
+		$(INSTALL_DIR) $(1)/$(TARGET_WEB_PATH); \
+		$(CP) $(MAAM_JSLIB_PATH)/*.js $(1)/$(TARGET_WEB_PATH); \
+	fi
+
+	# 安裝開機自動執行 mcm_daemon 和 mini_httpd 的設定檔.
+	$(INSTALL_DIR) $(1)/etc/init.d
+	$(INSTALL_BIN) ./files/mint-cm.init $(1)/etc/init.d/mint-cm
+endef
+
+$(eval $(call BuildPackage,$(PKG_NAME)))
+</pre>
+        </td>
+      </tr>
+    </table>
+    <br>
+
+    <table class="css_table_list1">
+      <tr>
+        <td class="css_td_list1_l">06.&nbsp;</td>
+        <td class="css_td_list1_r">
+          在 <font class="css_font_b1">mint-cm/files</font>
+          目錄內加入開機自動執行 mcm_daemon 和 mini_httpd 的設定檔,
+          檔名為 <font class="css_font_b1">mint-cm.init</font>, 內容 :
+<pre class="css_pre_code">
+#!/bin/sh /etc/rc.common
+
+START=1
+
+start() {
+	mcm_daemon \
+		-l /etc/mcm_module.lib \
+		-m /etc/mcm_model_profile.txt \
+		-d /etc/config/mcm_store_profile_default.txt \
+		-c /etc/config/mcm_store_profile_current.txt &
+
+	mini_httpd \
+		-D -C /etc/mini_httpd.conf &
+}
+</pre>
+        </td>
+      </tr>
+    </table>
+    <br>
+
+    <table class="css_table_list1">
+      <tr>
+        <td class="css_td_list1_l">07.&nbsp;</td>
+        <td class="css_td_list1_r">
+          在 OpenWRT 根目錄使用 <font class="css_font_p1">make menuconfig</font>,
+          啟用 <font class="css_font_b1">mint-cm</font> 並儲存 :<br>
+<pre class="css_pre_code">
+Base system  --->
+  <*> mint-cm
+</pre>
+        </td>
+      </tr>
+    </table>
+    <br>
+
+    <table class="css_table_list1">
+      <tr>
+        <td class="css_td_list1_l">08.&nbsp;</td>
+        <td class="css_td_list1_r">
+          在 OpenWRT 根目錄使用 <font class="css_font_p1">make V=s</font> 開始編譯.
+        </td>
+      </tr>
+    </table>
+    <br>
+
+  </div>
+</div>
+<br>
+
+<div class="css_div_box_frame_full">
+  <div class="css_div_box_title">其他程式使用 MintCM 和 MintAAM</div>
+  <div class="css_div_box_content">
+    <br>
+
+    其他用戶端程式使用 MintCM 的注意事項 :
+    <br><br>
+
+    <table class="css_table_list1">
+      <tr>
+        <td class="css_td_list1_l">01.&nbsp;</td>
+        <td class="css_td_list1_r">
+          給 OpenWRT 使用的 <font class="css_font_b1">Makefile</font> 需要加上依賴 mint-cm :<br>
+          <div class="css_div_block">
+            <font class="css_font_p1">DEPENDS:=</font><font class="css_font_g1">+mint-cm</font>
+          </div>
+        </td>
+      </tr>
+    </table>
+    <br>
+
+    <table class="css_table_list1">
+      <tr>
+        <td class="css_td_list1_l">02.&nbsp;</td>
+        <td class="css_td_list1_r">
+          編譯程式的 <font class="css_font_b1">Makefile</font> 部分參考
+          <a href="mcm_0302.html#hook_0302_makefile_01">#03-02#</a>,
+          不過因為 mcm_lulib_api 相關的標頭檔和函式庫在編譯 mint-cm 時會複製到
+          OpenWRT 指定的開發目錄, OpenWRT 編譯其他程式會參考指定的開發目錄,
+          所以 <font class="css_font_r1">標頭檔路徑設定 (-I$(MCM_PATH)),
+          函式庫路徑設定 (-L$(MCM_LULIB_PATH))</font>
+          <font class="css_font_r2">不需要</font>,
+          只需要加上 <font class="css_font_p1">設定鏈結 mcm_lulib_api 函式 (-lmcm_lulib_api)</font>.
+        </td>
+      </tr>
+    </table>
+    <br>
+
+    <table class="css_table_list1">
+      <tr>
+        <td class="css_td_list1_l">03.&nbsp;</td>
+        <td class="css_td_list1_r">
+          程式需要使用的標頭檔原本是在 <a href="mcm_0302.html#hook_0302_include_01">#03-02#</a>,
+          因為 OpenWRT 編譯其他程式會參考指定的開發目錄, 所以要改為 :<br>
+          <div class="css_div_block">
+            <font class="css_font_p1">
+            #include &lt;mcm_lib/mcm_lheader/mcm_type.h&gt;<br>
+            #include &lt;mcm_lib/mcm_lheader/mcm_size.h&gt;<br>
+            #include &lt;mcm_lib/mcm_lheader/mcm_connect.h&gt;<br>
+            #include &lt;mcm_lib/mcm_lheader/mcm_return.h&gt;<br>
+            #include &lt;mcm_lib/mcm_lheader/mcm_data_exinfo_auto.h&gt;<br>
+            #include &lt;mcm_lib/mcm_lulib/mcm_lulib_api.h&gt;
+            </font>
+          </div>
+        </td>
+      </tr>
+    </table>
+    <br><br>
+
+
+    其他核心端程式使用 MintCM 的注意事項 :
+    <br><br>
+
+    <table class="css_table_list1">
+      <tr>
+        <td class="css_td_list1_l">01.&nbsp;</td>
+        <td class="css_td_list1_r">
+          給 OpenWRT 使用的 <font class="css_font_b1">Makefile</font> 需要加上依賴 mint-cm :<br>
+          <div class="css_div_block">
+            <font class="css_font_p1">DEPENDS:=</font><font class="css_font_g1">+mint-cm</font>
+          </div>
+        </td>
+      </tr>
+    </table>
+    <br>
+
+    <table class="css_table_list1">
+      <tr>
+        <td class="css_td_list1_l">02.&nbsp;</td>
+        <td class="css_td_list1_r">
+          編譯程式的 <font class="css_font_b1">Makefile</font> 部分參考
+          <a href="mcm_0303.html#hook_0303_makefile_01">#03-03#</a>,
+          不過因為 mcm_lklib_api 相關的標頭檔和函式庫在編譯 mint-cm 時會複製到
+          OpenWRT 指定的開發目錄, OpenWRT 編譯其他程式會參考指定的開發目錄,
+          所以 <font class="css_font_r1">標頭檔路徑設定 (-I$(MCM_PATH))</font>
+          <font class="css_font_r2">不需要</font>.
+        </td>
+      </tr>
+    </table>
+    <br>
+
+    <table class="css_table_list1">
+      <tr>
+        <td class="css_td_list1_l">03.&nbsp;</td>
+        <td class="css_td_list1_r">
+          程式需要使用的標頭檔原本是在 <a href="mcm_0303.html#hook_0303_include_01">#03-03#</a>,
+          因為 OpenWRT 編譯其他程式會參考指定的開發目錄, 所以要改為 :<br>
+          <div class="css_div_block">
+            <font class="css_font_p1">
+            #include &lt;mcm_lib/mcm_lheader/mcm_type.h&gt;<br>
+            #include &lt;mcm_lib/mcm_lheader/mcm_size.h&gt;<br>
+            #include &lt;mcm_lib/mcm_lheader/mcm_connect.h&gt;<br>
+            #include &lt;mcm_lib/mcm_lheader/mcm_return.h&gt;<br>
+            #include &lt;mcm_lib/mcm_lheader/mcm_data_exinfo_auto.h&gt;<br>
+            #include &lt;mcm_lib/mcm_lklib/mcm_lklib_api.h&gt;
+            </font>
+          </div>
+        </td>
+      </tr>
+    </table>
+    <br><br>
+
+    其他用戶端程式使用 MintAAM 的注意事項 :
+    <br><br>
+
+    <table class="css_table_list1">
+      <tr>
+        <td class="css_td_list1_l">01.&nbsp;</td>
+        <td class="css_td_list1_r">
+          給 OpenWRT 使用的 <font class="css_font_b1">Makefile</font> 需要加上依賴 mint-cm :<br>
+          <div class="css_div_block">
+            <font class="css_font_p1">DEPENDS:=</font><font class="css_font_g1">+mint-cm</font>
+          </div>
+        </td>
+      </tr>
+    </table>
+    <br>
+
+    <table class="css_table_list1">
+      <tr>
+        <td class="css_td_list1_l">02.&nbsp;</td>
+        <td class="css_td_list1_r">
+          編譯程式的 <font class="css_font_b1">Makefile</font> 部分參考
+          <a href="mcm_1004.html#hook_1004_makefile_01">#10-04#</a>,
+          不過因為 maam_lulib_api 相關的標頭檔和函式庫在編譯 mint-cm 時會複製到
+          OpenWRT 指定的開發目錄, OpenWRT 編譯其他程式會參考指定的開發目錄,
+          所以 <font class="css_font_r1">標頭檔路徑設定 (-I$(MAAM_PATH)),
+          函式庫路徑設定 (-L$(MAAM_LULIB_PATH))</font>
+          <font class="css_font_r2">不需要</font>,
+          只需要加上 <font class="css_font_p1">設定鏈結 mcm_lulib_api 函式 (-lmcm_lulib_api)</font>.
+        </td>
+      </tr>
+    </table>
+    <br>
+
+    <table class="css_table_list1">
+      <tr>
+        <td class="css_td_list1_l">03.&nbsp;</td>
+        <td class="css_td_list1_r">
+          程式需要使用的標頭檔原本是在 <a href="mcm_1004.html#hook_1004_include_01">#10-04#</a>,
+          因為 OpenWRT 編譯其他程式會參考指定的開發目錄, 所以要改為 :<br>
+          <div class="css_div_block">
+            <font class="css_font_p1">#include &lt;maam_lib/maam_lulib/maam_lulib_api.h&gt;</font>
+          </div>
+        </td>
+      </tr>
+    </table>
+    <br>
+
+  </div>
+</div>
+<br>
+
+</body>
+
+</html>

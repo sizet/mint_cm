@@ -21,130 +21,12 @@ Some rights reserved. See README.
 <br>
 
 <div class="css_div_box_frame_full">
-  <div class="css_div_box_title">需要的檔案</div>
+  <div class="css_div_box_title">移植的注意事項</div>
   <div class="css_div_box_content">
     <br>
 
-    此系統可以編譯到使用 Linux 的不同硬體平台上執行, 這邊說明哪些檔案需要複製到目標平台.
-    <br><br><br>
-
-    必須在 PC 上執行的部分 :<br>
-    <table class="css_table_box">
-      <tr>
-        <td class="css_td_box">
-          <font class="css_font_b1">mint_cm/mcm_build</font><br>
-          編譯 <font class="css_font_r1">mcm_build</font><br>
-          此程負責分析資料模型並產生系統需要的程式定義檔和相關資料檔.
-        </td>
-      </tr>
-    </table>
+    此系統可以編譯到使用 Linux 的不同硬體平台上執行, 此章節說明移植的注意事項.
     <br><br>
-
-    在目標平台上執行的部分 :<br>
-    <table class="css_table_box">
-      <tr>
-        <td class="css_td_box">
-          <font class="css_font_b1">mint_cm/mcm_build</font><br>
-          產生 <font class="css_font_r1">mcm_model_profile.txt</font><br>
-          撰寫 <font class="css_font_r1">mcm_store_profile_default.txt</font><br>
-          程式分析完資料模型後會產生系統需要的資料模型檔, 以及撰寫系統需要的資料預設值檔,
-          必須複製到目標平台上.
-          <br><br>
-
-          <font class="css_font_b1">mint_cm/mcm_daemon</font><br>
-          編譯 <font class="css_font_r1">mcm_daemon</font><br>
-          主程式, 必須複製到目標平台上.
-          <br><br>
-
-          <font class="css_font_b1">mint_cm/mcm_daemon/mcm_module</font><br>
-          編譯 <font class="css_font_r1">mcm_module.lib</font><br>
-          自訂的資料處理函式庫, 必須複製到目標平台上.
-          <br><br>
-
-          <font class="css_font_b1">mint_cm/mcm_lib/mcm_lulib</font><br>
-          編譯 <font class="css_font_r1">libmcm_lulib_api.so</font><br>
-          提供介面給用戶端程式做資料的存取, 有用戶端程式或是網頁端程式或指令程式需要就必須複製到目標平台上.
-          <br><br>
-
-          <font class="css_font_b1">mint_cm/mcm_lib/mcm_lklib</font><br>
-          編譯 <font class="css_font_r1">mcm_lklib_api.ko</font><br>
-          提供介面給核心端程式做資料的存取, 有核心端程式需要就必須複製到目標平台上.
-          <br><br>
-
-          <font class="css_font_b1">mint_cm/mcm_cgi</font><br>
-          編譯 <font class="css_font_r1">mcm_cgi_config.cgi</font><br>
-          編譯 <font class="css_font_r1">mcm_cgi_upload.cgi</font><br>
-          處理網頁端程式做資料的存取和檔案的上傳, 有網頁端程式需要就必須複製到目標平台上.
-          <br>
-          <font class="css_font_b1">mint_cm/mcm_cgi/mcm_cgi_config_module</font><br>
-          編譯 <font class="css_font_r1">mcm_cgi_config_module.lib</font><br>
-          處理網頁端程式進階模式的資料讀取, 有網頁端程式需要就必須複製到目標平台上.
-          <br>
-          <font class="css_font_b1">mint_cm/mcm_cgi/mcm_cgi_upload_module</font><br>
-          編譯 <font class="css_font_r1">mcm_cgi_upload_module.lib</font><br>
-          處理網頁端程式上傳的檔案, 有網頁端程式需要就必須複製到目標平台上.
-          <br><br>
-
-          <font class="css_font_b1">mint_cm/mcm_lib/mcm_jslib</font><br>
-          放置 <font class="css_font_r1">jquery_main.js</font><br>
-          放置 <font class="css_font_r1">json3.js</font><br>
-          放置 <font class="css_font_r1">jquery_form.js</font><br>
-          放置 <font class="css_font_r1">mcm_jslib_api.js</font><br>
-          產生 <font class="css_font_r1">mcm_jslib_data_info_auto.js</font><br>
-          提供介面給網頁端程式做資料的存取和檔案的上傳,
-          有網頁端程式需要就必須複製到目標平台上.
-          <br><br>
-
-          <font class="css_font_b1">mint_cm/mcm_command</font><br>
-          編譯 <font class="css_font_r1">mcm</font><br>
-          指令程式, 在 Shell Script 中需要做資料的存取就必須複製到目標平台上.
-          <br><br>
-
-          <font class="css_font_b1">mint_cm/http_server/mini_httpd/last</font><br>
-          編譯 <font class="css_font_r1">mini_httpd</font><br>
-          撰寫 <font class="css_font_r1">mini_httpd.conf</font><br>
-          網頁伺服器和設定檔, 有網頁端程式需要就必須複製到目標平台上.
-          <br><br>
-
-          <font class="css_font_b1">mint_cm/http_server/mini_httpd/last/mint_aam/maam_lib/maam_jslib</font><br>
-          放置 <font class="css_font_r1">jquery_cookie.js</font><br>
-          放置 <font class="css_font_r1">md5.js</font><br>
-          放置 <font class="css_font_r1">maam_jslib_api.js</font><br>
-          提供介面給網頁端程式做登入登出, 有網頁端程式需要就必須複製到目標平台上.
-          <br><br>
-
-          <font class="css_font_b1">mint_cm/http_server/mini_httpd/last</font><br>
-          編譯 <font class="css_font_r1">libmaam_lulib_api.so</font><br>
-          提供介面給用戶端程式存取 session, 有用戶端程式需要就必須複製到目標平台上.
-          <br><br>
-
-          <font class="css_font_b1">mint_cm/Makefile</font><br>
-          變數 <font class="css_font_p1">CROSS</font> 可以指定要使用的交叉編譯器.
-        </td>
-      </tr>
-    </table>
-    <br>
-
-    為了測試方便, 預設所有使用到 mcm_lulib_api 的程式都使用靜態連結,
-    在實際使用上可以改為動態連結.<br>
-    <div class="css_div_block">
-      在 Makefile 中使用到如下設定改為 <font class="css_font_r1">NO</font><br>
-      <font class="css_font_p1">USE_STATIC_MCM_LIB = YES</font>
-      <br><br>
-      預設有使用到的部分 :<br>
-      <font class="css_font_b1">mint_cm/mcm_cgi/Makefile</font><br>
-      <font class="css_font_b1">mint_cm/mcm_cgi/mcm_cgi_config_module/Makefile</font><br>
-      <font class="css_font_b1">mint_cm/mcm_command/Makefile</font><br>
-    </div>
-    <br>
-
-    為了測試方便, 預設所有使用到 maam_lulib_api 的程式都使用靜態連結,
-    在實際使用上可以改為動態連結.<br>
-    <div class="css_div_block">
-      在 Makefile 中使用到如下設定改為 <font class="css_font_r1">NO</font><br>
-      <font class="css_font_p1">USE_STATIC_MAAM_LIB = YES</font>
-    </div>
-    <br>
 
   </div>
 </div>
@@ -281,6 +163,157 @@ Some rights reserved. See README.
         <td class="css_td_list2_l2">MCM_SUPPORT_DTYPE_B</td>
         <td class="css_td_list2_r1">b:$(size)</td>
         <td class="css_td_list2_r1"></td>
+      </tr>
+    </table>
+    <br>
+
+  </div>
+</div>
+<br>
+
+<div class="css_div_box_frame_full">
+  <div class="css_div_box_title">需要的檔案</div>
+  <div class="css_div_box_content">
+    <br>
+
+    此系統可以編譯到使用 Linux 的不同硬體平台上執行, 這邊說明哪些檔案需要複製到目標平台.
+    <br><br><br>
+
+    必須在 PC 上執行的部分 :<br>
+    <table class="css_table_box">
+      <tr>
+        <td class="css_td_box">
+          <font class="css_font_b1">mint_cm/mcm_build</font><br>
+          編譯 <font class="css_font_r1">mcm_build</font><br>
+          此程負責分析資料模型並產生系統需要的程式定義檔和相關資料檔.
+        </td>
+      </tr>
+    </table>
+    <br><br>
+
+    在目標平台上執行的部分 :<br>
+    <table class="css_table_box">
+      <tr>
+        <td class="css_td_box">
+          <font class="css_font_b1">mint_cm/mcm_build</font><br>
+          產生 <font class="css_font_r1">mcm_model_profile.txt</font><br>
+          撰寫 <font class="css_font_r1">mcm_store_profile_default.txt</font><br>
+          程式分析完資料模型後會產生系統需要的資料模型檔, 以及撰寫系統需要的資料預設值檔,
+          必須複製到目標平台上.
+          <br><br>
+
+          <font class="css_font_b1">mint_cm/mcm_daemon</font><br>
+          編譯 <font class="css_font_r1">mcm_daemon</font><br>
+          主程式, 必須複製到目標平台上.
+          <br><br>
+
+          <font class="css_font_b1">mint_cm/mcm_daemon/mcm_module</font><br>
+          編譯 <font class="css_font_r1">mcm_module.lib</font><br>
+          自訂的資料處理函式庫, 必須複製到目標平台上.
+          <br><br>
+
+          <font class="css_font_b1">mint_cm/mcm_lib/mcm_lulib</font><br>
+          編譯 <font class="css_font_r1">libmcm_lulib_api.so</font><br>
+          提供介面給用戶端程式做資料的存取, 有用戶端程式或是網頁端程式或指令程式需要就必須複製到目標平台上.
+          <br><br>
+
+          <font class="css_font_b1">mint_cm/mcm_lib/mcm_lklib</font><br>
+          編譯 <font class="css_font_r1">mcm_lklib_api.ko</font><br>
+          提供介面給核心端程式做資料的存取, 有核心端程式需要就必須複製到目標平台上.
+          <br><br>
+
+          <font class="css_font_b1">mint_cm/mcm_cgi</font><br>
+          編譯 <font class="css_font_r1">mcm_cgi_config.cgi</font><br>
+          編譯 <font class="css_font_r1">mcm_cgi_upload.cgi</font><br>
+          處理網頁端程式做資料的存取和檔案的上傳, 有網頁端程式需要就必須複製到目標平台上.
+          <br>
+          <font class="css_font_b1">mint_cm/mcm_cgi/mcm_cgi_config_module</font><br>
+          編譯 <font class="css_font_r1">mcm_cgi_config_module.lib</font><br>
+          處理網頁端程式進階模式的資料讀取, 有網頁端程式需要就必須複製到目標平台上.
+          <br>
+          <font class="css_font_b1">mint_cm/mcm_cgi/mcm_cgi_upload_module</font><br>
+          編譯 <font class="css_font_r1">mcm_cgi_upload_module.lib</font><br>
+          處理網頁端程式上傳的檔案, 有網頁端程式需要就必須複製到目標平台上.
+          <br><br>
+
+          <font class="css_font_b1">mint_cm/mcm_lib/mcm_jslib</font><br>
+          放置 <font class="css_font_r1">jquery_main.js</font><br>
+          放置 <font class="css_font_r1">json3.js</font><br>
+          放置 <font class="css_font_r1">jquery_form.js</font><br>
+          放置 <font class="css_font_r1">mcm_jslib_api.js</font><br>
+          產生 <font class="css_font_r1">mcm_jslib_data_info_auto.js</font><br>
+          提供介面給網頁端程式做資料的存取和檔案的上傳,
+          有網頁端程式需要就必須複製到目標平台上.
+          <br><br>
+
+          <font class="css_font_b1">mint_cm/mcm_command</font><br>
+          編譯 <font class="css_font_r1">mcm</font><br>
+          指令程式, 在 Shell Script 中需要做資料的存取就必須複製到目標平台上.
+          <br><br>
+
+          <font class="css_font_b1">mint_cm/http_server/mini_httpd/last</font><br>
+          編譯 <font class="css_font_r1">mini_httpd</font><br>
+          撰寫 <font class="css_font_r1">mini_httpd.conf</font><br>
+          網頁伺服器和設定檔, 有網頁端程式需要就必須複製到目標平台上.
+          <br><br>
+
+          <font class="css_font_b1">mint_cm/http_server/mini_httpd/last/mint_aam/maam_lib/maam_jslib</font><br>
+          放置 <font class="css_font_r1">jquery_cookie.js</font><br>
+          放置 <font class="css_font_r1">md5.js</font><br>
+          放置 <font class="css_font_r1">maam_jslib_api.js</font><br>
+          提供介面給網頁端程式做登入登出, 有網頁端程式需要就必須複製到目標平台上.
+          <br><br>
+
+          <font class="css_font_b1">mint_cm/http_server/mini_httpd/last</font><br>
+          編譯 <font class="css_font_r1">libmaam_lulib_api.so</font><br>
+          提供介面給用戶端程式存取 session, 有用戶端程式需要就必須複製到目標平台上.
+          <br><br>
+
+          <font class="css_font_b1">mint_cm/Makefile</font><br>
+          變數 <font class="css_font_p1">CROSS</font> 可以指定要使用的交叉編譯器.
+        </td>
+      </tr>
+    </table>
+    <br>
+
+    <div class="css_div_hook" id="hook_1201_use_dynamic_mcm_lib_01"></div>
+    為了測試方便, 預設所有使用到 mcm_lulib_api 的程式都使用靜態連結,
+    在實際使用上可以改為動態連結.<br>
+    <table class="css_table_list2">
+      <tr>
+        <td class="css_td_list2_t3" colspan="2">
+          <font class="css_font_g1">USE_STATIC_MCM_LIB</font><br>
+          <font class="css_font_b1">(mint_cm/Makefile)</font>
+        </td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l2">YES</td>
+        <td class="css_td_list2_r1">使用靜態鏈結</td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l2">NO</td>
+        <td class="css_td_list2_r1">使用動態鏈結</td>
+      </tr>
+    </table>
+    <br>
+
+    <div class="css_div_hook" id="hook_1201_use_dynamic_maam_lib_01"></div>
+    為了測試方便, 預設所有使用到 maam_lulib_api 的程式都使用靜態連結,
+    在實際使用上可以改為動態連結.<br>
+    <table class="css_table_list2">
+      <tr>
+        <td class="css_td_list2_t3" colspan="2">
+          <font class="css_font_g1">USE_STATIC_MAAM_LIB</font><br>
+          <font class="css_font_b1">(mint_cm/Makefile)</font>
+        </td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l2">YES</td>
+        <td class="css_td_list2_r1">使用靜態鏈結</td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l2">NO</td>
+        <td class="css_td_list2_r1">使用動態鏈結</td>
       </tr>
     </table>
     <br>

@@ -9,12 +9,12 @@ Some rights reserved. See README.
 <base version="1.0">
 <device type="gs" max="1" save="1">
   <ekey type="ek">0</ekey>
-  <descript type="s:256">Network-Device</descript>
+  <descript type="s:256">Wireless%20Device</descript>
   <serial_number type="b:10">0022E5A1CC9F</serial_number>
 
   <system type="gs" max="1" save="1">
     <ekey type="ek">0</ekey>
-    <date type="s:12">2015/01/01</date>
+    <date type="s:12">2016/01/01</date>
     <ip_addr type="s:46">192.168.1.1</ip_addr>
     <uptime type="iull">0</uptime>
     <loading type="fd">0</loading>
@@ -56,4 +56,4 @@ Some rights reserved. See README.
     <rule2 type="isi">0</rule2>
   </filter>
 </device>
-</base> 
+</base>
