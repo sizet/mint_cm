@@ -72,7 +72,7 @@ void maam_md5_hash(
         if(raw_len >= MAAM_BLOCK_SIZE)
         {
             input_data = (MAAM_UNIT_TYPE *) data_con;
-            data_con += MAAM_BLOCK_SIZE;
+            data_con = ((uint8_t *) data_con) + MAAM_BLOCK_SIZE;
             raw_len -= MAAM_BLOCK_SIZE;
         }
         else
