@@ -421,7 +421,7 @@ FREE_HELP:
     printf("  -c : [-d store_current_profile_path]\n");
     printf("       default = " MCM_DEFAULT_STORE_CURRENT_PATH "\n");
     printf("  -s : [-s save_mode]\n");
-    printf("       0 ~ 3\n");
+    printf("       0 ~ 1\n");
     printf("       default = " MCM_DTYPE_LIST_PF "\n", MCM_DEFAULT_STORE_SAVE_MODE);
     printf("  -e : [-e error_handle]\n");
     printf("       0 ~ 3\n");
