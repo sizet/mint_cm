@@ -82,7 +82,7 @@ Some rights reserved. See README.
       &lt;/device&gt;<br>
       &lt;/base&gt;
     </div>
-    <br>
+    <br><br>
 
   </div>
 </div>
@@ -173,7 +173,7 @@ Some rights reserved. See README.
 "&get.device.vap.*.station.*=find_mobile_station"
 取出 station 資料時, 執行 CGI 模組的 find_idle_station() 函式, 指定只取出需要哪幾筆資料.
 </pre>
-<br>
+<br><br>
 <div class="css_div_hook" id="hook_0305_note_01"></div>
 備註-01 (只有含有任意一個 gd 類型資料的路徑會執行指定的 CGI 端的處理函式) :
 <pre class="css_pre_code">
@@ -189,7 +189,7 @@ device 是 gs 類型, vap 是 gd 類型, find_5g_vap() 會被執行.
 "&get.device.vap.*.extra=find_hidden_vap"
 device 是 gs 類型, vap 是 gd 類型, extra 是 ds 類型, find_hidden_vap() 會被執行.
 </pre>
-<br>
+<br><br>
 <div class="css_div_hook" id="hook_0305_note_02a"></div>
 備註-02a (如果同時設定了多個 get 指令, 而且指令之間有階層關係, 則需要注意指令的順序) :
 <pre class="css_pre_code">
@@ -251,14 +251,16 @@ vap     => 已經處理過 (只有資料索引), 補上這些資料的內容.
     <br><br><br>
 
     步驟-01 : 加入基本的標頭檔 :<br>
-    <font class="css_font_p1">#include &lt;stdlib.h&gt;</font><br>
-    <font class="css_font_p1">#include "mcm_lib/mcm_lheader/mcm_type.h"</font><br>
-    <font class="css_font_p1">#include "mcm_lib/mcm_lheader/mcm_size.h"</font><br>
-    <font class="css_font_p1">#include "mcm_lib/mcm_lheader/mcm_connect.h"</font><br>
-    <font class="css_font_p1">#include "mcm_lib/mcm_lheader/mcm_return.h"</font><br>
-    <font class="css_font_p1">#include "mcm_lib/mcm_lheader/mcm_data_exinfo_auto.h"</font><br>
-    <font class="css_font_p1">#include "mcm_lib/mcm_lulib/mcm_lulib_api.h"</font><br>
-    <font class="css_font_p1">#include "mcm_cgi_module_debug.h"</font>
+    <div class="css_div_block">
+      <font class="css_font_p1">#include &lt;stdlib.h&gt;</font><br>
+      <font class="css_font_p1">#include "mcm_lib/mcm_lheader/mcm_type.h"</font><br>
+      <font class="css_font_p1">#include "mcm_lib/mcm_lheader/mcm_size.h"</font><br>
+      <font class="css_font_p1">#include "mcm_lib/mcm_lheader/mcm_connect.h"</font><br>
+      <font class="css_font_p1">#include "mcm_lib/mcm_lheader/mcm_return.h"</font><br>
+      <font class="css_font_p1">#include "mcm_lib/mcm_lheader/mcm_data_exinfo_auto.h"</font><br>
+      <font class="css_font_p1">#include "mcm_lib/mcm_lulib/mcm_lulib_api.h"</font><br>
+      <font class="css_font_p1">#include "mcm_cgi_module_debug.h"</font>
+    </div>
     <br><br><br>
 
     步驟-02 : 加入處函式.<br>
@@ -276,7 +278,7 @@ vap     => 已經處理過 (只有資料索引), 補上這些資料的內容.
       }<br>
       </font>
     </div>
-    <br>
+    <br><br>
 
     <font class="css_font_b1">$(function_name)</font><br>
     自定義的函式名稱.
@@ -318,7 +320,7 @@ vap     => 已經處理過 (只有資料索引), 補上這些資料的內容.
           CGI 處理路徑時會逐層處理, 如果該層路徑是 gd 類型就會呼叫模組函式, 並指出現在是第幾層路徑,
           如果路徑上有多個 gd 類型則會呼叫多次模組函式
           <br><br>
-          例如 :
+          例如 :<br>
 <pre class="css_pre_code">
 "&get.device.vap.*=find_5g_vap"
 device 是第 1 層, vap 是第 2 層,
@@ -359,7 +361,7 @@ device 是第 1 層, vap 是第 2 層,
             </tr>
           </table>
           <br>
-          例如 :
+          例如 :<br>
 <pre class="css_pre_code">
 "&get.device.vap.*=find_5g_vap"
 # 處理 vap 時呼叫模組函式,
@@ -498,7 +500,7 @@ device.vap.#23
             </tr>
           </table>
           <br>
-          例如 :
+          例如 :<br>
 <pre class="css_pre_code">
 // 假設 vap 有 #8, #15, #23, #45 這幾筆資料, 現在要回報 CGI 取出前 3 筆資料.
 int find_5g_vap(
@@ -572,6 +574,7 @@ int find_5g_vap(
       #endif
       </font>
     </div>
+    <br>
     在離開模組函式時加入關閉 console 設備 :<br>
     <div class="css_div_block">
       <font class="css_font_g1">
@@ -580,7 +583,7 @@ int find_5g_vap(
       #endif
       </font>
     </div>
-    <br>
+    <br><br>
 
     <font class="css_font_b1">[MCM_CCMEMODE]</font><br>
     定義, 是否要顯示錯誤訊息.<br>
@@ -620,7 +623,7 @@ int find_5g_vap(
     巨集的定義在 <font class="css_font_b1">mcm_cgi_module_debug.h</font>.
     <br><br><br>
 
-    範例-01 :
+    範例-01 :<br>
 <pre class="css_pre_code">
 網頁端
 
@@ -674,6 +677,7 @@ function main_init()
 &lt;/body&gt;
 &lt;/html&gt;
 </pre>
+<br>
 <pre class="css_pre_code">
 CGI 端 (模組函式)
 
@@ -759,9 +763,9 @@ FREE_01:
     return fret;
 }
 </pre>
-    <br>
+<br><br>
 
-    範例-02 :
+    範例-02 :<br>
 <pre class="css_pre_code">
 網頁端
 
@@ -847,6 +851,7 @@ function main_init()
 &lt;/body&gt;
 &lt;/html&gt;
 </pre>
+<br>
 <pre class="css_pre_code">
 CGI 端 (模組函式)
 
@@ -951,9 +956,9 @@ FREE_01:
     return fret;
 }
 </pre>
-    <br>
+<br><br>
 
-    範例-03 :
+    範例-03 :<br>
 <pre class="css_pre_code">
 網頁端
 
@@ -1035,6 +1040,7 @@ function main_init()
 &lt;/body&gt;
 &lt;/html&gt;
 </pre>
+<br>
 <pre class="css_pre_code">
 CGI 端 (模組函式)
 
@@ -1224,7 +1230,7 @@ FREE_01:
     return fret;
 }
 </pre>
-    <br>
+<br><br>
 
 <div class="css_div_hook" id="hook_0305_note_02b"></div>
 備註-02b (如果同時設定了多個 get 指令, 而且指令之間有階層關係, 則需要注意指令的順序) :
@@ -1265,7 +1271,7 @@ station => 依據符合的 vap 的資料筆數多次執行 find_match_rule_stati
 device => 已經處理過, 跳過.
 vap    => 已經處理過 (只有資料索引), 補上這些資料的內容.
 </pre>
-    <br>
+<br><br>
 
   </div>
 </div>
@@ -1384,7 +1390,6 @@ vap    => 已經處理過 (只有資料索引), 補上這些資料的內容.
       </tr>
     </table>
     <br><br>
-
 
     <table class="css_table_list1">
       <tr>

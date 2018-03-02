@@ -29,16 +29,20 @@ Some rights reserved. See README.
     <br><br><br>
 
     網頁的編碼格式必須是 UTF-8, 如下的宣告 :<br>
-    <font class="css_font_p1">&lt;meta http-equiv="content-type" content="text/html; charset=utf-8"&gt;</font>
+    <div class="css_div_block">
+      <font class="css_font_p1">&lt;meta http-equiv="content-type" content="text/html; charset=utf-8"&gt;</font>
+    </div>
     <br><br>
 
     需要的 JS 檔 :<br>
-    <font class="css_font_p1">
-    jquery_main.js<br>
-    json3.js<br>
-    mcm_jslib_api.js<br>
-    mcm_jslib_data_info_auto.js
-    </font>
+    <div class="css_div_block">
+      <font class="css_font_p1">
+      jquery_main.js<br>
+      json3.js<br>
+      mcm_jslib_api.js<br>
+      mcm_jslib_data_info_auto.js
+      </font>
+    </div>
     <br><br>
 
     <div class="css_div_hook" id="hook_0304_console_01"></div>
@@ -67,7 +71,7 @@ Some rights reserved. See README.
       <font class="css_font_g1">#define MCM_CUMDMODE 0</font><br>
       是否顯示除錯訊息 (mcm_cgi_upload_module 部分)
     </div>
-    <br>
+    <br><br>
 
     CGI 部分預設是使用靜態連結的方式使用 MintCM 函式庫, 實際使用可以改用動態連結的方式.<br>
     <table class="css_table_list2">
@@ -691,7 +695,7 @@ req_cmd += "&get.device.vap.*";
 // 取得 device.vap.*.station.* 的資料筆數上限.
 req_cmd += "&get.device.vap.*.station.*";
 </pre>
-<br>
+<br><br>
           之後使用 <font class="css_font_b1">mcm_jslib_obtain_max_count()</font> 送出請求.<br>
           範例 :<br>
 <pre class="css_pre_code">
@@ -705,7 +709,7 @@ self_jslib.request_command = req_cmd;
 self_jslib.other_query = "";
 rep_ret = mcm_jslib_obtain_max_count(self_jslib);
 </pre>
-<br>
+<br><br>
           之後檢查返回的結果, 返回成功的話, 使用 <font class="css_font_b1">JSON.parse()</font>
           將回傳的資料轉為 JSON 格式才可使用.<br>
           範例 :<br>
@@ -721,7 +725,7 @@ if(rep_ret.rep_code < mcm_return_code.pass)
 }
 mcm_dv = JSON.parse(rep_ret.rep_data);
 </pre>
-<br>
+<br><br>
           紀錄最大資料數目限制的變數名稱是 <font class="css_font_b1">$max_count</font><br>
           範例 :<br>
 <pre class="css_pre_code">
@@ -737,7 +741,7 @@ console.log("[max-count] device.vap.* = ",
 console.log("[max-count] device.vap.*.station.* = ",
             mcm_dv.device.vap.station.$max_count);
 </pre>
-<br>
+<br><br>
           完整程式 :<br>
 <pre class="css_pre_code">
 &lt;html&gt;
@@ -787,7 +791,7 @@ function main_init()
 &lt;/body&gt;
 &lt;/html&gt;
 </pre>
-<br>
+<br><br>
 
           除了上述方式外, 可以使用另一種方式取得 group 的資料筆數限制.<br>
           必須先寫好資料模型檔並編譯完成, <font class="css_font_b1">mint_cm/mcm_lib/mcm_jslib/mcm_jslib_data_info_auto.js</font>
@@ -809,6 +813,7 @@ function main_init()
             // device.client.*<br>
             <font class="css_font_r1">var mcm_mcount_device_client_max_count = 128;</font><br>
           </div>
+          <br>
           變數內的值就是實際的 $(max) 值.
           <br><br>
           範例 :<br>
@@ -919,7 +924,7 @@ req_cmd += "&get.device.vap.*.station.*";
 // 讀出 device.limit.*
 req_cmd += "&get.device.limit.*";
 </pre>
-<br>
+<br><br>
           之後使用 <font class="css_font_b1">mcm_jslib_obtain_config()</font>
           送出請求.<br>
           範例 :<br>
@@ -935,7 +940,7 @@ self_jslib.data_format = mcm_data_format.all_default;
 self_jslib.other_query = "";
 rep_ret = mcm_jslib_obtain_config(self_jslib);
 </pre>
-<br>
+<br><br>
           之後檢查返回的結果, 返回成功的話, 使用 <font class="css_font_b1">JSON.parse()</font>
           將回傳的資料轉為 JSON 格式才可使用.<br>
           範例 :<br>
@@ -951,7 +956,7 @@ if(rep_ret.rep_code < mcm_return_code.pass)
 }
 mcm_dv = JSON.parse(rep_ret.rep_data);
 </pre>
-<br>
+<br><br>
           如果要取得目前的資料筆數, 可以使用 <font class="css_font_b1">length</font> 此方法.<br>
           範例 :<br>
 <pre class="css_pre_code">
@@ -967,7 +972,7 @@ console.log("[count] device.vap.@2.station = ",
 console.log("[count] device.limit.* = ",
             mcm_dv.device.vap.length);
 </pre>
-<br>
+<br><br>
           實際的資料使用階層方式取得.<br>
           範例 :<br>
 <pre class="css_pre_code">
@@ -1017,7 +1022,7 @@ console.log("[get] device.limit.@1.name = ",
 console.log("[get] device.limit.@1.priority = ",
             mcm_dv.device.limit[0].priority);
 </pre>
-<br>
+<br><br>
           完整程式 :<br>
 <pre class="css_pre_code">
 &lt;html&gt;
@@ -1106,7 +1111,7 @@ function main_init()
 &lt;/body&gt;
 &lt;/html&gt;
 </pre>
-          <br>
+<br><br>
           範例 : 所有類型資料都使用字串格式輸出<br>
 <pre class="css_pre_code">
 &lt;html&gt;
@@ -1164,7 +1169,7 @@ function main_init()
 &lt;/body&gt;
 &lt;/html&gt;
 </pre>
-          <br>
+<br><br>
           範例 : isll 和 iull 類型的資料使用字串格式輸出<br>
 <pre class="css_pre_code">
 &lt;html&gt;
@@ -1318,7 +1323,7 @@ req_cmd += "&set.device.vap.#15.station.#30.rule=" + tmp_data;
 req_cmd += "&set.device.limit.#6.name=" +
            mcm_jslib_convert_submit_str("")
 </pre>
-<br>
+<br><br>
           指令建立後, 使用 <font class="css_font_b1">mcm_jslib_submit_config()</font>
           送出請求, 之後檢查返回的結果是否成功.<br>
           範例 :<br>
@@ -1342,7 +1347,7 @@ if(rep_ret.rep_code < mcm_return_code.pass)
 }
 mcm_jslib_run_script(rep_ret.rep_data);
 </pre>
-<br>
+<br><br>
           完整程式 :<br>
 <pre class="css_pre_code">
 &lt;html&gt;
@@ -1452,7 +1457,7 @@ function main_submit()
 &lt;/body&gt;
 &lt;/html&gt;
 </pre>
-          <br>
+<br><br>
           範例 : 設定 CGI 端處理完後預設不回傳訊息<br>
 <pre class="css_pre_code">
 &lt;html&gt;
@@ -1612,7 +1617,7 @@ req_cmd += "&set.device.vap.#234.station.#1.rule=" + tmp_data;
 // 不設值使用初始值.
 req_cmd += "&add.device.limit.#51=#60";
 </pre>
-<br>
+<br><br>
           指令建立後, 使用 <font class="css_font_b1">mcm_jslib_submit_config()</font>
           送出請求, 之後檢查返回的結果是否成功.<br>
           範例 :<br>
@@ -1636,7 +1641,7 @@ if(rep_ret.rep_code < mcm_return_code.pass)
 }
 mcm_jslib_run_script(rep_ret.rep_data);
 </pre>
-<br>
+<br><br>
           完整程式 :<br>
 <pre class="css_pre_code">
 &lt;html&gt;
@@ -1786,7 +1791,7 @@ req_cmd += "&del.device.vap.#8";
 // 刪除 device.vap.#15.station.#30
 req_cmd += "&del.device.vap.#15.station.#30";
 </pre>
-<br>
+<br><br>
           指令建立後, 使用 <font class="css_font_b1">mcm_jslib_submit_config()</font>
           送出請求, 之後檢查返回的結果是否成功.<br>
           範例 :<br>
@@ -1810,7 +1815,7 @@ if(rep_ret.rep_code < mcm_return_code.pass)
 }
 mcm_jslib_run_script(rep_ret.rep_data);
 </pre>
-<br>
+<br><br>
           完整程式 :<br>
 <pre class="css_pre_code">
 &lt;html&gt;
@@ -1917,7 +1922,7 @@ req_cmd += "&delall.device.vap.#15.station.*";
 // 刪除 device.limit.*
 req_cmd += "&delall.device.limit.*";
 </pre>
-<br>
+<br><br>
           指令建立後, 使用 <font class="css_font_b1">mcm_jslib_submit_config()</font>
           送出請求, 之後檢查返回的結果是否成功.<br>
           範例 :<br>
@@ -1941,7 +1946,7 @@ if(rep_ret.rep_code < mcm_return_code.pass)
 }
 mcm_jslib_run_script(rep_ret.rep_data);
 </pre>
-<br>
+<br><br>
           完整程式 :<br>
 <pre class="css_pre_code">
 &lt;html&gt;
@@ -2053,7 +2058,7 @@ var req_cmd = "";
 // 執行 mcm_module_web_test_01
 req_cmd += "&run.mcm_module_web_test_01";
 </pre>
-<br>
+<br><br>
           指令建立後, 使用 <font class="css_font_b1">mcm_jslib_submit_config()</font>
           送出請求, 之後檢查返回的結果是否成功.<br>
           範例 :<br>
@@ -2077,7 +2082,7 @@ if(rep_ret.rep_code < mcm_return_code.pass)
 }
 mcm_jslib_run_script(rep_ret.rep_data);
 </pre>
-<br>
+<br><br>
           完整程式 :<br>
 <pre class="css_pre_code">
 &lt;html&gt;
@@ -2133,6 +2138,7 @@ function main_submit()
 &lt;/body&gt;
 &lt;/html&gt;
 </pre>
+<br>
 <pre class="css_pre_code">
 模組部分 :
 這部分程式要放在 mint_cm/mcm_daemon/mcm_module 之下, 檔案名稱隨意 (*.c),
@@ -2163,7 +2169,7 @@ int mcm_module_web_test_01(
     return MCM_RCODE_PASS;
 }
 </pre>
-        </td>
+       </td>
       </tr>
     </table>
     <br>
@@ -2229,7 +2235,7 @@ self_jslib.other_query = "";
 rep_ret = mcm_jslib_obtain_config(self_jslib);
 ...
 </pre>
-<br>
+<br><br>
           注意事項 :<br>
           <table class="css_table_list1">
             <tr>
@@ -2326,7 +2332,7 @@ self_jslib.other_query = "";
 rep_ret = mcm_jslib_submit_config(self_jslib);
 ...
 </pre>
-<br>
+<br><br>
           注意事項 :<br>
           <table class="css_table_list1">
             <tr>

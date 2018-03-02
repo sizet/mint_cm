@@ -108,32 +108,32 @@ Some rights reserved. See README.
 
     啟動表要放在 <font class="css_font_b1">mint_cm/mcm_daemon/mcm_module</font> 內, 新增一個 C 檔案, 內容為 :<br>
     <div class="css_div_block">
-    #include "mcm_lib/mcm_lheader/mcm_type.h"<br>
-    #include "mcm_lib/mcm_lheader/mcm_return.h"<br>
-    #include "mcm_lib/mcm_lheader/mcm_debug.h"<br>
-    #include "../mcm_action_handle_define.h"<br><br>
-    struct mcm_action_module_t MCM_ACTION_CUSTOM_MODULE_BOOT_PROFILE_LIST_NAME[] =<br>
-    {<br>
-    &nbsp;&nbsp;&nbsp;&nbsp;{""}<br>
-    };<br><br>
-    <font class="css_font_g1">
-    struct mcm_action_module_t MCM_ACTION_CUSTOM_MODULE_BOOT_OTHER_LIST_NAME[] =<br>
-    {<br>
-    &nbsp;&nbsp;&nbsp;&nbsp;{""}<br>
-    };</font><br><br>
-    int MCM_ACTION_CUSTOM_RESET_DEFAULT_NAME(<br>
-    &nbsp;&nbsp;&nbsp;&nbsp;void)<br>
-    {<br>
-    &nbsp;&nbsp;&nbsp;&nbsp;return MCM_RCODE_PASS;<br>
-    }
+      #include "mcm_lib/mcm_lheader/mcm_type.h"<br>
+      #include "mcm_lib/mcm_lheader/mcm_return.h"<br>
+      #include "mcm_lib/mcm_lheader/mcm_debug.h"<br>
+      #include "../mcm_action_handle_define.h"<br><br>
+      struct mcm_action_module_t MCM_ACTION_CUSTOM_MODULE_BOOT_PROFILE_LIST_NAME[] =<br>
+      {<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;{""}<br>
+      };<br><br>
+      <font class="css_font_g1">
+      struct mcm_action_module_t MCM_ACTION_CUSTOM_MODULE_BOOT_OTHER_LIST_NAME[] =<br>
+      {<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;{""}<br>
+      };</font><br><br>
+      int MCM_ACTION_CUSTOM_RESET_DEFAULT_NAME(<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;void)<br>
+      {<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;return MCM_RCODE_PASS;<br>
+      }
     </div>
-    <br>
+    <br><br>
 
     此章節只需要用到 <font class="css_font_g1">MCM_ACTION_CUSTOM_MODULE_BOOT_OTHER_LIST_NAME[]</font>
     <br><br>
 
     在列表中填入要執行的模組函式名稱, 會依序執行, 最後一組必須要是 {""}.<br>
-    例如 :
+    例如 :<br>
 <pre class="css_pre_code">
 struct mcm_action_module_t MCM_ACTION_CUSTOM_MODULE_BOOT_OTHER_LIST_NAME[] =
 {
@@ -144,7 +144,7 @@ struct mcm_action_module_t MCM_ACTION_CUSTOM_MODULE_BOOT_OTHER_LIST_NAME[] =
     {""}
 }
 </pre>
-<br>
+<br><br>
 
   </div>
 </div>
@@ -157,7 +157,7 @@ struct mcm_action_module_t MCM_ACTION_CUSTOM_MODULE_BOOT_OTHER_LIST_NAME[] =
 
     內部模組在啟動執行的期間可以使用內部模組的回傳資訊 (<a href="mcm_0501.html">#05-01#</a>),
     但是不會有任何作用.
-    <br><br><br>
+    <br><br>
 
     執行 mcm_daemon 時資料現在值檔案的儲存方式是使用手動儲存的話 (<a href="mcm_0203.html">#02-03#</a>),
     必須在最後一個啟動模組中加入儲存資料的動作 (<a href="mcm_0407.html">#04-07#</a>).

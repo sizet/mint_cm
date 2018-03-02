@@ -34,34 +34,37 @@ Some rights reserved. See README.
     <div class="css_div_hook" id="hook_1004_makefile_01"></div>
     Makefile 的編譯參數 :<br>
     <div class="css_div_block">
-    # 路徑設定.<br>
-    <font class="css_font_p1">
-    MAAM_PATH&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; = mint_cm/http_server/mini_httpd/last/mint_aam<br>
-    MAAM_LULIB_PATH = $(MAAM_PATH)/maam_lib/maam_lulib<br>
-    </font>
-    <br>
-    # 標頭檔路徑.<br>
-    <font class="css_font_p1">INCLUDE_PATH = -I$(MAAM_PATH)</font><br>
-    # 函式庫路徑.<br>
-    <font class="css_font_p1">LIBRARY_PATH = -L$(MAAM_LULIB_PATH)</font>
-    <br><br>
-    # 使用靜態鏈結或動態鏈結的鏈結參數.<br>
-    <font class="css_font_p1">
-    USE_STATIC_MAAM_LIB = YES<br>
-    ifeq (${USE_STATIC_MAAM_LIB}, YES)<br>
-    LIBRARY_FILE = $(MAAM_LULIB_PATH)/maam_lulib_api.a<br>
-    else<br>
-    LIBRARY_FILE = -lmaam_lulib_api<br>
-    endif<br>
-    </font>
+      # 路徑設定.<br>
+      <font class="css_font_p1">
+      MAAM_PATH&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; = mint_cm/http_server/mini_httpd/last/mint_aam<br>
+      MAAM_LULIB_PATH = $(MAAM_PATH)/maam_lib/maam_lulib<br>
+      </font>
+      <br>
+      # 標頭檔路徑.<br>
+      <font class="css_font_p1">INCLUDE_PATH = -I$(MAAM_PATH)</font><br>
+      # 函式庫路徑.<br>
+      <font class="css_font_p1">LIBRARY_PATH = -L$(MAAM_LULIB_PATH)</font>
+      <br><br>
+      # 使用靜態鏈結或動態鏈結的鏈結參數.<br>
+      <font class="css_font_p1">
+      USE_STATIC_MAAM_LIB = YES<br>
+      ifeq (${USE_STATIC_MAAM_LIB}, YES)<br>
+      LIBRARY_FILE = $(MAAM_LULIB_PATH)/maam_lulib_api.a<br>
+      else<br>
+      LIBRARY_FILE = -lmaam_lulib_api<br>
+      endif<br>
+      </font>
     </div>
+    <br>
     MintAAM 的用戶端函式庫在 <font class="css_font_b1">mint_cm/http_server/mini_httpd/last/mint_aam/maam_lib/maam_lulib</font>.<br>
     使用動態鏈結必須將 <font class="css_font_b1">libmaam_lulib_api.so</font> 複製到系統的 lib 目錄.
     <br><br>
 
     <div class="css_div_hook" id="hook_1004_include_01"></div>
     需要的標頭檔 :<br>
-    <font class="css_font_p1">#include "maam_lib/maam_lulib/maam_lulib_api.h"</font>
+    <div class="css_div_block">
+      <font class="css_font_p1">#include "maam_lib/maam_lulib/maam_lulib_api.h"</font>
+    </div>
     <br><br>
 
   </div>

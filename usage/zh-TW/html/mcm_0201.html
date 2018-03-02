@@ -200,7 +200,7 @@ Some rights reserved. See README.
       &lt;/device&gt;
       </font>
     </div>
-    <br><br>
+    <br><br><br>
 
     步驟一 : 加入 XML 開頭.<br>
     <div class="css_div_block">
@@ -217,6 +217,7 @@ Some rights reserved. See README.
       &lt;/base&gt;
       </font>
     </div>
+    <br>
     實際 :<br>
     <div class="css_div_block">
       &lt;?xml version="1.0"?&gt;<br><br>
@@ -225,7 +226,7 @@ Some rights reserved. See README.
       &lt;/base&gt;<br><br>
       </font>
     </div>
-    <br>
+    <br><br>
 
     <font class="css_font_b1">version=$(version)</font><br>
     表示此資料模型的版本, 格式可以隨意自訂, 如 [1] [1.2] [a.b] [2.1b] 都可.
@@ -257,6 +258,7 @@ Some rights reserved. See README.
       &lt;/$(name)&gt;<br>
       </font>
     </div>
+    <br>
     實際 :<br>
     <div class="css_div_block">
       &lt;?xml version="1.0"?&gt;<br><br>
@@ -267,6 +269,7 @@ Some rights reserved. See README.
       </font>
       &lt;/base&gt;<br><br>
     </div>
+    <br>
     資料模型必須放在 <font class="css_font_b1">&lt;base&gt;...&lt;/base&gt;</font> 之內.
     <br><br>
 
@@ -366,6 +369,7 @@ Some rights reserved. See README.
     <div class="css_div_block">
       <font class="css_font_g1">&lt;$(name) type="$(type)"&gt;$(default)&lt;/$(name)&gt;</font>
     </div>
+    <br>
     實際 :<br>
     <div class="css_div_block">
       &lt;?xml version="1.0"?&gt;<br><br>
@@ -381,7 +385,7 @@ Some rights reserved. See README.
       &lt;/device&gt;<br>
       &lt;/base&gt;<br><br>
     </div>
-    <br>
+    <br><br>
 
     <font class="css_font_b1">$(name)</font><br>
     表示資料的名稱, 限制 :<br>
@@ -653,7 +657,7 @@ Some rights reserved. See README.
       &lt;/device&gt;<br>
       &lt;/base&gt;<br><br>
     </div>
-    <br>
+    <br><br>
 
     加入 [DATA-03] :<br>
     <div class="css_div_block">
@@ -682,7 +686,7 @@ Some rights reserved. See README.
       &lt;/device&gt;<br>
       &lt;/base&gt;<br><br>
     </div>
-    <br>
+    <br><br>
 
     加入 [DATA-04] :<br>
     <div class="css_div_block">
@@ -716,7 +720,7 @@ Some rights reserved. See README.
       &lt;/device&gt;<br>
       &lt;/base&gt;<br><br>
     </div>
-    <br>
+    <br><br>
 
     加入 [DATA-05] :<br>
     <div class="css_div_block">
@@ -755,7 +759,7 @@ Some rights reserved. See README.
       &lt;/device&gt;<br>
       &lt;/base&gt;<br><br>
     </div>
-    <br>
+    <br><br>
 
     加入 [DATA-06] :<br>
     <div class="css_div_block">
@@ -799,7 +803,7 @@ Some rights reserved. See README.
       &lt;/device&gt;<br>
       &lt;/base&gt;<br><br>
     </div>
-    <br>
+    <br><br>
 
     加入 [DATA-07] :<br>
     <div class="css_div_block">
@@ -849,7 +853,7 @@ Some rights reserved. See README.
       &lt;/device&gt;<br>
       &lt;/base&gt;<br><br>
     </div>
-    <br>
+    <br><br>
 
     資料模型到此就建立完成.
     <br><br>
@@ -880,7 +884,7 @@ Some rights reserved. See README.
       &lt;!--<br>&lt;!-- text --&gt;<br>--&gt;<br><br>
       &lt;!--<br>&lt;!--<br>text<br>--&gt;<br>--&gt;
     </div>
-    <br>
+    <br><br>
 
   </div>
 </div>
@@ -918,7 +922,7 @@ Some rights reserved. See README.
       <tr>
         <td class="css_td_list1_l">03.&nbsp;</td>
         <td class="css_td_list1_r">
-          沒有 child-group 的 group 必須要有 member (不含 ek 類型).
+          沒有 child-group 的 group 必須要有 member (不含 ek 類型).<br>
           <div class="css_div_block">
             &lt;GroupA&gt;<br>
             &nbsp;&nbsp;&lt;GroupB&gt;<br>
@@ -940,7 +944,7 @@ Some rights reserved. See README.
       <tr>
         <td class="css_td_list1_l">04.&nbsp;</td>
         <td class="css_td_list1_r">
-          若 group 的 $(save) 設為 0, 則內部的 child-group 的 $(save) 都必須是 0.
+          若 group 的 $(save) 設為 0, 則內部的 child-group 的 $(save) 都必須是 0.<br>
           <div class="css_div_block">
             &lt;GroupA type="gs" max="1" save="1"&gt;<br>
             &nbsp;&nbsp;&lt;GroupB1 type="gd" max="10" save="<font class="css_font_r1">0</font>"&gt;<br>
@@ -964,7 +968,7 @@ Some rights reserved. See README.
         <td class="css_td_list1_l">05.&nbsp;</td>
         <td class="css_td_list1_r">
           group 類型的標籤必須是區塊模式 (頭尾標籤在不同行).<br>
-          member 類型的標籤必須是單行模式 (頭尾標籤在同一行).
+          member 類型的標籤必須是單行模式 (頭尾標籤在同一行).<br>
           <div class="css_div_block">
             <font class="css_font_c1">group :</font><br>
             &lt;Group&gt;<br>...<br>&lt;/Group&gt;<br><br>
@@ -980,7 +984,7 @@ Some rights reserved. See README.
       <tr>
         <td class="css_td_list1_l">06.&nbsp;</td>
         <td class="css_td_list1_r">
-          檔案的最後必須多加一行換行.
+          檔案的最後必須多加一行換行.<br>
           <div class="css_div_block">
             &lt;?xml version="1.0"?&gt;<br>
             &lt;base version="1.0"&gt;<br>
@@ -1117,6 +1121,7 @@ Some rights reserved. See README.
       <font class="css_font_b1">$(descript)</font>
       </font>
     </div>
+    <br>
     範例 :
     <table class="css_table_console">
       <tr>

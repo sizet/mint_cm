@@ -100,26 +100,26 @@ Some rights reserved. See README.
 
     啟動表要放在 <font class="css_font_b1">mint_cm/mcm_daemon/mcm_module</font> 內, 新增一個 C 檔案, 內容為 :<br>
     <div class="css_div_block">
-    #include "mcm_lib/mcm_lheader/mcm_type.h"<br>
-    #include "mcm_lib/mcm_lheader/mcm_return.h"<br>
-    #include "mcm_lib/mcm_lheader/mcm_debug.h"<br>
-    #include "../mcm_action_handle_define.h"<br><br>
-    <font class="css_font_g1">
-    struct mcm_action_module_t MCM_ACTION_CUSTOM_MODULE_BOOT_PROFILE_LIST_NAME[] =<br>
-    {<br>
-    &nbsp;&nbsp;&nbsp;&nbsp;{""}<br>
-    };</font><br><br>
-    struct mcm_action_module_t MCM_ACTION_CUSTOM_MODULE_BOOT_OTHER_LIST_NAME[] =<br>
-    {<br>
-    &nbsp;&nbsp;&nbsp;&nbsp;{""}<br>
-    };<br><br>
-    int MCM_ACTION_CUSTOM_RESET_DEFAULT_NAME(<br>
-    &nbsp;&nbsp;&nbsp;&nbsp;void)<br>
-    {<br>
-    &nbsp;&nbsp;&nbsp;&nbsp;return MCM_RCODE_PASS;<br>
-    }
+      #include "mcm_lib/mcm_lheader/mcm_type.h"<br>
+      #include "mcm_lib/mcm_lheader/mcm_return.h"<br>
+      #include "mcm_lib/mcm_lheader/mcm_debug.h"<br>
+      #include "../mcm_action_handle_define.h"<br><br>
+      <font class="css_font_g1">
+      struct mcm_action_module_t MCM_ACTION_CUSTOM_MODULE_BOOT_PROFILE_LIST_NAME[] =<br>
+      {<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;{""}<br>
+      };</font><br><br>
+      struct mcm_action_module_t MCM_ACTION_CUSTOM_MODULE_BOOT_OTHER_LIST_NAME[] =<br>
+      {<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;{""}<br>
+      };<br><br>
+      int MCM_ACTION_CUSTOM_RESET_DEFAULT_NAME(<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;void)<br>
+      {<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;return MCM_RCODE_PASS;<br>
+      }
     </div>
-    <br>
+    <br><br>
 
     此章節只需要用到 <font class="css_font_g1">MCM_ACTION_CUSTOM_MODULE_BOOT_PROFILE_LIST_NAME[]</font>
     <br><br>
@@ -135,7 +135,7 @@ struct mcm_action_module_t MCM_ACTION_CUSTOM_MODULE_BOOT_PROFILE_LIST_NAME[] =
     {""}
 }
 </pre>
-<br>
+<br><br>
 
     資料檢查的啟動表內的內部模組的回傳值會影響後續的處理 :<br>
     <table class="css_table_list2">
@@ -241,6 +241,7 @@ device.vap.#8.station.#20 mac_addr:00:11:22:33:44:55 rule:3
 
 ; device.client.*
 </pre>
+<br>
 <pre class="css_pre_code">
 錯誤項目 :
 device.vap.#8.extra 和 device.vap.#8.station.#20 存在, 但是 device.vap.#8 卻不存在, 發生錯誤.
@@ -248,7 +249,7 @@ device.vap.#8.extra 和 device.vap.#8.station.#20 存在, 但是 device.vap.#8 �
 device.vap.#8.extra 貼上 MCM_DSATUS_ERROR_LOSE_PARENT.
 device.vap.#8.station.#20 貼上 MCM_DSERROR_LOSE_PARENT.
 </pre>
-          <br>
+<br><br>
           範例程式 :<br>
 <pre class="css_pre_code">
 現在值檔案部分
@@ -273,6 +274,7 @@ device.vap.#8.station.#20 mac_addr:00:11:22:33:44:55 rule:3
 
 ; device.client.*
 </pre>
+<br>
 <pre class="css_pre_code">
 模組程式部分
 
@@ -342,6 +344,7 @@ FREE_01:
     return fret;
 }
 </pre>
+<br>
 <pre class="css_pre_code">
 資料檢查啟動表部分
 
@@ -430,12 +433,14 @@ device.vap.#8.station.#20 mac_addr:00:11:22:33:44:55 rule:3
 
 ; device.client.*
 </pre>
+<br>
 <pre class="css_pre_code">
 錯誤項目 :
 device 是根結點但是不存在, 發生錯誤.
 系統處理 :
 device 被建立並貼上 MCM_DSERROR_LOSE_ENTRY.
 </pre>
+<br><br>
           示範 (狀況-02) :<br>
 <pre class="css_pre_code">
 $version 1.0
@@ -458,12 +463,14 @@ device.vap.#8.station.#20 mac_addr:00:11:22:33:44:55 rule:3
 
 ; device.client.*
 </pre>
+<br>
 <pre class="css_pre_code">
 錯誤項目 :
 device 存在, device.system 是 gs 類型但是不存在, 發生錯誤.
 系統處理 :
 device.system 被建立並貼上 MCM_DSERROR_LOSE_ENTRY.
 </pre>
+<br><br>
           示範 (狀況-02) :<br>
 <pre class="css_pre_code">
 $version 1.0
@@ -486,12 +493,14 @@ device.vap.#8.station.#20 mac_addr:00:11:22:33:44:55 rule:3
 
 ; device.client.*
 </pre>
+<br>
 <pre class="css_pre_code">
 錯誤項目 :
 device.vap.#8 存在, device.vap.*.extra 是 gs 類型但是 device.vap.#8.extra 不存在, 發生錯誤.
 系統處理 :
 device.vap.#8.extra 被建立並貼上 MCM_DSERROR_LOSE_ENTRY.
 </pre>
+<br><br>
           示範 (狀況-03) :<br>
 <pre class="css_pre_code">
 $version 1.0
@@ -514,13 +523,14 @@ device.vap.#8.station.#20 mac_addr:00:11:22:33:44:55 rule:3
 
 ; device.client.*
 </pre>
+<br>
 <pre class="css_pre_code">
 錯誤項目 :
 device.vap.#8.extra 和 device.vap.#8.station.#20 存在, 但是 device.vap.#8 卻不存在, 發生錯誤.
 系統處理 :
 device.vap.#8 被建立並貼上 MCM_DSERROR_LOSE_ENTRY.
 </pre>
-          <br>
+<br><br>
           範例程式 :<br>
 <pre class="css_pre_code">
 現在值檔案部分
@@ -542,6 +552,7 @@ device.vap.#8.station.#20 mac_addr:00:11:22:33:44:55 rule:3
 
 ; device.client.*
 </pre>
+<br>
 <pre class="css_pre_code">
 模組程式部分
 
@@ -654,6 +665,7 @@ FREE_01:
     return fret;
 }
 </pre>
+<br>
 <pre class="css_pre_code">
 資料檢查啟動表部分
 
@@ -731,13 +743,14 @@ device.vap.#8.station.#20 mac_addr:00:11:22:33:44:02 rule:7
 
 ; device.client.*
 </pre>
+<br>
 <pre class="css_pre_code">
 錯誤項目 :
 device.vap.#8.station.#20 重複出現, 發生錯誤.
 系統處理 :
 第一次出現的 device.vap.#8.station.#20 貼上 MCM_DSERROR_DUPLIC_ENTRY, 其餘的放棄.
 </pre>
-          <br>
+<br><br>
           範例程式 :<br>
 <pre class="css_pre_code">
 現在值檔案部分
@@ -766,6 +779,7 @@ device.vap.#8.station.#20 mac_addr:00:11:22:33:44:02 rule:7
 
 ; device.client.*
 </pre>
+<br>
 <pre class="css_pre_code">
 模組程式部分
 
@@ -835,6 +849,7 @@ FREE_01:
     return fret;
 }
 </pre>
+<br>
 <pre class="css_pre_code">
 資料檢查啟動表部分
 
@@ -910,13 +925,14 @@ device.vap.#8.station.#20 mac_addr:00:11:22:33:44:55 rule:3
 
 ; device.client.*
 </pre>
+<br>
 <pre class="css_pre_code">
 錯誤項目 :
 device 該行出現無法識別的項目 "pFw%#1$(%^=?", 發生錯誤.
 系統處理 :
 device 貼上 MCM_DSERROR_UNKNOWN_PARAMETER.
 </pre>
-          <br>
+<br><br>
           範例程式 :<br>
 <pre class="css_pre_code">
 現在值檔案部分
@@ -942,6 +958,7 @@ device.vap.#8.station.#20 mac_addr:00:11:22:33:44:55 rule:3
 
 ; device.client.*
 </pre>
+<br>
 <pre class="css_pre_code">
 模組程式部分
 
@@ -1013,6 +1030,7 @@ FREE_01:
     return fret;
 }
 </pre>
+<br>
 <pre class="css_pre_code">
 資料檢查啟動表部分
 
@@ -1097,13 +1115,14 @@ device.vap.#8.station.#20 mac_addr:00:11:22:33:44:55 rule:3
 
 ; device.client.*
 </pre>
+<br>
 <pre class="css_pre_code">
 錯誤項目 :
 device.vap.#8 該行出現無法識別的 member "authentication:wpa2", 發生錯誤.
 系統處理 :
 device.vap.#8 貼上 MCM_DSERROR_UNKNOWN_MEMBER.
 </pre>
-          <br>
+<br><br>
           範例程式 :<br>
 <pre class="css_pre_code">
 現在值檔案部分
@@ -1129,6 +1148,7 @@ device.vap.#8.station.#20 mac_addr:00:11:22:33:44:55 rule:3
 
 ; device.client.*
 </pre>
+<br>
 <pre class="css_pre_code">
 模組程式部分
 
@@ -1178,6 +1198,7 @@ FREE_01:
     return fret;
 }
 </pre>
+<br>
 <pre class="css_pre_code">
 資料檢查啟動表部分
 
@@ -1259,13 +1280,14 @@ device.vap.#8.station.#20 mac_addr:00:11:22:33:44:55 rule:3
 
 ; device.client.*
 </pre>
+<br>
 <pre class="css_pre_code">
 錯誤項目 :
 device.system 的 date 和 uptime 遺失, 發生錯誤.
 系統處理 :
 device.system 和 date 和 uptime 貼上 MCM_DSERROR_LOSE_MEMBER.
 </pre>
-          <br>
+<br><br>
           範例程式 :<br>
 <pre class="css_pre_code">
 現在值檔案部分
@@ -1291,6 +1313,7 @@ device.vap.#8.station.#20 mac_addr:00:11:22:33:44:55 rule:3
 
 ; device.client.*
 </pre>
+<br>
 <pre class="css_pre_code">
 模組程式部分
 
@@ -1358,6 +1381,7 @@ FREE_01:
     return fret;
 }
 </pre>
+<br>
 <pre class="css_pre_code">
 資料檢查啟動表部分
 
@@ -1433,13 +1457,14 @@ device.vap.#8.station.#20 mac_addr:00:11:22:33:44:55 rule:3
 
 ; device.client.*
 </pre>
+<br>
 <pre class="css_pre_code">
 錯誤項目 :
 device.system 的 ip_addr 和 loading 重複出現, 發生錯誤.
 系統處理 :
 device.system 和第一次出現的 ip_addr 和 loading 貼上 MCM_DSERROR_DUPLIC_MEMBER, 其餘的放棄.
 </pre>
-          <br>
+<br><br>
           範例程式 :<br>
 <pre class="css_pre_code">
 現在值檔案部分
@@ -1465,6 +1490,7 @@ device.vap.#8.station.#20 mac_addr:00:11:22:33:44:55 rule:3
 
 ; device.client.*
 </pre>
+<br>
 <pre class="css_pre_code">
 模組程式部分
 
@@ -1532,6 +1558,7 @@ FREE_01:
     return fret;
 }
 </pre>
+<br>
 <pre class="css_pre_code">
 資料檢查啟動表部分
 
@@ -1607,6 +1634,7 @@ device.vap.#8.station.#20 mac_addr:00:11:22:33:44:55 rule:3
 
 ; device.client.*
 </pre>
+<br>
 <pre class="css_pre_code">
 錯誤項目 :
 device.system 的 date 的長度超過設定的緩衝大小 (12), 發生錯誤.
@@ -1615,7 +1643,7 @@ device.system 的 loading 的數值有無效的字元, 發生錯誤.
 系統處理 :
 device.system 和 date 和 uptime 和 loading 貼上 MCM_DSERROR_INVALID_VALUE.
 </pre>
-          <br>
+<br><br>
           範例程式 :<br>
 <pre class="css_pre_code">
 現在值檔案部分
@@ -1641,6 +1669,7 @@ device.vap.#8.station.#20 mac_addr:00:11:22:33:44:55 rule:3
 
 ; device.client.*
 </pre>
+<br>
 <pre class="css_pre_code">
 模組程式部分
 
@@ -1710,6 +1739,7 @@ FREE_01:
     return fret;
 }
 </pre>
+<br>
 <pre class="css_pre_code">
 資料檢查啟動表部分
 

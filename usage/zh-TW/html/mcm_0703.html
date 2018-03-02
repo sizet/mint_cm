@@ -115,26 +115,26 @@ Some rights reserved. See README.
 
     處理函式要放在 <font class="css_font_b1">mint_cm/mcm_daemon/mcm_module</font> 內, 新增一個 C 檔案, 內容為 :<br>
     <div class="css_div_block">
-    #include "mcm_lib/mcm_lheader/mcm_type.h"<br>
-    #include "mcm_lib/mcm_lheader/mcm_return.h"<br>
-    #include "mcm_lib/mcm_lheader/mcm_debug.h"<br>
-    #include "../mcm_action_handle_define.h"<br><br>
-    struct mcm_action_module_t MCM_ACTION_CUSTOM_MODULE_BOOT_PROFILE_LIST_NAME[] =<br>
-    {<br>
-    &nbsp;&nbsp;&nbsp;&nbsp;{""}<br>
-    };<br><br>
-    struct mcm_action_module_t MCM_ACTION_CUSTOM_MODULE_BOOT_OTHER_LIST_NAME[] =<br>
-    {<br>
-    &nbsp;&nbsp;&nbsp;&nbsp;{""}<br>
-    };<br><br>
-    <font class="css_font_g1">
-    int MCM_ACTION_CUSTOM_RESET_DEFAULT_NAME(<br>
-    &nbsp;&nbsp;&nbsp;&nbsp;void)<br>
-    {<br>
-    &nbsp;&nbsp;&nbsp;&nbsp;return MCM_RCODE_PASS;<br>
-    }</font>
+      #include "mcm_lib/mcm_lheader/mcm_type.h"<br>
+      #include "mcm_lib/mcm_lheader/mcm_return.h"<br>
+      #include "mcm_lib/mcm_lheader/mcm_debug.h"<br>
+      #include "../mcm_action_handle_define.h"<br><br>
+      struct mcm_action_module_t MCM_ACTION_CUSTOM_MODULE_BOOT_PROFILE_LIST_NAME[] =<br>
+      {<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;{""}<br>
+      };<br><br>
+      struct mcm_action_module_t MCM_ACTION_CUSTOM_MODULE_BOOT_OTHER_LIST_NAME[] =<br>
+      {<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;{""}<br>
+      };<br><br>
+      <font class="css_font_g1">
+      int MCM_ACTION_CUSTOM_RESET_DEFAULT_NAME(<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;void)<br>
+      {<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;return MCM_RCODE_PASS;<br>
+      }</font>
     </div>
-    <br>
+    <br><br>
 
     此章節只需要用到 <font class="css_font_g1">MCM_ACTION_CUSTOM_RESET_DEFAULT_NAME{}</font>
     <br><br>
@@ -214,7 +214,7 @@ FREE_01:
     return fret;
 }
 </pre>
-    <br>
+<br><br>
 
     執行完 MCM_ACTION_CUSTOM_RESET_DEFAULT_NAME{} 後, mcm_daemon 會結束執行.
     <br><br>

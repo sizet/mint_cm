@@ -52,18 +52,21 @@ Some rights reserved. See README.
       endif<br>
       </font>
     </div>
+    <br>
     MintCM 的用戶端函式庫在 <font class="css_font_b1">mint_cm/mcm_lib/mcm_lulib</font>.<br>
     使用動態鏈結必須將 <font class="css_font_b1">libmcm_lulib_api.so</font> 複製到系統的 lib 目錄.
     <br><br>
 
     <div class="css_div_hook" id="hook_0302_include_01"></div>
     需要的標頭檔 :<br>
-    <font class="css_font_p1">#include "mcm_lib/mcm_lheader/mcm_type.h"</font><br>
-    <font class="css_font_p1">#include "mcm_lib/mcm_lheader/mcm_size.h"</font><br>
-    <font class="css_font_p1">#include "mcm_lib/mcm_lheader/mcm_connect.h"</font><br>
-    <font class="css_font_p1">#include "mcm_lib/mcm_lheader/mcm_return.h"</font><br>
-    <font class="css_font_p1">#include "mcm_lib/mcm_lheader/mcm_data_exinfo_auto.h"</font><br>
-    <font class="css_font_p1">#include "mcm_lib/mcm_lulib/mcm_lulib_api.h"</font>
+    <div class="css_div_block">
+      <font class="css_font_p1">#include "mcm_lib/mcm_lheader/mcm_type.h"</font><br>
+      <font class="css_font_p1">#include "mcm_lib/mcm_lheader/mcm_size.h"</font><br>
+      <font class="css_font_p1">#include "mcm_lib/mcm_lheader/mcm_connect.h"</font><br>
+      <font class="css_font_p1">#include "mcm_lib/mcm_lheader/mcm_return.h"</font><br>
+      <font class="css_font_p1">#include "mcm_lib/mcm_lheader/mcm_data_exinfo_auto.h"</font><br>
+      <font class="css_font_p1">#include "mcm_lib/mcm_lulib/mcm_lulib_api.h"</font>
+    </div>
     <br><br>
 
   </div>
@@ -188,6 +191,7 @@ Some rights reserved. See README.
     <div class="css_div_block">
       <font class="css_font_g1">$(group-info-1).$(group-info-2). - - - .$(group-info-N)</font>
     </div>
+    <br>
     <font class="css_font_b1">$(entry-info)</font><br>
     由 group 名稱和 mask 資訊所組成的一小段路徑.<br>
     格式 :<br>
@@ -197,7 +201,7 @@ Some rights reserved. See README.
       <font class="css_font_p1">gd 類型 :</font>
       <font class="css_font_g1">$(group-name).*</font>
     </div>
-    <br>
+    <br><br>
     <table class="css_table_list2">
       <tr>
         <td class="css_td_list2_l2">$(group-name)</td>
@@ -226,7 +230,7 @@ Some rights reserved. See README.
       device.client.*<br>
       表示 client
     </div>
-    <br><br>
+    <br><br><br>
 
     <div class="css_div_hook" id="hook_0302_mix_path_01"></div>
     <font class="css_font_b1">[char *mix_path]</font><br>
@@ -235,6 +239,7 @@ Some rights reserved. See README.
     <div class="css_div_block">
       <font class="css_font_g1">$(group-info-NonLast). - - - .($(group-info-LastGD) or $(group-info-LastGS))</font>
     </div>
+    <br>
     <font class="css_font_b1">$(entry-info-NonLast)</font><br>
     由 group 名稱和 index / key 資訊所組成的一小段路徑 (非最後一段路徑).<br>
     格式 :<br>
@@ -247,19 +252,21 @@ Some rights reserved. See README.
       <font class="css_font_r1">&nbsp;&nbsp;key 模式 :</font>
       <font class="css_font_g1">$(group-name).#$(entry-key)</font>
     </div>
+    <br>
     <font class="css_font_b1">[$(entry-info-LastGD)]</font><br>
     由 gd 類型的 group 名稱和 mask 資訊所組成的一小段路徑 (最後一段路徑).<br>
     格式 :<br>
     <div class="css_div_block">
       <font class="css_font_g1">$(group-name).*</font>
     </div>
+    <br>
     <font class="css_font_b1">[$(entry-info-LastGS)]</font><br>
     由 gs 類型的 group 名稱所組成的一小段路徑 (最後一段路徑).<br>
     格式 :<br>
     <div class="css_div_block">
       <font class="css_font_g1">$(group-name)</font>
     </div>
-    <br>
+    <br><br>
     index / key 模式的差異主要是針對 entry 的搜尋方式.<br>
     <table class="css_table_list2">
       <tr>
@@ -343,7 +350,7 @@ Some rights reserved. See README.
       device.client.*<br>
       表示 client
     </div>
-    <br><br>
+    <br><br><br>
 
     <div class="css_div_hook" id="hook_0302_full_path_01"></div>
     <font class="css_font_b1">[char *full_path]</font><br>
@@ -352,6 +359,7 @@ Some rights reserved. See README.
     <div class="css_div_block">
       <font class="css_font_g1">$(group-info-1).$(group-info-2). - - - .$(group-info-N)</font>
     </div>
+    <br>
     <font class="css_font_b1">$(entry-info)</font><br>
     由 group 名稱和 index / key 資訊所組成的一小段路徑.<br>
     格式 :<br>
@@ -364,12 +372,12 @@ Some rights reserved. See README.
       <font class="css_font_r1">&nbsp;&nbsp;key 模式 :</font>
       <font class="css_font_g1">$(group-name).#$(entry-key)</font>
     </div>
-    <br>
+    <br><br>
     member 格式 :<br>
     <div class="css_div_block">
       <font class="css_font_g1">$(group-info-1).$(group-info-2). - - - .$(group-info-N).$(member-name)</font>
     </div>
-    <br>
+    <br><br>
     index / key 模式的差異主要是針對 entry 的搜尋方式.<br>
     <table class="css_table_list2">
       <tr>
@@ -451,7 +459,7 @@ Some rights reserved. See README.
       device.client.@1<br>
       表示 client 的第 1 筆 entry
     </div>
-    <br>
+    <br><br>
     範例 (member) :<br>
     <div class="css_div_block">
       device.product<br>
@@ -469,7 +477,7 @@ Some rights reserved. See README.
       device.client.#6.location_x<br>
       表示 client 內 key 為 6 的 location_x
     </div>
-    <br><br>
+    <br><br><br>
 
     <div class="css_div_hook" id="hook_0302_insert_path_01"></div>
     <font class="css_font_b1">[char *insert_path]</font><br>
@@ -481,7 +489,7 @@ Some rights reserved. See README.
       <font class="css_font_r1">&nbsp;&nbsp;key 模式 :</font>
       <font class="css_font_g1">#$(entry-key)</font>
     </div>
-    <br>
+    <br><br>
     index / key 模式的差異主要是針對 entry 的搜尋方式.<br>
     <table class="css_table_list2">
       <tr>
@@ -549,7 +557,7 @@ Some rights reserved. See README.
       NULL<br>
       表示放在串列的尾端
     </div>
-    <br><br>
+    <br><br><br>
 
     註 :<br>
     使用 <a href="#hook_0302_mix_path_01">mix_path</a>, <a href="#hook_0302_full_path_01">full_path</a>,
@@ -652,27 +660,27 @@ Some rights reserved. See README.
     會產生對應的結構資料.<br>
     例如 :<br>
     <div class="css_div_block">
-    vap 會被編譯出 :<br><br>
-    // device.vap.*<br>
-    <font class="css_font_p1">struct</font>
-    <font class="css_font_g1">mcm_dv_device_vap_t</font><br>
-    {<br>
-    <font class="css_font_r1">
-    &nbsp;&nbsp;&nbsp;&nbsp;MCM_DTYPE_EK_TD ekey;<br>
-    &nbsp;&nbsp;&nbsp;&nbsp;MCM_DTYPE_S_TD ssid[MCM_BSIZE_DEVICE_VAP_SSID];<br>
-    &nbsp;&nbsp;&nbsp;&nbsp;MCM_DTYPE_IUS_TD channel;<br>
-    </font>
-    } <font class="css_font_p1">/*__attribute__((packed))*/</font>;
+      vap 會被編譯出 :<br><br>
+      // device.vap.*<br>
+      <font class="css_font_p1">struct</font>
+      <font class="css_font_g1">mcm_dv_device_vap_t</font><br>
+      {<br>
+      <font class="css_font_r1">
+      &nbsp;&nbsp;&nbsp;&nbsp;MCM_DTYPE_EK_TD ekey;<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;MCM_DTYPE_S_TD ssid[MCM_BSIZE_DEVICE_VAP_SSID];<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;MCM_DTYPE_IUS_TD channel;<br>
+      </font>
+      } <font class="css_font_p1">/*__attribute__((packed))*/</font>;
     </div>
-    <br>
+    <br><br>
     如果需要修改結構的對齊方式,
     修改 <font class="css_font_b1">mint_cm/mcm_build/mcm_build.c</font> 並重新編譯全部.<br>
     <div class="css_div_block">
-    <font class="css_font_p1">#define</font>
-    <font class="css_font_g1">MCM_DATA_EXINFO_DATA_VALUE_ATTRIBUTE</font>
-    <font class="css_font_r1">"/*__attribute__((packed))*/"</font>
+      <font class="css_font_p1">#define</font>
+      <font class="css_font_g1">MCM_DATA_EXINFO_DATA_VALUE_ATTRIBUTE</font>
+      <font class="css_font_r1">"/*__attribute__((packed))*/"</font>
     </div>
-    <br>
+    <br><br>
 
   </div>
 </div>
@@ -1009,6 +1017,7 @@ FREE_01:
             // device.client.*<br>
             <font class="css_font_r1">#define MCM_MCOUNT_DEVICE_CLIENT_MAX_COUNT 128U</font><br>
           </div>
+          <br>
           定義內的值就是實際的 $(max) 值.
           <br><br>
           範例 :<br>
@@ -3333,6 +3342,7 @@ FREE_01:
     return 0;
 }
 </pre>
+<br>
 <pre class="css_pre_code">
 模組部分 :
 這部分程式要放在 mint_cm/mcm_daemon/mcm_module 之下, 檔案名稱隨意 (*.c),

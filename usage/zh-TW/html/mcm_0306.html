@@ -59,8 +59,6 @@ Some rights reserved. See README.
   <div class="css_div_box_content">
     <br>
 
-
-
     指令程式需要的參數 :
     <table class="css_table_list2">
       <tr>
@@ -192,7 +190,10 @@ Some rights reserved. See README.
     <br>
 
     指令的格式為 :<br>
-    <font class="css_font_g1">$(operate_type)[.$(path)][=$(value)]</font><br>
+    <div class="css_div_block">
+      <font class="css_font_g1">$(operate_type)[.$(path)][=$(value)]</font>
+    </div>
+    <br>
     <table class="css_table_list2">
       <tr>
         <td class="css_td_list2_l2">$(operate_type)</td>
@@ -213,6 +214,7 @@ Some rights reserved. See README.
         </td>
       </tr>
     </table>
+    <br>
     下面說明每種操作類型的用法.
     <br><br>
 
@@ -258,6 +260,7 @@ Some rights reserved. See README.
 # 讀出 device.vap.*.station.* 的資料筆數上限.
 ./mcm -a @mintcm -p ro -s 0 maxcount.device.vap.*.station.*
 </pre>
+<br><br>
           範例 :<br>
 <pre class="css_pre_code">
 #!/bin/sh
@@ -328,6 +331,7 @@ echo "${path} max count = ${max_count}"
 # 取得 device.vap.#15.station.* 目前的資料筆數.
 ./mcm -a @mintcm -p ro count.device.vap.#15.station.*
 </pre>
+<br><br>
           範例 :<br>
 <pre class="css_pre_code">
 #!/bin/sh
@@ -400,6 +404,7 @@ done
 # 讀出 device.vap.#15.station.#33.mac_addr 的資料.
 ./mcm -a @mintcm -p ro get.device.vap.#15.station.#33.mac_addr
 </pre>
+<br><br>
           範例 :<br>
 <pre class="css_pre_code">
 #!/bin/sh
@@ -498,6 +503,7 @@ done
 # 對 device.system.loading 和 device.limit.@1.name 和 device.vap.#23.extra.hidden 寫入資料.
 ./mcm -a @mintcm -p rw set.device.system.loading=-987.12345 set.device.limit.@1.name=rule-1 set.device.vap.#23.extra.hidden=1
 </pre>
+<br><br>
           範例 :<br>
 <pre class="css_pre_code">
 #!/bin/sh
@@ -556,7 +562,6 @@ fi
       </tr>
     </table>
     <br>
-
 
     <div class="css_div_hook" id="hook_0306_add_01"></div>
     <table class="css_table_box">
@@ -632,6 +637,7 @@ fi
 # 增加 device.vap.#76.station.#5 和 device.vap.#76.station.#7, 都放在串列尾端 (""), 逐層增加.
 ./mcm -a @mintcm -p rw add.device.vap.#76= add.device.vap.#76.station.#5= add.device.vap.#76.station.#7=
 </pre>
+<br><br>
           範例 :<br>
 <pre class="css_pre_code">
 #!/bin/sh
@@ -732,6 +738,7 @@ result=`./mcm -a @mintcm -p rw ${list}`
 # 刪除 device.vap.#15.station.@1
 ./mcm -a @mintcm -p rw del.device.vap.#15.station.@1
 </pre>
+<br><br>
           範例 :<br>
 <pre class="css_pre_code">
 #!/bin/sh
@@ -802,6 +809,7 @@ fi
 # 刪除 device.vap.#15.* 底下所有的 station.
 ./mcm -a @mintcm -p rw delall.device.vap.#15.station.*
 </pre>
+<br><br>
           範例 :<br>
 <pre class="css_pre_code">
 #!/bin/sh
@@ -872,6 +880,7 @@ fi
 # 取得 device.vap.@2.station.* 內可用的 key.
 ./mcm -a @mintcm -p rw usablekey.device.vap.@2.station.*
 </pre>
+<br><br>
           範例 :<br>
 <pre class="css_pre_code">
 #!/bin/sh
@@ -949,6 +958,7 @@ echo "add ${count2} entry in ${path1}"
 # mcm_module_command_test_02() 會回傳訊息, mcm 會顯示回傳的訊息.
 ./mcm -a @mintcm -p ro -s 1048576 run.mcm_module_command_test_02
 </pre>
+<br>
 <pre class="css_pre_code">
 模組部分 :
 這部分程式要放在 mint_cm/mcm_daemon/mcm_module 之下, 檔案名稱隨意 (*.c),
@@ -1007,6 +1017,7 @@ FREE_01:
     return fret;
 }
 </pre>
+<br><br>
           範例 :<br>
 <pre class="css_pre_code">
 #!/bin/sh
@@ -1052,7 +1063,7 @@ fi
           <div class="css_div_block">
             <font class="css_font_g1">update</font>
           </div>
-          <br>
+          <br><br>
           注意事項 :<br>
           <table class="css_table_list1">
             <tr>
@@ -1068,6 +1079,7 @@ fi
 # 更新 (單獨使用無實際作用, 只是說明指令用法).
 ./mcm -a @mintcm -p rw update
 </pre>
+<br><br>
           範例 :<br>
 <pre class="css_pre_code">
 #!/bin/sh

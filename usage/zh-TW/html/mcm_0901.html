@@ -41,18 +41,22 @@ Some rights reserved. See README.
     <br>
 
     網頁的編碼格式必須是 UTF-8, 如下的宣告 :<br>
-    <font class="css_font_p1">&lt;meta http-equiv="content-type" content="text/html; charset=utf-8"&gt;</font>
+    <div class="css_div_block">
+      <font class="css_font_p1">&lt;meta http-equiv="content-type" content="text/html; charset=utf-8"&gt;</font>
+    </div>
     <br><br>
 
     需要的 JS 檔 :<br>
-    <font class="css_font_p1">
-    jquery_main.js<br>
-    jquery_form.js<br>
-    mcm_jslib_api.js
-    </font>
+    <div class="css_div_block">
+      <font class="css_font_p1">
+      jquery_main.js<br>
+      jquery_form.js<br>
+      mcm_jslib_api.js
+      </font>
+    </div>
     <br><br>
 
-    需要使用 form 處理.
+    需要使用 <font class="css_font_p1">form</font> 處理.
     <br><br><br>
 
     步驟-01 : 加入 form 內容.<br>
@@ -65,7 +69,7 @@ Some rights reserved. See README.
       &lt;/form&gt;
       </font>
     </div>
-    <br>
+    <br><br>
 
     <div class="css_div_hook" id="hook_0901_form_id_01"></div>
     <font class="css_font_b1">$(form_id)</font><br>
@@ -188,7 +192,7 @@ Some rights reserved. See README.
     </table>
     <br><br>
 
-    範例 :
+    範例 :<br>
 <pre class="css_pre_code">
 &lt;html&gt;
 &lt;head&gt;
@@ -229,7 +233,7 @@ function upload_file()
 &lt;/body&gt;
 &lt;/html&gt;
 </pre>
-    <br>
+<br><br>
 
   </div>
 </div>
@@ -248,20 +252,25 @@ function upload_file()
     <br><br><br>
 
     步驟-01 : 加入基本的標頭檔 :<br>
-    <font class="css_font_p1">#include &lt;stdio.h&gt;</font><br>
-    <font class="css_font_p1">#include "mcm_lib/mcm_lheader/mcm_return.h"</font><br>
-    <font class="css_font_p1">#include "../mcm_cgi_common_extern.h"</font><br>
-    <font class="css_font_p1">#include "mcm_cgi_module_debug.h"</font><br>
+    <div class="css_div_block">
+      <font class="css_font_p1">#include &lt;stdio.h&gt;</font><br>
+      <font class="css_font_p1">#include "mcm_lib/mcm_lheader/mcm_return.h"</font><br>
+      <font class="css_font_p1">#include "../mcm_cgi_common_extern.h"</font><br>
+      <font class="css_font_p1">#include "mcm_cgi_module_debug.h"</font>
+    </div>
+    <br>
     如果需要使用 MintCM 函式則改加入 (以及在 Makefile 中加入鏈結 MintCM 的函式庫) :<br>
-    <font class="css_font_p1">#include &lt;stdio.h&gt;</font><br>
-    <font class="css_font_p1">#include "mcm_lib/mcm_lheader/mcm_type.h"</font><br>
-    <font class="css_font_p1">#include "mcm_lib/mcm_lheader/mcm_size.h"</font><br>
-    <font class="css_font_p1">#include "mcm_lib/mcm_lheader/mcm_connect.h"</font><br>
-    <font class="css_font_p1">#include "mcm_lib/mcm_lheader/mcm_return.h"</font><br>
-    <font class="css_font_p1">#include "mcm_lib/mcm_lheader/mcm_data_exinfo_auto.h"</font><br>
-    <font class="css_font_p1">#include "mcm_lib/mcm_lulib/mcm_lulib_api.h"</font><br>
-    <font class="css_font_p1">#include "../mcm_cgi_common_extern.h"</font><br>
-    <font class="css_font_p1">#include "mcm_cgi_module_debug.h"</font>
+    <div class="css_div_block">
+      <font class="css_font_p1">#include &lt;stdio.h&gt;</font><br>
+      <font class="css_font_p1">#include "mcm_lib/mcm_lheader/mcm_type.h"</font><br>
+      <font class="css_font_p1">#include "mcm_lib/mcm_lheader/mcm_size.h"</font><br>
+      <font class="css_font_p1">#include "mcm_lib/mcm_lheader/mcm_connect.h"</font><br>
+      <font class="css_font_p1">#include "mcm_lib/mcm_lheader/mcm_return.h"</font><br>
+      <font class="css_font_p1">#include "mcm_lib/mcm_lheader/mcm_data_exinfo_auto.h"</font><br>
+      <font class="css_font_p1">#include "mcm_lib/mcm_lulib/mcm_lulib_api.h"</font><br>
+      <font class="css_font_p1">#include "../mcm_cgi_common_extern.h"</font><br>
+      <font class="css_font_p1">#include "mcm_cgi_module_debug.h"</font>
+    </div>
     <br><br><br>
 
     步驟-02 : 加入處函式.<br>
@@ -275,7 +284,7 @@ function upload_file()
       }<br>
       </font>
     </div>
-    <br>
+    <br><br>
 
     <font class="css_font_b1">$(function_name)</font><br>
     自定義的函式名稱.
@@ -453,6 +462,7 @@ function upload_file()
       #endif
       </font>
     </div>
+    <br>
     在離開處理函式時加入關閉 console 設備 :<br>
     <div class="css_div_block">
       <font class="css_font_g1">
@@ -461,7 +471,7 @@ function upload_file()
       #endif
       </font>
     </div>
-    <br>
+    <br><br>
 
     <font class="css_font_b1">[MCM_CUMEMODE]</font><br>
     定義, 是否要顯示錯誤訊息.<br>
@@ -501,7 +511,7 @@ function upload_file()
     巨集的定義在 <font class="css_font_b1">mcm_cgi_module_debug.h</font>.
     <br><br><br>
 
-    範例 :
+    範例 :<br>
 <pre class="css_pre_code">
 #include &lt;errno.h&gt;
 #include &lt;stdio.h&gt;
@@ -546,7 +556,7 @@ void upload_handle(
     return;
 }
 </pre>
-    <br>
+<br><br>
 
   </div>
 </div>

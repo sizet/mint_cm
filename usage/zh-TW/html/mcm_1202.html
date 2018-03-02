@@ -87,7 +87,7 @@ Some rights reserved. See README.
         <td class="css_td_list1_r">
           參考 <a href="mcm_1201.html#hook_1201_use_dynamic_mcm_lib_01">#12-01#01</a>
           和 <a href="mcm_1201.html.#hook_1201_use_dynamic_maam_lib_01">#12-01#02</a>,
-          把 <font class="css_font_b1">mint-cm/src</font> 目錄內用到 MintCM 和 MintAAM
+          把 <font class="css_font_b1">mint-cm/src</font> 目錄內用到 mcm_lulib_api 和 maam_lulib_api
           的部分改為使用動態鏈結.
         </td>
       </tr>
@@ -283,7 +283,7 @@ $(eval $(call BuildPackage,$(PKG_NAME)))
         <td class="css_td_list1_r">
           在 <font class="css_font_b1">mint-cm/files</font>
           目錄內加入開機自動執行 mcm_daemon 和 mini_httpd 的設定檔,
-          檔名為 <font class="css_font_b1">mint-cm.init</font>, 內容 :
+          檔名為 <font class="css_font_b1">mint-cm.init</font>, 內容 :<br>
 <pre class="css_pre_code">
 #!/bin/sh /etc/rc.common
 

@@ -6,7 +6,7 @@ Some rights reserved. See README.
 
 .css_body
 {
-    background-color: #bfdfff;
+    background-color: #aad5ff;
 }
 
 
@@ -33,7 +33,7 @@ Some rights reserved. See README.
 .css_div_box_content
 {
     color: #000000;
-    background-color: #fff5d7;
+    background-color: #fff4d5;
     padding: 2px 5px 0px 5px;
 }
 
@@ -185,22 +185,24 @@ Some rights reserved. See README.
 
 .css_div_block
 {
-    display: block;
+    display: inline-block;
     overflow: auto;
     border: 1px dotted #7f7f00;
     padding: 5px 5px 5px 5px;
-    background-color: #ffffdd;
+    background-color: #ffffd9;
 }
 
 
 .css_pre_code
 {
+    display: inline-block;
+    white-space:pre-wrap;
     font-family: Courier New, Courier;
     font-size: 12px;
     border: 1px dotted #7f7f00;
     padding: 5px 5px 5px 5px;
     margin: 0px;
-    background-color: #ffffdd;
+    background-color: #ffffd9;
 }
 
 

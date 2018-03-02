@@ -469,7 +469,7 @@ Some rights reserved. See README.
       "same_accout_multiple_active_rule=" + <font class="css_font_r1">$(same-accout-multiple-active-rule)</font>
       </font>
     </div>
-    <br>
+    <br><br>
 
     <font class="css_font_b1">$(account-name)</font><br>
     帳號名稱.
@@ -486,7 +486,12 @@ Some rights reserved. See README.
 
     <font class="css_font_b1">$(same-accout-multiple-active-rule)</font><br>
     是否允許同一個帳號被多個使用者同時登入的的處裡方式.
-    <a href="#hook_1002_same_accout_multiple_active_rule_01">[詳細]</a>
+    <a href="#hook_1002_same_accout_multiple_active_rule_01">[詳細]</a><br>
+    注意, 因為判斷的依據是帳號的優先權, 而此處又是登入同一個帳號所以優先權又一樣, 所以在這裡 :<br>
+    <font class="css_font_r1">deny_force_kick_inside</font> 行為等同
+    <font class="css_font_r1">deny_permission_kick_inside</font><br>
+    <font class="css_font_r1">deny_force_kick_outside</font> 行為等同
+    <font class="css_font_r1">deny_permission_kick_outside</font>
     <br><br>
 
     步驟-02 : 使用 maam_jslib_account_auth() 處理並判斷回傳值決定處理方式.
@@ -553,7 +558,7 @@ function account_login()
 &lt;/body&gt;
 &lt;/html&gt;
 </pre>
-    <br><br>
+<br><br><br>
 
     登出的使用方式 :
     <br><br>
@@ -605,7 +610,7 @@ function account_logout()
 &lt;/body&gt;
 &lt;/html&gt;
 </pre>
-    <br><br>
+<br><br><br>
 
     檢查 session 是否有效的使用方式 :
     <br><br>
@@ -691,7 +696,7 @@ function account_check()
 &lt;/body&gt;
 &lt;/html&gt;
 </pre>
-    <br><br>
+<br><br><br>
 
     搭配 MintCM 使用的注意事項 :
     <br><br>
@@ -768,7 +773,7 @@ if(rep_ret.rep_code < mcm_return_code.pass)
     return;
 }
 </pre>
-    <br>
+<br><br>
 
   </div>
 </div>
@@ -783,7 +788,7 @@ if(rep_ret.rep_code < mcm_return_code.pass)
     <br><br><br>
 
     設定-01 : 網頁檔使用的副檔名.<br>
-    <font class="css_font_b1">mint_aam/maam_build/maam_custom.c</font>
+    <font class="css_font_b1">mint_aam/maam_build/maam_custom.c</font><br>
     <div class="css_div_block">
       // 分別是副檔名的名稱和長度, 如果不是則需要修改.<br>
       <font class="css_font_g1">
@@ -791,10 +796,10 @@ if(rep_ret.rep_code < mcm_return_code.pass)
       #define MAAM_HTML_LEN 5
       </font>
     </div>
-    <br><br>
+    <br><br><br>
 
     設定-02 : 登入頁面和登入後主要頁面的路徑.<br>
-    <font class="css_font_b1">mint_aam/maam_build/maam_custom.c</font>
+    <font class="css_font_b1">mint_aam/maam_build/maam_custom.c</font><br>
     <div class="css_div_block">
       // 以 mini_httpd.conf 中 dir=... 的位置為基準.<br>
       <font class="css_font_g1">
@@ -802,7 +807,7 @@ if(rep_ret.rep_code < mcm_return_code.pass)
       #define MAAM_PAGE_INDEX "/index.html"
       </font>
     </div>
-    <br><br>
+    <br><br><br>
 
     設定-03 : 在 GET 時, 哪些網頁不用登入也允許讀取 (例如登入頁面).<br>
     列表 :<br>
@@ -816,7 +821,7 @@ if(rep_ret.rep_code < mcm_return_code.pass)
       };
       </font>
     </div>
-    <br>
+    <br><br>
 
     <div class="css_div_hook" id="hook_1002_maam_access_allow_get_html_list_01"></div>
     <font class="css_font_b1">[struct maam_access_t maam_access_allow_get_html_list[]]</font><br>
@@ -1026,7 +1031,7 @@ struct maam_access_t maam_access_allow_get_html_list[] =
     {NULL, 0, 0, NULL, 0, 0}
 };
 </pre>
-    <br><br>
+<br><br><br>
 
     設定-04 : 瀏覽器在 GET 時, 哪些非網頁檔在未登入情況下禁止存取.<br>
     預設情況下, 在還沒登入時 GET 非網頁檔是允許的 (如 CSS, JS, 圖片檔等等),
@@ -1041,7 +1046,7 @@ struct maam_access_t maam_access_allow_get_html_list[] =
       };
       </font>
     </div>
-    <br>
+    <br><br>
 
     設定方法和 maam_access_allow_get_html_list[] 一樣 <a href="#hook_1002_maam_access_allow_get_html_list_01">[詳細]</a>.
     <br><br>
@@ -1073,7 +1078,7 @@ struct maam_access_t maam_access_allow_get_html_list[] =
     {NULL, 0, 0, NULL, 0, 0}
 };
 </pre>
-    <br><br>
+<br><br><br>
 
     設定-05 : 在 POST 時, 哪些項目不用登入也允許使用.<br>
     列表 :<br>
@@ -1086,7 +1091,7 @@ struct maam_access_t maam_access_allow_get_html_list[] =
       };
       </font>
     </div>
-    <br>
+    <br><br>
 
     設定方法和 maam_access_allow_get_html_list[] 一樣 <a href="#hook_1002_maam_access_allow_get_html_list_01">[詳細]</a>.
     <br><br>
@@ -1118,12 +1123,12 @@ struct maam_access_t maam_access_allow_post_list[] =
     {NULL, 0, 0, NULL, 0, 0}
 };
 </pre>
-    <br><br>
+<br><br><br>
 
     <div class="css_div_hook" id="hook_1002_maam_verify_account_01"></div>
     設定-06 : 實作帳號驗證部分.<br>
     函式 :<br>
-    <font class="css_font_b1">mint_aam/maam_build/maam_custom.c</font>
+    <font class="css_font_b1">mint_aam/maam_build/maam_custom.c</font><br>
     <div class="css_div_block">
       <font class="css_font_g1">
       int maam_verify_account(<br>
@@ -1137,7 +1142,7 @@ struct maam_access_t maam_access_allow_post_list[] =
       }
       </font>
     </div>
-    <br>
+    <br><br>
 
     參數的用途 :<br>
     <table class="css_table_list2">
@@ -1330,7 +1335,7 @@ struct maam_access_t maam_access_allow_post_list[] =
     </table>
     <br>
 
-    範例 :
+    範例 :<br>
 <pre class="css_pre_code">
 int maam_verify_account(
     struct maam_login_t *login_info,
@@ -1429,7 +1434,7 @@ FREE_01:
     return fret;
 }
 </pre>
-    <br><br>
+<br><br><br>
 
     上述是基本的修改, 另外還有一些額外的部分視需要才要修改.
     <br><br><br>
@@ -1442,7 +1447,7 @@ FREE_01:
       #define MAAM_SHARE_MEMORY_KEY 518276493
       </font>
     </div>
-    <br><br>
+    <br><br><br>
 
     額外-02 : 共享記憶體的檔案互斥鎖的路徑 (此路徑必須可讀寫檔案).<br>
     存取 session 的資料必須使用互斥鎖保護避免多程式同時存取, 這邊使用 flock() 做為互斥鎖 :<br>
@@ -1452,7 +1457,7 @@ FREE_01:
       #define MAAM_MUTEX_PATH "/var/run/maam_mutex"
       </font>
     </div>
-    <br><br>
+    <br><br><br>
 
     額外-03 : 最大的 session 數目.<br>
     最大允許的已登入的使用者數目, 定義在 :<br>
@@ -1462,7 +1467,7 @@ FREE_01:
       #define MAAM_MAX_SESSION 8
       </font>
     </div>
-    <br><br>
+    <br><br><br>
 
     額外-04 : 權限的比對方式.<br>
     在比對權限時 <a href="#hook_1002_maam_limit_multiple_active_01">[詳細]</a>, 數值越低權限越高,
@@ -1478,7 +1483,7 @@ FREE_01:
       #define MAAM_PERMISSION_LOW(a, b) ((a) > (b))
       </font>
     </div>
-    <br>
+    <br><br>
 
   </div>
 </div>

@@ -78,7 +78,7 @@ Some rights reserved. See README.
       &lt;/device&gt;<br>
       &lt;/base&gt;
     </div>
-    <br><br>
+    <br><br><br>
 
     <div class="css_div_hook" id="hook_0202_version_01"></div>
     步驟一 : 加入資料模型版本.<br>
@@ -86,11 +86,12 @@ Some rights reserved. See README.
     <div class="css_div_block">
       <font class="css_font_g1">$version $(version)</font>
     </div>
+    <br>
     實際 :<br>
     <div class="css_div_block">
       <font class="css_font_g1">$version 1.0</font>
     </div>
-    <br>
+    <br><br>
     這裡的 <font class="css_font_b1">$version</font> 就是資料模型中
     <font class="css_font_b1">&lt;base&gt;&lt;/base&gt;</font> 內的設定.
     <br><br><br>
@@ -101,7 +102,7 @@ Some rights reserved. See README.
     <div class="css_div_block">
       <font class="css_font_g1">$(entry-path) $(member-list)</font>
     </div>
-    <br>
+    <br><br>
 
     <div class="css_div_hook" id="hook_0202_entry_path_01"></div>
     <font class="css_font_b1">$(entry-path)</font><br>
@@ -110,6 +111,7 @@ Some rights reserved. See README.
     <div class="css_div_block">
       <font class="css_font_g1">$(entry-info-1).$(entry-info-2). - - - .$(entry-info-N)</font>
     </div>
+    <br>
     <font class="css_font_b1">$(entry-info)</font><br>
     由 group 名稱和 key 資訊所組成的一小段路徑.<br>
     格式 :<br>
@@ -166,7 +168,7 @@ Some rights reserved. See README.
       <font class="css_font_g1">device.client.#120</font><br>
       表示 client 中 key 為 120 的 entry
     </div>
-    <br>
+    <br><br>
 
     <div class="css_div_hook" id="hook_0202_member_list_01"></div>
     <font class="css_font_b1">$(member-list)</font><br>
@@ -175,6 +177,7 @@ Some rights reserved. See README.
     <div class="css_div_block">
       <font class="css_font_g1">$(member-info-1) $(member-info-2) - - - $(member-info-N)</font>
     </div>
+    <br>
     <div class="css_div_hook" id="hook_0202_member_list_02"></div>
     <font class="css_font_b1">$(member-info)</font><br>
     由 member 的名稱和值所組成的資料區塊.<br>
@@ -182,6 +185,7 @@ Some rights reserved. See README.
     <div class="css_div_block">
       <font class="css_font_g1">$(name):$(value)</font>
     </div>
+    <br>
     <table class="css_table_list2">
       <tr>
         <td class="css_td_list2_l2">$(name)</td>
@@ -217,7 +221,7 @@ Some rights reserved. See README.
       mac_addr:mac_addr:00:11:22:33:44:55 location_x:123.987 location_y:-74.058
       </font>
     </div>
-    <br>
+    <br><br>
 
     將 <font class="css_font_b1">$(entry-path), $(member-list)</font> 組合 :<br>
     <div class="css_div_block">
@@ -240,7 +244,7 @@ Some rights reserved. See README.
       device.client.#120 mac_addr:00:aa:bb:cc:dd:ee location_x:-0.9 location_y:0.25
       </font>
     </div>
-    <br><br>
+    <br><br><br>
 
     最後輸出 :<br>
     <div class="css_div_block">
@@ -258,7 +262,7 @@ Some rights reserved. See README.
       device.client.#109 mac_addr:00:11:22:33:44:55 location_x:123.7812 location_y:-74.058<br>
       device.client.#120 mac_addr:00:aa:bb:cc:dd:ee location_x:-0.9 location_y:0.25
     </div>
-    <br>
+    <br><br>
 
   </div>
 </div>
@@ -274,7 +278,7 @@ Some rights reserved. See README.
     <div class="css_div_block">
       ; 這行是註解
     </div>
-    <br>
+    <br><br>
 
   </div>
 </div>
@@ -360,6 +364,7 @@ Some rights reserved. See README.
             &nbsp;&nbsp;&lt;/GroupB&gt;<br>
             &lt;/GroupA&gt;
           </div>
+          <br>
           設定 :<br>
           <div class="css_div_block">
             在 GroupD 加上預設值<br>
@@ -419,6 +424,7 @@ Some rights reserved. See README.
             &nbsp;&nbsp;&lt;/vap&gt;<br>
             &lt;/device&gt;<br>
           </div>
+          <br>
           設定 :<br>
           <div class="css_div_block">
             device :<br>
@@ -456,6 +462,7 @@ Some rights reserved. See README.
       <font class="css_font_b1">$(descript)</font>
       </font>
     </div>
+    <br>
     範例 :<br>
     <table class="css_table_console">
       <tr>
