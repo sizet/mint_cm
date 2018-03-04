@@ -3207,10 +3207,11 @@ int mcm_req_handle(
     {
         fret = mcm_req_cb_list[this_session->req_type].handle_cb(this_session);
         if(fret < MCM_RCODE_PASS)
-        {
-            MCM_ECTMSG("call mcm_req_cb_list[" MCM_DTYPE_USIZE_PF "].handle_cb fail",
-                       this_session->req_type);
-        }
+            if(fret != MCM_RCODE_CONFIG_NOT_FIND_STORE)
+            {
+                MCM_ECTMSG("call mcm_req_cb_list[" MCM_DTYPE_USIZE_PF "].handle_cb fail",
+                           this_session->req_type);
+            }
     }
     else
     {
@@ -3654,9 +3655,10 @@ void *mcm_session_thread_handle(
         // 處理請求.
         cret = mcm_req_handle(self_session);
         if(cret < MCM_RCODE_PASS)
-        {
-            MCM_ECTMSG("call mcm_req_handle() fail <%lu>", self_session->thread_id);
-        }
+            if(cret != MCM_RCODE_CONFIG_NOT_FIND_STORE)
+            {
+                MCM_ECTMSG("call mcm_req_handle() fail <%lu>", self_session->thread_id);
+            }
 
         // 傳送處理結果.
         fret = mcm_socket_send(self_session, self_session->pkt_buf, self_session->pkt_len, &xlen);
