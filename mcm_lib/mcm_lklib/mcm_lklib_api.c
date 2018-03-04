@@ -232,6 +232,10 @@ int mcm_lklib_init(
     char notify_usable = 0;
 
 
+    this_lklib->pkt_buf = NULL;
+    this_lklib->pkt_size = 0;
+    this_lklib->sock_fp = 0;
+
     fret = mcm_realloc_buf_lib(this_lklib, MCM_KERNEL_PACKET_BUFFER_SIZE);
     if(fret < MCM_RCODE_PASS)
     {

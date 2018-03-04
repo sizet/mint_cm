@@ -249,6 +249,10 @@ int mcm_lulib_init(
     char notify_usable;
 
 
+    this_lulib->pkt_buf = NULL;
+    this_lulib->pkt_size = 0;
+    this_lulib->sock_fd = 0;
+
     fret = mcm_realloc_buf_lib(this_lulib, MCM_USER_PACKET_BUFFER_SIZE);
     if(fret < MCM_RCODE_PASS)
     {
