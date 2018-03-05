@@ -3800,6 +3800,114 @@ mcm_lklib_run(&self_lklib, path1, NULL, 0, NULL, NULL);
       </tr>
     </table>
     <br>
+    範例 :<br>
+<pre class="css_pre_code">
+#include &lt;linux/init.h&gt;
+#include &lt;linux/slab.h&gt;
+#include &lt;linux/kernel.h&gt;
+#include &lt;linux/module.h&gt;
+#include &lt;linux/random.h&gt;
+#include "mcm_lib/mcm_lheader/mcm_type.h"
+#include "mcm_lib/mcm_lheader/mcm_size.h"
+#include "mcm_lib/mcm_lheader/mcm_connect.h"
+#include "mcm_lib/mcm_lheader/mcm_return.h"
+#include "mcm_lib/mcm_lheader/mcm_data_exinfo_auto.h"
+#include "mcm_lib/mcm_lklib/mcm_lklib_api.h"
+
+#define DMSG(msg_fmt, msgs...) \
+    printk(KERN_INFO "%s(%04u): " msg_fmt "\n", \
+           strrchr(__FILE__, '/') ? strrchr(__FILE__, '/') + 1 : __FILE__, __LINE__, ##msgs)
+
+static int __init main_init(
+    void)
+{
+    char *path1, path2[MCM_PATH_MAX_LENGTH];
+    struct mcm_lklib_lib_t self_lklib;
+    struct mcm_dv_device_vap_t vap_v;
+    MCM_DTYPE_EK_TD count, i;
+    MCM_DTYPE_FD_TD loading;
+    MCM_DTYPE_S_TD descript[MCM_BSIZE_DEVICE_DESCRIPT];
+
+    self_lklib.socket_path = "@mintcm";
+    self_lklib.call_from = MCM_CFROM_KERNEL;
+    self_lklib.session_permission = MCM_SPERMISSION_RO;
+    self_lklib.session_stack_size = 0;
+
+    // 範例 : 取得 device.limit.* 的資料筆數上限.
+    path1 = "device.limit.*";
+    if(mcm_lklib_do_get_max_count(&self_lklib, path1, &count) < MCM_RCODE_PASS)
+    {
+        DMSG("call mcm_lklib_get_max_count(%s) fail", path1);
+        goto FREE_01;
+    }
+    DMSG("[max-count] %s = " MCM_DTYPE_EK_PF, path1, count);
+
+    // 範例 : 讀出 device.system.loading
+    path1 = "device.system.loading";
+    if(mcm_lklib_do_get_alone(&self_lklib, path1, &loading) < MCM_RCODE_PASS)
+    {
+        DMSG("call mcm_lklib_get_alone(%s) fail", path1);
+        goto FREE_01;
+    }
+    DMSG("[get-alone] %s = " MCM_DTYPE_FD_PF, path1, loading);
+
+    // 做修改的動作, 先把資料存取模式改為 rw.
+    self_lklib.session_permission = MCM_SPERMISSION_RW;
+
+    // 範例 : 設定 device.descript
+    path1 = "device.descript";
+    snprintf(descript, sizeof(descript), "network-device-123");
+    DMSG("[set-alone] %s = " MCM_DTYPE_S_PF, path1, descript);
+    if(mcm_lklib_do_set_alone(&self_lklib, path1, descript, strlen(descript)) < MCM_RCODE_PASS)
+    {
+        DMSG("call mcm_lklib_set_alone(%s) fail", path1);
+        goto FREE_01;
+    }
+
+    // 做完修改的動作, 可以把資料存取模式改為 ro.
+    self_lklib.session_permission = MCM_SPERMISSION_RO;
+
+    // 範例 : 取得 device.vap.* 的資料筆數.
+    path1 = "device.vap.*";
+    if(mcm_lklib_do_get_count(&self_lklib, path1, &count) < MCM_RCODE_PASS)
+    {
+        DMSG("call mcm_lklib_get_max_count(%s) fail", path1);
+        goto FREE_01;
+    }
+    DMSG("[count] %s = " MCM_DTYPE_EK_PF, path1, count);
+
+    // 範例 : 讀出每一筆 device.vap.*
+    for(i = 0; i < count; i++)
+    {
+        snprintf(path2, sizeof(path2), "device.vap.@%u", i + 1);
+        if(mcm_lklib_do_get_entry(&self_lklib, path2, &vap_v) < MCM_RCODE_PASS)
+        {
+            DMSG("call mcm_lklib_get_entry(%s) fail", path2);
+            goto FREE_01;
+        }
+        DMSG("[get-entry] %s.ekey = " MCM_DTYPE_EK_PF, path2, vap_v.ekey);
+        DMSG("[get-entry] %s.ssid = " MCM_DTYPE_S_PF, path2, vap_v.ssid);
+        DMSG("[get-entry] %s.channel = " MCM_DTYPE_IUI_PF, path2, vap_v.channel);
+    }
+
+    // 其他 mcm_lklib_do_xxxx() 函式.
+
+FREE_01:
+    return 0;
+}
+
+static void __exit main_exit(
+    void)
+{
+    return;
+}
+
+module_init(main_init);
+module_exit(main_exit);
+
+MODULE_LICENSE("GPL");
+</pre>
+<br><br>
 
   </div>
 </div>

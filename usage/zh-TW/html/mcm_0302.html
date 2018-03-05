@@ -4107,6 +4107,102 @@ mcm_lulib_run(&self_lulib, path1, NULL, 0, NULL, NULL);
       </tr>
     </table>
     <br>
+    範例 :<br>
+<pre class="css_pre_code">
+#include &lt;time.h&gt;
+#include &lt;errno.h&gt;
+#include &lt;stdio.h&gt;
+#include &lt;string.h&gt;
+#include &lt;stdlib.h&gt;
+#include "mcm_lib/mcm_lheader/mcm_type.h"
+#include "mcm_lib/mcm_lheader/mcm_size.h"
+#include "mcm_lib/mcm_lheader/mcm_connect.h"
+#include "mcm_lib/mcm_lheader/mcm_return.h"
+#include "mcm_lib/mcm_lheader/mcm_data_exinfo_auto.h"
+#include "mcm_lib/mcm_lulib/mcm_lulib_api.h"
+
+#define DMSG(msg_fmt, msgs...) printf("%s(%04u): " msg_fmt "\n", __FILE__, __LINE__, ##msgs)
+
+int main(
+    int argc,
+    char **argv)
+{
+    char *path1, path2[MCM_PATH_MAX_LENGTH];
+    struct mcm_lulib_lib_t self_lulib;
+    struct mcm_dv_device_vap_t vap_v;
+    MCM_DTYPE_EK_TD count, i;
+    MCM_DTYPE_FD_TD loading;
+    MCM_DTYPE_S_TD descript[MCM_BSIZE_DEVICE_DESCRIPT];
+
+    self_lulib.socket_path = "@mintcm";
+    self_lulib.call_from = MCM_CFROM_USER;
+    self_lulib.session_permission = MCM_SPERMISSION_RO;
+    self_lulib.session_stack_size = 0;
+
+    // 範例 : 取得 device.limit.* 的資料筆數上限.
+    path1 = "device.limit.*";
+    if(mcm_lulib_do_get_max_count(&self_lulib, path1, &count) < MCM_RCODE_PASS)
+    {
+        DMSG("call mcm_lulib_get_max_count(%s) fail", path1);
+        goto FREE_01;
+    }
+    DMSG("[max-count] %s = " MCM_DTYPE_EK_PF, path1, count);
+
+    // 範例 : 讀出 device.system.loading
+    path1 = "device.system.loading";
+    if(mcm_lulib_do_get_alone(&self_lulib, path1, &loading) < MCM_RCODE_PASS)
+    {
+        DMSG("call mcm_lulib_get_alone(%s) fail", path1);
+        goto FREE_01;
+    }
+    DMSG("[get-alone] %s = " MCM_DTYPE_FD_PF, path1, loading);
+
+    // 做修改的動作, 先把資料存取模式改為 rw.
+    self_lulib.session_permission = MCM_SPERMISSION_RW;
+
+    // 範例 : 設定 device.descript
+    path1 = "device.descript";
+    snprintf(descript, sizeof(descript), "network-device-123");
+    DMSG("[set-alone] %s = " MCM_DTYPE_S_PF, path1, descript);
+    if(mcm_lulib_do_set_alone(&self_lulib, path1, descript, strlen(descript)) < MCM_RCODE_PASS)
+    {
+        DMSG("call mcm_lulib_set_alone(%s) fail", path1);
+        goto FREE_01;
+    }
+
+    // 做完修改的動作, 可以把資料存取模式改為 ro.
+    self_lulib.session_permission = MCM_SPERMISSION_RO;
+
+    // 範例 : 取得 device.vap.* 的資料筆數.
+    path1 = "device.vap.*";
+    if(mcm_lulib_do_get_count(&self_lulib, path1, &count) < MCM_RCODE_PASS)
+    {
+        DMSG("call mcm_lulib_get_max_count(%s) fail", path1);
+        goto FREE_01;
+    }
+    DMSG("[count] %s = " MCM_DTYPE_EK_PF, path1, count);
+
+    // 範例 : 讀出每一筆 device.vap.*
+    for(i = 0; i < count; i++)
+    {
+        snprintf(path2, sizeof(path2), "device.vap.@%u", i + 1);
+        if(mcm_lulib_do_get_entry(&self_lulib, path2, &vap_v) < MCM_RCODE_PASS)
+        {
+            DMSG("call mcm_lulib_get_entry(%s) fail", path2);
+            goto FREE_01;
+        }
+        DMSG("[get-entry] %s.ekey = " MCM_DTYPE_EK_PF, path2, vap_v.ekey);
+        DMSG("[get-entry] %s.ssid = " MCM_DTYPE_S_PF, path2, vap_v.ssid);
+        DMSG("[get-entry] %s.channel = " MCM_DTYPE_IUI_PF, path2, vap_v.channel);
+    }
+
+    // 其他 mcm_lulib_do_xxxx() 函式.
+
+FREE_01:
+    return 0;
+}
+</pre>
+<br><br>
 
   </div>
 </div>
