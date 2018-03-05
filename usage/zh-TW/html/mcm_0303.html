@@ -223,7 +223,6 @@ static int __init main_init(
 {
     struct mcm_lklib_lib_t self_lklib;
 
-    memset(&self_lklib, 0, sizeof(struct mcm_lklib_lib_t));
     self_lklib.socket_path = "@mintcm";
     self_lklib.call_from = MCM_CFROM_KERNEL;
     self_lklib.session_permission = MCM_SPERMISSION_RW;
@@ -312,7 +311,6 @@ static int __init main_init(
 {
     struct mcm_lklib_lib_t self_lklib;
 
-    memset(&self_lklib, 0, sizeof(struct mcm_lklib_lib_t));
     self_lklib.socket_path = "@mintcm";
     self_lklib.call_from = MCM_CFROM_KERNEL;
     self_lklib.session_permission = MCM_SPERMISSION_RW;
@@ -436,7 +434,6 @@ static int __init main_init(
     struct mcm_lklib_lib_t self_lklib;
     MCM_DTYPE_EK_TD max_count;
 
-    memset(&self_lklib, 0, sizeof(struct mcm_lklib_lib_t));
     self_lklib.socket_path = "@mintcm";
     self_lklib.call_from = MCM_CFROM_KERNEL;
     self_lklib.session_permission = MCM_SPERMISSION_RO;
@@ -649,7 +646,6 @@ static int __init main_init(
     struct mcm_lklib_lib_t self_lklib;
     MCM_DTYPE_EK_TD count;
 
-    memset(&self_lklib, 0, sizeof(struct mcm_lklib_lib_t));
     self_lklib.socket_path = "@mintcm";
     self_lklib.call_from = MCM_CFROM_KERNEL;
     self_lklib.session_permission = MCM_SPERMISSION_RO;
@@ -824,7 +820,6 @@ static int __init main_init(
     MCM_DTYPE_S_TD mac_addr[MCM_BSIZE_DEVICE_VAP_STATION_MAC_ADDR];
     MCM_DTYPE_RK_TD rule;
 
-    memset(&self_lklib, 0, sizeof(struct mcm_lklib_lib_t));
     self_lklib.socket_path = "@mintcm";
     self_lklib.call_from = MCM_CFROM_KERNEL;
     self_lklib.session_permission = MCM_SPERMISSION_RO;
@@ -1064,7 +1059,6 @@ static int __init main_init(
     MCM_DTYPE_RK_TD rule;
     MCM_DTYPE_USIZE_TD i;
 
-    memset(&self_lklib, 0, sizeof(struct mcm_lklib_lib_t));
     self_lklib.socket_path = "@mintcm";
     self_lklib.call_from = MCM_CFROM_KERNEL;
     self_lklib.session_permission = MCM_SPERMISSION_RW;
@@ -1283,7 +1277,6 @@ static int __init main_init(
     struct mcm_dv_device_vap_station_t station_v;
     struct mcm_dv_device_limit_t limit_v;
 
-    memset(&self_lklib, 0, sizeof(struct mcm_lklib_lib_t));
     self_lklib.socket_path = "@mintcm";
     self_lklib.call_from = MCM_CFROM_KERNEL;
     self_lklib.session_permission = MCM_SPERMISSION_RO;
@@ -1509,7 +1502,6 @@ static int __init main_init(
     struct mcm_dv_device_vap_station_t station_v;
     MCM_DTYPE_USIZE_TD i;
 
-    memset(&self_lklib, 0, sizeof(struct mcm_lklib_lib_t));
     self_lklib.socket_path = "@mintcm";
     self_lklib.call_from = MCM_CFROM_KERNEL;
     self_lklib.session_permission = MCM_SPERMISSION_RW;
@@ -1788,7 +1780,6 @@ static int __init main_init(
     struct mcm_dv_device_vap_t vap_v;
     struct mcm_dv_device_vap_station_t station_v;
 
-    memset(&self_lklib, 0, sizeof(struct mcm_lklib_lib_t));
     self_lklib.socket_path = "@mintcm";
     self_lklib.call_from = MCM_CFROM_KERNEL;
     self_lklib.session_permission = MCM_SPERMISSION_RW;
@@ -1997,7 +1988,6 @@ static int __init main_init(
     char *path1;
     struct mcm_lklib_lib_t self_lklib;
 
-    memset(&self_lklib, 0, sizeof(struct mcm_lklib_lib_t));
     self_lklib.socket_path = "@mintcm";
     self_lklib.call_from = MCM_CFROM_KERNEL;
     self_lklib.session_permission = MCM_SPERMISSION_RW;
@@ -2186,7 +2176,6 @@ static int __init main_init(
     struct mcm_dv_device_vap_station_t station_v;
     MCM_DTYPE_EK_TD i, count, *key_array;
 
-    memset(&self_lklib, 0, sizeof(struct mcm_lklib_lib_t));
     self_lklib.socket_path = "@mintcm";
     self_lklib.call_from = MCM_CFROM_KERNEL;
     self_lklib.session_permission = MCM_SPERMISSION_RO;
@@ -2414,7 +2403,6 @@ static int __init main_init(
     struct mcm_dv_device_vap_station_t *station_v;
     MCM_DTYPE_EK_TD i, count;
 
-    memset(&self_lklib, 0, sizeof(struct mcm_lklib_lib_t));
     self_lklib.socket_path = "@mintcm";
     self_lklib.call_from = MCM_CFROM_KERNEL;
     self_lklib.session_permission = MCM_SPERMISSION_RO;
@@ -2603,7 +2591,6 @@ static int __init main_init(
     char *path1;
     struct mcm_lklib_lib_t self_lklib;
 
-    memset(&self_lklib, 0, sizeof(struct mcm_lklib_lib_t));
     self_lklib.socket_path = "@mintcm";
     self_lklib.call_from = MCM_CFROM_KERNEL;
     self_lklib.session_permission = MCM_SPERMISSION_RW;
@@ -2768,7 +2755,6 @@ static int __init main_init(
     struct mcm_lklib_lib_t self_lklib;
     MCM_DTYPE_EK_TD key;
 
-    memset(&self_lklib, 0, sizeof(struct mcm_lklib_lib_t));
     self_lklib.socket_path = "@mintcm";
     self_lklib.call_from = MCM_CFROM_KERNEL;
     self_lklib.session_permission = MCM_SPERMISSION_RO;
@@ -2962,7 +2948,6 @@ static int __init main_init(
     char *path1;
     struct mcm_lklib_lib_t self_lklib;
 
-    memset(&self_lklib, 0, sizeof(struct mcm_lklib_lib_t));
     self_lklib.socket_path = "@mintcm";
     self_lklib.call_from = MCM_CFROM_KERNEL;
     self_lklib.session_permission = MCM_SPERMISSION_RO;
@@ -3152,7 +3137,6 @@ static int __init main_init(
     struct mcm_lklib_lib_t self_lklib;
     MCM_DTYPE_EK_TD count;
 
-    memset(&self_lklib, 0, sizeof(struct mcm_lklib_lib_t));
     self_lklib.socket_path = "@mintcm";
     self_lklib.call_from = MCM_CFROM_KERNEL;
     self_lklib.session_permission = MCM_SPERMISSION_RW;
@@ -3309,7 +3293,6 @@ static int __init main_init(
     struct mcm_lklib_lib_t self_lklib;
     MCM_DTYPE_BOOL_TD force_save = 1;
 
-    memset(&self_lklib, 0, sizeof(struct mcm_lklib_lib_t));
     self_lklib.socket_path = "@mintcm";
     self_lklib.call_from = MCM_CFROM_KERNEL;
     self_lklib.session_permission = MCM_SPERMISSION_RW;
@@ -3424,7 +3407,6 @@ static int __init main_init(
 {
     struct mcm_lklib_lib_t self_lklib;
 
-    memset(&self_lklib, 0, sizeof(struct mcm_lklib_lib_t));
     self_lklib.socket_path = "@mintcm";
     self_lklib.call_from = MCM_CFROM_KERNEL;
     self_lklib.session_permission = MCM_SPERMISSION_RW;

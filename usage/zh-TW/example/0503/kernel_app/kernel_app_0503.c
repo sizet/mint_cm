@@ -42,7 +42,6 @@ static int __init kernel_app_0503_init(
     MCM_DTYPE_USIZE_TD req_len2, rep_len2, idx, count;
 
 
-    memset(&self_lklib, 0, sizeof(struct mcm_lklib_lib_t));
     self_lklib.socket_path = "@mintcm";
     self_lklib.call_from = MCM_CFROM_KERNEL;
     self_lklib.session_permission = MCM_SPERMISSION_RO;

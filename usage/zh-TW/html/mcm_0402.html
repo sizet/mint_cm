@@ -390,7 +390,6 @@ int main(
     MCM_DTYPE_ISLL_TD uptime;
     struct mcm_dv_device_vap_t vap_v;
 
-    memset(&self_lulib, 0, sizeof(struct mcm_lulib_lib_t));
     self_lulib.socket_path = "@mintcm";
     self_lulib.call_from = MCM_CFROM_USER;
     self_lulib.session_permission = MCM_SPERMISSION_RW;
@@ -736,7 +735,6 @@ int main(
     MCM_DTYPE_ISLL_TD uptime;
     struct mcm_dv_device_vap_t vap_v;
 
-    memset(&self_lulib, 0, sizeof(struct mcm_lulib_lib_t));
     self_lulib.socket_path = "@mintcm";
     self_lulib.call_from = MCM_CFROM_USER;
     self_lulib.session_permission = MCM_SPERMISSION_RW;
@@ -1068,7 +1066,6 @@ int main(
     MCM_DTYPE_ISLL_TD uptime;
     struct mcm_dv_device_vap_t vap_v;
 
-    memset(&self_lulib, 0, sizeof(struct mcm_lulib_lib_t));
     self_lulib.socket_path = "@mintcm";
     self_lulib.call_from = MCM_CFROM_USER;
     self_lulib.session_permission = MCM_SPERMISSION_RW;

@@ -1367,7 +1367,6 @@ int main(
     if(operate_cb_list[i].opt_cb == NULL)
         goto FREE_HELP;
 
-    memset(&self_lulib, 0, sizeof(struct mcm_lulib_lib_t));
     self_lulib.socket_path = "@mintcm";
     self_lulib.call_from = MCM_CFROM_USER;
     self_lulib.session_permission = operate_cb_list[i].opt_permission;

@@ -810,7 +810,6 @@ int main(
         goto FREE_HELP;
     }
 
-    memset(&self_lulib, 0, sizeof(struct mcm_lulib_lib_t));
     self_lulib.socket_path = arg_socket_path;
     self_lulib.call_from = MCM_CFROM_USER;
 

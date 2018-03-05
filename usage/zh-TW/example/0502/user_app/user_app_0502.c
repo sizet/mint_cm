@@ -32,7 +32,6 @@ int main(
 
     srand(time(NULL));
 
-    memset(&self_lulib, 0, sizeof(struct mcm_lulib_lib_t));
     self_lulib.socket_path = "@mintcm";
     self_lulib.call_from = MCM_CFROM_USER;
     self_lulib.session_permission = MCM_SPERMISSION_RO;

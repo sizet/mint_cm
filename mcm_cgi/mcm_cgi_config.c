@@ -2313,7 +2313,6 @@ int mcm_process_request(
         MCM_CCDMSG("dlopen %s[%p]", MCM_CONFIG_MODULE_PATH, pull_module_fp);
     }
 
-    memset(&self_lulib, 0, sizeof(struct mcm_lulib_lib_t));
     self_lulib.socket_path = request_info->socket_path;
     self_lulib.call_from = MCM_CFROM_WEB;
     self_lulib.session_permission = request_info->session_permission;

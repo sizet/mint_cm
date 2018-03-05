@@ -1435,7 +1435,6 @@ static ssize_t node_write(
     if(operate_cb_list[i].opt_cb == NULL)
         goto FREE_HELP;
 
-    memset(&self_lklib, 0, sizeof(struct mcm_lklib_lib_t));
     self_lklib.socket_path = "@mintcm";
     self_lklib.call_from = MCM_CFROM_KERNEL;
     self_lklib.session_permission = operate_cb_list[i].opt_permission;

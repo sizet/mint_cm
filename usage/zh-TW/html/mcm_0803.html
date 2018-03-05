@@ -169,7 +169,6 @@ static int __init main_init(
     struct mcm_lklib_lib_t self_lklib;
     MCM_DTYPE_LIST_TD store_result;
 
-    memset(&self_lklib, 0, sizeof(struct mcm_lklib_lib_t));
     self_lklib.socket_path = "@mintcm";
     self_lklib.call_from = MCM_CFROM_KERNEL;
     self_lklib.session_permission = MCM_SPERMISSION_RO;

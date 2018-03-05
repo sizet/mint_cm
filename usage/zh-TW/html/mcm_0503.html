@@ -69,7 +69,6 @@ static int __init main_init(
     int req_data2[4], *rep_data2;
     MCM_DTYPE_USIZE_TD req_len2, rep_len2, idx, count;
 
-    memset(&self_lklib, 0, sizeof(struct mcm_lklib_lib_t));
     self_lklib.socket_path = "@mintcm";
     self_lklib.call_from = MCM_CFROM_KERNEL;
     self_lklib.session_permission = MCM_SPERMISSION_RO;
