@@ -36,9 +36,8 @@ int mcm_module_get_session(
     MCM_DTYPE_EK_TD i = 0;
 
 
-    DMSG("get-session test:");
+    DMSG("get-session test :");
 
-    memset(&self_maam_lulib, 0, sizeof(struct maam_lulib_t));
     self_maam_lulib.sm_key = MAAM_SHARE_MEMORY_KEY;
     self_maam_lulib.sm_mutex_path = MAAM_MUTEX_PATH;
     if(maam_lulib_init(&self_maam_lulib) < MAAM_RCODE_PASS)
@@ -175,9 +174,8 @@ int mcm_module_kick_session(
     struct mcm_dv_device_web_session_t session_v;
 
 
-    DMSG("kick-session test:");
+    DMSG("kick-session test :");
 
-    memset(&self_maam_lulib, 0, sizeof(struct maam_lulib_t));
     self_maam_lulib.sm_key = MAAM_SHARE_MEMORY_KEY;
     self_maam_lulib.sm_mutex_path = MAAM_MUTEX_PATH;
     if(maam_lulib_init(&self_maam_lulib) < MAAM_RCODE_PASS)
