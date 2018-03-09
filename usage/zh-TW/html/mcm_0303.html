@@ -1013,7 +1013,13 @@ MODULE_LICENSE("GPL");
             <tr>
               <td class="css_td_list1_l">02.&nbsp;</td>
               <td class="css_td_list1_r">
-                對於 ek 類型的 member 是唯讀的, 不可寫入.
+                因為 ek 類型的 member 是唯讀的, 所以不可寫入.
+              </td>
+            </tr>
+            <tr>
+              <td class="css_td_list1_l">03.&nbsp;</td>
+              <td class="css_td_list1_r">
+                字串類型的資料在寫入時必須是 <font class="css_font_p1">UTF-8</font> 格式.
               </td>
             </tr>
           </table>
@@ -1458,6 +1464,12 @@ MODULE_LICENSE("GPL");
               <td class="css_td_list1_l">02.&nbsp;</td>
               <td class="css_td_list1_r">
                 因為 ek 類型的 member 是唯讀的, 所以資料庫內 ek 的數值不會被寫入的資料覆蓋.
+              </td>
+            </tr>
+            <tr>
+              <td class="css_td_list1_l">03.&nbsp;</td>
+              <td class="css_td_list1_r">
+                字串類型的資料在寫入時必須是 <font class="css_font_p1">UTF-8</font> 格式.
               </td>
             </tr>
           </table>
