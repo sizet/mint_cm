@@ -3413,6 +3413,7 @@ int mcm_module_user_test_01(
           <br>
           此功能只有在特殊情況才需要.
           <br><br>
+          <div class="css_div_hook" id="hook_0302_mcm_note_01"></div>
           程式修改資料時, mcm_daemon 的大致處理步驟 :<br>
           <table class="css_table_list1">
             <tr>
@@ -3448,7 +3449,21 @@ int mcm_module_user_test_01(
             <tr>
               <td class="css_td_list1_l">06.&nbsp;</td>
               <td class="css_td_list1_r">
-                mcm_daemon 將資料庫內新進資料區的資料套用回系統資料區.
+                mcm_daemon 根據最後一次的執行結果決定如何處理修改的資料.<br>
+                <table class="css_table_list1">
+                  <tr>
+                    <td class="css_td_list1_l" width="50px">成功:</td>
+                    <td class="css_td_list1_r">
+                      將所做的修改套用回資料庫.
+                    </td>
+                  </tr>
+                  <tr>
+                    <td class="css_td_list1_l">失敗:</td>
+                    <td class="css_td_list1_r">
+                      放棄所做的修改.
+                    </td>
+                  </tr>
+                </table>
               </td>
             </tr>
           </table>
@@ -4206,6 +4221,12 @@ FREE_01:
   <div class="css_div_box_title">注意事項</div>
   <div class="css_div_box_content">
     <br>
+
+    如果函式回傳的值小於 MCM_RCODE_PASS 的話,
+    mcm_daemon 會結束連線並啟動恢復資料的動作 <a href="mcm_0302.html#hook_0302_mcm_note_01">[詳細][06]</a>,
+    在 mcm_lulib_init() 和 mcm_lulib_exit() 期間所做的資料修改 (設定/增加/刪除) 都會廢棄並還原到修改前的資料.
+    (如果有使用 mcm_lulib_update() 的話, 在呼叫 mcm_lulib_update() 之前的資料會保留)
+    <br><br><br>
 
     如果要透過修改設定資料檔案來做讀取測試的話, 步驟 :<br>
     先關閉 mcm_daemon (有在執行的話), 修改設定值檔案, 重新執行 mcm_daemon.<br>
