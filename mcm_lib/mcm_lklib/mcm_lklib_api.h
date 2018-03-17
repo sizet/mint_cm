@@ -98,6 +98,11 @@ int mcm_lklib_get_usable_key(
     char *mix_path,
     MCM_DTYPE_EK_TD *key_buf);
 
+int mcm_lklib_check_exist(
+    struct mcm_lklib_lib_t *this_lklib,
+    char *full_path,
+    MCM_DTYPE_BOOL_TD *exist_buf);
+
 int mcm_lklib_update(
     struct mcm_lklib_lib_t *this_lklib);
 
@@ -186,6 +191,11 @@ int mcm_lklib_do_get_usable_key(
     struct mcm_lklib_lib_t *this_lklib,
     char *mix_path,
     MCM_DTYPE_EK_TD *key_buf);
+
+int mcm_lklib_do_check_exist(
+    struct mcm_lklib_lib_t *this_lklib,
+    char *full_path,
+    MCM_DTYPE_BOOL_TD *exist_buf);
 
 int mcm_lklib_do_update(
     struct mcm_lklib_lib_t *this_lklib);

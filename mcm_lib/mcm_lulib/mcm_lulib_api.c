@@ -1536,6 +1536,97 @@ FREE_01:
     return fret;
 }
 
+int mcm_lulib_check_exist(
+    struct mcm_lulib_lib_t *this_lulib,
+    char *full_path,
+    MCM_DTYPE_BOOL_TD *exist_buf)
+{
+    int fret;
+    MCM_DTYPE_USIZE_TD xlen;
+    void *tmp_offset;
+
+
+    xlen = strlen(full_path) + 1;
+    this_lulib->pkt_len = sizeof(MCM_DTYPE_USIZE_TD) +
+                          sizeof(MCM_DTYPE_LIST_TD) +
+                          xlen;
+
+    if(this_lulib->pkt_len > this_lulib->pkt_size)
+    {
+        fret = mcm_realloc_buf_lib(this_lulib, this_lulib->pkt_len);
+        if(fret < MCM_RCODE_PASS)
+        {
+            if(mcm_lulib_show_msg != 0)
+            {
+                MCM_ECTMSG("call mcm_realloc_buf_lib() fail");
+            }
+            goto FREE_01;
+        }
+    }
+
+    // 封包格式 :
+    // | T | REQ | PC |.
+    // T   [MCM_DTYPE_USIZE_TD].
+    //     紀錄封包總長度, 內容 = T + REQ + PC.
+    // REQ [MCM_DTYPE_LIST_TD].
+    //     紀錄請求類型.
+    // PC  [binary].
+    //     紀錄請求的路徑.
+
+    // T + REQ + PC.
+    MCM_BUILD_BASE_REQ_02(tmp_offset, this_lulib, MCM_SREQUEST_CHECK_EXIST, full_path, xlen);
+
+    fret = mcm_send_req(this_lulib);
+    if(fret < MCM_RCODE_PASS)
+    {
+        if(mcm_lulib_show_msg != 0)
+        {
+            MCM_ECTMSG("call mcm_send_req() fail");
+        }
+        goto FREE_01;
+    }
+
+    fret = mcm_recv_rep(this_lulib);
+    if(fret < MCM_RCODE_PASS)
+    {
+        if(mcm_lulib_show_msg != 0)
+        {
+            MCM_ECTMSG("call mcm_recv_rep() fail");
+        }
+        goto FREE_01;
+    }
+
+    // 封包格式 :
+    // | T | REP | EE |.
+    // T   [MCM_DTYPE_USIZE_TD].
+    //     紀錄封包的總長度, 內容 = T + REP + EE.
+    // REP [MCM_DTYPE_LIST_TD].
+    //     紀錄回應的類型.
+    // EE  [MCM_DTYPE_BOOL_TD].
+    //     紀錄回應的資料.
+
+    // T + REP.
+    MCM_PARSE_BASE_REP(tmp_offset, this_lulib, fret);
+    if(fret < MCM_RCODE_PASS)
+    {
+        if(fret != MCM_RCODE_CONFIG_NOT_FIND_STORE)
+            if(mcm_lulib_show_msg != 0)
+            {
+                MCM_ECTMSG("call fail (%d)", fret);
+            }
+        goto FREE_01;
+    }
+    // EE.
+    *exist_buf = *((MCM_DTYPE_BOOL_TD *) tmp_offset);
+    if(mcm_lulib_show_msg != 0)
+    {
+        MCM_LUDMSG("exist[" MCM_DTYPE_BOOL_PF "]", *exist_buf);
+    }
+
+FREE_01:
+    return fret;
+}
+
 int mcm_lulib_update(
     struct mcm_lulib_lib_t *this_lulib)
 {
@@ -3091,6 +3182,35 @@ int mcm_lulib_do_get_usable_key(
         if(fret != MCM_RCODE_CONFIG_NOT_FIND_STORE)
         {
             MCM_ECTMSG("call mcm_lulib_get_usable_key() fail");
+        }
+    }
+
+    mcm_lulib_exit(this_lulib);
+
+    return fret;
+}
+
+int mcm_lulib_do_check_exist(
+    struct mcm_lulib_lib_t *this_lulib,
+    char *full_path,
+    MCM_DTYPE_BOOL_TD *exist_buf)
+{
+    int fret;
+
+
+    fret = mcm_lulib_init(this_lulib);
+    if(fret < MCM_RCODE_PASS)
+    {
+        MCM_ECTMSG("call mcm_lulib_init() fail");
+        return fret;
+    }
+
+    fret = mcm_lulib_check_exist(this_lulib, full_path, exist_buf);
+    if(fret < MCM_RCODE_PASS)
+    {
+        if(fret != MCM_RCODE_CONFIG_NOT_FIND_STORE)
+        {
+            MCM_ECTMSG("call mcm_lulib_check_exist() fail");
         }
     }
 

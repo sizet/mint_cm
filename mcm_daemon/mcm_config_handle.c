@@ -5851,7 +5851,7 @@ int mcm_config_anysis_path(
             *parent_store_buf = parent_store;
     }
 
-    return 0;
+    return MCM_RCODE_PASS;
 }
 
 // 以路徑 (mask_path) 尋找對應的 model group.

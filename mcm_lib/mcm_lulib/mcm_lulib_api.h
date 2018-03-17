@@ -103,6 +103,11 @@ int mcm_lulib_get_usable_key(
     char *mix_path,
     MCM_DTYPE_EK_TD *key_buf);
 
+int mcm_lulib_check_exist(
+    struct mcm_lulib_lib_t *this_lulib,
+    char *full_path,
+    MCM_DTYPE_BOOL_TD *exist_buf);
+
 int mcm_lulib_update(
     struct mcm_lulib_lib_t *this_lulib);
 
@@ -229,6 +234,11 @@ int mcm_lulib_do_get_usable_key(
     struct mcm_lulib_lib_t *this_lulib,
     char *mix_path,
     MCM_DTYPE_EK_TD *key_buf);
+
+int mcm_lulib_do_check_exist(
+    struct mcm_lulib_lib_t *this_lulib,
+    char *full_path,
+    MCM_DTYPE_BOOL_TD *exist_buf);
 
 int mcm_lulib_do_update(
     struct mcm_lulib_lib_t *this_lulib);

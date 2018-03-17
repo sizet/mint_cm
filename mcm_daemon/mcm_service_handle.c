@@ -164,6 +164,9 @@ int mcm_req_get_count(
 int mcm_req_get_usable_key(
     struct mcm_service_session_t *this_session);
 
+int mcm_req_check_exist(
+    struct mcm_service_session_t *this_session);
+
 int mcm_req_run(
     struct mcm_service_session_t *this_session);
 
@@ -222,6 +225,7 @@ struct mcm_req_cb_t mcm_req_cb_list[] =
     {mcm_req_get_max_count},
     {mcm_req_get_count},
     {mcm_req_get_usable_key},
+    {mcm_req_check_exist},
     {mcm_req_update},
     {mcm_req_save},
     {mcm_req_run},
@@ -1874,6 +1878,102 @@ int mcm_req_get_usable_key(
 
 FREE_01:
     cret = mcm_build_get_usable_key(this_session, fret, self_key);
+    return fret < MCM_RCODE_PASS ? fret : cret;
+}
+
+void mcm_parse_check_exist(
+    struct mcm_service_session_t *this_session)
+{
+    // 封包格式 :
+    // | T | REQ | PC |.
+    // T   [MCM_DTYPE_USIZE_TD].
+    //     紀錄封包總長度, 內容 = T + REQ + PC.
+    // REQ [MCM_DTYPE_LIST_TD].
+    //     紀錄請求類型.
+    // PC  [binary].
+    //     紀錄請求的路徑.
+
+    // PC.
+    this_session->req_path = (char *) this_session->pkt_offset;
+    MCM_SVDMSG("req_path[%s]", this_session->req_path);
+}
+
+int mcm_build_check_exist(
+    struct mcm_service_session_t *this_session,
+    MCM_DTYPE_LIST_TD rep_code,
+    MCM_DTYPE_EK_TD rep_exist)
+{
+    int fret;
+    void *tmp_offset;
+
+
+    this_session->pkt_len = sizeof(MCM_DTYPE_USIZE_TD) +
+                            sizeof(MCM_DTYPE_LIST_TD) +
+                            sizeof(MCM_DTYPE_EK_TD);
+
+    if(this_session->pkt_len > this_session->pkt_size)
+    {
+        fret = mcm_realloc_buf_service(this_session, MCM_RMEMORY_PACKET, this_session->pkt_len);
+        if(fret < MCM_RCODE_PASS)
+        {
+            MCM_ECTMSG("call mcm_realloc_buf_service() fail");
+            mcm_build_fail_rep(this_session, fret, 0);
+            return fret;
+        }
+    }
+
+    // 封包格式 :
+    // | T | REP | EE |.
+    // T   [MCM_DTYPE_USIZE_TD].
+    //     紀錄封包的總長度, 內容 = T + REP + EE.
+    // REP [MCM_DTYPE_LIST_TD].
+    //     紀錄回應的類型.
+    // EE  [MCM_DTYPE_BOOL_TD].
+    //     紀錄回應的資料.
+
+    // T + REP.
+    MCM_BUILD_BASE_REP(tmp_offset, this_session, rep_code);
+    // EE.
+    *((MCM_DTYPE_BOOL_TD *) tmp_offset) = rep_exist;
+
+    return MCM_RCODE_PASS;
+}
+
+int mcm_req_check_exist(
+    struct mcm_service_session_t *this_session)
+{
+    int fret, cret;
+    MCM_DTYPE_BOOL_TD entry_exist = 0;
+
+
+    MCM_SVDMSG("=> %s", __FUNCTION__);
+
+    mcm_parse_check_exist(this_session);
+
+    fret = mcm_config_anysis_path(this_session, MCM_APATH_ENTRY_FULL,
+                                  this_session->req_path, 0,
+                                  0, 0, NULL,
+                                  MCM_PLIMIT_BOTH, MCM_PLIMIT_BOTH, 1,
+                                  NULL, NULL,
+                                  NULL, NULL,
+                                  NULL, NULL, NULL, NULL, NULL);
+    if(fret < MCM_RCODE_PASS)
+    {
+        if(fret == MCM_RCODE_CONFIG_NOT_FIND_STORE)
+        {
+            fret = MCM_RCODE_PASS;
+        }
+        else
+        {
+            MCM_ECTMSG("call mcm_config_anysis_path() fail");
+        }
+        goto FREE_01;
+    }
+
+    entry_exist = 1;
+
+FREE_01:
+    cret = mcm_build_check_exist(this_session, fret, entry_exist);
     return fret < MCM_RCODE_PASS ? fret : cret;
 }
 

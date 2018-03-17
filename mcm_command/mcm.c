@@ -42,6 +42,8 @@ enum MCM_OPERATE_PARAMETER_INDEX
     MCM_OPERATE_COUNT_INDEX,
     // 取得可用的 key.
     MCM_OPERATE_USABLE_KEY_INDEX,
+    // 檢查 entry 是否存在.
+    MCM_OPERATE_CHECK_EXIST_INDEX,
     // 執行模組函式.
     MCM_OPERATE_RUN_INDEX,
     // 更新資料.
@@ -52,18 +54,19 @@ enum MCM_OPERATE_PARAMETER_INDEX
     MCM_OPERATE_SHUTDOWN_INDEX
 };
 // 指令的控制碼 (對映的字串).
-#define MCM_OPERATE_GET_KEY        "get"
-#define MCM_OPERATE_SET_KEY        "set"
-#define MCM_OPERATE_ADD_KEY        "add"
-#define MCM_OPERATE_DEL_KEY        "del"
-#define MCM_OPERATE_DEL_ALL_KEY    "delall"
-#define MCM_OPERATE_MAX_COUNT_KEY  "maxcount"
-#define MCM_OPERATE_COUNT_KEY      "count"
-#define MCM_OPERATE_USABLE_KEY_KEY "usablekey"
-#define MCM_OPERATE_RUN_KEY        "run"
-#define MCM_OPERATE_UPDATE_KEY     "update"
-#define MCM_OPERATE_SAVE_KEY       "save"
-#define MCM_OPERATE_SHUTDOWN_KEY   "shutdown"
+#define MCM_OPERATE_GET_KEY         "get"
+#define MCM_OPERATE_SET_KEY         "set"
+#define MCM_OPERATE_ADD_KEY         "add"
+#define MCM_OPERATE_DEL_KEY         "del"
+#define MCM_OPERATE_DEL_ALL_KEY     "delall"
+#define MCM_OPERATE_MAX_COUNT_KEY   "maxcount"
+#define MCM_OPERATE_COUNT_KEY       "count"
+#define MCM_OPERATE_USABLE_KEY_KEY  "usablekey"
+#define MCM_OPERATE_CHECK_EXIST_KEY "exist"
+#define MCM_OPERATE_RUN_KEY         "run"
+#define MCM_OPERATE_UPDATE_KEY      "update"
+#define MCM_OPERATE_SAVE_KEY        "save"
+#define MCM_OPERATE_SHUTDOWN_KEY    "shutdown"
 
 // save 指令的參數 (編號).
 enum MCM_SAVE_METHOD_INDEX
@@ -131,6 +134,10 @@ int do_usable_key(
     struct mcm_lulib_lib_t *this_lulib,
     struct mcm_command_t *command_info);
 
+int do_check_exist(
+    struct mcm_lulib_lib_t *this_lulib,
+    struct mcm_command_t *command_info);
+
 int do_run(
     struct mcm_lulib_lib_t *this_lulib,
     struct mcm_command_t *command_info);
@@ -172,18 +179,19 @@ struct mcm_operate_type_map_t
 };
 struct mcm_operate_type_map_t mcm_operate_type_map_info[] =
 {
-    {MCM_OPERATE_GET_KEY,        MCM_OPERATE_GET_INDEX,        1, 0, do_get},
-    {MCM_OPERATE_SET_KEY,        MCM_OPERATE_SET_INDEX,        1, 1, do_set},
-    {MCM_OPERATE_ADD_KEY,        MCM_OPERATE_ADD_INDEX,        1, 1, do_add},
-    {MCM_OPERATE_DEL_KEY,        MCM_OPERATE_DEL_INDEX,        1, 0, do_del},
-    {MCM_OPERATE_DEL_ALL_KEY,    MCM_OPERATE_DEL_ALL_INDEX,    1, 0, do_del_all},
-    {MCM_OPERATE_MAX_COUNT_KEY,  MCM_OPERATE_MAX_COUNT_INDEX,  1, 0, do_max_count},
-    {MCM_OPERATE_COUNT_KEY,      MCM_OPERATE_COUNT_INDEX,      1, 0, do_count},
-    {MCM_OPERATE_USABLE_KEY_KEY, MCM_OPERATE_USABLE_KEY_INDEX, 1, 0, do_usable_key},
-    {MCM_OPERATE_RUN_KEY,        MCM_OPERATE_RUN_INDEX,        1, 0, do_run},
-    {MCM_OPERATE_UPDATE_KEY,     MCM_OPERATE_UPDATE_INDEX,     0, 0, do_update},
-    {MCM_OPERATE_SAVE_KEY,       MCM_OPERATE_SAVE_INDEX,       0, 1, do_save},
-    {MCM_OPERATE_SHUTDOWN_KEY,   MCM_OPERATE_SHUTDOWN_INDEX,   0, 0, do_shutdown},
+    {MCM_OPERATE_GET_KEY,         MCM_OPERATE_GET_INDEX,         1, 0, do_get},
+    {MCM_OPERATE_SET_KEY,         MCM_OPERATE_SET_INDEX,         1, 1, do_set},
+    {MCM_OPERATE_ADD_KEY,         MCM_OPERATE_ADD_INDEX,         1, 1, do_add},
+    {MCM_OPERATE_DEL_KEY,         MCM_OPERATE_DEL_INDEX,         1, 0, do_del},
+    {MCM_OPERATE_DEL_ALL_KEY,     MCM_OPERATE_DEL_ALL_INDEX,     1, 0, do_del_all},
+    {MCM_OPERATE_MAX_COUNT_KEY,   MCM_OPERATE_MAX_COUNT_INDEX,   1, 0, do_max_count},
+    {MCM_OPERATE_COUNT_KEY,       MCM_OPERATE_COUNT_INDEX,       1, 0, do_count},
+    {MCM_OPERATE_USABLE_KEY_KEY,  MCM_OPERATE_USABLE_KEY_INDEX,  1, 0, do_usable_key},
+    {MCM_OPERATE_CHECK_EXIST_KEY, MCM_OPERATE_CHECK_EXIST_INDEX, 1, 0, do_check_exist},
+    {MCM_OPERATE_RUN_KEY,         MCM_OPERATE_RUN_INDEX,         1, 0, do_run},
+    {MCM_OPERATE_UPDATE_KEY,      MCM_OPERATE_UPDATE_INDEX,      0, 0, do_update},
+    {MCM_OPERATE_SAVE_KEY,        MCM_OPERATE_SAVE_INDEX,        0, 1, do_save},
+    {MCM_OPERATE_SHUTDOWN_KEY,    MCM_OPERATE_SHUTDOWN_INDEX,    0, 0, do_shutdown},
     {NULL, 0, 0, 0, NULL}
 };
 
@@ -683,6 +691,26 @@ int do_usable_key(
     }
 
     printf(MCM_DTYPE_EK_PF "\n", tmp_key);
+
+    return fret;
+}
+
+int do_check_exist(
+    struct mcm_lulib_lib_t *this_lulib,
+    struct mcm_command_t *command_info)
+{
+    int fret;
+    MCM_DTYPE_BOOL_TD tmp_exist;
+
+
+    fret = mcm_lulib_check_exist(this_lulib, command_info->cmd_path, &tmp_exist);
+    if(fret < MCM_RCODE_PASS)
+    {
+        MCM_EMSG("call mcm_lulib_check_exist(%s) fail", command_info->cmd_path);
+        return fret;
+    }
+
+    printf(MCM_DTYPE_BOOL_PF "\n", tmp_exist);
 
     return fret;
 }

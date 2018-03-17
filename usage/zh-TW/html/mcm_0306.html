@@ -263,7 +263,7 @@ Some rights reserved. See README.
 <br><br>
           範例 :<br>
 <pre class="css_pre_code">
-#!/bin/sh
+#!/bin/bash
 
 # 讀出 device.system 的資料筆數上限.
 path="device.system"
@@ -334,7 +334,7 @@ echo "${path} max count = ${max_count}"
 <br><br>
           範例 :<br>
 <pre class="css_pre_code">
-#!/bin/sh
+#!/bin/bash
 
 # 取得 device 目前的資料筆數.
 path="device"
@@ -407,7 +407,7 @@ done
 <br><br>
           範例 :<br>
 <pre class="css_pre_code">
-#!/bin/sh
+#!/bin/bash
 
 # 讀出 device.serial_number 的資料.
 path="device.serial_number"
@@ -506,7 +506,7 @@ done
 <br><br>
           範例 :<br>
 <pre class="css_pre_code">
-#!/bin/sh
+#!/bin/bash
 
 # 對 device.serial_number 寫入資料.
 path="device.serial_number"
@@ -640,7 +640,7 @@ fi
 <br><br>
           範例 :<br>
 <pre class="css_pre_code">
-#!/bin/sh
+#!/bin/bash
 
 # 增加 device.limit.#70, 放在串列尾端 ("").
 path="device.limit.#70"
@@ -741,7 +741,7 @@ result=`./mcm -a @mintcm -p rw ${list}`
 <br><br>
           範例 :<br>
 <pre class="css_pre_code">
-#!/bin/sh
+#!/bin/bash
 
 # 刪除 device.limit.#6
 ./mcm -a @mintcm -p rw del.device.limit.#6
@@ -763,6 +763,75 @@ done
 if [ ! -z "${list}" ]; then
     result=`./mcm -a @mintcm -p rw ${list}`
 fi
+</pre>
+        </td>
+      </tr>
+    </table>
+    <br>
+
+    <div class="css_div_hook" id="hook_0306_exist_01"></div>
+    <table class="css_table_box">
+      <tr>
+        <td class="css_td_box">
+          <font class="css_font_b2">exist</font><br>
+          檢查 entry 是否存在.
+          <br><br>
+          格式 :<br>
+          <div class="css_div_block">
+            <font class="css_font_g1">exist.$(full_path)</font>
+          </div>
+          <br>
+          <table class="css_table_list2">
+            <tr>
+              <td class="css_td_list2_l2">$(full_path)</td>
+              <td class="css_td_list2_r1">
+                目標的路徑 <a href="#hook_0306_full_path_01">[詳細]</a><br>
+                <font class="css_font_p1">[entry 格式][index / key 模式]</font>
+              </td>
+            </tr>
+          </table>
+          <br>
+          注意事項 :<br>
+          <table class="css_table_list1">
+            <tr>
+              <td class="css_td_list1_l">01.&nbsp;</td>
+              <td class="css_td_list1_r">
+                資料存取模式可以是 ro 或 rw.
+              </td>
+            </tr>
+          </table>
+          <br>
+          範例 :<br>
+<pre class="css_pre_code">
+# 檢查 device.limit.@1 是否存在.
+./mcm -a @mintcm -p ro exist.device.limit.@1
+
+# 檢查 device.vap.#15.station.#543 是否存在.
+./mcm -a @mintcm -p ro exist.device.vap.#15.station.#543
+</pre>
+<br><br>
+          範例 :<br>
+<pre class="css_pre_code">
+#!/bin/bash
+
+# 檢查 device.system 是否存在 (因為是 gs 類型, 所以一定存在).
+./mcm -a @mintcm -p ro exist.device.system
+
+# 檢查 device.vap.* 的第 1 到 9 筆的資料是否存在.
+for ((index1 = 1; index1 <= 9; index1++))
+do
+    path="device.vap.@${index1}"
+    result=`./mcm -a @mintcm -p ro exist.${path}`
+    echo "${path} = ${result}"
+done
+
+# 檢查 device.limit.* 中 key 為 1 到 9 的資料是否存在.
+for ((index1 = 1; index1 <= 9; index1++))
+do
+    path="device.limit.#${index1}"
+    result=`./mcm -a @mintcm -p ro exist.${path}`
+    echo "${path} = ${result}"
+done
 </pre>
         </td>
       </tr>
@@ -812,7 +881,7 @@ fi
 <br><br>
           範例 :<br>
 <pre class="css_pre_code">
-#!/bin/sh
+#!/bin/bash
 
 # 刪除所有的 device.limit.*
 ./mcm -a @mintcm -p rw delall.device.limit.*
@@ -883,7 +952,7 @@ fi
 <br><br>
           範例 :<br>
 <pre class="css_pre_code">
-#!/bin/sh
+#!/bin/bash
 
 # 在 device.limit.* 增加 10 筆資料.
 list=
@@ -1020,7 +1089,7 @@ FREE_01:
 <br><br>
           範例 :<br>
 <pre class="css_pre_code">
-#!/bin/sh
+#!/bin/bash
 
 # 設定 device.system.ip_addr 並執行 mcm_module_command_test_01().
 list=
@@ -1082,7 +1151,7 @@ fi
 <br><br>
           範例 :<br>
 <pre class="css_pre_code">
-#!/bin/sh
+#!/bin/bash
 
 # 情況一.
 # 刪除一筆 device.limit.*, 之後取得 device.limit.* 的資料筆數,

@@ -2054,6 +2054,169 @@ MODULE_LICENSE("GPL");
     </table>
     <br>
 
+    <div class="css_div_hook" id="hook_0303_mcm_lklib_check_exist_01"></div>
+    <table class="css_table_box">
+      <tr>
+        <td class="css_td_box">
+          <font class="css_font_b2">mcm_lklib_check_exist</font><br>
+          檢查 entry 是否存在.<br>
+          <table class="css_table_list2">
+            <tr>
+              <td class="css_td_list2_t1">參數</td>
+              <td class="css_td_list2_t1">說明</td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l1">
+                <font class="css_font_r1">struct mcm_lklib_lib_t *</font><br>
+                <font class="css_font_g1">this_lklib</font>
+              </td>
+              <td class="css_td_list2_r1">
+                紀錄 mcm_lklib_api 所需要的資料
+              </td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l1">
+                <font class="css_font_r1">char *</font><br>
+                <font class="css_font_g1">full_path</font>
+              </td>
+              <td class="css_td_list2_r1">
+                目標的路徑 <a href="#hook_0303_full_path_01">[詳細]</a><br>
+                <font class="css_font_p1">[entry 格式][index / key 模式]</font>
+              </td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l1">
+                <font class="css_font_r1">MCM_DTYPE_BOOL_TD *</font><br>
+                <font class="css_font_g1">exist_buf</font>
+              </td>
+              <td class="css_td_list2_r1">
+                紀錄 entry 是否存在的緩衝<br>
+                <font class="css_font_p1">
+                回傳值 :<br>
+                0 : 不存在<br>
+                1 : 有存在
+                </font>
+              </td>
+            </tr>
+          </table>
+          <table class="css_table_list2">
+            <tr>
+              <td class="css_td_list2_t1">回傳</td>
+              <td class="css_td_list2_t1">說明</td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l2">&gt;= MCM_RCODE_PASS</td>
+              <td class="css_td_list2_r1">成功</td>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l2">&nbsp;&lt; MCM_RCODE_PASS</td>
+              <td class="css_td_list2_r1">錯誤</td>
+            </tr>
+          </table>
+          <br>
+          注意事項 :<br>
+          <table class="css_table_list1">
+            <tr>
+              <td class="css_td_list1_l">01.&nbsp;</td>
+              <td class="css_td_list1_r">
+                資料存取模式可以是 MCM_SPERMISSION_RO 或 MCM_SPERMISSION_RW.
+              </td>
+            </tr>
+            <tr>
+              <td class="css_td_list1_l">02.&nbsp;</td>
+              <td class="css_td_list1_r">
+                entry 是否存在要看 exist_buf 的值.
+              </td>
+            </tr>
+          </table>
+          <br>
+          範例 :<br>
+<pre class="css_pre_code">
+#include &lt;linux/init.h&gt;
+#include &lt;linux/slab.h&gt;
+#include &lt;linux/kernel.h&gt;
+#include &lt;linux/module.h&gt;
+#include &lt;linux/random.h&gt;
+#include "mcm_lib/mcm_lheader/mcm_type.h"
+#include "mcm_lib/mcm_lheader/mcm_size.h"
+#include "mcm_lib/mcm_lheader/mcm_connect.h"
+#include "mcm_lib/mcm_lheader/mcm_return.h"
+#include "mcm_lib/mcm_lheader/mcm_data_exinfo_auto.h"
+#include "mcm_lib/mcm_lklib/mcm_lklib_api.h"
+
+#define DMSG(msg_fmt, msgs...) \
+    printk(KERN_INFO "%s(%04u): " msg_fmt "\n", \
+           strrchr(__FILE__, '/') ? strrchr(__FILE__, '/') + 1 : __FILE__, __LINE__, ##msgs)
+
+static int __init main_init(
+    void)
+{
+    char *path1;
+    struct mcm_lklib_lib_t self_lklib;
+    MCM_DTYPE_BOOL_TD is_exist;
+
+    self_lklib.socket_path = "@mintcm";
+    self_lklib.call_from = MCM_CFROM_KERNEL;
+    self_lklib.session_permission = MCM_SPERMISSION_RO;
+    self_lklib.session_stack_size = 0;
+    if(mcm_lklib_init(&self_lklib) < MCM_RCODE_PASS)
+    {
+        DMSG("call mcm_lklib_init() fail");
+        goto FREE_01;
+    }
+
+    // 範例 : 檢查 device.syatem 是否存在 (因為是 gs 類型, 所以一定存在).
+    // 路徑 : "device.system"
+    path1 = "device.system";
+    if(mcm_lklib_check_exist(&self_lklib, path1, &is_exist) < MCM_RCODE_PASS)
+    {
+        DMSG("call mcm_lklib_check_exist(%s) fail", path1);
+        goto FREE_02;
+    }
+    DMSG("[check-exist] %s = " MCM_DTYPE_BOOL_PF, path1, is_exist);
+
+    // 範例 : 檢查 device.vap.@2 是否存在.
+    // 路徑 : "device.vap.@2"
+    path1 = "device.vap.@2";
+    if(mcm_lklib_check_exist(&self_lklib, path1, &is_exist) < MCM_RCODE_PASS)
+    {
+        DMSG("call mcm_lklib_check_exist(%s) fail", path1);
+        goto FREE_02;
+    }
+    DMSG("[check-exist] %s = " MCM_DTYPE_BOOL_PF, path1, is_exist);
+
+    // 範例 : 檢查 device.vap.#8.station.#1234 是否存在.
+    // 路徑 : "device.vap.#8.station.#1234"
+    path1 = "device.vap.#8.station.#1234";
+    if(mcm_lklib_check_exist(&self_lklib, path1, &is_exist) < MCM_RCODE_PASS)
+    {
+        DMSG("call mcm_lklib_check_exist(%s) fail", path1);
+        goto FREE_02;
+    }
+    DMSG("[check-exist] %s = " MCM_DTYPE_BOOL_PF, path1, is_exist);
+
+FREE_02:
+    mcm_lklib_exit(&self_lklib);
+FREE_01:
+    return 0;
+}
+
+static void __exit main_exit(
+    void)
+{
+    return;
+}
+
+module_init(main_init);
+module_exit(main_exit);
+
+MODULE_LICENSE("GPL");
+</pre>
+        </td>
+      </tr>
+    </table>
+    <br>
+
     <div class="css_div_hook" id="hook_0303_mcm_lklib_get_all_key_01"></div>
     <table class="css_table_box">
       <tr>
@@ -3737,6 +3900,15 @@ mcm_lklib_run(&self_lklib, path1, NULL, 0, NULL, NULL);
       </tr>
       <tr>
         <td class="css_td_list2_l1">
+          <div class="css_div_hook" id="hook_0303_mcm_lklib_do_check_exist_01"></div>
+          <font class="css_font_b2">mcm_lklib_do_check_exist</font>
+        </td>
+        <td class="css_td_list2_r1">
+          等同 <a href="#hook_0303_mcm_lklib_check_exist_01">mcm_lklib_check_exist</a>
+        </td>
+      </tr>
+      <tr>
+        <td class="css_td_list2_l1">
           <div class="css_div_hook" id="hook_0303_mcm_lklib_do_get_all_key_01"></div>
           <font class="css_font_b2">mcm_lklib_do_get_all_key</font>
         </td>
@@ -4049,6 +4221,10 @@ MODULE_LICENSE("GPL");
             <tr>
               <td class="css_td_list2_l2">del-entry</td>
               <td class="css_td_list2_r1">mcm_lklib_del_entry() 範例</font>
+            </tr>
+            <tr>
+              <td class="css_td_list2_l2">check-exist</td>
+              <td class="css_td_list2_r1">mcm_lklib_check_exist() 範例</font>
             </tr>
             <tr>
               <td class="css_td_list2_l2">get-all-key</td>

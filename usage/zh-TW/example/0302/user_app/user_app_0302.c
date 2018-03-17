@@ -717,6 +717,55 @@ FREE_01:
     return ret_val;
 }
 
+int case_check_exist(
+    struct mcm_lulib_lib_t *this_lulib)
+{
+    int ret_val = -1;
+    char *path1, path2[MCM_PATH_MAX_LENGTH];
+    MCM_DTYPE_BOOL_TD is_exist;
+    MCM_DTYPE_EK_TD i;
+
+
+    DMSG("check entry exist test :");
+
+    // 讀出 device.system
+    path1 = "device.system";
+    if(mcm_lulib_check_exist(this_lulib, path1, &is_exist) < MCM_RCODE_PASS)
+    {
+        DMSG("call mcm_lulib_check_exist(%s) fail", path1);
+        goto FREE_01;
+    }
+    DMSG("[check-exist] %s = " MCM_DTYPE_BOOL_PF, path1, is_exist);
+
+    // 檢查 device.vap.* 的第 1 到 9 筆的資料是否存在.
+    for(i = 0; i < 9; i++)
+    {
+        snprintf(path2, sizeof(path2), "device.vap.@%u", i + 1);
+        if(mcm_lulib_check_exist(this_lulib, path2, &is_exist) < MCM_RCODE_PASS)
+        {
+            DMSG("call mcm_lulib_check_exist(%s) fail", path2);
+            goto FREE_01;
+        }
+        DMSG("[check-exist] %s = " MCM_DTYPE_BOOL_PF, path2, is_exist);
+    }
+
+    // 檢查 device.limit.* 中 key 為 1 到 9 的資料是否存在.
+    for(i = 0; i < 9; i++)
+    {
+        snprintf(path2, sizeof(path2), "device.limit.#%u", i + 1);
+        if(mcm_lulib_check_exist(this_lulib, path2, &is_exist) < MCM_RCODE_PASS)
+        {
+            DMSG("call mcm_lulib_check_exist(%s) fail", path2);
+            goto FREE_01;
+        }
+        DMSG("[check-exist] %s = " MCM_DTYPE_BOOL_PF, path2, is_exist);
+    }
+
+    ret_val = 0;
+FREE_01:
+    return ret_val;
+}
+
 int case_add_entry(
     struct mcm_lulib_lib_t *this_lulib)
 {
@@ -1336,6 +1385,7 @@ struct operate_cb_t operate_cb_list[] =
     {"set-alone",     "set alone test",     case_set_alone,     MCM_SPERMISSION_RW, 0},
     {"get-entry",     "get entry test",     case_get_entry,     MCM_SPERMISSION_RO, 0},
     {"set-entry",     "set entry test",     case_set_entry,     MCM_SPERMISSION_RW, 0},
+    {"check-exist",   "check exist test",   case_check_exist,   MCM_SPERMISSION_RO, 0},
     {"add-entry",     "add entry test",     case_add_entry,     MCM_SPERMISSION_RW, 0},
     {"del-entry",     "del entry test",     case_del_entry,     MCM_SPERMISSION_RW, 0},
     {"get-all-key",   "get all key test",   case_get_all_key,   MCM_SPERMISSION_RO, 0},
